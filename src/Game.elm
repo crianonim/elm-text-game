@@ -19,7 +19,10 @@ type alias Dialog =
     , options : List DialogOption
     }
 
-type alias Dialogs = Dict DialogId Dialog
+
+type alias Dialogs =
+    Dict DialogId Dialog
+
 
 dialogExamples : List Dialog
 dialogExamples =
@@ -35,9 +38,11 @@ listDialogToDictDialog dialogs =
         |> List.map (\dial -> ( dial.id, dial ))
         |> Dict.fromList
 
+
 badDialog : Dialog
 badDialog =
-    { id = "bad", text = "BAD Dialog", options = [ ] }
+    { id = "bad", text = "BAD Dialog", options = [] }
+
 
 getDialog : DialogId -> Dialogs -> Dialog
 getDialog dialogId dialogs =

@@ -1,10 +1,12 @@
 module Main exposing (main)
 
 import Browser
+import Game exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
-import Game exposing (..)
+import Stack exposing (Stack)
+
 
 main : Program () Model Msg
 main =
@@ -18,9 +20,9 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( {dialogs = listDialogToDictDialog dialogExamples
-    , currentDialog = "start"
-    }
+    ( { dialogs = listDialogToDictDialog dialogExamples
+      , dialogStack = Stack.push "start" Stack.initialise
+      }
     , Cmd.none
     )
 
@@ -28,22 +30,26 @@ init _ =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-      None ->
-       ( model, Cmd.none )
+        None ->
+            ( model, Cmd.none )
 
-      GoDialog dialogId ->
-         ( {model|currentDialog = dialogId}, Cmd.none )
+        GoDialog dialogId ->
+            ( { model | dialogStack = Stack.push dialogId model.dialogStack }, Cmd.none )
+
+        GoBack ->
+            ( { model | dialogStack = Tuple.second (Stack.pop model.dialogStack) }, Cmd.none )
 
 
 type alias Model =
     { dialogs : Game.Dialogs
-    , currentDialog: Game.DialogId
+    , dialogStack : Stack Game.DialogId
     }
 
 
 type Msg
     = None
     | GoDialog DialogId
+    | GoBack
 
 
 
@@ -62,16 +68,35 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        dialog = getDialog model.currentDialog model.dialogs
-    in
-    div [] [viewDialog dialog]
+        dialog =
+            getDialog (Stack.top model.dialogStack |> Maybe.withDefault "bad") model.dialogs
 
-viewDialog : Game.Dialog -> Html Msg
-viewDialog dialog =
-    div [] [
-        h2 [] [text dialog.text]
-        ,div [] <| List.map viewOption dialog.options
-    ]
+        _ =
+            Debug.log "stack" model.dialogStack
+    in
+    div [] [ viewDialog dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
+
+
+viewDialog : Game.Dialog -> Bool -> Html Msg
+viewDialog dialog showGoBack =
+    div []
+        [ h2 [] [ text dialog.text ]
+        , div [] <|
+            List.map viewOption dialog.options
+                ++ (if showGoBack then
+                        [ viewGoBackOption ]
+
+                    else
+                        []
+                   )
+        ]
+
+
 viewOption : Game.DialogOption -> Html Msg
 viewOption dialogOption =
-    div [onClick <| GoDialog dialogOption.go ] [text dialogOption.text ]
+    div [ onClick <| GoDialog dialogOption.go ] [ text dialogOption.text ]
+
+
+viewGoBackOption : Html Msg
+viewGoBackOption =
+    div [ onClick GoBack ] [ text "Back" ]
