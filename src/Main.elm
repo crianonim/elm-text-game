@@ -2,8 +2,9 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (..)
+import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
-
+import Game exposing (..)
 
 main : Program () Model Msg
 main =
@@ -17,22 +18,32 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( ()
+    ( {dialogs = listDialogToDictDialog dialogExamples
+    , currentDialog = "start"
+    }
     , Cmd.none
     )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-   (model, Cmd.none)
+    case msg of
+      None ->
+       ( model, Cmd.none )
+
+      GoDialog dialogId ->
+         ( {model|currentDialog = dialogId}, Cmd.none )
+
 
 type alias Model =
-   ()
+    { dialogs : Game.Dialogs
+    , currentDialog: Game.DialogId
+    }
 
 
 type Msg
     = None
-
+    | GoDialog DialogId
 
 
 
@@ -50,4 +61,17 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-   div [] []
+    let
+        dialog = getDialog model.currentDialog model.dialogs
+    in
+    div [] [viewDialog dialog]
+
+viewDialog : Game.Dialog -> Html Msg
+viewDialog dialog =
+    div [] [
+        h2 [] [text dialog.text]
+        ,div [] <| List.map viewOption dialog.options
+    ]
+viewOption : Game.DialogOption -> Html Msg
+viewOption dialogOption =
+    div [onClick <| GoDialog dialogOption.go ] [text dialogOption.text ]
