@@ -76,7 +76,7 @@ view model =
         _ =
             Debug.log "stack" model.dialogStack
         _ =
-                    Debug.log "test" <| testCondition (Item "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
+                    Debug.log "test" <| testCondition (Counter "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
 
     in
     div [] [ viewDialog model.gameState dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]

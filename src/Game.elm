@@ -6,13 +6,11 @@ import Dict exposing (Dict)
 type alias GameState =
     { turn : Int
     , counters : Dict String Int
-    , inventory : Dict String Int
     }
 
 type GameValue =
  Const Int
  | Counter String
- | Item String
  | Turn
 
 type GameTest
@@ -50,7 +48,6 @@ getSpecialText  gameState specialText=
              getGameValue gameValue gameState |> String.fromInt
 
 
-
 getGameValue : GameValue -> GameState -> Int
 getGameValue gameValue gameState =
     case gameValue of
@@ -60,8 +57,6 @@ getGameValue gameValue gameState =
         Counter counter ->
             Dict.get counter gameState.counters |> Maybe.withDefault 0
 
-        Item item ->
-             Dict.get item gameState.inventory |> Maybe.withDefault 0
 
         Turn ->
              gameState.turn
@@ -69,7 +64,7 @@ getGameValue gameValue gameState =
 
 exampleGameState : GameState
 exampleGameState =
-    { turn = 1, counters = exampleCounters, inventory = exampleInventory }
+    { turn = 1, counters = exampleCounters }
 
 
 testCondition : GameValue -> GameTest -> GameState -> Bool
@@ -84,8 +79,7 @@ testCondition gv counterTest gameState =
             Counter counter ->
                 Dict.get counter gameState.counters |> Maybe.withDefault 0
 
-            Item item ->
-                      Dict.get item gameState.inventory |> Maybe.withDefault 0
+
 
 
             Turn ->
@@ -107,13 +101,18 @@ testCondition gv counterTest gameState =
 
 exampleCounters : Dict String Int
 exampleCounters =
-    [ ( "raining", 0 ), ( "killed_dragon", 1 ) ]
+    [ ( "raining", 0 ), ( "killed_dragon", 1 ) ,( "money", 40 ), ( "wood", 3 )]
         |> Dict.fromList
 
-exampleInventory : Dict String Int
-exampleInventory =
-    [ ( "money", 40 ), ( "wood", 3 ) ]
-        |> Dict.fromList
+
+
+inventoryType: Dict String String
+inventoryType =
+    [( "money", "Coins" ), ( "wood", "Wood" )]
+    |> Dict.fromList
+
+
+
 type alias GameCheck =
     GameState -> Bool
 
@@ -141,12 +140,6 @@ type alias Dialogs =
     Dict DialogId Dialog
 
 
-dialogExamples : List Dialog
-dialogExamples =
-    [ { id = "start", text = Special [S "You're at start ", GameValueText <| Const 5 , S " ", GameValueText <|Counter "killed_dragon" ], options = [ { text = "Go second", go = "second" } ] }
-    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", go = "start" }, { text = "Go third", go = "third" } ] }
-    , { id = "third", text =Normal "You're at third", options = [ { text = "Go start", go = "start" } ] }
-    ]
 
 
 listDialogToDictDialog : List Dialog -> Dict DialogId Dialog
@@ -156,11 +149,20 @@ listDialogToDictDialog dialogs =
         |> Dict.fromList
 
 
-badDialog : Dialog
-badDialog =
-    { id = "bad", text = Normal "BAD Dialog", options = [] }
-
 
 getDialog : DialogId -> Dialogs -> Dialog
 getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
+
+
+dialogExamples : List Dialog
+dialogExamples =
+    [ { id = "start", text = Special [S "You're at start ", GameValueText <| Const 5 , S " ", GameValueText <|Counter "killed_dragon" , S ". You have ", GameValueText <| Counter "money" , S " coins."], options = [ { text = "Go second", go = "second" } ] }
+    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", go = "start" }, { text = "Go third", go = "third" } ] }
+    , { id = "third", text =Normal "You're at third", options = [ { text = "Go start", go = "start" } ] }
+    ]
+
+
+badDialog : Dialog
+badDialog =
+    { id = "bad", text = Normal "BAD Dialog", options = [] }
