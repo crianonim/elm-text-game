@@ -6,8 +6,7 @@ import Stack exposing (Stack)
 
 
 type alias GameState =
-    {
-     counters : Dict String Int
+    { counters : Dict String Int
     , dialogStack : Stack DialogId
     }
 
@@ -24,31 +23,28 @@ type GameTest
     | NOT GameTest
 
 
-type SpecialText
+type Text
     = S String
+    | Special (List Text)
+    | Conditional GameValue GameTest Text
     | GameValueText GameValue
 
 
-type Text
-    = Normal String
-    | Special (List SpecialText)
-
-
-getText : Text -> GameState -> String
-getText text gameState =
+getText : GameState -> Text -> String
+getText gameState text =
     case text of
-        Normal string ->
+        S string ->
             string
 
         Special specialTexts ->
-            List.map (getSpecialText gameState) specialTexts |> String.concat
+            List.map (getText gameState) specialTexts |> String.concat
 
+        Conditional gameValue gameTest conditionalText ->
+            if testCondition gameValue gameTest gameState then
+                getText gameState conditionalText
 
-getSpecialText : GameState -> SpecialText -> String
-getSpecialText gameState specialText =
-    case specialText of
-        S string ->
-            string
+            else
+                ""
 
         GameValueText gameValue ->
             getGameValueWithDefault gameValue gameState |> String.fromInt
@@ -69,7 +65,6 @@ getMaybeGameValue gameValue gameState =
             Dict.get counter gameState.counters
 
 
-
 addCounter : String -> Int -> GameState -> GameState
 addCounter counter add gameState =
     { gameState | counters = Dict.update counter (\value -> Maybe.map (\v -> v + add) value) gameState.counters }
@@ -77,7 +72,7 @@ addCounter counter add gameState =
 
 exampleGameState : GameState
 exampleGameState =
-    {  counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise }
+    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise }
 
 
 testCondition : GameValue -> GameTest -> GameState -> Bool
@@ -90,7 +85,6 @@ testCondition gv counterTest gameState =
 
                 Counter counter ->
                     Dict.get counter gameState.counters |> Maybe.withDefault 0
-
     in
     case counterTest of
         EQ v ->
@@ -173,30 +167,32 @@ executeAction dialogActionExecution gameState =
         DoNothing ->
             gameState
 
+
 introText : GameState -> Html a
 introText gameState =
-   div [] [ p [] [ text <|"It is now " ++ (Dict.get "turn" gameState.counters |> Maybe.map (String.fromInt) |> Maybe.withDefault " - BAD TURN -") ++ " turn. " ]
-   , p [] (Dict.toList gameState.counters |> List.map (\(k,v)-> text <| k ++ ":" ++ String.fromInt v ++ ", "))
-   ]
+    div []
+        [ p [] [ text <| "It is now " ++ (Dict.get "turn" gameState.counters |> Maybe.map String.fromInt |> Maybe.withDefault " - BAD TURN -") ++ " turn. " ]
+        , p [] (Dict.toList gameState.counters |> List.map (\( k, v ) -> text <| k ++ ":" ++ String.fromInt v ++ ", "))
+        ]
 
 
 dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
-      , text = Special [ S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , text = Special [ Conditional (Counter "money") (GT (Const 40)) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
       , options = [ { text = "Go second", action = [ GoAction "second" ] }, { text = "Spend money", action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] } ]
       }
-    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", action = [ GoAction "start" ] }, { text = "Go third", action = [ GoAction "third" ] } ] }
-    , { id = "third", text = Normal "You're at third", options = [ { text = "Go start", action = [ GoAction "start" ] } ] }
+    , { id = "second", text = S "You're at second", options = [ { text = "Go start", action = [ Inc "turn" (Const 1), GoAction "start" ] }, { text = "Go third", action = [ GoAction "third" ] } ] }
+    , { id = "third", text = S "You're at third", options = [ { text = "Go start", action = [ GoAction "start" ] } ] }
     ]
 
 
 badDialog : Dialog
 badDialog =
-    { id = "bad", text = Normal "BAD Dialog", options = [] }
+    { id = "bad", text = S "BAD Dialog", options = [] }
 
 
 exampleCounters : Dict String Int
 exampleCounters =
-    [ ("turn",1),( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 ) ]
+    [ ( "turn", 1 ), ( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 ) ]
         |> Dict.fromList
