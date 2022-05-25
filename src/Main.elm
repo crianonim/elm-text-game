@@ -21,7 +21,6 @@ main =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog dialogExamples
-      , dialogStack = Stack.push "start" Stack.initialise
       , gameState = exampleGameState
       }
     , Cmd.none
@@ -34,29 +33,19 @@ update msg model =
         None ->
             ( model, Cmd.none )
 
-        ClickDialog action ->
-            case action of
-                Go dialogId ->
-                    ( { model | dialogStack = Stack.push dialogId model.dialogStack }, Cmd.none )
-
-                DoNothing ->
-                    ( model, Cmd.none )
-
-        GoBack ->
-            ( { model | dialogStack = Tuple.second (Stack.pop model.dialogStack) }, Cmd.none )
+        ClickDialog actions ->
+            ( { model | gameState = List.foldl executeAction model.gameState actions }, Cmd.none )
 
 
 type alias Model =
     { dialogs : Game.Dialogs
-    , dialogStack : Stack Game.DialogId
     , gameState : GameState
     }
 
 
 type Msg
     = None
-    | ClickDialog DialogAction
-    | GoBack
+    | ClickDialog (List DialogActionExecution)
 
 
 
@@ -76,15 +65,15 @@ view : Model -> Html Msg
 view model =
     let
         dialog =
-            getDialog (Stack.top model.dialogStack |> Maybe.withDefault "bad") model.dialogs
+            getDialog (Stack.top model.gameState.dialogStack |> Maybe.withDefault "bad") model.dialogs
 
         _ =
-            Debug.log "stack" model.dialogStack
+            Debug.log "stack" model.gameState.dialogStack
 
         _ =
             Debug.log "test" <| testCondition (Counter "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
     in
-    div [] [ viewDialog model.gameState dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
+    div [] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
 
 
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
@@ -109,4 +98,4 @@ viewOption dialogOption =
 
 viewGoBackOption : Html Msg
 viewGoBackOption =
-    div [ onClick GoBack ] [ text "Back" ]
+    div [ onClick <| ClickDialog [ GoBackAction ] ] [ text "Back" ]
