@@ -22,6 +22,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog dialogExamples
       , dialogStack = Stack.push "start" Stack.initialise
+      , gameState = exampleGameState
       }
     , Cmd.none
     )
@@ -43,6 +44,7 @@ update msg model =
 type alias Model =
     { dialogs : Game.Dialogs
     , dialogStack : Stack Game.DialogId
+    , gameState : GameState
     }
 
 
@@ -73,6 +75,9 @@ view model =
 
         _ =
             Debug.log "stack" model.dialogStack
+        _ =
+                    Debug.log "test" <| testCondition (Item "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
+
     in
     div [] [ viewDialog dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
 
