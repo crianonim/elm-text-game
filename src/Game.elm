@@ -111,7 +111,7 @@ type alias GameCheck =
 
 
 type alias DialogOption =
-    { text : String
+    { text : Text
     , action : List DialogActionExecution
     }
 
@@ -180,10 +180,10 @@ dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
       , text = Special [ Conditional (Counter "money") (GT (Const 40)) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
-      , options = [ { text = "Go second", action = [ GoAction "second" ] }, { text = "Spend money", action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] } ]
+      , options = [ { text = S "Go second", action = [ GoAction "second" ] }, { text = S "Spend money", action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] } ]
       }
-    , { id = "second", text = S "You're at second", options = [ { text = "Go start", action = [ Inc "turn" (Const 1), GoAction "start" ] }, { text = "Go third", action = [ GoAction "third" ] } ] }
-    , { id = "third", text = S "You're at third", options = [ { text = "Go start", action = [ GoAction "start" ] } ] }
+    , { id = "second", text = S "You're at second", options = [ { text = S "Go start", action = [ Inc "turn" (Const 1), GoAction "start" ] }, { text = S "Go third", action = [ GoAction "third" ] } ] }
+    , { id = "third", text = S "You're at third", options = [ { text = S "Go start", action = [ GoAction "start" ] } ] }
     ]
 
 

@@ -82,7 +82,7 @@ viewDialog gameState dialog showGoBack =
         [ h3 [] [ introText gameState ]
         , h2 [] [ text <| getText gameState dialog.text ]
         , div [] <|
-            List.map viewOption dialog.options
+            List.map (viewOption gameState) dialog.options
                 ++ (if showGoBack then
                         [ viewGoBackOption ]
 
@@ -92,9 +92,9 @@ viewDialog gameState dialog showGoBack =
         ]
 
 
-viewOption : Game.DialogOption -> Html Msg
-viewOption dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action ] [ text dialogOption.text ]
+viewOption : GameState -> Game.DialogOption -> Html Msg
+viewOption gameState dialogOption =
+    div [ onClick <| ClickDialog dialogOption.action ] [ text <| getText gameState dialogOption.text ]
 
 
 viewGoBackOption : Html Msg
