@@ -79,7 +79,8 @@ view model =
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
 viewDialog gameState dialog showGoBack =
     div []
-        [ h2 [] [ text <| getText dialog.text gameState ]
+        [ h3 [] [introText gameState]
+         ,h2 [] [ text <| getText dialog.text gameState ]
         , div [] <|
             List.map viewOption dialog.options
                 ++ (if showGoBack then
