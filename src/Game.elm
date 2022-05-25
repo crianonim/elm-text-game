@@ -16,17 +16,21 @@ type GameValue
     | Counter String
 
 
-type GameTest
+type alias GameCheck =
+    ( GameValue, GameTestOpertation )
+
+
+type GameTestOpertation
     = EQ GameValue
     | GT GameValue
     | LT GameValue
-    | NOT GameTest
+    | NOT GameTestOpertation
 
 
 type Text
     = S String
     | Special (List Text)
-    | Conditional GameValue GameTest Text
+    | Conditional GameCheck Text
     | GameValueText GameValue
 
 
@@ -39,8 +43,8 @@ getText gameState text =
         Special specialTexts ->
             List.map (getText gameState) specialTexts |> String.concat
 
-        Conditional gameValue gameTest conditionalText ->
-            if testCondition gameValue gameTest gameState then
+        Conditional gameCheck conditionalText ->
+            if testCondition gameCheck gameState then
                 getText gameState conditionalText
 
             else
@@ -75,8 +79,8 @@ exampleGameState =
     { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise }
 
 
-testCondition : GameValue -> GameTest -> GameState -> Bool
-testCondition gv counterTest gameState =
+testCondition : GameCheck -> GameState -> Bool
+testCondition ( gv, counterTest ) gameState =
     let
         value =
             case gv of
@@ -97,21 +101,12 @@ testCondition gv counterTest gameState =
             value < getGameValueWithDefault v gameState
 
         NOT innerTest ->
-            not <| testCondition gv innerTest gameState
-
-
-inventoryType : Dict String String
-inventoryType =
-    [ ( "money", "Coins" ), ( "wood", "Wood" ) ]
-        |> Dict.fromList
-
-
-type alias GameCheck =
-    GameState -> Bool
+            not <| testCondition ( gv, innerTest ) gameState
 
 
 type alias DialogOption =
     { text : Text
+    , condition : Maybe GameCheck
     , action : List DialogActionExecution
     }
 
@@ -179,11 +174,20 @@ introText gameState =
 dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
-      , text = Special [ Conditional (Counter "money") (GT (Const 40)) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
-      , options = [ { text = S "Go second", action = [ GoAction "second" ] }, { text = S "Spend money", action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] } ]
+      , text = Special [ Conditional ( Counter "money", GT (Const 40) ) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , options =
+            [ { text = S "Go second", condition = Just ( Counter "money", GT (Const 40) ), action = [ GoAction "second" ] }
+            , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
+            ]
       }
-    , { id = "second", text = S "You're at second", options = [ { text = S "Go start", action = [ Inc "turn" (Const 1), GoAction "start" ] }, { text = S "Go third", action = [ GoAction "third" ] } ] }
-    , { id = "third", text = S "You're at third", options = [ { text = S "Go start", action = [ GoAction "start" ] } ] }
+    , { id = "second"
+      , text = S "You're at second"
+      , options =
+            [ { text = S "Go start", condition = Nothing, action = [ Inc "turn" (Const 1), GoAction "start" ] }
+            , { text = S "Go third", condition = Nothing, action = [ GoAction "third" ] }
+            ]
+      }
+    , { id = "third", text = S "You're at third", options = [ { text = S "Go start", condition = Nothing, action = [ GoAction "start" ] } ] }
     ]
 
 

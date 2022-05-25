@@ -71,7 +71,7 @@ view model =
             Debug.log "stack" model.gameState.dialogStack
 
         _ =
-            Debug.log "test" <| testCondition (Counter "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
+            Debug.log "test" <| testCondition ( Counter "money", Game.NOT <| Game.LT (Const 30) ) model.gameState
     in
     div [] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
 
@@ -82,7 +82,7 @@ viewDialog gameState dialog showGoBack =
         [ h3 [] [ introText gameState ]
         , h2 [] [ text <| getText gameState dialog.text ]
         , div [] <|
-            List.map (viewOption gameState) dialog.options
+            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> testCondition check gameState) |> Maybe.withDefault True))
                 ++ (if showGoBack then
                         [ viewGoBackOption ]
 
