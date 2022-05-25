@@ -21,6 +21,35 @@ type GameTest
     | LT GameValue
     | NOT GameTest
 
+type SpecialText =
+  S String
+  | GameValueText GameValue
+
+
+
+type Text =
+ Normal String
+ | Special (List SpecialText)
+
+getText: Text -> GameState -> String
+getText text gameState =
+    case text of
+        Normal string ->
+            string
+
+        Special specialTexts ->
+            List.map (getSpecialText gameState) specialTexts |> String.concat
+
+getSpecialText : GameState -> SpecialText ->  String
+getSpecialText  gameState specialText=
+    case specialText of
+        S string ->
+            string
+
+        GameValueText gameValue ->
+             getGameValue gameValue gameState |> String.fromInt
+
+
 
 getGameValue : GameValue -> GameState -> Int
 getGameValue gameValue gameState =
@@ -89,9 +118,6 @@ type alias GameCheck =
     GameState -> Bool
 
 
-isTurnGT10 : GameCheck
-isTurnGT10 =
-    .turn >> modBy 2 >> (==) 0
 
 
 type alias DialogOption =
@@ -106,7 +132,7 @@ type alias DialogId =
 
 type alias Dialog =
     { id : DialogId
-    , text : String
+    , text : Text
     , options : List DialogOption
     }
 
@@ -117,9 +143,9 @@ type alias Dialogs =
 
 dialogExamples : List Dialog
 dialogExamples =
-    [ { id = "start", text = "You're at start", options = [ { text = "Go second", go = "second" } ] }
-    , { id = "second", text = "You're at second", options = [ { text = "Go start", go = "start" }, { text = "Go third", go = "third" } ] }
-    , { id = "third", text = "You're at third", options = [ { text = "Go start", go = "start" } ] }
+    [ { id = "start", text = Special [S "You're at start ", GameValueText <| Const 5 , S " ", GameValueText <|Counter "killed_dragon" ], options = [ { text = "Go second", go = "second" } ] }
+    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", go = "start" }, { text = "Go third", go = "third" } ] }
+    , { id = "third", text =Normal "You're at third", options = [ { text = "Go start", go = "start" } ] }
     ]
 
 
@@ -132,7 +158,7 @@ listDialogToDictDialog dialogs =
 
 badDialog : Dialog
 badDialog =
-    { id = "bad", text = "BAD Dialog", options = [] }
+    { id = "bad", text = Normal "BAD Dialog", options = [] }
 
 
 getDialog : DialogId -> Dialogs -> Dialog

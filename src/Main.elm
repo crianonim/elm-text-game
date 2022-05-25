@@ -79,13 +79,13 @@ view model =
                     Debug.log "test" <| testCondition (Item "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
 
     in
-    div [] [ viewDialog dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
+    div [] [ viewDialog model.gameState dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
 
 
-viewDialog : Game.Dialog -> Bool -> Html Msg
-viewDialog dialog showGoBack =
+viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
+viewDialog gameState dialog showGoBack =
     div []
-        [ h2 [] [ text dialog.text ]
+        [ h2 [] [ text <| getText  dialog.text gameState ]
         , div [] <|
             List.map viewOption dialog.options
                 ++ (if showGoBack then
