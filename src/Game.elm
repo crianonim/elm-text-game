@@ -8,10 +8,12 @@ type alias GameState =
     , counters : Dict String Int
     }
 
-type GameValue =
- Const Int
- | Counter String
- | Turn
+
+type GameValue
+    = Const Int
+    | Counter String
+    | Turn
+
 
 type GameTest
     = EQ GameValue
@@ -19,17 +21,18 @@ type GameTest
     | LT GameValue
     | NOT GameTest
 
-type SpecialText =
-  S String
-  | GameValueText GameValue
+
+type SpecialText
+    = S String
+    | GameValueText GameValue
 
 
+type Text
+    = Normal String
+    | Special (List SpecialText)
 
-type Text =
- Normal String
- | Special (List SpecialText)
 
-getText: Text -> GameState -> String
+getText : Text -> GameState -> String
 getText text gameState =
     case text of
         Normal string ->
@@ -38,14 +41,15 @@ getText text gameState =
         Special specialTexts ->
             List.map (getSpecialText gameState) specialTexts |> String.concat
 
-getSpecialText : GameState -> SpecialText ->  String
-getSpecialText  gameState specialText=
+
+getSpecialText : GameState -> SpecialText -> String
+getSpecialText gameState specialText =
     case specialText of
         S string ->
             string
 
         GameValueText gameValue ->
-             getGameValue gameValue gameState |> String.fromInt
+            getGameValue gameValue gameState |> String.fromInt
 
 
 getGameValue : GameValue -> GameState -> Int
@@ -57,9 +61,8 @@ getGameValue gameValue gameState =
         Counter counter ->
             Dict.get counter gameState.counters |> Maybe.withDefault 0
 
-
         Turn ->
-             gameState.turn
+            gameState.turn
 
 
 exampleGameState : GameState
@@ -70,20 +73,16 @@ exampleGameState =
 testCondition : GameValue -> GameTest -> GameState -> Bool
 testCondition gv counterTest gameState =
     let
-        value = case gv of
+        value =
+            case gv of
+                Const int ->
+                    int
 
+                Counter counter ->
+                    Dict.get counter gameState.counters |> Maybe.withDefault 0
 
-            Const int ->
-                int
-
-            Counter counter ->
-                Dict.get counter gameState.counters |> Maybe.withDefault 0
-
-
-
-
-            Turn ->
-                gameState.turn
+                Turn ->
+                    gameState.turn
     in
     case counterTest of
         EQ v ->
@@ -93,7 +92,7 @@ testCondition gv counterTest gameState =
             value > getGameValue v gameState
 
         LT v ->
-            value <getGameValue v gameState
+            value < getGameValue v gameState
 
         NOT innerTest ->
             not <| testCondition gv innerTest gameState
@@ -101,28 +100,29 @@ testCondition gv counterTest gameState =
 
 exampleCounters : Dict String Int
 exampleCounters =
-    [ ( "raining", 0 ), ( "killed_dragon", 1 ) ,( "money", 40 ), ( "wood", 3 )]
+    [ ( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 ) ]
         |> Dict.fromList
 
 
-
-inventoryType: Dict String String
+inventoryType : Dict String String
 inventoryType =
-    [( "money", "Coins" ), ( "wood", "Wood" )]
-    |> Dict.fromList
-
+    [ ( "money", "Coins" ), ( "wood", "Wood" ) ]
+        |> Dict.fromList
 
 
 type alias GameCheck =
     GameState -> Bool
 
 
-
-
 type alias DialogOption =
     { text : String
-    , go : DialogId
+    , action : DialogAction
     }
+
+
+type DialogAction
+    = Go DialogId
+    | DoNothing
 
 
 type alias DialogId =
@@ -140,14 +140,11 @@ type alias Dialogs =
     Dict DialogId Dialog
 
 
-
-
 listDialogToDictDialog : List Dialog -> Dict DialogId Dialog
 listDialogToDictDialog dialogs =
     dialogs
         |> List.map (\dial -> ( dial.id, dial ))
         |> Dict.fromList
-
 
 
 getDialog : DialogId -> Dialogs -> Dialog
@@ -157,9 +154,12 @@ getDialog dialogId dialogs =
 
 dialogExamples : List Dialog
 dialogExamples =
-    [ { id = "start", text = Special [S "You're at start ", GameValueText <| Const 5 , S " ", GameValueText <|Counter "killed_dragon" , S ". You have ", GameValueText <| Counter "money" , S " coins."], options = [ { text = "Go second", go = "second" } ] }
-    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", go = "start" }, { text = "Go third", go = "third" } ] }
-    , { id = "third", text =Normal "You're at third", options = [ { text = "Go start", go = "start" } ] }
+    [ { id = "start"
+      , text = Special [ S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , options = [ { text = "Go second", action = Go "second" }, { text = "Spend money", action = DoNothing } ]
+      }
+    , { id = "second", text = Normal "You're at second", options = [ { text = "Go start", action = Go "start" }, { text = "Go third", action = Go "third" } ] }
+    , { id = "third", text = Normal "You're at third", options = [ { text = "Go start", action = Go "start" } ] }
     ]
 
 

@@ -34,8 +34,13 @@ update msg model =
         None ->
             ( model, Cmd.none )
 
-        GoDialog dialogId ->
-            ( { model | dialogStack = Stack.push dialogId model.dialogStack }, Cmd.none )
+        ClickDialog action ->
+            case action of
+                Go dialogId ->
+                    ( { model | dialogStack = Stack.push dialogId model.dialogStack }, Cmd.none )
+
+                DoNothing ->
+                    ( model, Cmd.none )
 
         GoBack ->
             ( { model | dialogStack = Tuple.second (Stack.pop model.dialogStack) }, Cmd.none )
@@ -50,7 +55,7 @@ type alias Model =
 
 type Msg
     = None
-    | GoDialog DialogId
+    | ClickDialog DialogAction
     | GoBack
 
 
@@ -75,9 +80,9 @@ view model =
 
         _ =
             Debug.log "stack" model.dialogStack
-        _ =
-                    Debug.log "test" <| testCondition (Counter "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
 
+        _ =
+            Debug.log "test" <| testCondition (Counter "money") (Game.NOT <| Game.LT (Const 30)) model.gameState
     in
     div [] [ viewDialog model.gameState dialog (Stack.toList model.dialogStack |> List.length |> (<) 1) ]
 
@@ -85,7 +90,7 @@ view model =
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
 viewDialog gameState dialog showGoBack =
     div []
-        [ h2 [] [ text <| getText  dialog.text gameState ]
+        [ h2 [] [ text <| getText dialog.text gameState ]
         , div [] <|
             List.map viewOption dialog.options
                 ++ (if showGoBack then
@@ -99,7 +104,7 @@ viewDialog gameState dialog showGoBack =
 
 viewOption : Game.DialogOption -> Html Msg
 viewOption dialogOption =
-    div [ onClick <| GoDialog dialogOption.go ] [ text dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.action ] [ text dialogOption.text ]
 
 
 viewGoBackOption : Html Msg
