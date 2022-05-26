@@ -5159,6 +5159,9 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Game$AND = function (a) {
+	return {$: 'AND', a: a};
+};
 var $author$project$Game$Conditional = F2(
 	function (a, b) {
 		return {$: 'Conditional', a: a, b: b};
@@ -5169,10 +5172,6 @@ var $author$project$Game$Const = function (a) {
 var $author$project$Game$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
-var $author$project$Game$GT = {$: 'GT'};
-var $author$project$Game$GameValueText = function (a) {
-	return {$: 'GameValueText', a: a};
-};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
@@ -5180,20 +5179,26 @@ var $author$project$Game$Inc = F2(
 	function (a, b) {
 		return {$: 'Inc', a: a, b: b};
 	});
-var $author$project$Game$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
 var $author$project$Game$S = function (a) {
 	return {$: 'S', a: a};
 };
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
 };
+var $author$project$Game$inc1 = function (counter) {
+	return A2(
+		$author$project$Game$Inc,
+		counter,
+		$author$project$Game$Const(1));
+};
 var $author$project$Game$NOT = function (a) {
 	return {$: 'NOT', a: a};
 };
 var $author$project$Game$EQ = {$: 'EQ'};
+var $author$project$Game$Predicate = F3(
+	function (a, b, c) {
+		return {$: 'Predicate', a: a, b: b, c: c};
+	});
 var $author$project$Game$zero = function (gameValue) {
 	return A3(
 		$author$project$Game$Predicate,
@@ -5224,15 +5229,28 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						A2(
-						$author$project$Game$Inc,
-						'start_look_around',
-						$author$project$Game$Const(1))
+						$author$project$Game$inc1('start_look_around')
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
 						$author$project$Game$Counter('start_look_around'))),
 				text: $author$project$Game$S('Look around')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$inc1('start_search_bed')
+					]),
+				condition: $elm$core$Maybe$Just(
+					$author$project$Game$AND(
+						_List_fromArray(
+							[
+								$author$project$Game$zero(
+								$author$project$Game$Counter('start_search_bed')),
+								$author$project$Game$nonZero(
+								$author$project$Game$Counter('start_look_around'))
+							]))),
+				text: $author$project$Game$S('Search the bed')
 			},
 				{
 				action: _List_fromArray(
@@ -5254,15 +5272,7 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 		text: $author$project$Game$Special(
 			_List_fromArray(
 				[
-					A2(
-					$author$project$Game$Conditional,
-					A3(
-						$author$project$Game$Predicate,
-						$author$project$Game$Counter('money'),
-						$author$project$Game$GT,
-						$author$project$Game$Const(40)),
-					$author$project$Game$S('Raining')),
-					$author$project$Game$S('You\'re at start. '),
+					$author$project$Game$S('You\'re in a dark room. '),
 					A2(
 					$author$project$Game$Conditional,
 					$author$project$Game$zero(
@@ -5272,16 +5282,12 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 					$author$project$Game$Conditional,
 					$author$project$Game$nonZero(
 						$author$project$Game$Counter('start_look_around')),
-					$author$project$Game$S('You see an exit. ')),
-					$author$project$Game$GameValueText(
-					$author$project$Game$Const(5)),
-					$author$project$Game$S(' '),
-					$author$project$Game$GameValueText(
-					$author$project$Game$Counter('killed_dragon')),
-					$author$project$Game$S('. You have '),
-					$author$project$Game$GameValueText(
-					$author$project$Game$Counter('money')),
-					$author$project$Game$S(' coins.')
+					$author$project$Game$S('You see a straw bed. ')),
+					A2(
+					$author$project$Game$Conditional,
+					$author$project$Game$nonZero(
+						$author$project$Game$Counter('start_search_bed')),
+					$author$project$Game$S('There is a rusty key among the straw. '))
 				]))
 	},
 		{
@@ -5458,7 +5464,8 @@ var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
 			_Utils_Tuple2('killed_dragon', 1),
 			_Utils_Tuple2('money', 40),
 			_Utils_Tuple2('wood', 3),
-			_Utils_Tuple2('start_look_around', 0)
+			_Utils_Tuple2('start_look_around', 0),
+			_Utils_Tuple2('start_search_bed', 0)
 		]));
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
@@ -6078,14 +6085,35 @@ var $author$project$Game$testCondition = F2(
 						A2($author$project$Game$getMaybeGameValue, x, gameState),
 						A2($author$project$Game$getMaybeGameValue, y, gameState)));
 			});
-		if (condition.$ === 'Predicate') {
-			var v1 = condition.a;
-			var ops = condition.b;
-			var v2 = condition.c;
-			return A3(testPredicate, v1, ops, v2);
-		} else {
-			var innerTest = condition.a;
-			return !A2($author$project$Game$testCondition, innerTest, gameState);
+		switch (condition.$) {
+			case 'Predicate':
+				var v1 = condition.a;
+				var ops = condition.b;
+				var v2 = condition.c;
+				return A3(testPredicate, v1, ops, v2);
+			case 'NOT':
+				var innerTest = condition.a;
+				return !A2($author$project$Game$testCondition, innerTest, gameState);
+			case 'AND':
+				var conditions = condition.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (c, acc) {
+							return A2($author$project$Game$testCondition, c, gameState) && acc;
+						}),
+					true,
+					conditions);
+			default:
+				var conditions = condition.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (c, acc) {
+							return A2($author$project$Game$testCondition, c, gameState) || acc;
+						}),
+					false,
+					conditions);
 		}
 	});
 var $mhoare$elm_stack$Stack$toList = function (_v0) {

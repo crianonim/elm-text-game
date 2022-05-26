@@ -74,12 +74,12 @@ view model =
         _ =
             Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
-    div [class "container"] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
+    div [ class "container" ] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
 
 
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
 viewDialog gameState dialog showGoBack =
-    div [ class "dialog"]
+    div [ class "dialog" ]
         [ p [] [ introText gameState ]
         , h2 [] [ text <| getText gameState dialog.text ]
         , div [] <|

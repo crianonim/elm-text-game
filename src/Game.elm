@@ -25,8 +25,9 @@ type GameValue
 
 type Condition
     = Predicate GameValue PredicateOp GameValue
-
     | NOT Condition
+    | AND (List Condition)
+    | OR (List Condition)
 
 
 type PredicateOp
@@ -34,13 +35,23 @@ type PredicateOp
     | GT
     | LT
 
+
 nonZero : GameValue -> Condition
 nonZero gameValue =
     NOT (zero gameValue)
 
+
 zero : GameValue -> Condition
 zero gameValue =
-    (Predicate gameValue EQ (Const 0))
+    Predicate gameValue EQ (Const 0)
+
+
+inc1 : String -> DialogActionExecution
+inc1 counter =
+    Inc counter (Const 1)
+
+
+
 --
 --type GameTestOpertation
 --    = EQ GameValue
@@ -129,6 +140,12 @@ testCondition condition gameState =
         NOT innerTest ->
             not <| testCondition innerTest gameState
 
+        AND conditions ->
+            List.foldl (\c acc -> testCondition c gameState && acc) True conditions
+
+        OR conditions ->
+            List.foldl (\c acc -> testCondition c gameState || acc) False conditions
+
 
 type alias DialogOption =
     { text : Text
@@ -191,7 +208,7 @@ executeAction dialogActionExecution gameState =
 
 introText : GameState -> Html a
 introText gameState =
-    div [class "intro"]
+    div [ class "intro" ]
         [ p [] [ text <| "It is now " ++ (Dict.get "turn" gameState.counters |> Maybe.map String.fromInt |> Maybe.withDefault " - BAD TURN -") ++ " turn. " ]
         , p [] (Dict.toList gameState.counters |> List.map (\( k, v ) -> text <| k ++ ":" ++ String.fromInt v ++ ", "))
         ]
@@ -200,11 +217,12 @@ introText gameState =
 dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
-      , text = Special [ Conditional (Predicate (Counter "money") GT (Const 40)) (S "Raining"), S "You're at start. ",Conditional (zero (Counter "start_look_around")) (S "You see nothing. "),Conditional (nonZero (Counter "start_look_around")) (S "You see an exit. "), GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            ,{ text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Inc "start_look_around" (Const 1) ] }
-             ,{ text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around" ] }
+            , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
+            , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             ]
       }
     , { id = "second"
@@ -225,7 +243,12 @@ badDialog =
 
 exampleCounters : Dict String Int
 exampleCounters =
-    [ ( "turn", 1 ), ( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 )
-     , ("start_look_around",0)
-     ]
+    [ ( "turn", 1 )
+    , ( "raining", 0 )
+    , ( "killed_dragon", 1 )
+    , ( "money", 40 )
+    , ( "wood", 3 )
+    , ( "start_look_around", 0 )
+    , ( "start_search_bed", 0 )
+    ]
         |> Dict.fromList
