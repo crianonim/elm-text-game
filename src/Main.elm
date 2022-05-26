@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Game exposing (..)
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
 import Stack exposing (Stack)
@@ -73,13 +74,13 @@ view model =
         _ =
             Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
-    div [] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
+    div [class "container"] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
 
 
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
 viewDialog gameState dialog showGoBack =
-    div []
-        [ h3 [] [ introText gameState ]
+    div [ class "dialog"]
+        [ p [] [ introText gameState ]
         , h2 [] [ text <| getText gameState dialog.text ]
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> testCondition check gameState) |> Maybe.withDefault True))
@@ -94,9 +95,9 @@ viewDialog gameState dialog showGoBack =
 
 viewOption : GameState -> Game.DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action ] [ text <| getText gameState dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| getText gameState dialogOption.text ]
 
 
 viewGoBackOption : Html Msg
 viewGoBackOption =
-    div [ onClick <| ClickDialog [ GoBackAction ] ] [ text "Back" ]
+    div [ onClick <| ClickDialog [ GoBackAction ], class "option" ] [ text "Back" ]
