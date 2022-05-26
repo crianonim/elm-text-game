@@ -16,21 +16,37 @@ type GameValue
     | Counter String
 
 
-type alias GameCheck =
-    ( GameValue, GameTestOpertation )
+
+--
+--type alias GameCheck =
+--    ( GameValue, GameTestOpertation )
 
 
-type GameTestOpertation
-    = EQ GameValue
-    | GT GameValue
-    | LT GameValue
-    | NOT GameTestOpertation
+type Condition
+    = Predicate GameValue PredicateOp GameValue
+    | NOT Condition
+
+
+type PredicateOp
+    = EQ
+    | GT
+    | LT
+
+
+
+--
+--type GameTestOpertation
+--    = EQ GameValue
+--    | GT GameValue
+--    | LT GameValue
+--    | NOT GameTestOpertation
+--
 
 
 type Text
     = S String
     | Special (List Text)
-    | Conditional GameCheck Text
+    | Conditional Condition Text
     | GameValueText GameValue
 
 
@@ -79,34 +95,37 @@ exampleGameState =
     { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise }
 
 
-testCondition : GameCheck -> GameState -> Bool
-testCondition ( gv, counterTest ) gameState =
+testCondition : Condition -> GameState -> Bool
+testCondition condition gameState =
     let
-        value =
-            case gv of
-                Const int ->
-                    int
+        testPredicate : GameValue -> PredicateOp -> GameValue -> Bool
+        testPredicate x predicate y =
+            let
+                comp =
+                    case predicate of
+                        LT ->
+                            (<)
 
-                Counter counter ->
-                    Dict.get counter gameState.counters |> Maybe.withDefault 0
+                        EQ ->
+                            (==)
+
+                        GT ->
+                            (>)
+            in
+            Maybe.map2 comp (getMaybeGameValue x gameState) (getMaybeGameValue y gameState)
+                |> Maybe.withDefault False
     in
-    case counterTest of
-        EQ v ->
-            value == getGameValueWithDefault v gameState
-
-        GT v ->
-            value > getGameValueWithDefault v gameState
-
-        LT v ->
-            value < getGameValueWithDefault v gameState
+    case condition of
+        Predicate v1 ops v2 ->
+            testPredicate v1 ops v2
 
         NOT innerTest ->
-            not <| testCondition ( gv, innerTest ) gameState
+            not <| testCondition innerTest gameState
 
 
 type alias DialogOption =
     { text : Text
-    , condition : Maybe GameCheck
+    , condition : Maybe Condition
     , action : List DialogActionExecution
     }
 
@@ -174,9 +193,9 @@ introText gameState =
 dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
-      , text = Special [ Conditional ( Counter "money", GT (Const 40) ) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , text = Special [ Conditional (Predicate (Counter "money") GT (Const 40)) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
       , options =
-            [ { text = S "Go second", condition = Just ( Counter "money", GT (Const 40) ), action = [ GoAction "second" ] }
+            [ { text = S "Go second", condition = Just (Predicate (Counter "money") GT (Const 40)), action = [ GoAction "second" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             ]
       }

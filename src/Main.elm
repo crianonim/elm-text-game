@@ -71,7 +71,7 @@ view model =
             Debug.log "stack" model.gameState.dialogStack
 
         _ =
-            Debug.log "test" <| testCondition ( Counter "money", Game.NOT <| Game.LT (Const 30) ) model.gameState
+            Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
     div [] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
 
