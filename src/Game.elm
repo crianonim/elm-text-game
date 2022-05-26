@@ -25,6 +25,7 @@ type GameValue
 
 type Condition
     = Predicate GameValue PredicateOp GameValue
+
     | NOT Condition
 
 
@@ -33,8 +34,13 @@ type PredicateOp
     | GT
     | LT
 
+nonZero : GameValue -> Condition
+nonZero gameValue =
+    NOT (zero gameValue)
 
-
+zero : GameValue -> Condition
+zero gameValue =
+    (Predicate gameValue EQ (Const 0))
 --
 --type GameTestOpertation
 --    = EQ GameValue
@@ -194,10 +200,11 @@ introText gameState =
 dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
-      , text = Special [ Conditional (Predicate (Counter "money") GT (Const 40)) (S "Raining"), S "You're at start ", GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
+      , text = Special [ Conditional (Predicate (Counter "money") GT (Const 40)) (S "Raining"), S "You're at start. ",Conditional (zero (Counter "start_look_around")) (S "You see nothing. "),Conditional (nonZero (Counter "start_look_around")) (S "You see an exit. "), GameValueText <| Const 5, S " ", GameValueText <| Counter "killed_dragon", S ". You have ", GameValueText <| Counter "money", S " coins." ]
       , options =
-            [ { text = S "Go second", condition = Just (Predicate (Counter "money") GT (Const 40)), action = [ GoAction "second" ] }
-            , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
+            [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
+            ,{ text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Inc "start_look_around" (Const 1) ] }
+             ,{ text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             ]
       }
     , { id = "second"
@@ -218,5 +225,7 @@ badDialog =
 
 exampleCounters : Dict String Int
 exampleCounters =
-    [ ( "turn", 1 ), ( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 ) ]
+    [ ( "turn", 1 ), ( "raining", 0 ), ( "killed_dragon", 1 ), ( "money", 40 ), ( "wood", 3 )
+     , ("start_look_around",0)
+     ]
         |> Dict.fromList

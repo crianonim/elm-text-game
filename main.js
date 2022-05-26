@@ -5190,6 +5190,21 @@ var $author$project$Game$S = function (a) {
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
 };
+var $author$project$Game$NOT = function (a) {
+	return {$: 'NOT', a: a};
+};
+var $author$project$Game$EQ = {$: 'EQ'};
+var $author$project$Game$zero = function (gameValue) {
+	return A3(
+		$author$project$Game$Predicate,
+		gameValue,
+		$author$project$Game$EQ,
+		$author$project$Game$Const(0));
+};
+var $author$project$Game$nonZero = function (gameValue) {
+	return $author$project$Game$NOT(
+		$author$project$Game$zero(gameValue));
+};
 var $author$project$Game$dialogExamples = _List_fromArray(
 	[
 		{
@@ -5202,12 +5217,22 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 						$author$project$Game$GoAction('second')
 					]),
 				condition: $elm$core$Maybe$Just(
-					A3(
-						$author$project$Game$Predicate,
-						$author$project$Game$Counter('money'),
-						$author$project$Game$GT,
-						$author$project$Game$Const(40))),
-				text: $author$project$Game$S('Go second')
+					$author$project$Game$nonZero(
+						$author$project$Game$Counter('start_look_around'))),
+				text: $author$project$Game$S('Go through the exit')
+			},
+				{
+				action: _List_fromArray(
+					[
+						A2(
+						$author$project$Game$Inc,
+						'start_look_around',
+						$author$project$Game$Const(1))
+					]),
+				condition: $elm$core$Maybe$Just(
+					$author$project$Game$zero(
+						$author$project$Game$Counter('start_look_around'))),
+				text: $author$project$Game$S('Look around')
 			},
 				{
 				action: _List_fromArray(
@@ -5237,7 +5262,17 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 						$author$project$Game$GT,
 						$author$project$Game$Const(40)),
 					$author$project$Game$S('Raining')),
-					$author$project$Game$S('You\'re at start '),
+					$author$project$Game$S('You\'re at start. '),
+					A2(
+					$author$project$Game$Conditional,
+					$author$project$Game$zero(
+						$author$project$Game$Counter('start_look_around')),
+					$author$project$Game$S('You see nothing. ')),
+					A2(
+					$author$project$Game$Conditional,
+					$author$project$Game$nonZero(
+						$author$project$Game$Counter('start_look_around')),
+					$author$project$Game$S('You see an exit. ')),
 					$author$project$Game$GameValueText(
 					$author$project$Game$Const(5)),
 					$author$project$Game$S(' '),
@@ -5422,7 +5457,8 @@ var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
 			_Utils_Tuple2('raining', 0),
 			_Utils_Tuple2('killed_dragon', 1),
 			_Utils_Tuple2('money', 40),
-			_Utils_Tuple2('wood', 3)
+			_Utils_Tuple2('wood', 3),
+			_Utils_Tuple2('start_look_around', 0)
 		]));
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
@@ -5980,9 +6016,6 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Game$LT = {$: 'LT'};
-var $author$project$Game$NOT = function (a) {
-	return {$: 'NOT', a: a};
-};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
