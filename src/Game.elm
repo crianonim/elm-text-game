@@ -9,6 +9,7 @@ import Stack exposing (Stack)
 type alias GameState =
     { counters : Dict String Int
     , dialogStack : Stack DialogId
+    , messages : List String
     }
 
 
@@ -110,7 +111,7 @@ addCounter counter add gameState =
 
 exampleGameState : GameState
 exampleGameState =
-    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise }
+    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = [ "First message test" ] }
 
 
 testCondition : Condition -> GameState -> Bool
@@ -158,6 +159,7 @@ type DialogActionExecution
     = GoAction DialogId
     | GoBackAction
     | Inc String GameValue
+    | Msg String
     | DoNothing
 
 
@@ -204,6 +206,9 @@ executeAction dialogActionExecution gameState =
 
         DoNothing ->
             gameState
+
+        Msg msg ->
+            { gameState | messages = msg :: gameState.messages }
 
 
 introText : GameState -> Html a

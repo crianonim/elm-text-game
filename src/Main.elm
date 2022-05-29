@@ -74,7 +74,16 @@ view model =
         _ =
             Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
-    div [ class "container" ] [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1) ]
+    div [ class "container" ]
+        [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1)
+        , viewMessages model.gameState.messages
+        ]
+
+
+viewMessages : List String -> Html msg
+viewMessages msgs =
+    div [] <|
+        List.map (\m -> li [] [ text m ]) msgs
 
 
 viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg

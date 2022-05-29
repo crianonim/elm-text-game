@@ -5479,7 +5479,9 @@ var $mhoare$elm_stack$Stack$push = F2(
 	});
 var $author$project$Game$exampleGameState = {
 	counters: $author$project$Game$exampleCounters,
-	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise)
+	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
+	messages: _List_fromArray(
+		['First message test'])
 };
 var $author$project$Game$listDialogToDictDialog = function (dialogs) {
 	return $elm$core$Dict$fromList(
@@ -6003,8 +6005,15 @@ var $author$project$Game$executeAction = F2(
 							return A3($author$project$Game$addCounter, counter, amount, gameState);
 						},
 						A2($author$project$Game$getMaybeGameValue, gv, gameState)));
-			default:
+			case 'DoNothing':
 				return gameState;
+			default:
+				var msg = dialogActionExecution.a;
+				return _Utils_update(
+					gameState,
+					{
+						messages: A2($elm$core$List$cons, msg, gameState.messages)
+					});
 		}
 	});
 var $author$project$Main$update = F2(
@@ -6330,6 +6339,24 @@ var $author$project$Main$viewDialog = F3(
 							[$author$project$Main$viewGoBackOption]) : _List_Nil))
 				]));
 	});
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $author$project$Main$viewMessages = function (msgs) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2(
+			$elm$core$List$map,
+			function (m) {
+				return A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(m)
+						]));
+			},
+			msgs));
+};
 var $author$project$Main$view = function (model) {
 	var dialog = A2(
 		$author$project$Game$getDialog,
@@ -6364,7 +6391,8 @@ var $author$project$Main$view = function (model) {
 				model.gameState,
 				dialog,
 				1 < $elm$core$List$length(
-					$mhoare$elm_stack$Stack$toList(model.gameState.dialogStack)))
+					$mhoare$elm_stack$Stack$toList(model.gameState.dialogStack))),
+				$author$project$Main$viewMessages(model.gameState.messages)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
