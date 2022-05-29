@@ -5179,6 +5179,9 @@ var $author$project$Game$Inc = F2(
 	function (a, b) {
 		return {$: 'Inc', a: a, b: b};
 	});
+var $author$project$Game$Msg = function (a) {
+	return {$: 'Msg', a: a};
+};
 var $author$project$Game$S = function (a) {
 	return {$: 'S', a: a};
 };
@@ -5229,7 +5232,8 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$inc1('start_look_around')
+						$author$project$Game$inc1('start_look_around'),
+						$author$project$Game$Msg('You noticed a straw bed')
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
@@ -5467,6 +5471,8 @@ var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
 			_Utils_Tuple2('start_look_around', 0),
 			_Utils_Tuple2('start_search_bed', 0)
 		]));
+var $author$project$Game$exampleMessages = _List_fromArray(
+	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
@@ -5480,8 +5486,7 @@ var $mhoare$elm_stack$Stack$push = F2(
 var $author$project$Game$exampleGameState = {
 	counters: $author$project$Game$exampleCounters,
 	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
-	messages: _List_fromArray(
-		['First message test'])
+	messages: $author$project$Game$exampleMessages
 };
 var $author$project$Game$listDialogToDictDialog = function (dialogs) {
 	return $elm$core$Dict$fromList(
@@ -6339,17 +6344,22 @@ var $author$project$Main$viewDialog = F3(
 							[$author$project$Main$viewGoBackOption]) : _List_Nil))
 				]));
 	});
-var $elm$html$Html$li = _VirtualDom_node('li');
 var $author$project$Main$viewMessages = function (msgs) {
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('messages')
+			]),
 		A2(
 			$elm$core$List$map,
 			function (m) {
 				return A2(
-					$elm$html$Html$li,
-					_List_Nil,
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('message')
+						]),
 					_List_fromArray(
 						[
 							$elm$html$Html$text(m)

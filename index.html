@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elm game</title>
   <style>
 .container {
@@ -11,7 +12,7 @@
 }
 .status,
 .dialog,
-.box {
+.messages {
   border: 1px solid black;
   box-shadow: 3px 3px;
   padding: 5px;
@@ -41,6 +42,13 @@ button {
   outline:none;
 }
 
+.messages {
+max-height: 10em;
+overflow-y: scroll;
+}
+.message {
+
+}
   </style>
 
 </head>

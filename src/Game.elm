@@ -109,11 +109,6 @@ addCounter counter add gameState =
     { gameState | counters = Dict.update counter (\value -> Maybe.map (\v -> v + add) value) gameState.counters }
 
 
-exampleGameState : GameState
-exampleGameState =
-    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = [ "First message test" ] }
-
-
 testCondition : Condition -> GameState -> Bool
 testCondition condition gameState =
     let
@@ -225,7 +220,7 @@ dialogExamples =
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around" ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Msg "You noticed a straw bed" ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             ]
@@ -257,3 +252,18 @@ exampleCounters =
     , ( "start_search_bed", 0 )
     ]
         |> Dict.fromList
+
+
+exampleGameState : GameState
+exampleGameState =
+    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = exampleMessages }
+
+
+exampleMessages : List String
+exampleMessages =
+    [ "Last one I promise"
+    , "Need more messages to see the scrolling"
+    , "Third message"
+    , "Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice."
+    , "First message test"
+    ]
