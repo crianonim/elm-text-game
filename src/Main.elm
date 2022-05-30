@@ -10,7 +10,7 @@ import Platform.Cmd exposing (Cmd)
 import Stack exposing (Stack)
 
 
-main : Program () Model Msg
+main : Program () (Model TestGame.FirstActions) (Msg TestGame.FirstActions)
 main =
     Browser.element
         { init = init
@@ -20,7 +20,7 @@ main =
         }
 
 
-init : () -> ( Model, Cmd Msg )
+init : () -> ( Model TestGame.FirstActions, Cmd (Msg TestGame.FirstActions) )
 init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogExamples
       , gameState = TestGame.exampleGameState
@@ -29,32 +29,47 @@ init _ =
     )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg TestGame.FirstActions -> Model TestGame.FirstActions -> ( Model TestGame.FirstActions, Cmd (Msg TestGame.FirstActions) )
 update msg model =
     case msg of
         None ->
             ( model, Cmd.none )
 
         ClickDialog actions ->
-            ( { model | gameState = List.foldl executeAction model.gameState actions }, Cmd.none )
+            ( { model
+                | gameState =
+                    List.foldl
+                        (\ac acc ->
+                            case ac of
+                                CustomAction custom ->
+                                    TestGame.executeCustomAction custom acc
+
+                                x ->
+                                    executeAction x acc
+                        )
+                        model.gameState
+                        actions
+              }
+            , Cmd.none
+            )
 
 
-type alias Model =
-    { dialogs : Game.Dialogs
+type alias Model a =
+    { dialogs : Game.Dialogs a
     , gameState : GameState
     }
 
 
-type Msg
+type Msg a
     = None
-    | ClickDialog (List DialogActionExecution)
+    | ClickDialog (List (DialogActionExecution a))
 
 
 
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model a -> Sub (Msg a)
 subscriptions model =
     Sub.none
 
@@ -63,7 +78,7 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model a -> Html (Msg a)
 view model =
     let
         dialog =
@@ -76,7 +91,7 @@ view model =
             Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
     div [ class "container" ]
-        [ viewDialog model.gameState dialog (Stack.toList model.gameState.dialogStack |> List.length |> (<) 1)
+        [ viewDialog model.gameState dialog
         , viewMessages model.gameState.messages
         ]
 
@@ -87,8 +102,8 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
-viewDialog : GameState -> Game.Dialog -> Bool -> Html Msg
-viewDialog gameState dialog showGoBack =
+viewDialog : GameState -> Game.Dialog a -> Html (Msg a)
+viewDialog gameState dialog =
     div [ class "dialog" ]
         [ p [] [ introText gameState ]
         , h2 [] [ text <| getText gameState dialog.text ]
@@ -97,6 +112,6 @@ viewDialog gameState dialog showGoBack =
         ]
 
 
-viewOption : GameState -> Game.DialogOption -> Html Msg
+viewOption : GameState -> Game.DialogOption a -> Html (Msg a)
 viewOption gameState dialogOption =
     div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| getText gameState dialogOption.text ]

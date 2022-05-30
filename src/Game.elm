@@ -41,12 +41,12 @@ zero gameValue =
     Predicate gameValue EQ (Const 0)
 
 
-inc1 : String -> DialogActionExecution
+inc1 : String -> DialogActionExecution a
 inc1 counter =
     inc counter 1
 
 
-inc : String -> Int -> DialogActionExecution
+inc : String -> Int -> DialogActionExecution a
 inc counter i =
     Inc counter (Const i)
 
@@ -132,18 +132,19 @@ testCondition condition gameState =
             List.foldl (\c acc -> testCondition c gameState || acc) False conditions
 
 
-type alias DialogOption =
+type alias DialogOption a =
     { text : Text
     , condition : Maybe Condition
-    , action : List DialogActionExecution
+    , action : List (DialogActionExecution a)
     }
 
 
-type DialogActionExecution
+type DialogActionExecution a
     = GoAction DialogId
     | GoBackAction
     | Inc String GameValue
-    | Msg String
+    | Message String
+    | CustomAction a
     | DoNothing
 
 
@@ -151,30 +152,30 @@ type alias DialogId =
     String
 
 
-type alias Dialog =
+type alias Dialog a =
     { id : DialogId
     , text : Text
-    , options : List DialogOption
+    , options : List (DialogOption a)
     }
 
 
-type alias Dialogs =
-    Dict DialogId Dialog
+type alias Dialogs a =
+    Dict DialogId (Dialog a)
 
 
-listDialogToDictDialog : List Dialog -> Dict DialogId Dialog
+listDialogToDictDialog : List (Dialog a) -> Dict DialogId (Dialog a)
 listDialogToDictDialog dialogs =
     dialogs
         |> List.map (\dial -> ( dial.id, dial ))
         |> Dict.fromList
 
 
-getDialog : DialogId -> Dialogs -> Dialog
+getDialog : DialogId -> Dialogs a -> Dialog a
 getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
 
 
-executeAction : DialogActionExecution -> GameState -> GameState
+executeAction : DialogActionExecution a -> GameState -> GameState
 executeAction dialogActionExecution gameState =
     case dialogActionExecution of
         GoAction dialogId ->
@@ -191,8 +192,11 @@ executeAction dialogActionExecution gameState =
         DoNothing ->
             gameState
 
-        Msg msg ->
+        Message msg ->
             { gameState | messages = msg :: gameState.messages }
+
+        CustomAction a ->
+            gameState
 
 
 introText : GameState -> Html a
@@ -203,14 +207,14 @@ introText gameState =
         ]
 
 
-recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
+recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption a
 recipeToDialogOption ( crafted, ingredients ) =
     let
         ingredientToCondition : ( String, Int ) -> Condition
         ingredientToCondition ( item, amount ) =
             NOT <| Predicate (Counter item) LT (Const amount)
 
-        ingredientToAction : ( String, Int ) -> DialogActionExecution
+        ingredientToAction : ( String, Int ) -> DialogActionExecution a
         ingredientToAction ( item, amount ) =
             inc item (0 - amount)
 
@@ -224,6 +228,6 @@ recipeToDialogOption ( crafted, ingredients ) =
     }
 
 
-badDialog : Dialog
+badDialog : Dialog a
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }

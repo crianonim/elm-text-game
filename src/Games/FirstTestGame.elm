@@ -5,6 +5,25 @@ import Game exposing (..)
 import Stack
 
 
+type FirstActions
+    = Turn Int
+    | Other
+
+
+executeCustomAction : FirstActions -> GameState -> GameState
+executeCustomAction dialogActionExecution gameState =
+    case dialogActionExecution of
+        Turn amount ->
+            let
+                _ =
+                    Debug.log "TURN ADDED" amount
+            in
+            addCounter "turn" amount gameState
+
+        Other ->
+            gameState
+
+
 exampleCounters : Dict String Int
 exampleCounters =
     [ ( "turn", 1 )
@@ -43,13 +62,13 @@ recipes =
     ]
 
 
-dialogExamples : List Dialog
+dialogExamples : List (Dialog FirstActions)
 dialogExamples =
     [ { id = "start"
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Msg "You noticed a straw bed" ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", CustomAction (Turn 7) ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
@@ -71,6 +90,6 @@ dialogExamples =
     ]
 
 
-backOption : DialogOption
+backOption : DialogOption a
 backOption =
     { text = S "Go back", condition = Nothing, action = [ GoBackAction ] }

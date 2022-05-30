@@ -5172,6 +5172,9 @@ var $author$project$Game$Const = function (a) {
 var $author$project$Game$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
+var $author$project$Game$CustomAction = function (a) {
+	return {$: 'CustomAction', a: a};
+};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
@@ -5179,14 +5182,17 @@ var $author$project$Game$Inc = F2(
 	function (a, b) {
 		return {$: 'Inc', a: a, b: b};
 	});
-var $author$project$Game$Msg = function (a) {
-	return {$: 'Msg', a: a};
+var $author$project$Game$Message = function (a) {
+	return {$: 'Message', a: a};
 };
 var $author$project$Game$S = function (a) {
 	return {$: 'S', a: a};
 };
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
+};
+var $author$project$Games$FirstTestGame$Turn = function (a) {
+	return {$: 'Turn', a: a};
 };
 var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
 var $author$project$Games$FirstTestGame$backOption = {
@@ -5300,7 +5306,9 @@ var $author$project$Games$FirstTestGame$dialogExamples = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$Game$inc1('start_look_around'),
-						$author$project$Game$Msg('You noticed a straw bed')
+						$author$project$Game$Message('You noticed a straw bed'),
+						$author$project$Game$CustomAction(
+						$author$project$Games$FirstTestGame$Turn(7))
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
@@ -6099,13 +6107,27 @@ var $author$project$Game$executeAction = F2(
 						A2($author$project$Game$getMaybeGameValue, gv, gameState)));
 			case 'DoNothing':
 				return gameState;
-			default:
+			case 'Message':
 				var msg = dialogActionExecution.a;
 				return _Utils_update(
 					gameState,
 					{
 						messages: A2($elm$core$List$cons, msg, gameState.messages)
 					});
+			default:
+				var a = dialogActionExecution.a;
+				return gameState;
+		}
+	});
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$Games$FirstTestGame$executeCustomAction = F2(
+	function (dialogActionExecution, gameState) {
+		if (dialogActionExecution.$ === 'Turn') {
+			var amount = dialogActionExecution.a;
+			var _v1 = A2($elm$core$Debug$log, 'TURN ADDED', amount);
+			return A3($author$project$Game$addCounter, 'turn', amount, gameState);
+		} else {
+			return gameState;
 		}
 	});
 var $author$project$Main$update = F2(
@@ -6118,7 +6140,20 @@ var $author$project$Main$update = F2(
 				_Utils_update(
 					model,
 					{
-						gameState: A3($elm$core$List$foldl, $author$project$Game$executeAction, model.gameState, actions)
+						gameState: A3(
+							$elm$core$List$foldl,
+							F2(
+								function (ac, acc) {
+									if (ac.$ === 'CustomAction') {
+										var custom = ac.a;
+										return A2($author$project$Games$FirstTestGame$executeCustomAction, custom, acc);
+									} else {
+										var x = ac;
+										return A2($author$project$Game$executeAction, x, acc);
+									}
+								}),
+							model.gameState,
+							actions)
 					}),
 				$elm$core$Platform$Cmd$none);
 		}
@@ -6145,7 +6180,6 @@ var $author$project$Game$getDialog = F2(
 			$author$project$Game$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -6216,10 +6250,6 @@ var $author$project$Game$testCondition = F2(
 					conditions);
 		}
 	});
-var $mhoare$elm_stack$Stack$toList = function (_v0) {
-	var stack = _v0.a;
-	return stack;
-};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -6365,8 +6395,8 @@ var $author$project$Main$viewOption = F2(
 					A2($author$project$Game$getText, gameState, dialogOption.text))
 				]));
 	});
-var $author$project$Main$viewDialog = F3(
-	function (gameState, dialog, showGoBack) {
+var $author$project$Main$viewDialog = F2(
+	function (gameState, dialog) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
@@ -6464,12 +6494,7 @@ var $author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A3(
-				$author$project$Main$viewDialog,
-				model.gameState,
-				dialog,
-				1 < $elm$core$List$length(
-					$mhoare$elm_stack$Stack$toList(model.gameState.dialogStack))),
+				A2($author$project$Main$viewDialog, model.gameState, dialog),
 				$author$project$Main$viewMessages(model.gameState.messages)
 			]));
 };
