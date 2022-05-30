@@ -5188,11 +5188,15 @@ var $author$project$Game$S = function (a) {
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
 };
+var $author$project$Game$inc = F2(
+	function (counter, i) {
+		return A2(
+			$author$project$Game$Inc,
+			counter,
+			$author$project$Game$Const(i));
+	});
 var $author$project$Game$inc1 = function (counter) {
-	return A2(
-		$author$project$Game$Inc,
-		counter,
-		$author$project$Game$Const(1));
+	return A2($author$project$Game$inc, counter, 1);
 };
 var $author$project$Game$NOT = function (a) {
 	return {$: 'NOT', a: a};
@@ -5213,6 +5217,62 @@ var $author$project$Game$nonZero = function (gameValue) {
 	return $author$project$Game$NOT(
 		$author$project$Game$zero(gameValue));
 };
+var $author$project$Game$LT = {$: 'LT'};
+var $author$project$Game$recipeToDialogOption = function (_v0) {
+	var crafted = _v0.a;
+	var ingredients = _v0.b;
+	var ingredientToString = function (_v3) {
+		var item = _v3.a;
+		var amount = _v3.b;
+		return item + (' ' + $elm$core$String$fromInt(amount));
+	};
+	var ingredientToCondition = function (_v2) {
+		var item = _v2.a;
+		var amount = _v2.b;
+		return $author$project$Game$NOT(
+			A3(
+				$author$project$Game$Predicate,
+				$author$project$Game$Counter(item),
+				$author$project$Game$LT,
+				$author$project$Game$Const(amount)));
+	};
+	var ingredientToAction = function (_v1) {
+		var item = _v1.a;
+		var amount = _v1.b;
+		return A2($author$project$Game$inc, item, 0 - amount);
+	};
+	return {
+		action: A2(
+			$elm$core$List$cons,
+			A2($author$project$Game$inc, crafted, 1),
+			A2($elm$core$List$map, ingredientToAction, ingredients)),
+		condition: $elm$core$Maybe$Just(
+			$author$project$Game$AND(
+				A2($elm$core$List$map, ingredientToCondition, ingredients))),
+		text: $author$project$Game$S(
+			'Craft ' + (crafted + (' (' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2($elm$core$List$map, ingredientToString, ingredients)) + ')'))))
+	};
+};
+var $author$project$Game$recipes = _List_fromArray(
+	[
+		_Utils_Tuple2(
+		'axe',
+		_List_fromArray(
+			[
+				_Utils_Tuple2('wood', 2),
+				_Utils_Tuple2('stone', 1)
+			])),
+		_Utils_Tuple2(
+		'pickaxe',
+		_List_fromArray(
+			[
+				_Utils_Tuple2('wood', 2),
+				_Utils_Tuple2('stone', 2)
+			]))
+	]);
 var $author$project$Game$dialogExamples = _List_fromArray(
 	[
 		{
@@ -5271,6 +5331,14 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Game$S('Spend money')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('craft')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Game$S('Craft')
 			}
 			]),
 		text: $author$project$Game$Special(
@@ -5335,6 +5403,11 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 			}
 			]),
 		text: $author$project$Game$S('You\'re at third')
+	},
+		{
+		id: 'craft',
+		options: A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Game$recipes),
+		text: $author$project$Game$S('You can craft items')
 	}
 	]);
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
@@ -5467,7 +5540,10 @@ var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
 			_Utils_Tuple2('raining', 0),
 			_Utils_Tuple2('killed_dragon', 1),
 			_Utils_Tuple2('money', 40),
-			_Utils_Tuple2('wood', 3),
+			_Utils_Tuple2('wood', 10),
+			_Utils_Tuple2('stone', 9),
+			_Utils_Tuple2('axe', 0),
+			_Utils_Tuple2('pickaxe', 0),
 			_Utils_Tuple2('start_look_around', 0),
 			_Utils_Tuple2('start_search_bed', 0)
 		]));
@@ -6036,7 +6112,6 @@ var $author$project$Main$update = F2(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Game$LT = {$: 'LT'};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {

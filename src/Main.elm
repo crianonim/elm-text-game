@@ -82,7 +82,7 @@ view model =
 
 viewMessages : List String -> Html msg
 viewMessages msgs =
-    div [ class "messages"] <|
+    div [ class "messages" ] <|
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
