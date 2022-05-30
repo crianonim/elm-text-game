@@ -13,6 +13,11 @@ type alias GameState =
     }
 
 
+type alias GameConfig =
+    { turnCallback : Int -> GameState -> GameState
+    }
+
+
 type GameValue
     = Const Int
     | Counter String
@@ -41,12 +46,12 @@ zero gameValue =
     Predicate gameValue EQ (Const 0)
 
 
-inc1 : String -> DialogActionExecution a
+inc1 : String -> DialogActionExecution
 inc1 counter =
     inc counter 1
 
 
-inc : String -> Int -> DialogActionExecution a
+inc : String -> Int -> DialogActionExecution
 inc counter i =
     Inc counter (Const i)
 
@@ -132,19 +137,19 @@ testCondition condition gameState =
             List.foldl (\c acc -> testCondition c gameState || acc) False conditions
 
 
-type alias DialogOption a =
+type alias DialogOption =
     { text : Text
     , condition : Maybe Condition
-    , action : List (DialogActionExecution a)
+    , action : List DialogActionExecution
     }
 
 
-type DialogActionExecution a
+type DialogActionExecution
     = GoAction DialogId
     | GoBackAction
     | Inc String GameValue
     | Message String
-    | CustomAction a
+    | Turn Int
     | DoNothing
 
 
@@ -152,31 +157,31 @@ type alias DialogId =
     String
 
 
-type alias Dialog a =
+type alias Dialog =
     { id : DialogId
     , text : Text
-    , options : List (DialogOption a)
+    , options : List DialogOption
     }
 
 
-type alias Dialogs a =
-    Dict DialogId (Dialog a)
+type alias Dialogs =
+    Dict DialogId Dialog
 
 
-listDialogToDictDialog : List (Dialog a) -> Dict DialogId (Dialog a)
+listDialogToDictDialog : List Dialog -> Dict DialogId Dialog
 listDialogToDictDialog dialogs =
     dialogs
         |> List.map (\dial -> ( dial.id, dial ))
         |> Dict.fromList
 
 
-getDialog : DialogId -> Dialogs a -> Dialog a
+getDialog : DialogId -> Dialogs -> Dialog
 getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
 
 
-executeAction : DialogActionExecution a -> GameState -> GameState
-executeAction dialogActionExecution gameState =
+executeAction : (Int -> GameState -> GameState) -> DialogActionExecution -> GameState -> GameState
+executeAction turnCallback dialogActionExecution gameState =
     case dialogActionExecution of
         GoAction dialogId ->
             { gameState | dialogStack = Stack.push dialogId gameState.dialogStack }
@@ -195,8 +200,24 @@ executeAction dialogActionExecution gameState =
         Message msg ->
             { gameState | messages = msg :: gameState.messages }
 
-        CustomAction a ->
-            gameState
+        Turn t ->
+            let
+                runTurn : Int -> GameState -> GameState
+                runTurn left gs =
+                    let
+                        currentTurn =
+                            getGameValueWithDefault (Counter "turn") gs
+                    in
+                    if left == 0 then
+                        gs
+
+                    else
+                        runTurn (left - 1)
+                            (turnCallback currentTurn gs
+                                |> addCounter "turn" 1
+                            )
+            in
+            runTurn t gameState
 
 
 introText : GameState -> Html a
@@ -207,14 +228,14 @@ introText gameState =
         ]
 
 
-recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption a
+recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
 recipeToDialogOption ( crafted, ingredients ) =
     let
         ingredientToCondition : ( String, Int ) -> Condition
         ingredientToCondition ( item, amount ) =
             NOT <| Predicate (Counter item) LT (Const amount)
 
-        ingredientToAction : ( String, Int ) -> DialogActionExecution a
+        ingredientToAction : ( String, Int ) -> DialogActionExecution
         ingredientToAction ( item, amount ) =
             inc item (0 - amount)
 
@@ -228,6 +249,6 @@ recipeToDialogOption ( crafted, ingredients ) =
     }
 
 
-badDialog : Dialog a
+badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }

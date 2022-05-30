@@ -10,7 +10,7 @@ import Platform.Cmd exposing (Cmd)
 import Stack exposing (Stack)
 
 
-main : Program () (Model TestGame.FirstActions) (Msg TestGame.FirstActions)
+main : Program () Model Msg
 main =
     Browser.element
         { init = init
@@ -20,16 +20,17 @@ main =
         }
 
 
-init : () -> ( Model TestGame.FirstActions, Cmd (Msg TestGame.FirstActions) )
+init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogExamples
       , gameState = TestGame.exampleGameState
+      , config = TestGame.config
       }
     , Cmd.none
     )
 
 
-update : Msg TestGame.FirstActions -> Model TestGame.FirstActions -> ( Model TestGame.FirstActions, Cmd (Msg TestGame.FirstActions) )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         None ->
@@ -37,39 +38,29 @@ update msg model =
 
         ClickDialog actions ->
             ( { model
-                | gameState =
-                    List.foldl
-                        (\ac acc ->
-                            case ac of
-                                CustomAction custom ->
-                                    TestGame.executeCustomAction custom acc
-
-                                x ->
-                                    executeAction x acc
-                        )
-                        model.gameState
-                        actions
+                | gameState = List.foldl (executeAction model.config.turnCallback) model.gameState actions
               }
             , Cmd.none
             )
 
 
-type alias Model a =
-    { dialogs : Game.Dialogs a
+type alias Model =
+    { dialogs : Game.Dialogs
     , gameState : GameState
+    , config : GameConfig
     }
 
 
-type Msg a
+type Msg
     = None
-    | ClickDialog (List (DialogActionExecution a))
+    | ClickDialog (List DialogActionExecution)
 
 
 
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model a -> Sub (Msg a)
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
@@ -78,7 +69,7 @@ subscriptions model =
 -- VIEW
 
 
-view : Model a -> Html (Msg a)
+view : Model -> Html Msg
 view model =
     let
         dialog =
@@ -102,7 +93,7 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
-viewDialog : GameState -> Game.Dialog a -> Html (Msg a)
+viewDialog : GameState -> Game.Dialog -> Html Msg
 viewDialog gameState dialog =
     div [ class "dialog" ]
         [ p [] [ introText gameState ]
@@ -112,6 +103,6 @@ viewDialog gameState dialog =
         ]
 
 
-viewOption : GameState -> Game.DialogOption a -> Html (Msg a)
+viewOption : GameState -> Game.DialogOption -> Html Msg
 viewOption gameState dialogOption =
     div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| getText gameState dialogOption.text ]

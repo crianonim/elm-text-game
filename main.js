@@ -5159,6 +5159,38 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $elm$core$Debug$log = _Debug_log;
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Games$FirstTestGame$turnActions = _List_fromArray(
+	[
+		_Utils_Tuple2(
+		1,
+		function (gs) {
+			var _v0 = A2($elm$core$Debug$log, 'Turn passed', '1');
+			return gs;
+		}),
+		_Utils_Tuple2(
+		2,
+		function (gs) {
+			var _v1 = A2($elm$core$Debug$log, 'Even Turn passed', '2');
+			return gs;
+		})
+	]);
+var $author$project$Games$FirstTestGame$processTurn = F2(
+	function (turn, gameState) {
+		var _v0 = A2($elm$core$Debug$log, 'Processing turn ', turn);
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v1, acc) {
+					var t = _v1.a;
+					var fn = _v1.b;
+					return (!A2($elm$core$Basics$modBy, t, turn)) ? fn(acc) : acc;
+				}),
+			gameState,
+			$author$project$Games$FirstTestGame$turnActions);
+	});
+var $author$project$Games$FirstTestGame$config = {turnCallback: $author$project$Games$FirstTestGame$processTurn};
 var $author$project$Game$AND = function (a) {
 	return {$: 'AND', a: a};
 };
@@ -5171,9 +5203,6 @@ var $author$project$Game$Const = function (a) {
 };
 var $author$project$Game$Counter = function (a) {
 	return {$: 'Counter', a: a};
-};
-var $author$project$Game$CustomAction = function (a) {
-	return {$: 'CustomAction', a: a};
 };
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
@@ -5191,7 +5220,7 @@ var $author$project$Game$S = function (a) {
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
 };
-var $author$project$Games$FirstTestGame$Turn = function (a) {
+var $author$project$Game$Turn = function (a) {
 	return {$: 'Turn', a: a};
 };
 var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
@@ -5307,8 +5336,7 @@ var $author$project$Games$FirstTestGame$dialogExamples = _List_fromArray(
 					[
 						$author$project$Game$inc1('start_look_around'),
 						$author$project$Game$Message('You noticed a straw bed'),
-						$author$project$Game$CustomAction(
-						$author$project$Games$FirstTestGame$Turn(7))
+						$author$project$Game$Turn(5)
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
@@ -5597,6 +5625,7 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
+			config: $author$project$Games$FirstTestGame$config,
 			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogExamples),
 			gameState: $author$project$Games$FirstTestGame$exampleGameState
 		},
@@ -6050,6 +6079,22 @@ var $author$project$Game$getMaybeGameValue = F2(
 			return A2($elm$core$Dict$get, counter, gameState.counters);
 		}
 	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Game$getGameValueWithDefault = F2(
+	function (gameValue, gameState) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
+	});
 var $mhoare$elm_stack$Stack$pop = function (_v0) {
 	var stack = _v0.a;
 	if (!stack.b) {
@@ -6068,17 +6113,8 @@ var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
 };
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Game$executeAction = F2(
-	function (dialogActionExecution, gameState) {
+var $author$project$Game$executeAction = F3(
+	function (turnCallback, dialogActionExecution, gameState) {
 		switch (dialogActionExecution.$) {
 			case 'GoAction':
 				var dialogId = dialogActionExecution.a;
@@ -6115,75 +6151,31 @@ var $author$project$Game$executeAction = F2(
 						messages: A2($elm$core$List$cons, msg, gameState.messages)
 					});
 			default:
-				var a = dialogActionExecution.a;
-				return gameState;
-		}
-	});
-var $author$project$Game$getGameValueWithDefault = F2(
-	function (gameValue, gameState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
-	});
-var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Games$FirstTestGame$turnActions = _List_fromArray(
-	[
-		_Utils_Tuple2(
-		1,
-		function (gs) {
-			var _v0 = A2($elm$core$Debug$log, 'Turn passed', '1');
-			return gs;
-		}),
-		_Utils_Tuple2(
-		2,
-		function (gs) {
-			var _v1 = A2($elm$core$Debug$log, 'Even Turn passed', '2');
-			return gs;
-		})
-	]);
-var $author$project$Games$FirstTestGame$executeCustomAction = F2(
-	function (dialogActionExecution, gameState) {
-		if (dialogActionExecution.$ === 'Turn') {
-			var amount = dialogActionExecution.a;
-			var passTurn = F2(
-				function (i, gs) {
-					passTurn:
-					while (true) {
-						if (!i) {
-							return gs;
-						} else {
-							var turn = A2(
+				var t = dialogActionExecution.a;
+				var runTurn = F2(
+					function (left, gs) {
+						runTurn:
+						while (true) {
+							var currentTurn = A2(
 								$author$project$Game$getGameValueWithDefault,
 								$author$project$Game$Counter('turn'),
 								gs);
-							var newGs = A3(
-								$author$project$Game$addCounter,
-								'turn',
-								1,
-								A3(
-									$elm$core$List$foldl,
-									F2(
-										function (_v2, acc) {
-											var t = _v2.a;
-											var fn = _v2.b;
-											return (!A2($elm$core$Basics$modBy, t, turn)) ? fn(acc) : acc;
-										}),
-									gs,
-									$author$project$Games$FirstTestGame$turnActions));
-							var _v1 = A2($elm$core$Debug$log, 'turn', turn);
-							var $temp$i = i - 1,
-								$temp$gs = newGs;
-							i = $temp$i;
-							gs = $temp$gs;
-							continue passTurn;
+							if (!left) {
+								return gs;
+							} else {
+								var $temp$left = left - 1,
+									$temp$gs = A3(
+									$author$project$Game$addCounter,
+									'turn',
+									1,
+									A2(turnCallback, currentTurn, gs));
+								left = $temp$left;
+								gs = $temp$gs;
+								continue runTurn;
+							}
 						}
-					}
-				});
-			return A2(passTurn, amount, gameState);
-		} else {
-			return gameState;
+					});
+				return A2(runTurn, t, gameState);
 		}
 	});
 var $author$project$Main$update = F2(
@@ -6198,16 +6190,7 @@ var $author$project$Main$update = F2(
 					{
 						gameState: A3(
 							$elm$core$List$foldl,
-							F2(
-								function (ac, acc) {
-									if (ac.$ === 'CustomAction') {
-										var custom = ac.a;
-										return A2($author$project$Games$FirstTestGame$executeCustomAction, custom, acc);
-									} else {
-										var x = ac;
-										return A2($author$project$Game$executeAction, x, acc);
-									}
-								}),
+							$author$project$Game$executeAction(model.config.turnCallback),
 							model.gameState,
 							actions)
 					}),

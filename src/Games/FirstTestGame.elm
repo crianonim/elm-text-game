@@ -5,48 +5,28 @@ import Game exposing (..)
 import Stack
 
 
-type FirstActions
-    = Turn Int
-    | Other
+config : GameConfig
+config =
+    { turnCallback = processTurn
+    }
 
 
-executeCustomAction : FirstActions -> GameState -> GameState
-executeCustomAction dialogActionExecution gameState =
-    case dialogActionExecution of
-        Turn amount ->
-            let
-                passTurn : Int -> GameState -> GameState
-                passTurn i gs =
-                    if i == 0 then
-                        gs
+processTurn : Int -> GameState -> GameState
+processTurn turn gameState =
+    let
+        _ =
+            Debug.log "Processing turn " turn
+    in
+    List.foldl
+        (\( t, fn ) acc ->
+            if modBy t turn == 0 then
+                fn acc
 
-                    else
-                        let
-                            turn =
-                                getGameValueWithDefault (Counter "turn") gs
-
-                            _ =
-                                Debug.log "turn" turn
-
-                            newGs =
-                                List.foldl
-                                    (\( t, fn ) acc ->
-                                        if modBy t turn == 0 then
-                                            fn acc
-
-                                        else
-                                            acc
-                                    )
-                                    gs
-                                    turnActions
-                                    |> addCounter "turn" 1
-                        in
-                        passTurn (i - 1) newGs
-            in
-            passTurn amount gameState
-
-        Other ->
-            gameState
+            else
+                acc
+        )
+        gameState
+        turnActions
 
 
 turnActions : List ( Int, GameState -> GameState )
@@ -108,13 +88,13 @@ recipes =
     ]
 
 
-dialogExamples : List (Dialog FirstActions)
+dialogExamples : List Dialog
 dialogExamples =
     [ { id = "start"
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", CustomAction (Turn 7) ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", Turn 5 ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
@@ -136,6 +116,6 @@ dialogExamples =
     ]
 
 
-backOption : DialogOption a
+backOption : DialogOption
 backOption =
     { text = S "Go back", condition = Nothing, action = [ GoBackAction ] }
