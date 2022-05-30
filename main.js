@@ -5188,6 +5188,13 @@ var $author$project$Game$S = function (a) {
 var $author$project$Game$Special = function (a) {
 	return {$: 'Special', a: a};
 };
+var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
+var $author$project$Games$FirstTestGame$backOption = {
+	action: _List_fromArray(
+		[$author$project$Game$GoBackAction]),
+	condition: $elm$core$Maybe$Nothing,
+	text: $author$project$Game$S('Go back')
+};
 var $author$project$Game$inc = F2(
 	function (counter, i) {
 		return A2(
@@ -5256,7 +5263,7 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 				A2($elm$core$List$map, ingredientToString, ingredients)) + ')'))))
 	};
 };
-var $author$project$Game$recipes = _List_fromArray(
+var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
 	[
 		_Utils_Tuple2(
 		'axe',
@@ -5273,7 +5280,7 @@ var $author$project$Game$recipes = _List_fromArray(
 				_Utils_Tuple2('stone', 2)
 			]))
 	]);
-var $author$project$Game$dialogExamples = _List_fromArray(
+var $author$project$Games$FirstTestGame$dialogExamples = _List_fromArray(
 	[
 		{
 		id: 'start',
@@ -5385,7 +5392,8 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Game$S('Go third')
-			}
+			},
+				$author$project$Games$FirstTestGame$backOption
 			]),
 		text: $author$project$Game$S('You\'re at second')
 	},
@@ -5406,7 +5414,10 @@ var $author$project$Game$dialogExamples = _List_fromArray(
 	},
 		{
 		id: 'craft',
-		options: A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Game$recipes),
+		options: _Utils_ap(
+			A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
+			_List_fromArray(
+				[$author$project$Games$FirstTestGame$backOption])),
 		text: $author$project$Game$S('You can craft items')
 	}
 	]);
@@ -5533,7 +5544,7 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
+var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
 			_Utils_Tuple2('turn', 1),
@@ -5547,7 +5558,7 @@ var $author$project$Game$exampleCounters = $elm$core$Dict$fromList(
 			_Utils_Tuple2('start_look_around', 0),
 			_Utils_Tuple2('start_search_bed', 0)
 		]));
-var $author$project$Game$exampleMessages = _List_fromArray(
+var $author$project$Games$FirstTestGame$exampleMessages = _List_fromArray(
 	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
@@ -5559,10 +5570,10 @@ var $mhoare$elm_stack$Stack$push = F2(
 		return $mhoare$elm_stack$Stack$Stack(
 			A2($elm$core$List$cons, item, stack));
 	});
-var $author$project$Game$exampleGameState = {
-	counters: $author$project$Game$exampleCounters,
+var $author$project$Games$FirstTestGame$exampleGameState = {
+	counters: $author$project$Games$FirstTestGame$exampleCounters,
 	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
-	messages: $author$project$Game$exampleMessages
+	messages: $author$project$Games$FirstTestGame$exampleMessages
 };
 var $author$project$Game$listDialogToDictDialog = function (dialogs) {
 	return $elm$core$Dict$fromList(
@@ -5578,8 +5589,8 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Game$dialogExamples),
-			gameState: $author$project$Game$exampleGameState
+			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogExamples),
+			gameState: $author$project$Games$FirstTestGame$exampleGameState
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -6321,7 +6332,6 @@ var $author$project$Game$introText = function (gameState) {
 var $author$project$Main$ClickDialog = function (a) {
 	return {$: 'ClickDialog', a: a};
 };
-var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6339,20 +6349,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $author$project$Main$viewGoBackOption = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Events$onClick(
-			$author$project$Main$ClickDialog(
-				_List_fromArray(
-					[$author$project$Game$GoBackAction]))),
-			$elm$html$Html$Attributes$class('option')
-		]),
-	_List_fromArray(
-		[
-			$elm$html$Html$text('Back')
-		]));
 var $author$project$Main$viewOption = F2(
 	function (gameState, dialogOption) {
 		return A2(
@@ -6397,26 +6393,23 @@ var $author$project$Main$viewDialog = F3(
 					A2(
 					$elm$html$Html$div,
 					_List_Nil,
-					_Utils_ap(
+					A2(
+						$elm$core$List$map,
+						$author$project$Main$viewOption(gameState),
 						A2(
-							$elm$core$List$map,
-							$author$project$Main$viewOption(gameState),
-							A2(
-								$elm$core$List$filter,
-								function (o) {
-									return A2(
-										$elm$core$Maybe$withDefault,
-										true,
-										A2(
-											$elm$core$Maybe$map,
-											function (check) {
-												return A2($author$project$Game$testCondition, check, gameState);
-											},
-											o.condition));
-								},
-								dialog.options)),
-						showGoBack ? _List_fromArray(
-							[$author$project$Main$viewGoBackOption]) : _List_Nil))
+							$elm$core$List$filter,
+							function (o) {
+								return A2(
+									$elm$core$Maybe$withDefault,
+									true,
+									A2(
+										$elm$core$Maybe$map,
+										function (check) {
+											return A2($author$project$Game$testCondition, check, gameState);
+										},
+										o.condition));
+							},
+							dialog.options)))
 				]));
 	});
 var $author$project$Main$viewMessages = function (msgs) {

@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Game exposing (..)
+import Games.FirstTestGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -21,8 +22,8 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { dialogs = listDialogToDictDialog dialogExamples
-      , gameState = exampleGameState
+    ( { dialogs = listDialogToDictDialog TestGame.dialogExamples
+      , gameState = TestGame.exampleGameState
       }
     , Cmd.none
     )
@@ -93,20 +94,9 @@ viewDialog gameState dialog showGoBack =
         , h2 [] [ text <| getText gameState dialog.text ]
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> testCondition check gameState) |> Maybe.withDefault True))
-                ++ (if showGoBack then
-                        [ viewGoBackOption ]
-
-                    else
-                        []
-                   )
         ]
 
 
 viewOption : GameState -> Game.DialogOption -> Html Msg
 viewOption gameState dialogOption =
     div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| getText gameState dialogOption.text ]
-
-
-viewGoBackOption : Html Msg
-viewGoBackOption =
-    div [ onClick <| ClickDialog [ GoBackAction ], class "option" ] [ text "Back" ]

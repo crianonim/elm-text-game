@@ -18,12 +18,6 @@ type GameValue
     | Counter String
 
 
-
---
---type alias GameCheck =
---    ( GameValue, GameTestOpertation )
-
-
 type Condition
     = Predicate GameValue PredicateOp GameValue
     | NOT Condition
@@ -55,16 +49,6 @@ inc1 counter =
 inc : String -> Int -> DialogActionExecution
 inc counter i =
     Inc counter (Const i)
-
-
-
---
---type GameTestOpertation
---    = EQ GameValue
---    | GT GameValue
---    | LT GameValue
---    | NOT GameTestOpertation
---
 
 
 type Text
@@ -219,33 +203,6 @@ introText gameState =
         ]
 
 
-dialogExamples : List Dialog
-dialogExamples =
-    [ { id = "start"
-      , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
-      , options =
-            [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Msg "You noticed a straw bed" ] }
-            , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
-            , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
-            , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
-            ]
-      }
-    , { id = "second"
-      , text = S "You're at second"
-      , options =
-            [ { text = S "Go start", condition = Nothing, action = [ Inc "turn" (Const 1), GoAction "start" ] }
-            , { text = S "Go third", condition = Nothing, action = [ GoAction "third" ] }
-            ]
-      }
-    , { id = "third", text = S "You're at third", options = [ { text = S "Go start", condition = Nothing, action = [ GoAction "start" ] } ] }
-    , { id = "craft"
-      , text = S "You can craft items"
-      , options = List.map recipeToDialogOption recipes
-      }
-    ]
-
-
 recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
 recipeToDialogOption ( crafted, ingredients ) =
     let
@@ -267,44 +224,6 @@ recipeToDialogOption ( crafted, ingredients ) =
     }
 
 
-recipes : List ( String, List ( String, Int ) )
-recipes =
-    [ ( "axe", [ ( "wood", 2 ), ( "stone", 1 ) ] )
-    , ( "pickaxe", [ ( "wood", 2 ), ( "stone", 2 ) ] )
-    ]
-
-
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
-
-
-exampleCounters : Dict String Int
-exampleCounters =
-    [ ( "turn", 1 )
-    , ( "raining", 0 )
-    , ( "killed_dragon", 1 )
-    , ( "money", 40 )
-    , ( "wood", 10 )
-    , ( "stone", 9 )
-    , ( "axe", 0 )
-    , ( "pickaxe", 0 )
-    , ( "start_look_around", 0 )
-    , ( "start_search_bed", 0 )
-    ]
-        |> Dict.fromList
-
-
-exampleGameState : GameState
-exampleGameState =
-    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = exampleMessages }
-
-
-exampleMessages : List String
-exampleMessages =
-    [ "Last one I promise"
-    , "Need more messages to see the scrolling"
-    , "Third message"
-    , "Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice."
-    , "First message test"
-    ]
