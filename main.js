@@ -6119,13 +6119,69 @@ var $author$project$Game$executeAction = F2(
 				return gameState;
 		}
 	});
+var $author$project$Game$getGameValueWithDefault = F2(
+	function (gameValue, gameState) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
+	});
 var $elm$core$Debug$log = _Debug_log;
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Games$FirstTestGame$turnActions = _List_fromArray(
+	[
+		_Utils_Tuple2(
+		1,
+		function (gs) {
+			var _v0 = A2($elm$core$Debug$log, 'Turn passed', '1');
+			return gs;
+		}),
+		_Utils_Tuple2(
+		2,
+		function (gs) {
+			var _v1 = A2($elm$core$Debug$log, 'Even Turn passed', '2');
+			return gs;
+		})
+	]);
 var $author$project$Games$FirstTestGame$executeCustomAction = F2(
 	function (dialogActionExecution, gameState) {
 		if (dialogActionExecution.$ === 'Turn') {
 			var amount = dialogActionExecution.a;
-			var _v1 = A2($elm$core$Debug$log, 'TURN ADDED', amount);
-			return A3($author$project$Game$addCounter, 'turn', amount, gameState);
+			var passTurn = F2(
+				function (i, gs) {
+					passTurn:
+					while (true) {
+						if (!i) {
+							return gs;
+						} else {
+							var turn = A2(
+								$author$project$Game$getGameValueWithDefault,
+								$author$project$Game$Counter('turn'),
+								gs);
+							var newGs = A3(
+								$author$project$Game$addCounter,
+								'turn',
+								1,
+								A3(
+									$elm$core$List$foldl,
+									F2(
+										function (_v2, acc) {
+											var t = _v2.a;
+											var fn = _v2.b;
+											return (!A2($elm$core$Basics$modBy, t, turn)) ? fn(acc) : acc;
+										}),
+									gs,
+									$author$project$Games$FirstTestGame$turnActions));
+							var _v1 = A2($elm$core$Debug$log, 'turn', turn);
+							var $temp$i = i - 1,
+								$temp$gs = newGs;
+							i = $temp$i;
+							gs = $temp$gs;
+							continue passTurn;
+						}
+					}
+				});
+			return A2(passTurn, amount, gameState);
 		} else {
 			return gameState;
 		}
@@ -6277,13 +6333,6 @@ var $elm$core$List$filter = F2(
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
-var $author$project$Game$getGameValueWithDefault = F2(
-	function (gameValue, gameState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
-	});
 var $author$project$Game$getText = F2(
 	function (gameState, text) {
 		getText:

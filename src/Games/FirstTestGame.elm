@@ -15,13 +15,59 @@ executeCustomAction dialogActionExecution gameState =
     case dialogActionExecution of
         Turn amount ->
             let
-                _ =
-                    Debug.log "TURN ADDED" amount
+                passTurn : Int -> GameState -> GameState
+                passTurn i gs =
+                    if i == 0 then
+                        gs
+
+                    else
+                        let
+                            turn =
+                                getGameValueWithDefault (Counter "turn") gs
+
+                            _ =
+                                Debug.log "turn" turn
+
+                            newGs =
+                                List.foldl
+                                    (\( t, fn ) acc ->
+                                        if modBy t turn == 0 then
+                                            fn acc
+
+                                        else
+                                            acc
+                                    )
+                                    gs
+                                    turnActions
+                                    |> addCounter "turn" 1
+                        in
+                        passTurn (i - 1) newGs
             in
-            addCounter "turn" amount gameState
+            passTurn amount gameState
 
         Other ->
             gameState
+
+
+turnActions : List ( Int, GameState -> GameState )
+turnActions =
+    [ ( 1
+      , \gs ->
+            let
+                _ =
+                    Debug.log "Turn passed" "1"
+            in
+            gs
+      )
+    , ( 2
+      , \gs ->
+            let
+                _ =
+                    Debug.log "Even Turn passed" "2"
+            in
+            gs
+      )
+    ]
 
 
 exampleCounters : Dict String Int
