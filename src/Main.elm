@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Dict
 import Game exposing (..)
-import Games.FirstTestGame as TestGame
+import Games.UnderSeaGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -26,7 +26,7 @@ init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogs
       , gameState = TestGame.initialGameState
       , config = TestGame.config
-      , isDebug = True
+      , isDebug = False
       }
     , Cmd.none
     )

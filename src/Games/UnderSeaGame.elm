@@ -39,6 +39,27 @@ dialogs =
             , { text = S "Investigate the grotto with the round entrance", condition = Nothing, action = [ GoAction "p9" ] }
             ]
       }
+    , { id = "p6"
+      , text = S """
+      Your sea suit will protect you from the intense pressures of the deep. It is a tight fit and takes you some time to put it on. Finally you slip from the airlock of the Seeker and stand on the ocean floor. It is a strange and marvelous world where your every move is slowed down. You begin to explore with your special hand-held searchlight. You examine the ledge by the canyon.
+      Suddenly, a school of bright yellow angel fish dart by, almost brushing you. What made them move so fast? Are they being chased?
+      Then you see it. The Seeker is in the grips of a huge sea monster. It is similar to a squid, but it is enormous. The Seeker is just a toy in its long, powerful tentacles. You seek shelter behind a rock formation. You know the spear gun you carry will be useless against this monster. It looks as though it will destroy the Seeker. Fish of all sizes huddle with you in an attempt to escape the monster.
+      """
+      , options =
+            [ { text = S "Stay hidden close to the Seeker", condition = Nothing, action = [ GoAction "p10" ] }
+            , { text = S "Try to escape in the hope that rescuers will see you", condition = Nothing, action = [ GoAction "p12" ] }
+            ]
+      }
+    , { id = "p8"
+      , text = S """
+            Carefully, you maneuver the Seeker between the walls of the canyon.
+            On the floor of the canyon, you discover a large round hole out of which flow the large bubbles. The Seeker is equipped with scientific equipment to analyze the bubbles. It also has sonar equipment that can measure the depth of any hole.
+            """
+      , options =
+            [ { text = S "Analyze the bubbles", condition = Nothing, action = [ GoAction "p11" ] }
+            , { text = S "Take sonar readings", condition = Nothing, action = [ GoAction "p15" ] }
+            ]
+      }
     ]
 
 
