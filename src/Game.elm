@@ -1,8 +1,6 @@
 module Game exposing (..)
 
 import Dict exposing (Dict)
-import Html exposing (Html, div, p, text)
-import Html.Attributes exposing (class)
 import Stack exposing (Stack)
 
 
@@ -15,6 +13,7 @@ type alias GameState =
 
 type alias GameConfig =
     { turnCallback : Int -> GameState -> GameState
+    , showMessages : Bool
     }
 
 
@@ -218,14 +217,6 @@ executeAction turnCallback dialogActionExecution gameState =
                             )
             in
             runTurn t gameState
-
-
-introText : GameState -> Html a
-introText gameState =
-    div [ class "intro" ]
-        [ p [] [ text <| "It is now " ++ (Dict.get "turn" gameState.counters |> Maybe.map String.fromInt |> Maybe.withDefault " - BAD TURN -") ++ " turn. " ]
-        , p [] (Dict.toList gameState.counters |> List.map (\( k, v ) -> text <| k ++ ":" ++ String.fromInt v ++ ", "))
-        ]
 
 
 recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption

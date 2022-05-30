@@ -8,6 +8,7 @@ import Stack
 config : GameConfig
 config =
     { turnCallback = processTurn
+    , showMessages = True
     }
 
 
@@ -66,8 +67,8 @@ exampleCounters =
         |> Dict.fromList
 
 
-exampleGameState : GameState
-exampleGameState =
+initialGameState : GameState
+initialGameState =
     { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = exampleMessages }
 
 
@@ -88,8 +89,8 @@ recipes =
     ]
 
 
-dialogExamples : List Dialog
-dialogExamples =
+dialogs : List Dialog
+dialogs =
     [ { id = "start"
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =

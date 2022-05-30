@@ -8,6 +8,7 @@ import Stack
 config : GameConfig
 config =
     { turnCallback = \_ gs -> gs
+    , showMessages = False
     }
 
 

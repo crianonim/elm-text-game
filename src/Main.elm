@@ -1,8 +1,9 @@
 module Main exposing (main)
 
 import Browser
+import Dict
 import Game exposing (..)
-import Games.UnderSeaGame as TestGame
+import Games.FirstTestGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -25,6 +26,7 @@ init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogs
       , gameState = TestGame.initialGameState
       , config = TestGame.config
+      , isDebug = True
       }
     , Cmd.none
     )
@@ -48,6 +50,7 @@ type alias Model =
     { dialogs : Game.Dialogs
     , gameState : GameState
     , config : GameConfig
+    , isDebug : Bool
     }
 
 
@@ -83,7 +86,16 @@ view model =
     in
     div [ class "container" ]
         [ viewDialog model.gameState dialog
-        , viewMessages model.gameState.messages
+        , if model.config.showMessages then
+            viewMessages model.gameState.messages
+
+          else
+            text ""
+        , if model.isDebug then
+            viewDebug model.gameState
+
+          else
+            text ""
         ]
 
 
@@ -96,10 +108,16 @@ viewMessages msgs =
 viewDialog : GameState -> Game.Dialog -> Html Msg
 viewDialog gameState dialog =
     div [ class "dialog" ]
-        [ p [] [ introText gameState ]
-        , h2 [] [ text <| getText gameState dialog.text ]
+        [ p [] [ text <| getText gameState dialog.text ]
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> testCondition check gameState) |> Maybe.withDefault True))
+        ]
+
+
+viewDebug : GameState -> Html a
+viewDebug gameState =
+    div [ class "status" ]
+        [ p [] (Dict.toList gameState.counters |> List.map (\( k, v ) -> text <| k ++ ":" ++ String.fromInt v ++ ", "))
         ]
 
 
