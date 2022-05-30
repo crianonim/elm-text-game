@@ -5159,163 +5159,19 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Games$FirstTestGame$turnActions = _List_fromArray(
-	[
-		_Utils_Tuple2(
-		1,
-		function (gs) {
-			var _v0 = A2($elm$core$Debug$log, 'Turn passed', '1');
-			return gs;
-		}),
-		_Utils_Tuple2(
-		2,
-		function (gs) {
-			var _v1 = A2($elm$core$Debug$log, 'Even Turn passed', '2');
+var $author$project$Games$UnderSeaGame$config = {
+	turnCallback: F2(
+		function (_v0, gs) {
 			return gs;
 		})
-	]);
-var $author$project$Games$FirstTestGame$processTurn = F2(
-	function (turn, gameState) {
-		var _v0 = A2($elm$core$Debug$log, 'Processing turn ', turn);
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v1, acc) {
-					var t = _v1.a;
-					var fn = _v1.b;
-					return (!A2($elm$core$Basics$modBy, t, turn)) ? fn(acc) : acc;
-				}),
-			gameState,
-			$author$project$Games$FirstTestGame$turnActions);
-	});
-var $author$project$Games$FirstTestGame$config = {turnCallback: $author$project$Games$FirstTestGame$processTurn};
-var $author$project$Game$AND = function (a) {
-	return {$: 'AND', a: a};
-};
-var $author$project$Game$Conditional = F2(
-	function (a, b) {
-		return {$: 'Conditional', a: a, b: b};
-	});
-var $author$project$Game$Const = function (a) {
-	return {$: 'Const', a: a};
-};
-var $author$project$Game$Counter = function (a) {
-	return {$: 'Counter', a: a};
 };
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
-var $author$project$Game$Inc = F2(
-	function (a, b) {
-		return {$: 'Inc', a: a, b: b};
-	});
-var $author$project$Game$Message = function (a) {
-	return {$: 'Message', a: a};
-};
 var $author$project$Game$S = function (a) {
 	return {$: 'S', a: a};
 };
-var $author$project$Game$Special = function (a) {
-	return {$: 'Special', a: a};
-};
-var $author$project$Game$Turn = function (a) {
-	return {$: 'Turn', a: a};
-};
-var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
-var $author$project$Games$FirstTestGame$backOption = {
-	action: _List_fromArray(
-		[$author$project$Game$GoBackAction]),
-	condition: $elm$core$Maybe$Nothing,
-	text: $author$project$Game$S('Go back')
-};
-var $author$project$Game$inc = F2(
-	function (counter, i) {
-		return A2(
-			$author$project$Game$Inc,
-			counter,
-			$author$project$Game$Const(i));
-	});
-var $author$project$Game$inc1 = function (counter) {
-	return A2($author$project$Game$inc, counter, 1);
-};
-var $author$project$Game$NOT = function (a) {
-	return {$: 'NOT', a: a};
-};
-var $author$project$Game$EQ = {$: 'EQ'};
-var $author$project$Game$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
-var $author$project$Game$zero = function (gameValue) {
-	return A3(
-		$author$project$Game$Predicate,
-		gameValue,
-		$author$project$Game$EQ,
-		$author$project$Game$Const(0));
-};
-var $author$project$Game$nonZero = function (gameValue) {
-	return $author$project$Game$NOT(
-		$author$project$Game$zero(gameValue));
-};
-var $author$project$Game$LT = {$: 'LT'};
-var $author$project$Game$recipeToDialogOption = function (_v0) {
-	var crafted = _v0.a;
-	var ingredients = _v0.b;
-	var ingredientToString = function (_v3) {
-		var item = _v3.a;
-		var amount = _v3.b;
-		return item + (' ' + $elm$core$String$fromInt(amount));
-	};
-	var ingredientToCondition = function (_v2) {
-		var item = _v2.a;
-		var amount = _v2.b;
-		return $author$project$Game$NOT(
-			A3(
-				$author$project$Game$Predicate,
-				$author$project$Game$Counter(item),
-				$author$project$Game$LT,
-				$author$project$Game$Const(amount)));
-	};
-	var ingredientToAction = function (_v1) {
-		var item = _v1.a;
-		var amount = _v1.b;
-		return A2($author$project$Game$inc, item, 0 - amount);
-	};
-	return {
-		action: A2(
-			$elm$core$List$cons,
-			A2($author$project$Game$inc, crafted, 1),
-			A2($elm$core$List$map, ingredientToAction, ingredients)),
-		condition: $elm$core$Maybe$Just(
-			$author$project$Game$AND(
-				A2($elm$core$List$map, ingredientToCondition, ingredients))),
-		text: $author$project$Game$S(
-			'Craft ' + (crafted + (' (' + (A2(
-				$elm$core$String$join,
-				', ',
-				A2($elm$core$List$map, ingredientToString, ingredients)) + ')'))))
-	};
-};
-var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
-	[
-		_Utils_Tuple2(
-		'axe',
-		_List_fromArray(
-			[
-				_Utils_Tuple2('wood', 2),
-				_Utils_Tuple2('stone', 1)
-			])),
-		_Utils_Tuple2(
-		'pickaxe',
-		_List_fromArray(
-			[
-				_Utils_Tuple2('wood', 2),
-				_Utils_Tuple2('stone', 2)
-			]))
-	]);
-var $author$project$Games$FirstTestGame$dialogExamples = _List_fromArray(
+var $author$project$Games$UnderSeaGame$dialogs = _List_fromArray(
 	[
 		{
 		id: 'start',
@@ -5324,141 +5180,63 @@ var $author$project$Games$FirstTestGame$dialogExamples = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('second')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_look_around'))),
-				text: $author$project$Game$S('Go through the exit')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Game$inc1('start_look_around'),
-						$author$project$Game$Message('You noticed a straw bed'),
-						$author$project$Game$Turn(5)
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
-						$author$project$Game$Counter('start_look_around'))),
-				text: $author$project$Game$S('Look around')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Game$inc1('start_search_bed')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Game$AND(
-						_List_fromArray(
-							[
-								$author$project$Game$zero(
-								$author$project$Game$Counter('start_search_bed')),
-								$author$project$Game$nonZero(
-								$author$project$Game$Counter('start_look_around'))
-							]))),
-				text: $author$project$Game$S('Search the bed')
-			},
-				{
-				action: _List_fromArray(
-					[
-						A2(
-						$author$project$Game$Inc,
-						'money',
-						$author$project$Game$Counter('turn')),
-						A2(
-						$author$project$Game$Inc,
-						'money',
-						$author$project$Game$Counter('wood')),
-						$author$project$Game$GoAction('third')
+						$author$project$Game$GoAction('p6')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Spend money')
+				text: $author$project$Game$S('Explore the ledge where the Seeker has come to rest')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('craft')
+						$author$project$Game$GoAction('p5')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Craft')
+				text: $author$project$Game$S('Cut loose from the Maray and dive with the Seeker into the canyon in the ocean floor')
 			}
 			]),
-		text: $author$project$Game$Special(
-			_List_fromArray(
-				[
-					$author$project$Game$S('You\'re in a dark room. '),
-					A2(
-					$author$project$Game$Conditional,
-					$author$project$Game$zero(
-						$author$project$Game$Counter('start_look_around')),
-					$author$project$Game$S('You see nothing. ')),
-					A2(
-					$author$project$Game$Conditional,
-					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_look_around')),
-					$author$project$Game$S('You see a straw bed. ')),
-					A2(
-					$author$project$Game$Conditional,
-					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_search_bed')),
-					$author$project$Game$S('There is a rusty key among the straw. '))
-				]))
+		text: $author$project$Game$S('\n\n    You are an underwater explorer. You are leaving to explore the deepest oceans. You must find the lost city of Atlantis. This is your most challenging assignment.\n    It is morning and the sun pushes up on the horizon. The sea is calm. You climb into the narrow pilot\'s compartment of the underwater vessel Seeker with your special gear. The crew of the research vessel Maray screws down the hatch clamps. Now begins the plunge into the depths of the ocean. The Seeker crew begins lowering by a strong, but thin cable. Within minutes, you are so deep in the ocean that little light filters down to you. The silence is eerie as the Seeker slips deeper and deeper. You peer out the thick glass porthole and see fish drifting past, sometimes stopping to look at you—an intruder from another world.\n     Now the cable attaching you to Maray is extended almost to its limit. You have come to rest on a ledge near the canyon in the ocean floor that supposedly leads to the lost city of Atlantis.\n    You have a special sea suit that will protect you from the intense pressure of the deep if you choose to walk about on the sea bottom. You can cut loose from the cable if you wish because the\n    Seeker is self-propelled. You are now in another world.\n    ')
 	},
 		{
-		id: 'second',
+		id: 'p5',
 		options: _List_fromArray(
 			[
 				{
 				action: _List_fromArray(
 					[
-						A2(
-						$author$project$Game$Inc,
-						'turn',
-						$author$project$Game$Const(1)),
-						$author$project$Game$GoAction('start')
+						$author$project$Game$GoAction('p8')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go start')
+				text: $author$project$Game$S('Investigate the bubbles')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('third')
+						$author$project$Game$GoAction('p9')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go third')
-			},
-				$author$project$Games$FirstTestGame$backOption
-			]),
-		text: $author$project$Game$S('You\'re at second')
-	},
-		{
-		id: 'third',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Game$GoAction('start')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go start')
+				text: $author$project$Game$S('Investigate the grotto with the round entrance')
 			}
 			]),
-		text: $author$project$Game$S('You\'re at third')
-	},
-		{
-		id: 'craft',
-		options: _Utils_ap(
-			A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
-			_List_fromArray(
-				[$author$project$Games$FirstTestGame$backOption])),
-		text: $author$project$Game$S('You can craft items')
+		text: $author$project$Game$S('\n      You radio a status report to the Moray and tell them that you are going to cast off from the line and descend under your own power. Your plan is approved and you cast off your line. Now you are on your own. The Seeker slips noiselessly into the undersea canyon.\n      As you drop into the canyon, you turn on the Seeker\'s powerful searchlight. Straight ahead is a dark wall covered with a strange type of barnacle growth. To the left (port) side you see what appears to be a grotto. The entrance is perfectly\n      round, as if it had been cut by human hands. Lantern fish give off a pale, greenish light. To the right (starboard) side of the Seeker you see bub- bles rising steadily from the floor of the canyon.\n      ')
 	}
 	]);
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $mhoare$elm_stack$Stack$Stack = function (a) {
+	return {$: 'Stack', a: a};
+};
+var $mhoare$elm_stack$Stack$initialise = $mhoare$elm_stack$Stack$Stack(_List_Nil);
+var $mhoare$elm_stack$Stack$push = F2(
+	function (item, _v0) {
+		var stack = _v0.a;
+		return $mhoare$elm_stack$Stack$Stack(
+			A2($elm$core$List$cons, item, stack));
+	});
+var $author$project$Games$UnderSeaGame$initialGameState = {
+	counters: $elm$core$Dict$empty,
+	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
+	messages: _List_Nil
+};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5580,37 +5358,6 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2('turn', 1),
-			_Utils_Tuple2('raining', 0),
-			_Utils_Tuple2('killed_dragon', 1),
-			_Utils_Tuple2('money', 40),
-			_Utils_Tuple2('wood', 10),
-			_Utils_Tuple2('stone', 9),
-			_Utils_Tuple2('axe', 0),
-			_Utils_Tuple2('pickaxe', 0),
-			_Utils_Tuple2('start_look_around', 0),
-			_Utils_Tuple2('start_search_bed', 0)
-		]));
-var $author$project$Games$FirstTestGame$exampleMessages = _List_fromArray(
-	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
-var $mhoare$elm_stack$Stack$Stack = function (a) {
-	return {$: 'Stack', a: a};
-};
-var $mhoare$elm_stack$Stack$initialise = $mhoare$elm_stack$Stack$Stack(_List_Nil);
-var $mhoare$elm_stack$Stack$push = F2(
-	function (item, _v0) {
-		var stack = _v0.a;
-		return $mhoare$elm_stack$Stack$Stack(
-			A2($elm$core$List$cons, item, stack));
-	});
-var $author$project$Games$FirstTestGame$exampleGameState = {
-	counters: $author$project$Games$FirstTestGame$exampleCounters,
-	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
-	messages: $author$project$Games$FirstTestGame$exampleMessages
-};
 var $author$project$Game$listDialogToDictDialog = function (dialogs) {
 	return $elm$core$Dict$fromList(
 		A2(
@@ -5625,9 +5372,9 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			config: $author$project$Games$FirstTestGame$config,
-			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogExamples),
-			gameState: $author$project$Games$FirstTestGame$exampleGameState
+			config: $author$project$Games$UnderSeaGame$config,
+			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Games$UnderSeaGame$dialogs),
+			gameState: $author$project$Games$UnderSeaGame$initialGameState
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5635,6 +5382,9 @@ var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Game$Counter = function (a) {
+	return {$: 'Counter', a: a};
 };
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -6197,6 +5947,17 @@ var $author$project$Main$update = F2(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Game$Const = function (a) {
+	return {$: 'Const', a: a};
+};
+var $author$project$Game$LT = {$: 'LT'};
+var $author$project$Game$NOT = function (a) {
+	return {$: 'NOT', a: a};
+};
+var $author$project$Game$Predicate = F3(
+	function (a, b, c) {
+		return {$: 'Predicate', a: a, b: b, c: c};
+	});
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -6219,6 +5980,7 @@ var $author$project$Game$getDialog = F2(
 			$author$project$Game$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {

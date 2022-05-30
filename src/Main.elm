@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Game exposing (..)
-import Games.FirstTestGame as TestGame
+import Games.UnderSeaGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -22,8 +22,8 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { dialogs = listDialogToDictDialog TestGame.dialogExamples
-      , gameState = TestGame.exampleGameState
+    ( { dialogs = listDialogToDictDialog TestGame.dialogs
+      , gameState = TestGame.initialGameState
       , config = TestGame.config
       }
     , Cmd.none
