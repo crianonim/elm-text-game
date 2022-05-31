@@ -61,6 +61,7 @@ exampleCounters =
     , ( "money", 40 )
     , ( "wood", 10 )
     , ( "stone", 9 )
+    , ( "sticks", 0 )
     , ( "axe", 0 )
     , ( "pickaxe", 0 )
     , ( "start_look_around", 0 )
@@ -101,10 +102,11 @@ dialogs =
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", Turn 5, Rnd "rrr" 1 5 ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Rnd "rrr" 1 5 ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
+            , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
             ]
       }
     , { id = "second"
@@ -119,6 +121,23 @@ dialogs =
     , { id = "craft"
       , text = S "You can craft items"
       , options = List.map recipeToDialogOption recipes ++ [ backOption ]
+      }
+    , { id = "forest"
+      , text = S "Has trees"
+      , options =
+            [ { text = S "Forage"
+              , condition = Nothing
+              , action =
+                    [ Rnd "rnd_wood" 0 5
+                    , Inc "wood" (Counter "rnd_wood")
+                    , Rnd "rnd_sticks" 0 5
+                    , Inc "sticks" (Counter "rnd_sticks")
+                    , Turn 4
+                    , Message <| Special [ S "You found ", GameValueText (Counter "rnd_wood"), S " of wood and ", GameValueText (Counter "rnd_sticks"), S " of sticks." ]
+                    ]
+              }
+            , backOption
+            ]
       }
     ]
 

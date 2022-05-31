@@ -5290,6 +5290,9 @@ var $author$project$Game$Const = function (a) {
 var $author$project$Game$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
+var $author$project$Game$GameValueText = function (a) {
+	return {$: 'GameValueText', a: a};
+};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
@@ -5425,7 +5428,8 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$Game$inc1('start_look_around'),
-						$author$project$Game$Message('You noticed a straw bed'),
+						$author$project$Game$Message(
+						$author$project$Game$S('You noticed a straw bed')),
 						$author$project$Game$Turn(5),
 						A3($author$project$Game$Rnd, 'rrr', 1, 5)
 					]),
@@ -5473,6 +5477,14 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Game$S('Craft')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('forest')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Game$S('Forest')
 			}
 			]),
 		text: $author$project$Game$Special(
@@ -5546,6 +5558,44 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			_List_fromArray(
 				[$author$project$Games$FirstTestGame$backOption])),
 		text: $author$project$Game$S('You can craft items')
+	},
+		{
+		id: 'forest',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						A3($author$project$Game$Rnd, 'rnd_wood', 0, 5),
+						A2(
+						$author$project$Game$Inc,
+						'wood',
+						$author$project$Game$Counter('rnd_wood')),
+						A3($author$project$Game$Rnd, 'rnd_sticks', 0, 5),
+						A2(
+						$author$project$Game$Inc,
+						'sticks',
+						$author$project$Game$Counter('rnd_sticks')),
+						$author$project$Game$Turn(4),
+						$author$project$Game$Message(
+						$author$project$Game$Special(
+							_List_fromArray(
+								[
+									$author$project$Game$S('You found '),
+									$author$project$Game$GameValueText(
+									$author$project$Game$Counter('rnd_wood')),
+									$author$project$Game$S(' of wood and '),
+									$author$project$Game$GameValueText(
+									$author$project$Game$Counter('rnd_sticks')),
+									$author$project$Game$S(' of sticks.')
+								])))
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Game$S('Forage')
+			},
+				$author$project$Games$FirstTestGame$backOption
+			]),
+		text: $author$project$Game$S('Has trees')
 	}
 	]);
 var $elm$random$Random$Generate = function (a) {
@@ -5865,6 +5915,7 @@ var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromLis
 			_Utils_Tuple2('money', 40),
 			_Utils_Tuple2('wood', 10),
 			_Utils_Tuple2('stone', 9),
+			_Utils_Tuple2('sticks', 0),
 			_Utils_Tuple2('axe', 0),
 			_Utils_Tuple2('pickaxe', 0),
 			_Utils_Tuple2('start_look_around', 0),
@@ -6371,6 +6422,113 @@ var $author$project$Game$getGameValueWithDefault = F2(
 			0,
 			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
 	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$Game$testCondition = F2(
+	function (condition, gameState) {
+		var testPredicate = F3(
+			function (x, predicate, y) {
+				var comp = function () {
+					switch (predicate.$) {
+						case 'LT':
+							return $elm$core$Basics$lt;
+						case 'EQ':
+							return $elm$core$Basics$eq;
+						default:
+							return $elm$core$Basics$gt;
+					}
+				}();
+				return A2(
+					$elm$core$Maybe$withDefault,
+					false,
+					A3(
+						$elm$core$Maybe$map2,
+						comp,
+						A2($author$project$Game$getMaybeGameValue, x, gameState),
+						A2($author$project$Game$getMaybeGameValue, y, gameState)));
+			});
+		switch (condition.$) {
+			case 'Predicate':
+				var v1 = condition.a;
+				var ops = condition.b;
+				var v2 = condition.c;
+				return A3(testPredicate, v1, ops, v2);
+			case 'NOT':
+				var innerTest = condition.a;
+				return !A2($author$project$Game$testCondition, innerTest, gameState);
+			case 'AND':
+				var conditions = condition.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (c, acc) {
+							return A2($author$project$Game$testCondition, c, gameState) && acc;
+						}),
+					true,
+					conditions);
+			default:
+				var conditions = condition.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (c, acc) {
+							return A2($author$project$Game$testCondition, c, gameState) || acc;
+						}),
+					false,
+					conditions);
+		}
+	});
+var $author$project$Game$getText = F2(
+	function (gameState, text) {
+		getText:
+		while (true) {
+			switch (text.$) {
+				case 'S':
+					var string = text.a;
+					return string;
+				case 'Special':
+					var specialTexts = text.a;
+					return $elm$core$String$concat(
+						A2(
+							$elm$core$List$map,
+							$author$project$Game$getText(gameState),
+							specialTexts));
+				case 'Conditional':
+					var gameCheck = text.a;
+					var conditionalText = text.b;
+					if (A2($author$project$Game$testCondition, gameCheck, gameState)) {
+						var $temp$gameState = gameState,
+							$temp$text = conditionalText;
+						gameState = $temp$gameState;
+						text = $temp$text;
+						continue getText;
+					} else {
+						return '';
+					}
+				default:
+					var gameValue = text.a;
+					return $elm$core$String$fromInt(
+						A2($author$project$Game$getGameValueWithDefault, gameValue, gameState));
+			}
+		}
+	});
 var $mhoare$elm_stack$Stack$pop = function (_v0) {
 	var stack = _v0.a;
 	if (!stack.b) {
@@ -6432,7 +6590,10 @@ var $author$project$Game$executeAction = F3(
 				return _Utils_update(
 					gameState,
 					{
-						messages: A2($elm$core$List$cons, msg, gameState.messages)
+						messages: A2(
+							$elm$core$List$cons,
+							A2($author$project$Game$getText, gameState, msg),
+							gameState.messages)
 					});
 			case 'Turn':
 				var t = dialogActionExecution.a;
@@ -6535,76 +6696,6 @@ var $author$project$Game$getDialog = F2(
 			$author$project$Game$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
-var $elm$core$Basics$not = _Basics_not;
-var $author$project$Game$testCondition = F2(
-	function (condition, gameState) {
-		var testPredicate = F3(
-			function (x, predicate, y) {
-				var comp = function () {
-					switch (predicate.$) {
-						case 'LT':
-							return $elm$core$Basics$lt;
-						case 'EQ':
-							return $elm$core$Basics$eq;
-						default:
-							return $elm$core$Basics$gt;
-					}
-				}();
-				return A2(
-					$elm$core$Maybe$withDefault,
-					false,
-					A3(
-						$elm$core$Maybe$map2,
-						comp,
-						A2($author$project$Game$getMaybeGameValue, x, gameState),
-						A2($author$project$Game$getMaybeGameValue, y, gameState)));
-			});
-		switch (condition.$) {
-			case 'Predicate':
-				var v1 = condition.a;
-				var ops = condition.b;
-				var v2 = condition.c;
-				return A3(testPredicate, v1, ops, v2);
-			case 'NOT':
-				var innerTest = condition.a;
-				return !A2($author$project$Game$testCondition, innerTest, gameState);
-			case 'AND':
-				var conditions = condition.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (c, acc) {
-							return A2($author$project$Game$testCondition, c, gameState) && acc;
-						}),
-					true,
-					conditions);
-			default:
-				var conditions = condition.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (c, acc) {
-							return A2($author$project$Game$testCondition, c, gameState) || acc;
-						}),
-					false,
-					conditions);
-		}
-	});
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$List$head = function (list) {
@@ -6654,43 +6745,6 @@ var $elm$core$List$filter = F2(
 				}),
 			_List_Nil,
 			list);
-	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$Game$getText = F2(
-	function (gameState, text) {
-		getText:
-		while (true) {
-			switch (text.$) {
-				case 'S':
-					var string = text.a;
-					return string;
-				case 'Special':
-					var specialTexts = text.a;
-					return $elm$core$String$concat(
-						A2(
-							$elm$core$List$map,
-							$author$project$Game$getText(gameState),
-							specialTexts));
-				case 'Conditional':
-					var gameCheck = text.a;
-					var conditionalText = text.b;
-					if (A2($author$project$Game$testCondition, gameCheck, gameState)) {
-						var $temp$gameState = gameState,
-							$temp$text = conditionalText;
-						gameState = $temp$gameState;
-						text = $temp$text;
-						continue getText;
-					} else {
-						return '';
-					}
-				default:
-					var gameValue = text.a;
-					return $elm$core$String$fromInt(
-						A2($author$project$Game$getGameValueWithDefault, gameValue, gameState));
-			}
-		}
 	});
 var $author$project$Main$ClickDialog = function (a) {
 	return {$: 'ClickDialog', a: a};

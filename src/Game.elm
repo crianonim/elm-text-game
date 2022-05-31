@@ -154,7 +154,7 @@ type DialogActionExecution
     = GoAction DialogId
     | GoBackAction
     | Inc String GameValue
-    | Message String
+    | Message Text
     | Turn Int
     | Rnd String Int Int
     | DoNothing
@@ -205,7 +205,7 @@ executeAction turnCallback dialogActionExecution gameState =
             gameState
 
         Message msg ->
-            { gameState | messages = msg :: gameState.messages }
+            { gameState | messages = getText gameState msg :: gameState.messages }
 
         Turn t ->
             let
