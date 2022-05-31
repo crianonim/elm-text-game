@@ -2,6 +2,7 @@ module Games.UnderSeaGame exposing (..)
 
 import Dict
 import Game exposing (..)
+import Random
 import Stack
 
 
@@ -65,4 +66,4 @@ dialogs =
 
 initialGameState : GameState
 initialGameState =
-    { counters = Dict.empty, dialogStack = Stack.push "start" Stack.initialise, messages = [] }
+    { counters = Dict.empty, dialogStack = Stack.push "start" Stack.initialise, messages = [], rnd = Random.initialSeed 666 }

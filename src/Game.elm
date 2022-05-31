@@ -1,6 +1,7 @@
 module Game exposing (..)
 
 import Dict exposing (Dict)
+import Random
 import Stack exposing (Stack)
 
 
@@ -8,6 +9,7 @@ type alias GameState =
     { counters : Dict String Int
     , dialogStack : Stack DialogId
     , messages : List String
+    , rnd : Random.Seed
     }
 
 
@@ -102,6 +104,11 @@ addCounter counter add gameState =
     { gameState | counters = Dict.update counter (\value -> Maybe.map (\v -> v + add) value) gameState.counters }
 
 
+setCounter : String -> Int -> GameState -> GameState
+setCounter counter x gameState =
+    { gameState | counters = Dict.insert counter x gameState.counters }
+
+
 testCondition : Condition -> GameState -> Bool
 testCondition condition gameState =
     let
@@ -149,6 +156,7 @@ type DialogActionExecution
     | Inc String GameValue
     | Message String
     | Turn Int
+    | Rnd String Int Int
     | DoNothing
 
 
@@ -217,6 +225,21 @@ executeAction turnCallback dialogActionExecution gameState =
                             )
             in
             runTurn t gameState
+
+        Rnd counter x y ->
+            let
+                ( result, newSeed ) =
+                    Random.step (Random.int x y) gameState.rnd
+
+                newState =
+                    { gameState | rnd = newSeed }
+            in
+            setCounter counter result newState
+
+
+setRndSeed : Random.Seed -> GameState -> GameState
+setRndSeed seed gameState =
+    { gameState | rnd = seed }
 
 
 recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption

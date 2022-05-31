@@ -2,6 +2,7 @@ module Games.FirstTestGame exposing (..)
 
 import Dict exposing (Dict)
 import Game exposing (..)
+import Random
 import Stack
 
 
@@ -54,6 +55,7 @@ turnActions =
 exampleCounters : Dict String Int
 exampleCounters =
     [ ( "turn", 1 )
+    , ( "rnd", 0 )
     , ( "raining", 0 )
     , ( "killed_dragon", 1 )
     , ( "money", 40 )
@@ -69,7 +71,11 @@ exampleCounters =
 
 initialGameState : GameState
 initialGameState =
-    { counters = exampleCounters, dialogStack = Stack.push "start" Stack.initialise, messages = exampleMessages }
+    { counters = exampleCounters
+    , dialogStack = Stack.push "start" Stack.initialise
+    , messages = exampleMessages
+    , rnd = Random.initialSeed 666
+    }
 
 
 exampleMessages : List String
@@ -95,7 +101,7 @@ dialogs =
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", Turn 5 ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message "You noticed a straw bed", Turn 5, Rnd "rrr" 1 5 ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
             , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }

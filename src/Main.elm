@@ -3,11 +3,12 @@ module Main exposing (main)
 import Browser
 import Dict
 import Game exposing (..)
-import Games.UnderSeaGame as TestGame
+import Games.FirstTestGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
+import Random
 import Stack exposing (Stack)
 
 
@@ -26,9 +27,9 @@ init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogs
       , gameState = TestGame.initialGameState
       , config = TestGame.config
-      , isDebug = False
+      , isDebug = True
       }
-    , Cmd.none
+    , Random.generate SeedGenerated Random.independentSeed
     )
 
 
@@ -45,6 +46,9 @@ update msg model =
             , Cmd.none
             )
 
+        SeedGenerated seed ->
+            ( { model | gameState = setRndSeed seed model.gameState }, Cmd.none )
+
 
 type alias Model =
     { dialogs : Game.Dialogs
@@ -57,6 +61,7 @@ type alias Model =
 type Msg
     = None
     | ClickDialog (List DialogActionExecution)
+    | SeedGenerated Random.Seed
 
 
 
