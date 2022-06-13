@@ -8,6 +8,7 @@ type IntValue
     = Const Int
     | Counter String
     | Addition IntValue IntValue
+    | Subtraction IntValue IntValue
 
 
 type Condition
@@ -35,6 +36,7 @@ type Statement
     | Rnd TextValue IntValue IntValue
     | Block (List Statement)
     | If Condition Statement Statement
+    | None
 
 
 runStatement : Statement -> State a -> State a
@@ -77,6 +79,9 @@ runStatement statement state =
                 )
                 state
 
+        None ->
+            state
+
 
 type alias State a =
     { a | counters : Dict String Int, rnd : Random.Seed }
@@ -118,6 +123,9 @@ getMaybeGameValue gameValue gameState =
 
         Addition mx my ->
             Maybe.map2 (\x y -> x + y) (getMaybeGameValue mx gameState) (getMaybeGameValue my gameState)
+
+        Subtraction mx my ->
+            Maybe.map2 (\x y -> x - y) (getMaybeGameValue mx gameState) (getMaybeGameValue my gameState)
 
 
 addCounter : String -> Int -> State a -> State a

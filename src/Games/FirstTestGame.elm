@@ -67,6 +67,10 @@ exampleCounters =
     , ( "pickaxe", 0 )
     , ( "start_look_around", 0 )
     , ( "start_search_bed", 0 )
+    , ( "player_stamina", 19 )
+    , ( "player_defence", 7 )
+    , ( "player_combat", 5 )
+    , ( "defeated_goblin", 0 )
     ]
         |> Dict.fromList
 
@@ -108,6 +112,8 @@ dialogs =
             , { text = S "Spend money", condition = Nothing, action = [ Screept <| Screept.Block [ Screept.inc "money", Screept.inc "money" ], GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
+            , { text = S "Combat", condition = Nothing, action = [ fightGoblin, GoAction "combat" ] }
+            , { text = S "Goblin Cave", condition = Nothing, action = [ GoAction "goblin_cave" ] }
             , { text = S "Test Screept"
               , condition = Nothing
               , action =
@@ -139,11 +145,7 @@ dialogs =
             [ { text = S "Forage"
               , condition = Nothing
               , action =
-                    [ --rndInts "rnd_wood" 0 5
-                      --, incCounter "wood" (Counter "rnd_wood")
-                      --, rndInts "rnd_sticks" 0 5
-                      --, incCounter "sticks" (Counter "rnd_sticks")
-                      Screept <|
+                    [ Screept <|
                         Screept.Block
                             [ Screept.Rnd (S "rnd_wood") (Const 0) (Const 5)
                             , Screept.SetCounter (S "wood") (Addition (Counter "wood") (Counter "rnd_wood"))
@@ -157,7 +159,74 @@ dialogs =
             , backOption
             ]
       }
+    , { id = "combat"
+      , text = Special [ S "Combat. ", S "You have ", GameValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", GameValueText (Counter "enemy_stamina") ]
+      , options =
+            [ { text = S "Hit enemy"
+              , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
+              , action =
+                    [ Screept <|
+                        Screept.Block
+                            [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                            , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                            , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+                            , Screept.SetCounter (S "player_attack") (Addition (Counter "rnd_2d6") (Counter "player_combat"))
+                            , Screept.SetCounter (S "player_damage") (Subtraction (Counter "player_attack") (Counter "enemy_defence"))
+                            , Screept.If (Predicate (Counter "player_damage") Gt (Const 0))
+                                (Screept.Block
+                                    [ Screept.SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
+                                    ]
+                                )
+                                Screept.None
+                            , Screept.If (Predicate (Counter "enemy_stamina") Gt (Const 0))
+                                (Screept.Block
+                                    [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                                    , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                                    , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+                                    , Screept.SetCounter (S "enemy_attack") (Addition (Counter "rnd_2d6") (Counter "enemy_combat"))
+                                    , Screept.SetCounter (S "enemy_damage") (Subtraction (Counter "enemy_attack") (Counter "player_defence"))
+                                    , Screept.If (Predicate (Counter "enemy_damage") Gt (Const 0))
+                                        (Screept.Block
+                                            [ Screept.SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
+                                            , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                                            ]
+                                        )
+                                        Screept.None
+                                    ]
+                                )
+                                (Screept.Block
+                                    [ Screept.SetCounter (S "enemy_damage") (Const 0)
+                                    , Screept.SetCounter (S "fight_won") (Const 1)
+                                    ]
+                                )
+                            ]
+                    , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", GameValueText (Counter "player_damage"), S " damage" ])
+                    , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", GameValueText (Counter "enemy_damage"), S " damage" ])
+                    ]
+              }
+            , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ GoBackAction ] }
+            , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [] }
+            ]
+      }
+    , { id = "goblin_cave"
+      , text = S "Goblin Cave"
+      , options =
+            [ { text = S "Fight Goblin", condition = Just <| zero (Counter "defeated_goblin"), action = [ fightGoblin, GoAction "combat" ] }
+            ]
+      }
     ]
+
+
+fightGoblin : DialogActionExecution
+fightGoblin =
+    Screept <|
+        Screept.Block
+            [ Screept.SetCounter (S "enemy_stamina") (Const 10)
+            , Screept.SetCounter (S "enemy_defence") (Const 6)
+            , Screept.SetCounter (S "enemy_combat") (Const 6)
+            , Screept.SetCounter (S "fight_won") (Const 0)
+            , Screept.SetCounter (S "fight_lost") (Const 0)
+            ]
 
 
 backOption : DialogOption
