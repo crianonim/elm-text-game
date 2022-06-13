@@ -5277,40 +5277,50 @@ var $author$project$Games$FirstTestGame$processTurn = F2(
 			$author$project$Games$FirstTestGame$turnActions);
 	});
 var $author$project$Games$FirstTestGame$config = {showMessages: true, turnCallback: $author$project$Games$FirstTestGame$processTurn};
-var $author$project$Game$AND = function (a) {
+var $author$project$Screept$AND = function (a) {
 	return {$: 'AND', a: a};
 };
-var $author$project$Game$Conditional = F2(
+var $author$project$Screept$Addition = F2(
+	function (a, b) {
+		return {$: 'Addition', a: a, b: b};
+	});
+var $author$project$Screept$Block = function (a) {
+	return {$: 'Block', a: a};
+};
+var $author$project$Screept$Conditional = F2(
 	function (a, b) {
 		return {$: 'Conditional', a: a, b: b};
 	});
-var $author$project$Game$Const = function (a) {
+var $author$project$Screept$Const = function (a) {
 	return {$: 'Const', a: a};
 };
-var $author$project$Game$Counter = function (a) {
+var $author$project$Screept$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
-var $author$project$Game$GameValueText = function (a) {
+var $author$project$Screept$GameValueText = function (a) {
 	return {$: 'GameValueText', a: a};
 };
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
-var $author$project$Game$Inc = F2(
-	function (a, b) {
-		return {$: 'Inc', a: a, b: b};
-	});
 var $author$project$Game$Message = function (a) {
 	return {$: 'Message', a: a};
 };
-var $author$project$Game$Rnd = F3(
+var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
 		return {$: 'Rnd', a: a, b: b, c: c};
 	});
-var $author$project$Game$S = function (a) {
+var $author$project$Screept$S = function (a) {
 	return {$: 'S', a: a};
 };
-var $author$project$Game$Special = function (a) {
+var $author$project$Game$Screept = function (a) {
+	return {$: 'Screept', a: a};
+};
+var $author$project$Screept$SetCounter = F2(
+	function (a, b) {
+		return {$: 'SetCounter', a: a, b: b};
+	});
+var $author$project$Screept$Special = function (a) {
 	return {$: 'Special', a: a};
 };
 var $author$project$Game$Turn = function (a) {
@@ -5321,38 +5331,46 @@ var $author$project$Games$FirstTestGame$backOption = {
 	action: _List_fromArray(
 		[$author$project$Game$GoBackAction]),
 	condition: $elm$core$Maybe$Nothing,
-	text: $author$project$Game$S('Go back')
+	text: $author$project$Screept$S('Go back')
 };
+var $author$project$Game$incCounter = F2(
+	function (counter, intValue) {
+		return $author$project$Game$Screept(
+			A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S(counter),
+				intValue));
+	});
 var $author$project$Game$inc = F2(
 	function (counter, i) {
 		return A2(
-			$author$project$Game$Inc,
+			$author$project$Game$incCounter,
 			counter,
-			$author$project$Game$Const(i));
+			$author$project$Screept$Const(i));
 	});
 var $author$project$Game$inc1 = function (counter) {
 	return A2($author$project$Game$inc, counter, 1);
 };
-var $author$project$Game$NOT = function (a) {
+var $author$project$Screept$NOT = function (a) {
 	return {$: 'NOT', a: a};
 };
-var $author$project$Game$EQ = {$: 'EQ'};
-var $author$project$Game$Predicate = F3(
+var $author$project$Screept$Eq = {$: 'Eq'};
+var $author$project$Screept$Predicate = F3(
 	function (a, b, c) {
 		return {$: 'Predicate', a: a, b: b, c: c};
 	});
 var $author$project$Game$zero = function (gameValue) {
 	return A3(
-		$author$project$Game$Predicate,
+		$author$project$Screept$Predicate,
 		gameValue,
-		$author$project$Game$EQ,
-		$author$project$Game$Const(0));
+		$author$project$Screept$Eq,
+		$author$project$Screept$Const(0));
 };
 var $author$project$Game$nonZero = function (gameValue) {
-	return $author$project$Game$NOT(
+	return $author$project$Screept$NOT(
 		$author$project$Game$zero(gameValue));
 };
-var $author$project$Game$LT = {$: 'LT'};
+var $author$project$Screept$Lt = {$: 'Lt'};
 var $author$project$Game$recipeToDialogOption = function (_v0) {
 	var crafted = _v0.a;
 	var ingredients = _v0.b;
@@ -5364,12 +5382,12 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 	var ingredientToCondition = function (_v2) {
 		var item = _v2.a;
 		var amount = _v2.b;
-		return $author$project$Game$NOT(
+		return $author$project$Screept$NOT(
 			A3(
-				$author$project$Game$Predicate,
-				$author$project$Game$Counter(item),
-				$author$project$Game$LT,
-				$author$project$Game$Const(amount)));
+				$author$project$Screept$Predicate,
+				$author$project$Screept$Counter(item),
+				$author$project$Screept$Lt,
+				$author$project$Screept$Const(amount)));
 	};
 	var ingredientToAction = function (_v1) {
 		var item = _v1.a;
@@ -5382,9 +5400,9 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 			A2($author$project$Game$inc, crafted, 1),
 			A2($elm$core$List$map, ingredientToAction, ingredients)),
 		condition: $elm$core$Maybe$Just(
-			$author$project$Game$AND(
+			$author$project$Screept$AND(
 				A2($elm$core$List$map, ingredientToCondition, ingredients))),
-		text: $author$project$Game$S(
+		text: $author$project$Screept$S(
 			'Craft ' + (crafted + (' (' + (A2(
 				$elm$core$String$join,
 				', ',
@@ -5408,6 +5426,15 @@ var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
 				_Utils_Tuple2('stone', 2)
 			]))
 	]);
+var $author$project$Game$rndInts = F3(
+	function (counter, x, y) {
+		return $author$project$Game$Screept(
+			A3(
+				$author$project$Screept$Rnd,
+				$author$project$Screept$S(counter),
+				$author$project$Screept$Const(x),
+				$author$project$Screept$Const(y)));
+	});
 var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 	[
 		{
@@ -5421,22 +5448,22 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_look_around'))),
-				text: $author$project$Game$S('Go through the exit')
+						$author$project$Screept$Counter('start_look_around'))),
+				text: $author$project$Screept$S('Go through the exit')
 			},
 				{
 				action: _List_fromArray(
 					[
 						$author$project$Game$inc1('start_look_around'),
 						$author$project$Game$Message(
-						$author$project$Game$S('You noticed a straw bed')),
+						$author$project$Screept$S('You noticed a straw bed')),
 						$author$project$Game$Turn(5),
-						A3($author$project$Game$Rnd, 'rrr', 1, 5)
+						A3($author$project$Game$rndInts, 'rrr', 1, 5)
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
-						$author$project$Game$Counter('start_look_around'))),
-				text: $author$project$Game$S('Look around')
+						$author$project$Screept$Counter('start_look_around'))),
+				text: $author$project$Screept$S('Look around')
 			},
 				{
 				action: _List_fromArray(
@@ -5444,31 +5471,31 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 						$author$project$Game$inc1('start_search_bed')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$AND(
+					$author$project$Screept$AND(
 						_List_fromArray(
 							[
 								$author$project$Game$zero(
-								$author$project$Game$Counter('start_search_bed')),
+								$author$project$Screept$Counter('start_search_bed')),
 								$author$project$Game$nonZero(
-								$author$project$Game$Counter('start_look_around'))
+								$author$project$Screept$Counter('start_look_around'))
 							]))),
-				text: $author$project$Game$S('Search the bed')
+				text: $author$project$Screept$S('Search the bed')
 			},
 				{
 				action: _List_fromArray(
 					[
 						A2(
-						$author$project$Game$Inc,
+						$author$project$Game$incCounter,
 						'money',
-						$author$project$Game$Counter('turn')),
+						$author$project$Screept$Counter('turn')),
 						A2(
-						$author$project$Game$Inc,
+						$author$project$Game$incCounter,
 						'money',
-						$author$project$Game$Counter('wood')),
+						$author$project$Screept$Counter('wood')),
 						$author$project$Game$GoAction('third')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Spend money')
+				text: $author$project$Screept$S('Spend money')
 			},
 				{
 				action: _List_fromArray(
@@ -5476,7 +5503,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 						$author$project$Game$GoAction('craft')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Craft')
+				text: $author$project$Screept$S('Craft')
 			},
 				{
 				action: _List_fromArray(
@@ -5484,28 +5511,28 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 						$author$project$Game$GoAction('forest')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Forest')
+				text: $author$project$Screept$S('Forest')
 			}
 			]),
-		text: $author$project$Game$Special(
+		text: $author$project$Screept$Special(
 			_List_fromArray(
 				[
-					$author$project$Game$S('You\'re in a dark room. '),
+					$author$project$Screept$S('You\'re in a dark room. '),
 					A2(
-					$author$project$Game$Conditional,
+					$author$project$Screept$Conditional,
 					$author$project$Game$zero(
-						$author$project$Game$Counter('start_look_around')),
-					$author$project$Game$S('You see nothing. ')),
+						$author$project$Screept$Counter('start_look_around')),
+					$author$project$Screept$S('You see nothing. ')),
 					A2(
-					$author$project$Game$Conditional,
+					$author$project$Screept$Conditional,
 					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_look_around')),
-					$author$project$Game$S('You see a straw bed. ')),
+						$author$project$Screept$Counter('start_look_around')),
+					$author$project$Screept$S('You see a straw bed. ')),
 					A2(
-					$author$project$Game$Conditional,
+					$author$project$Screept$Conditional,
 					$author$project$Game$nonZero(
-						$author$project$Game$Counter('start_search_bed')),
-					$author$project$Game$S('There is a rusty key among the straw. '))
+						$author$project$Screept$Counter('start_search_bed')),
+					$author$project$Screept$S('There is a rusty key among the straw. '))
 				]))
 	},
 		{
@@ -5516,13 +5543,13 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						A2(
-						$author$project$Game$Inc,
+						$author$project$Game$incCounter,
 						'turn',
-						$author$project$Game$Const(1)),
+						$author$project$Screept$Const(1)),
 						$author$project$Game$GoAction('start')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go start')
+				text: $author$project$Screept$S('Go start')
 			},
 				{
 				action: _List_fromArray(
@@ -5530,11 +5557,11 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 						$author$project$Game$GoAction('third')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go third')
+				text: $author$project$Screept$S('Go third')
 			},
 				$author$project$Games$FirstTestGame$backOption
 			]),
-		text: $author$project$Game$S('You\'re at second')
+		text: $author$project$Screept$S('You\'re at second')
 	},
 		{
 		id: 'third',
@@ -5546,10 +5573,10 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 						$author$project$Game$GoAction('start')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Go start')
+				text: $author$project$Screept$S('Go start')
 			}
 			]),
-		text: $author$project$Game$S('You\'re at third')
+		text: $author$project$Screept$S('You\'re at third')
 	},
 		{
 		id: 'craft',
@@ -5557,7 +5584,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
 			_List_fromArray(
 				[$author$project$Games$FirstTestGame$backOption])),
-		text: $author$project$Game$S('You can craft items')
+		text: $author$project$Screept$S('You can craft items')
 	},
 		{
 		id: 'forest',
@@ -5566,36 +5593,55 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						A3($author$project$Game$Rnd, 'rnd_wood', 0, 5),
-						A2(
-						$author$project$Game$Inc,
-						'wood',
-						$author$project$Game$Counter('rnd_wood')),
-						A3($author$project$Game$Rnd, 'rnd_sticks', 0, 5),
-						A2(
-						$author$project$Game$Inc,
-						'sticks',
-						$author$project$Game$Counter('rnd_sticks')),
-						$author$project$Game$Turn(4),
-						$author$project$Game$Message(
-						$author$project$Game$Special(
+						$author$project$Game$Screept(
+						$author$project$Screept$Block(
 							_List_fromArray(
 								[
-									$author$project$Game$S('You found '),
-									$author$project$Game$GameValueText(
-									$author$project$Game$Counter('rnd_wood')),
-									$author$project$Game$S(' of wood and '),
-									$author$project$Game$GameValueText(
-									$author$project$Game$Counter('rnd_sticks')),
-									$author$project$Game$S(' of sticks.')
+									A3(
+									$author$project$Screept$Rnd,
+									$author$project$Screept$S('rnd_wood'),
+									$author$project$Screept$Const(0),
+									$author$project$Screept$Const(5)),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('wood'),
+									A2(
+										$author$project$Screept$Addition,
+										$author$project$Screept$Counter('wood'),
+										$author$project$Screept$Counter('rnd_wood'))),
+									A3(
+									$author$project$Screept$Rnd,
+									$author$project$Screept$S('rnd_sticks'),
+									$author$project$Screept$Const(0),
+									$author$project$Screept$Const(5)),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('sticks'),
+									A2(
+										$author$project$Screept$Addition,
+										$author$project$Screept$Counter('sticks'),
+										$author$project$Screept$Counter('rnd_sticks')))
+								]))),
+						$author$project$Game$Turn(4),
+						$author$project$Game$Message(
+						$author$project$Screept$Special(
+							_List_fromArray(
+								[
+									$author$project$Screept$S('You found '),
+									$author$project$Screept$GameValueText(
+									$author$project$Screept$Counter('rnd_wood')),
+									$author$project$Screept$S(' of wood and '),
+									$author$project$Screept$GameValueText(
+									$author$project$Screept$Counter('rnd_sticks')),
+									$author$project$Screept$S(' of sticks.')
 								])))
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Game$S('Forage')
+				text: $author$project$Screept$S('Forage')
 			},
 				$author$project$Games$FirstTestGame$backOption
 			]),
-		text: $author$project$Game$S('Has trees')
+		text: $author$project$Screept$S('Has trees')
 	}
 	]);
 var $elm$random$Random$Generate = function (a) {
@@ -6377,7 +6423,7 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $author$project$Game$addCounter = F3(
+var $author$project$Screept$addCounter = F3(
 	function (counter, add, gameState) {
 		return _Utils_update(
 			gameState,
@@ -6396,35 +6442,6 @@ var $author$project$Game$addCounter = F3(
 					gameState.counters)
 			});
 	});
-var $author$project$Game$getMaybeGameValue = F2(
-	function (gameValue, gameState) {
-		if (gameValue.$ === 'Const') {
-			var _int = gameValue.a;
-			return $elm$core$Maybe$Just(_int);
-		} else {
-			var counter = gameValue.a;
-			return A2($elm$core$Dict$get, counter, gameState.counters);
-		}
-	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Game$getGameValueWithDefault = F2(
-	function (gameValue, gameState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			A2($author$project$Game$getMaybeGameValue, gameValue, gameState));
-	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -6440,16 +6457,57 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
+var $author$project$Screept$getMaybeGameValue = F2(
+	function (gameValue, gameState) {
+		switch (gameValue.$) {
+			case 'Const':
+				var _int = gameValue.a;
+				return $elm$core$Maybe$Just(_int);
+			case 'Counter':
+				var counter = gameValue.a;
+				return A2($elm$core$Dict$get, counter, gameState.counters);
+			default:
+				var mx = gameValue.a;
+				var my = gameValue.b;
+				return A3(
+					$elm$core$Maybe$map2,
+					F2(
+						function (x, y) {
+							return x + y;
+						}),
+					A2($author$project$Screept$getMaybeGameValue, mx, gameState),
+					A2($author$project$Screept$getMaybeGameValue, my, gameState));
+		}
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Screept$getGameValueWithDefault = F2(
+	function (gameValue, gameState) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($author$project$Screept$getMaybeGameValue, gameValue, gameState));
+	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
 var $elm$core$Basics$not = _Basics_not;
-var $author$project$Game$testCondition = F2(
+var $author$project$Screept$testCondition = F2(
 	function (condition, gameState) {
 		var testPredicate = F3(
 			function (x, predicate, y) {
 				var comp = function () {
 					switch (predicate.$) {
-						case 'LT':
+						case 'Lt':
 							return $elm$core$Basics$lt;
-						case 'EQ':
+						case 'Eq':
 							return $elm$core$Basics$eq;
 						default:
 							return $elm$core$Basics$gt;
@@ -6461,8 +6519,8 @@ var $author$project$Game$testCondition = F2(
 					A3(
 						$elm$core$Maybe$map2,
 						comp,
-						A2($author$project$Game$getMaybeGameValue, x, gameState),
-						A2($author$project$Game$getMaybeGameValue, y, gameState)));
+						A2($author$project$Screept$getMaybeGameValue, x, gameState),
+						A2($author$project$Screept$getMaybeGameValue, y, gameState)));
 			});
 		switch (condition.$) {
 			case 'Predicate':
@@ -6472,14 +6530,14 @@ var $author$project$Game$testCondition = F2(
 				return A3(testPredicate, v1, ops, v2);
 			case 'NOT':
 				var innerTest = condition.a;
-				return !A2($author$project$Game$testCondition, innerTest, gameState);
+				return !A2($author$project$Screept$testCondition, innerTest, gameState);
 			case 'AND':
 				var conditions = condition.a;
 				return A3(
 					$elm$core$List$foldl,
 					F2(
 						function (c, acc) {
-							return A2($author$project$Game$testCondition, c, gameState) && acc;
+							return A2($author$project$Screept$testCondition, c, gameState) && acc;
 						}),
 					true,
 					conditions);
@@ -6489,13 +6547,13 @@ var $author$project$Game$testCondition = F2(
 					$elm$core$List$foldl,
 					F2(
 						function (c, acc) {
-							return A2($author$project$Game$testCondition, c, gameState) || acc;
+							return A2($author$project$Screept$testCondition, c, gameState) || acc;
 						}),
 					false,
 					conditions);
 		}
 	});
-var $author$project$Game$getText = F2(
+var $author$project$Screept$getText = F2(
 	function (gameState, text) {
 		getText:
 		while (true) {
@@ -6508,12 +6566,12 @@ var $author$project$Game$getText = F2(
 					return $elm$core$String$concat(
 						A2(
 							$elm$core$List$map,
-							$author$project$Game$getText(gameState),
+							$author$project$Screept$getText(gameState),
 							specialTexts));
 				case 'Conditional':
 					var gameCheck = text.a;
 					var conditionalText = text.b;
-					if (A2($author$project$Game$testCondition, gameCheck, gameState)) {
+					if (A2($author$project$Screept$testCondition, gameCheck, gameState)) {
 						var $temp$gameState = gameState,
 							$temp$text = conditionalText;
 						gameState = $temp$gameState;
@@ -6525,7 +6583,7 @@ var $author$project$Game$getText = F2(
 				default:
 					var gameValue = text.a;
 					return $elm$core$String$fromInt(
-						A2($author$project$Game$getGameValueWithDefault, gameValue, gameState));
+						A2($author$project$Screept$getGameValueWithDefault, gameValue, gameState));
 			}
 		}
 	});
@@ -6543,11 +6601,7 @@ var $mhoare$elm_stack$Stack$pop = function (_v0) {
 			$mhoare$elm_stack$Stack$Stack(tail));
 	}
 };
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $author$project$Game$setCounter = F3(
+var $author$project$Screept$setCounter = F3(
 	function (counter, x, gameState) {
 		return _Utils_update(
 			gameState,
@@ -6555,6 +6609,66 @@ var $author$project$Game$setCounter = F3(
 				counters: A3($elm$core$Dict$insert, counter, x, gameState.counters)
 			});
 	});
+var $author$project$Screept$runStatement = F2(
+	function (statement, state) {
+		switch (statement.$) {
+			case 'SetCounter':
+				var textValue = statement.a;
+				var intValue = statement.b;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					state,
+					A2(
+						$elm$core$Maybe$map,
+						function (v) {
+							return A3(
+								$author$project$Screept$setCounter,
+								A2($author$project$Screept$getText, state, textValue),
+								v,
+								state);
+						},
+						A2($author$project$Screept$getMaybeGameValue, intValue, state)));
+			case 'Rnd':
+				var counter = statement.a;
+				var mx = statement.b;
+				var my = statement.c;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					state,
+					A3(
+						$elm$core$Maybe$map2,
+						F2(
+							function (x, y) {
+								var counterName = A2($author$project$Screept$getText, state, counter);
+								var _v1 = A2(
+									$elm$random$Random$step,
+									A2($elm$random$Random$int, x, y),
+									state.rnd);
+								var result = _v1.a;
+								var newSeed = _v1.b;
+								var newState = _Utils_update(
+									state,
+									{rnd: newSeed});
+								return A3($author$project$Screept$setCounter, counterName, result, newState);
+							}),
+						A2($author$project$Screept$getMaybeGameValue, mx, state),
+						A2($author$project$Screept$getMaybeGameValue, my, state)));
+			default:
+				var statements = statement.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (s, acc) {
+							return A2($author$project$Screept$runStatement, s, acc);
+						}),
+					state,
+					statements);
+		}
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
 var $author$project$Game$executeAction = F3(
 	function (turnCallback, dialogActionExecution, gameState) {
 		switch (dialogActionExecution.$) {
@@ -6571,18 +6685,6 @@ var $author$project$Game$executeAction = F3(
 					{
 						dialogStack: $mhoare$elm_stack$Stack$pop(gameState.dialogStack).b
 					});
-			case 'Inc':
-				var counter = dialogActionExecution.a;
-				var gv = dialogActionExecution.b;
-				return A2(
-					$elm$core$Maybe$withDefault,
-					gameState,
-					A2(
-						$elm$core$Maybe$map,
-						function (amount) {
-							return A3($author$project$Game$addCounter, counter, amount, gameState);
-						},
-						A2($author$project$Game$getMaybeGameValue, gv, gameState)));
 			case 'DoNothing':
 				return gameState;
 			case 'Message':
@@ -6592,7 +6694,7 @@ var $author$project$Game$executeAction = F3(
 					{
 						messages: A2(
 							$elm$core$List$cons,
-							A2($author$project$Game$getText, gameState, msg),
+							A2($author$project$Screept$getText, gameState, msg),
 							gameState.messages)
 					});
 			case 'Turn':
@@ -6602,15 +6704,15 @@ var $author$project$Game$executeAction = F3(
 						runTurn:
 						while (true) {
 							var currentTurn = A2(
-								$author$project$Game$getGameValueWithDefault,
-								$author$project$Game$Counter('turn'),
+								$author$project$Screept$getGameValueWithDefault,
+								$author$project$Screept$Counter('turn'),
 								gs);
 							if (!left) {
 								return gs;
 							} else {
 								var $temp$left = left - 1,
 									$temp$gs = A3(
-									$author$project$Game$addCounter,
+									$author$project$Screept$addCounter,
 									'turn',
 									1,
 									A2(turnCallback, currentTurn, gs));
@@ -6622,19 +6724,8 @@ var $author$project$Game$executeAction = F3(
 					});
 				return A2(runTurn, t, gameState);
 			default:
-				var counter = dialogActionExecution.a;
-				var x = dialogActionExecution.b;
-				var y = dialogActionExecution.c;
-				var _v1 = A2(
-					$elm$random$Random$step,
-					A2($elm$random$Random$int, x, y),
-					gameState.rnd);
-				var result = _v1.a;
-				var newSeed = _v1.b;
-				var newState = _Utils_update(
-					gameState,
-					{rnd: newSeed});
-				return A3($author$project$Game$setCounter, counter, result, newState);
+				var statement = dialogActionExecution.a;
+				return A2($author$project$Screept$runStatement, statement, gameState);
 		}
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6687,7 +6778,7 @@ var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Game$badDialog = {
 	id: 'bad',
 	options: _List_Nil,
-	text: $author$project$Game$S('BAD Dialog')
+	text: $author$project$Screept$S('BAD Dialog')
 };
 var $author$project$Game$getDialog = F2(
 	function (dialogId, dialogs) {
@@ -6779,7 +6870,7 @@ var $author$project$Main$viewOption = F2(
 			_List_fromArray(
 				[
 					$elm$html$Html$text(
-					A2($author$project$Game$getText, gameState, dialogOption.text))
+					A2($author$project$Screept$getText, gameState, dialogOption.text))
 				]));
 	});
 var $author$project$Main$viewDialog = F2(
@@ -6798,7 +6889,7 @@ var $author$project$Main$viewDialog = F2(
 					_List_fromArray(
 						[
 							$elm$html$Html$text(
-							A2($author$project$Game$getText, gameState, dialog.text))
+							A2($author$project$Screept$getText, gameState, dialog.text))
 						])),
 					A2(
 					$elm$html$Html$div,
@@ -6815,7 +6906,7 @@ var $author$project$Main$viewDialog = F2(
 									A2(
 										$elm$core$Maybe$map,
 										function (check) {
-											return A2($author$project$Game$testCondition, check, gameState);
+											return A2($author$project$Screept$testCondition, check, gameState);
 										},
 										o.condition));
 							},
@@ -6853,19 +6944,6 @@ var $author$project$Main$view = function (model) {
 			'bad',
 			$mhoare$elm_stack$Stack$top(model.gameState.dialogStack)),
 		model.dialogs);
-	var _v0 = A2($elm$core$Debug$log, 'stack', model.gameState.dialogStack);
-	var _v1 = A2(
-		$elm$core$Debug$log,
-		'test',
-		A2(
-			$author$project$Game$testCondition,
-			$author$project$Game$NOT(
-				A3(
-					$author$project$Game$Predicate,
-					$author$project$Game$Counter('money'),
-					$author$project$Game$LT,
-					$author$project$Game$Const(43))),
-			model.gameState));
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(

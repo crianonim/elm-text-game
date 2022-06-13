@@ -2,6 +2,7 @@ module Game exposing (..)
 
 import Dict exposing (Dict)
 import Random
+import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), State, TextValue(..))
 import Stack exposing (Stack)
 
 
@@ -19,32 +20,14 @@ type alias GameConfig =
     }
 
 
-type GameValue
-    = Const Int
-    | Counter String
-
-
-type Condition
-    = Predicate GameValue PredicateOp GameValue
-    | NOT Condition
-    | AND (List Condition)
-    | OR (List Condition)
-
-
-type PredicateOp
-    = EQ
-    | GT
-    | LT
-
-
-nonZero : GameValue -> Condition
+nonZero : IntValue -> Condition
 nonZero gameValue =
     NOT (zero gameValue)
 
 
-zero : GameValue -> Condition
+zero : IntValue -> Condition
 zero gameValue =
-    Predicate gameValue EQ (Const 0)
+    Predicate gameValue Eq (Const 0)
 
 
 inc1 : String -> DialogActionExecution
@@ -54,97 +37,11 @@ inc1 counter =
 
 inc : String -> Int -> DialogActionExecution
 inc counter i =
-    Inc counter (Const i)
-
-
-type Text
-    = S String
-    | Special (List Text)
-    | Conditional Condition Text
-    | GameValueText GameValue
-
-
-getText : GameState -> Text -> String
-getText gameState text =
-    case text of
-        S string ->
-            string
-
-        Special specialTexts ->
-            List.map (getText gameState) specialTexts |> String.concat
-
-        Conditional gameCheck conditionalText ->
-            if testCondition gameCheck gameState then
-                getText gameState conditionalText
-
-            else
-                ""
-
-        GameValueText gameValue ->
-            getGameValueWithDefault gameValue gameState |> String.fromInt
-
-
-getGameValueWithDefault : GameValue -> GameState -> Int
-getGameValueWithDefault gameValue gameState =
-    getMaybeGameValue gameValue gameState |> Maybe.withDefault 0
-
-
-getMaybeGameValue : GameValue -> GameState -> Maybe Int
-getMaybeGameValue gameValue gameState =
-    case gameValue of
-        Const int ->
-            Just int
-
-        Counter counter ->
-            Dict.get counter gameState.counters
-
-
-addCounter : String -> Int -> GameState -> GameState
-addCounter counter add gameState =
-    { gameState | counters = Dict.update counter (\value -> Maybe.map (\v -> v + add) value) gameState.counters }
-
-
-setCounter : String -> Int -> GameState -> GameState
-setCounter counter x gameState =
-    { gameState | counters = Dict.insert counter x gameState.counters }
-
-
-testCondition : Condition -> GameState -> Bool
-testCondition condition gameState =
-    let
-        testPredicate : GameValue -> PredicateOp -> GameValue -> Bool
-        testPredicate x predicate y =
-            let
-                comp =
-                    case predicate of
-                        LT ->
-                            (<)
-
-                        EQ ->
-                            (==)
-
-                        GT ->
-                            (>)
-            in
-            Maybe.map2 comp (getMaybeGameValue x gameState) (getMaybeGameValue y gameState)
-                |> Maybe.withDefault False
-    in
-    case condition of
-        Predicate v1 ops v2 ->
-            testPredicate v1 ops v2
-
-        NOT innerTest ->
-            not <| testCondition innerTest gameState
-
-        AND conditions ->
-            List.foldl (\c acc -> testCondition c gameState && acc) True conditions
-
-        OR conditions ->
-            List.foldl (\c acc -> testCondition c gameState || acc) False conditions
+    incCounter counter (Const i)
 
 
 type alias DialogOption =
-    { text : Text
+    { text : TextValue
     , condition : Maybe Condition
     , action : List DialogActionExecution
     }
@@ -153,11 +50,10 @@ type alias DialogOption =
 type DialogActionExecution
     = GoAction DialogId
     | GoBackAction
-    | Inc String GameValue
-    | Message Text
+    | Message TextValue
     | Turn Int
-    | Rnd String Int Int
     | DoNothing
+    | Screept Screept.Statement
 
 
 type alias DialogId =
@@ -166,7 +62,7 @@ type alias DialogId =
 
 type alias Dialog =
     { id : DialogId
-    , text : Text
+    , text : TextValue
     , options : List DialogOption
     }
 
@@ -196,16 +92,11 @@ executeAction turnCallback dialogActionExecution gameState =
         GoBackAction ->
             { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }
 
-        Inc counter gv ->
-            getMaybeGameValue gv gameState
-                |> Maybe.map (\amount -> addCounter counter amount gameState)
-                |> Maybe.withDefault gameState
-
         DoNothing ->
             gameState
 
         Message msg ->
-            { gameState | messages = getText gameState msg :: gameState.messages }
+            { gameState | messages = Screept.getText gameState msg :: gameState.messages }
 
         Turn t ->
             let
@@ -213,7 +104,7 @@ executeAction turnCallback dialogActionExecution gameState =
                 runTurn left gs =
                     let
                         currentTurn =
-                            getGameValueWithDefault (Counter "turn") gs
+                            Screept.getGameValueWithDefault (Counter "turn") gs
                     in
                     if left == 0 then
                         gs
@@ -221,20 +112,13 @@ executeAction turnCallback dialogActionExecution gameState =
                     else
                         runTurn (left - 1)
                             (turnCallback currentTurn gs
-                                |> addCounter "turn" 1
+                                |> Screept.addCounter "turn" 1
                             )
             in
             runTurn t gameState
 
-        Rnd counter x y ->
-            let
-                ( result, newSeed ) =
-                    Random.step (Random.int x y) gameState.rnd
-
-                newState =
-                    { gameState | rnd = newSeed }
-            in
-            setCounter counter result newState
+        Screept statement ->
+            Screept.runStatement statement gameState
 
 
 setRndSeed : Random.Seed -> GameState -> GameState
@@ -247,7 +131,7 @@ recipeToDialogOption ( crafted, ingredients ) =
     let
         ingredientToCondition : ( String, Int ) -> Condition
         ingredientToCondition ( item, amount ) =
-            NOT <| Predicate (Counter item) LT (Const amount)
+            NOT <| Predicate (Counter item) Lt (Const amount)
 
         ingredientToAction : ( String, Int ) -> DialogActionExecution
         ingredientToAction ( item, amount ) =
@@ -266,3 +150,13 @@ recipeToDialogOption ( crafted, ingredients ) =
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
+
+
+rndInts : String -> Int -> Int -> DialogActionExecution
+rndInts counter x y =
+    Screept <| Screept.Rnd (S counter) (Const x) (Const y)
+
+
+incCounter : String -> IntValue -> DialogActionExecution
+incCounter counter intValue =
+    Screept <| Screept.SetCounter (S counter) intValue

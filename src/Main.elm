@@ -9,6 +9,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
 import Random
+import Screept
 import Stack exposing (Stack)
 
 
@@ -82,12 +83,6 @@ view model =
     let
         dialog =
             getDialog (Stack.top model.gameState.dialogStack |> Maybe.withDefault "bad") model.dialogs
-
-        _ =
-            Debug.log "stack" model.gameState.dialogStack
-
-        _ =
-            Debug.log "test" <| testCondition (NOT (Predicate (Counter "money") Game.LT (Const 43))) model.gameState
     in
     div [ class "container" ]
         [ viewDialog model.gameState dialog
@@ -113,9 +108,9 @@ viewMessages msgs =
 viewDialog : GameState -> Game.Dialog -> Html Msg
 viewDialog gameState dialog =
     div [ class "dialog" ]
-        [ p [] [ text <| getText gameState dialog.text ]
+        [ p [] [ text <| Screept.getText gameState dialog.text ]
         , div [] <|
-            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> testCondition check gameState) |> Maybe.withDefault True))
+            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.testCondition check gameState) |> Maybe.withDefault True))
         ]
 
 
@@ -128,4 +123,4 @@ viewDebug gameState =
 
 viewOption : GameState -> Game.DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| getText gameState dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getText gameState dialogOption.text ]

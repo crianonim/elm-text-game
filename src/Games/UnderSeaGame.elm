@@ -3,6 +3,7 @@ module Games.UnderSeaGame exposing (..)
 import Dict
 import Game exposing (..)
 import Random
+import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), TextValue(..))
 import Stack
 
 

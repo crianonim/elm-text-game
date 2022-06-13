@@ -3,6 +3,7 @@ module Games.FirstTestGame exposing (..)
 import Dict exposing (Dict)
 import Game exposing (..)
 import Random
+import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), TextValue(..))
 import Stack
 
 
@@ -102,9 +103,9 @@ dialogs =
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Rnd "rrr" 1 5 ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message <| S "You noticed a straw bed", Turn 5, rndInts "rrr" 1 5 ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
-            , { text = S "Spend money", condition = Nothing, action = [ Inc "money" (Counter "turn"), Inc "money" (Counter "wood"), GoAction "third" ] }
+            , { text = S "Spend money", condition = Nothing, action = [ incCounter "money" (Counter "turn"), incCounter "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
             ]
@@ -112,7 +113,7 @@ dialogs =
     , { id = "second"
       , text = S "You're at second"
       , options =
-            [ { text = S "Go start", condition = Nothing, action = [ Inc "turn" (Const 1), GoAction "start" ] }
+            [ { text = S "Go start", condition = Nothing, action = [ incCounter "turn" (Const 1), GoAction "start" ] }
             , { text = S "Go third", condition = Nothing, action = [ GoAction "third" ] }
             , backOption
             ]
@@ -128,10 +129,17 @@ dialogs =
             [ { text = S "Forage"
               , condition = Nothing
               , action =
-                    [ Rnd "rnd_wood" 0 5
-                    , Inc "wood" (Counter "rnd_wood")
-                    , Rnd "rnd_sticks" 0 5
-                    , Inc "sticks" (Counter "rnd_sticks")
+                    [ --rndInts "rnd_wood" 0 5
+                      --, incCounter "wood" (Counter "rnd_wood")
+                      --, rndInts "rnd_sticks" 0 5
+                      --, incCounter "sticks" (Counter "rnd_sticks")
+                      Screept <|
+                        Screept.Block
+                            [ Screept.Rnd (S "rnd_wood") (Const 0) (Const 5)
+                            , Screept.SetCounter (S "wood") (Addition (Counter "wood") (Counter "rnd_wood"))
+                            , Screept.Rnd (S "rnd_sticks") (Const 0) (Const 5)
+                            , Screept.SetCounter (S "sticks") (Addition (Counter "sticks") (Counter "rnd_sticks"))
+                            ]
                     , Turn 4
                     , Message <| Special [ S "You found ", GameValueText (Counter "rnd_wood"), S " of wood and ", GameValueText (Counter "rnd_sticks"), S " of sticks." ]
                     ]
