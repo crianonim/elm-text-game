@@ -5297,15 +5297,24 @@ var $author$project$Screept$Const = function (a) {
 var $author$project$Screept$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
+var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Screept$GameValueText = function (a) {
 	return {$: 'GameValueText', a: a};
 };
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
+var $author$project$Screept$If = F3(
+	function (a, b, c) {
+		return {$: 'If', a: a, b: b, c: c};
+	});
 var $author$project$Game$Message = function (a) {
 	return {$: 'Message', a: a};
 };
+var $author$project$Screept$Predicate = F3(
+	function (a, b, c) {
+		return {$: 'Predicate', a: a, b: b, c: c};
+	});
 var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
 		return {$: 'Rnd', a: a, b: b, c: c};
@@ -5354,11 +5363,6 @@ var $author$project$Game$inc1 = function (counter) {
 var $author$project$Screept$NOT = function (a) {
 	return {$: 'NOT', a: a};
 };
-var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$Screept$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
 var $author$project$Game$zero = function (gameValue) {
 	return A3(
 		$author$project$Screept$Predicate,
@@ -5512,6 +5516,38 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Forest')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$Screept(
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A3(
+									$author$project$Screept$Rnd,
+									$author$project$Screept$S('rnd_1'),
+									$author$project$Screept$Const(0),
+									$author$project$Screept$Const(1)),
+									A3(
+									$author$project$Screept$If,
+									A3(
+										$author$project$Screept$Predicate,
+										$author$project$Screept$Counter('rnd_1'),
+										$author$project$Screept$Eq,
+										$author$project$Screept$Const(1)),
+									A2(
+										$author$project$Screept$SetCounter,
+										$author$project$Screept$S('rnd_s'),
+										$author$project$Screept$Const(100)),
+									A2(
+										$author$project$Screept$SetCounter,
+										$author$project$Screept$S('rnd_s'),
+										$author$project$Screept$Const(200)))
+								])))
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Test Screept')
 			}
 			]),
 		text: $author$project$Screept$Special(
@@ -6611,58 +6647,70 @@ var $author$project$Screept$setCounter = F3(
 	});
 var $author$project$Screept$runStatement = F2(
 	function (statement, state) {
-		switch (statement.$) {
-			case 'SetCounter':
-				var textValue = statement.a;
-				var intValue = statement.b;
-				return A2(
-					$elm$core$Maybe$withDefault,
-					state,
-					A2(
-						$elm$core$Maybe$map,
-						function (v) {
-							return A3(
-								$author$project$Screept$setCounter,
-								A2($author$project$Screept$getText, state, textValue),
-								v,
-								state);
-						},
-						A2($author$project$Screept$getMaybeGameValue, intValue, state)));
-			case 'Rnd':
-				var counter = statement.a;
-				var mx = statement.b;
-				var my = statement.c;
-				return A2(
-					$elm$core$Maybe$withDefault,
-					state,
-					A3(
-						$elm$core$Maybe$map2,
+		runStatement:
+		while (true) {
+			switch (statement.$) {
+				case 'SetCounter':
+					var textValue = statement.a;
+					var intValue = statement.b;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						state,
+						A2(
+							$elm$core$Maybe$map,
+							function (v) {
+								return A3(
+									$author$project$Screept$setCounter,
+									A2($author$project$Screept$getText, state, textValue),
+									v,
+									state);
+							},
+							A2($author$project$Screept$getMaybeGameValue, intValue, state)));
+				case 'Rnd':
+					var counter = statement.a;
+					var mx = statement.b;
+					var my = statement.c;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						state,
+						A3(
+							$elm$core$Maybe$map2,
+							F2(
+								function (x, y) {
+									var counterName = A2($author$project$Screept$getText, state, counter);
+									var _v1 = A2(
+										$elm$random$Random$step,
+										A2($elm$random$Random$int, x, y),
+										state.rnd);
+									var result = _v1.a;
+									var newSeed = _v1.b;
+									var newState = _Utils_update(
+										state,
+										{rnd: newSeed});
+									return A3($author$project$Screept$setCounter, counterName, result, newState);
+								}),
+							A2($author$project$Screept$getMaybeGameValue, mx, state),
+							A2($author$project$Screept$getMaybeGameValue, my, state)));
+				case 'Block':
+					var statements = statement.a;
+					return A3(
+						$elm$core$List$foldl,
 						F2(
-							function (x, y) {
-								var counterName = A2($author$project$Screept$getText, state, counter);
-								var _v1 = A2(
-									$elm$random$Random$step,
-									A2($elm$random$Random$int, x, y),
-									state.rnd);
-								var result = _v1.a;
-								var newSeed = _v1.b;
-								var newState = _Utils_update(
-									state,
-									{rnd: newSeed});
-								return A3($author$project$Screept$setCounter, counterName, result, newState);
+							function (s, acc) {
+								return A2($author$project$Screept$runStatement, s, acc);
 							}),
-						A2($author$project$Screept$getMaybeGameValue, mx, state),
-						A2($author$project$Screept$getMaybeGameValue, my, state)));
-			default:
-				var statements = statement.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (s, acc) {
-							return A2($author$project$Screept$runStatement, s, acc);
-						}),
-					state,
-					statements);
+						state,
+						statements);
+				default:
+					var condition = statement.a;
+					var success = statement.b;
+					var failure = statement.c;
+					var $temp$statement = A2($author$project$Screept$testCondition, condition, state) ? success : failure,
+						$temp$state = state;
+					statement = $temp$statement;
+					state = $temp$state;
+					continue runStatement;
+			}
 		}
 	});
 var $elm$core$Tuple$second = function (_v0) {

@@ -34,6 +34,7 @@ type Statement
     = SetCounter TextValue IntValue
     | Rnd TextValue IntValue IntValue
     | Block (List Statement)
+    | If Condition Statement Statement
 
 
 runStatement : Statement -> State a -> State a
@@ -65,6 +66,16 @@ runStatement statement state =
 
         Block statements ->
             List.foldl (\s acc -> runStatement s acc) state statements
+
+        If condition success failure ->
+            runStatement
+                (if testCondition condition state then
+                    success
+
+                 else
+                    failure
+                )
+                state
 
 
 type alias State a =

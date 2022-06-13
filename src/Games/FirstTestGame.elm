@@ -108,6 +108,16 @@ dialogs =
             , { text = S "Spend money", condition = Nothing, action = [ incCounter "money" (Counter "turn"), incCounter "money" (Counter "wood"), GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
+            , { text = S "Test Screept"
+              , condition = Nothing
+              , action =
+                    [ Screept <|
+                        Screept.Block
+                            [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)
+                            , Screept.If (Predicate (Counter "rnd_1") Eq (Const 1)) (Screept.SetCounter (S "rnd_s") (Const 100)) (Screept.SetCounter (S "rnd_s") (Const 200))
+                            ]
+                    ]
+              }
             ]
       }
     , { id = "second"
