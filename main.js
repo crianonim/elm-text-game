@@ -5342,23 +5342,14 @@ var $author$project$Games$FirstTestGame$backOption = {
 	condition: $elm$core$Maybe$Nothing,
 	text: $author$project$Screept$S('Go back')
 };
-var $author$project$Game$incCounter = F2(
-	function (counter, intValue) {
-		return $author$project$Game$Screept(
-			A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S(counter),
-				intValue));
-	});
-var $author$project$Game$inc = F2(
-	function (counter, i) {
-		return A2(
-			$author$project$Game$incCounter,
-			counter,
-			$author$project$Screept$Const(i));
-	});
-var $author$project$Game$inc1 = function (counter) {
-	return A2($author$project$Game$inc, counter, 1);
+var $author$project$Screept$inc = function (counter) {
+	return A2(
+		$author$project$Screept$SetCounter,
+		$author$project$Screept$S(counter),
+		A2(
+			$author$project$Screept$Addition,
+			$author$project$Screept$Counter(counter),
+			$author$project$Screept$Const(1)));
 };
 var $author$project$Screept$NOT = function (a) {
 	return {$: 'NOT', a: a};
@@ -5375,6 +5366,9 @@ var $author$project$Game$nonZero = function (gameValue) {
 		$author$project$Game$zero(gameValue));
 };
 var $author$project$Screept$Lt = {$: 'Lt'};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $author$project$Game$recipeToDialogOption = function (_v0) {
 	var crafted = _v0.a;
 	var ingredients = _v0.b;
@@ -5396,12 +5390,20 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 	var ingredientToAction = function (_v1) {
 		var item = _v1.a;
 		var amount = _v1.b;
-		return A2($author$project$Game$inc, item, 0 - amount);
+		return $author$project$Game$Screept(
+			A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S(item),
+				A2(
+					$author$project$Screept$Addition,
+					$author$project$Screept$Counter(item),
+					$author$project$Screept$Const(-amount))));
 	};
 	return {
 		action: A2(
 			$elm$core$List$cons,
-			A2($author$project$Game$inc, crafted, 1),
+			$author$project$Game$Screept(
+				$author$project$Screept$inc(crafted)),
 			A2($elm$core$List$map, ingredientToAction, ingredients)),
 		condition: $elm$core$Maybe$Just(
 			$author$project$Screept$AND(
@@ -5430,15 +5432,6 @@ var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
 				_Utils_Tuple2('stone', 2)
 			]))
 	]);
-var $author$project$Game$rndInts = F3(
-	function (counter, x, y) {
-		return $author$project$Game$Screept(
-			A3(
-				$author$project$Screept$Rnd,
-				$author$project$Screept$S(counter),
-				$author$project$Screept$Const(x),
-				$author$project$Screept$Const(y)));
-	});
 var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 	[
 		{
@@ -5458,11 +5451,17 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$inc1('start_look_around'),
+						$author$project$Game$Screept(
+						$author$project$Screept$inc('start_look_around')),
 						$author$project$Game$Message(
 						$author$project$Screept$S('You noticed a straw bed')),
 						$author$project$Game$Turn(5),
-						A3($author$project$Game$rndInts, 'rrr', 1, 5)
+						$author$project$Game$Screept(
+						A3(
+							$author$project$Screept$Rnd,
+							$author$project$Screept$S('rrr'),
+							$author$project$Screept$Const(1),
+							$author$project$Screept$Const(5)))
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Game$zero(
@@ -5472,7 +5471,8 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$inc1('start_search_bed')
+						$author$project$Game$Screept(
+						$author$project$Screept$inc('start_search_bed'))
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Screept$AND(
@@ -5488,14 +5488,13 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						A2(
-						$author$project$Game$incCounter,
-						'money',
-						$author$project$Screept$Counter('turn')),
-						A2(
-						$author$project$Game$incCounter,
-						'money',
-						$author$project$Screept$Counter('wood')),
+						$author$project$Game$Screept(
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									$author$project$Screept$inc('money'),
+									$author$project$Screept$inc('money')
+								]))),
 						$author$project$Game$GoAction('third')
 					]),
 				condition: $elm$core$Maybe$Nothing,
@@ -5578,10 +5577,14 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
+						$author$project$Game$Screept(
 						A2(
-						$author$project$Game$incCounter,
-						'turn',
-						$author$project$Screept$Const(1)),
+							$author$project$Screept$SetCounter,
+							$author$project$Screept$S('turn'),
+							A2(
+								$author$project$Screept$Addition,
+								$author$project$Screept$Counter('turn'),
+								$author$project$Screept$Const(1)))),
 						$author$project$Game$GoAction('start')
 					]),
 				condition: $elm$core$Maybe$Nothing,
@@ -5788,9 +5791,6 @@ var $elm$random$Random$generate = F2(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
 var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $elm$random$Random$peel = function (_v0) {
 	var state = _v0.a;

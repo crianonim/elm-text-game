@@ -103,9 +103,9 @@ dialogs =
       , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
-            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ inc1 "start_look_around", Message <| S "You noticed a straw bed", Turn 5, rndInts "rrr" 1 5 ] }
-            , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ inc1 "start_search_bed" ] }
-            , { text = S "Spend money", condition = Nothing, action = [ incCounter "money" (Counter "turn"), incCounter "money" (Counter "wood"), GoAction "third" ] }
+            , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
+            , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
+            , { text = S "Spend money", condition = Nothing, action = [ Screept <| Screept.Block [ Screept.inc "money", Screept.inc "money" ], GoAction "third" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
             , { text = S "Test Screept"
@@ -123,7 +123,7 @@ dialogs =
     , { id = "second"
       , text = S "You're at second"
       , options =
-            [ { text = S "Go start", condition = Nothing, action = [ incCounter "turn" (Const 1), GoAction "start" ] }
+            [ { text = S "Go start", condition = Nothing, action = [ Screept <| Screept.SetCounter (S "turn") (Screept.Addition (Counter "turn") (Const 1)), GoAction "start" ] }
             , { text = S "Go third", condition = Nothing, action = [ GoAction "third" ] }
             , backOption
             ]

@@ -30,16 +30,6 @@ zero gameValue =
     Predicate gameValue Eq (Const 0)
 
 
-inc1 : String -> DialogActionExecution
-inc1 counter =
-    inc counter 1
-
-
-inc : String -> Int -> DialogActionExecution
-inc counter i =
-    incCounter counter (Const i)
-
-
 type alias DialogOption =
     { text : TextValue
     , condition : Maybe Condition
@@ -135,7 +125,7 @@ recipeToDialogOption ( crafted, ingredients ) =
 
         ingredientToAction : ( String, Int ) -> DialogActionExecution
         ingredientToAction ( item, amount ) =
-            inc item (0 - amount)
+            Screept (Screept.SetCounter (S item) (Addition (Counter item) (Const -amount)))
 
         ingredientToString : ( String, Int ) -> String
         ingredientToString ( item, amount ) =
@@ -143,20 +133,10 @@ recipeToDialogOption ( crafted, ingredients ) =
     in
     { text = S <| "Craft " ++ crafted ++ " (" ++ String.join ", " (List.map ingredientToString ingredients) ++ ")"
     , condition = Just <| AND (List.map ingredientToCondition ingredients)
-    , action = inc crafted 1 :: List.map ingredientToAction ingredients
+    , action = Screept (Screept.inc crafted) :: List.map ingredientToAction ingredients
     }
 
 
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
-
-
-rndInts : String -> Int -> Int -> DialogActionExecution
-rndInts counter x y =
-    Screept <| Screept.Rnd (S counter) (Const x) (Const y)
-
-
-incCounter : String -> IntValue -> DialogActionExecution
-incCounter counter intValue =
-    Screept <| Screept.SetCounter (S counter) intValue

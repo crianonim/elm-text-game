@@ -162,3 +162,14 @@ testCondition condition gameState =
 
         OR conditions ->
             List.foldl (\c acc -> testCondition c gameState || acc) False conditions
+
+
+
+-----------
+--- Helpers
+-----------
+
+
+inc : String -> Statement
+inc counter =
+    SetCounter (S counter) (Addition (Counter counter) (Const 1))
