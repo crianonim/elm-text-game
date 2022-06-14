@@ -115,10 +115,16 @@ viewMessages msgs =
 viewDialog : GameState -> Game.Dialog -> Html Msg
 viewDialog gameState dialog =
     div [ class "dialog" ]
-        [ p [] [ text <| Screept.getText gameState dialog.text ]
+        [ viewDialogText dialog.text gameState
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.testCondition check gameState) |> Maybe.withDefault True))
         ]
+
+
+viewDialogText : Screept.TextValue -> GameState -> Html msg
+viewDialogText textValue gameState =
+    div []
+        (Screept.getText gameState textValue |> String.split "\n" |> List.map (\par -> p [] [ text par ]))
 
 
 viewDebug : GameState -> Html a
