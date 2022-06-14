@@ -70,6 +70,7 @@ exampleCounters =
     , ( "player_stamina", 19 )
     , ( "player_defence", 7 )
     , ( "player_combat", 5 )
+    , ( "player_scouting", 6 )
     , ( "defeated_goblin", 0 )
     , ( "taken_goblin_treasure", 0 )
     , ( "defeated_wolf", 0 )
@@ -121,7 +122,7 @@ dialogs =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
             , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
-            , { text = S "Spend money", condition = Nothing, action = [ Screept <| Screept.Block [ Screept.inc "money", Screept.inc "money" ], GoAction "third" ] }
+            , { text = S "Game", condition = Nothing, action = [ GoAction "#1" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
             , { text = S "Combat", condition = Nothing, action = [ fightGoblin, GoAction "combat" ] }
@@ -238,7 +239,74 @@ dialogs =
               }
             ]
       }
+    , { id = "#1", text = S """
+    The approach of dawn has turned the sky a milky grey-green, like jade. The sea is a luminous pane of silver. Holding the tiller of your sailing boat, you keep your gaze fixed on the glittering constellation known as the Spider. It marks the north, and by keeping it to port you know you are still on course.
+    The sun appears in a trembling burst of red fire at the rim of the world. Slowly the chill of night gives way to brazen warmth. You lick your parched lips. There is a little water sloshing in the bottom of the barrel by your feet, but not enough to see you through another day.
+    Sealed in a scroll case tucked into your jerkin is the parchment map your grandfather gave to you on his death-bed. You remember his stirring tales of far sea voyages, of kingdoms beyond the western horizon, of sorcerous islands and ruined palaces filled with treasure. As a child you dreamed of nothing else but the magical quests that were in store if you too became an adventurer.
+    You never expected to die in an open boat before your adventures even began.
+    Securing the tiller, you unroll the map and study it again. You hardly need to. Every detail is etched into your memory by now. According to your reckoning, you should have reached the east coast of Harkuna, the great northern continent, days ago.
+    A pasty grey blob splatters on to the map. After a moment of stunned surprise, you look up and curse the seagull circling directly overhead. Then it strikes you – where there’s a seagull, there may be land.
+    You leap to your feet and scan the horizon. Sure enough, a line of white cliffs lie a league to the north. Have you been sailing along the coast all this time without realising the mainland was so close?
+    Steering towards the cliffs, you feel the boat judder against rough waves. A howling wind whips plumes of spindrift across the sea. Breakers pound the high cliffs. The tiller is yanked out of your hands. The little boat is spun around, out of control, and goes plunging in towards the coast.
+    You leap clear at the last second. There is the snap of timber, the roaring crescendo of the waves – and then silence as you go under. Striking out wildly, you try to swim clear of the razor- sharp rocks. For a while the undertow threatens to drag you down, then suddenly a wave catches you and flings you contemptuously up on to the beach.
+    Battered and bedraggled you lie gasping for breath until you hear someone walking along the shore towards you. Wary of danger, you lose no time in getting to your feet. Confronting you is an old man clad in a dirty loin-cloth. His eyes have a feverish bright look that is suggestive of either a mystic or a madman.
+
+      """, options = [ { text = S "...", condition = Nothing, action = [ GoAction "#20" ] } ] }
+    , { id = "#20"
+      , text = S """
+      ‘Well, well, well, what have we here, friends?’ asks the old man. He seems to be talking to someone next to him, although you are certain he is alone. ‘Looks like a washed up adventurer to me!’ he says in answer to his own question, ‘all wet and out of luck.’
+      He carries on having a conversation – a conversation that quickly turns into a heated debate. He is clearly quite mad.
+      ‘Excuse me, umm, EXCUSE ME!,’ you shout above the hubbub in an attempt to grab the old man’s attention. He stops and stares at you.
+      ‘Is this the Isle of the Druids?’ you ask impatiently.
+      ‘Indeed it is,’ says the old man, ‘I see that you are from a far land so it is up to me to welcome you to Harkuna. But I think you may have much to do here as it is written in the stars that someone like you would come. Your destiny awaits you! Follow me, young adventurer.’
+      The old man turns smartly about and begins walking up a path towards some hills. You can just see some sort of monolithic stone structure atop one of them.
+      ‘Come on, come one, I’ll show you the Gates of the World,’ the old man babbles.
+      """
+      , options =
+            [ { text = S "Follow him", condition = Nothing, action = [ GoAction "#192" ] }
+            , { text = S "Explore the coast", condition = Nothing, action = [ GoAction "#128" ] }
+            , { text = S "Head into the nearby forest", condition = Nothing, action = [ GoAction "#257" ] }
+            ]
+      }
+    , { id = "#65"
+      , text = S """
+    There are three stone gates engraved with ancient runes. Each gate is marked with a name – Yellowport, Marlock City, and Wishport. From here, you can see the coast and the whole island, which is heavily forested
+    """
+      , options =
+            [ { text = S "Explore the coastline", condition = Nothing, action = [ GoAction "#128" ] }
+            , { text = S "Head into the forest", condition = Nothing, action = [ GoAction "#257" ] }
+            , { text = S "Step through the Yellowport arch", condition = Nothing, action = [ GoAction "#8" ] }
+            , { text = S "Step through the Marlock City arch", condition = Nothing, action = [ GoAction "#180" ] }
+            , { text = S "Step through the Wishport arch", condition = Nothing, action = [ GoAction "#330" ] }
+            ]
+      }
+    , { id = "#128", text = S """
+      You make your way around the coast. The interior of the island appears to be heavily forested. After a while, however, you come to a bay in which a couple of ships are anchored. A small settlement nestles on the beach, and you make your way towards it
+      """, options = [ { text = S "...", condition = Nothing, action = [ GoAction "#195" ] } ] }
+    , { id = "#192", text = S """
+      During your short trip upward, the old man regales you with tales of your destiny and fate, continuously arguing with himself as he does so.
+      You reach a hill covered with a circle of large obsidian standing stones. Despite the bitter wind that blow across these hills the stones are unweathered and seem almost newly lain.
+      ‘Here are the Gates of the World.’ says the mad old man.
+      The stones are laid in such a way that they form three archways, each carven with mystic symbols and runes of power.
+      ‘Each gate will take you to a part of the world of Harkuna, though I know not where,’ explains the old man. Abruptly, he turns around and sets off down the hill, babbling to himself. His voice fades as he descends the hill, leaving you alone with the brooding stones and the howling wind
+      """, options = [ { text = S "...", condition = Nothing, action = [ GoAction "#65" ] } ] }
+    , { id = "#257", text = S """
+      The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.
+      As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.
+      """, options = [ { text = S "...", condition = Nothing, action = [ Screept <| testAgainstDifficulty "player_scouting" 10, ConditionalAction (nonZero (Counter "test_success")) (GoAction "#630") (GoAction "#36") ] } ] }
     ]
+
+
+testAgainstDifficulty : String -> Int -> Screept.Statement
+testAgainstDifficulty counter diff =
+    Screept.Block
+        [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
+        , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
+        , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
+        , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter counter)) Screept.Gt (Const diff))
+            (Screept.SetCounter (S "test_success") (Const 1))
+            (Screept.SetCounter (S "test_success") (Const 0))
+        ]
 
 
 fightGoblin : DialogActionExecution

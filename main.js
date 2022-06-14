@@ -5738,6 +5738,10 @@ var $author$project$Games$FirstTestGame$config = {showMessages: true, turnCallba
 var $author$project$Screept$AND = function (a) {
 	return {$: 'AND', a: a};
 };
+var $author$project$Game$ConditionalAction = F3(
+	function (a, b, c) {
+		return {$: 'ConditionalAction', a: a, b: b, c: c};
+	});
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
@@ -5916,6 +5920,48 @@ var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
 				_Utils_Tuple2('stone', 2)
 			]))
 	]);
+var $author$project$Games$FirstTestGame$testAgainstDifficulty = F2(
+	function (counter, diff) {
+		return $author$project$Screept$Block(
+			_List_fromArray(
+				[
+					A3(
+					$author$project$Screept$Rnd,
+					$author$project$Screept$S('d6_1'),
+					$author$project$Screept$Const(1),
+					$author$project$Screept$Const(6)),
+					A3(
+					$author$project$Screept$Rnd,
+					$author$project$Screept$S('d6_2'),
+					$author$project$Screept$Const(1),
+					$author$project$Screept$Const(6)),
+					A2(
+					$author$project$Screept$SetCounter,
+					$author$project$Screept$S('2d6'),
+					A2(
+						$author$project$Screept$Addition,
+						$author$project$Screept$Counter('d6_1'),
+						$author$project$Screept$Counter('d6_2'))),
+					A3(
+					$author$project$Screept$If,
+					A3(
+						$author$project$Screept$Predicate,
+						A2(
+							$author$project$Screept$Addition,
+							$author$project$Screept$Counter('2d6'),
+							$author$project$Screept$Counter(counter)),
+						$author$project$Screept$Gt,
+						$author$project$Screept$Const(diff)),
+					A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('test_success'),
+						$author$project$Screept$Const(1)),
+					A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('test_success'),
+						$author$project$Screept$Const(0)))
+				]));
+	});
 var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 	[
 		{
@@ -5972,17 +6018,10 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									$author$project$Screept$inc('money'),
-									$author$project$Screept$inc('money')
-								]))),
-						$author$project$Game$GoAction('third')
+						$author$project$Game$GoAction('#1')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Spend money')
+				text: $author$project$Screept$S('Game')
 			},
 				{
 				action: _List_fromArray(
@@ -6489,6 +6528,151 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			}
 			]),
 		text: $author$project$Screept$S('Goblin Cave')
+	},
+		{
+		id: '#1',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#20')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('...')
+			}
+			]),
+		text: $author$project$Screept$S('\n    The approach of dawn has turned the sky a milky grey-green, like jade. The sea is a luminous pane of silver. Holding the tiller of your sailing boat, you keep your gaze fixed on the glittering constellation known as the Spider. It marks the north, and by keeping it to port you know you are still on course.\n    The sun appears in a trembling burst of red fire at the rim of the world. Slowly the chill of night gives way to brazen warmth. You lick your parched lips. There is a little water sloshing in the bottom of the barrel by your feet, but not enough to see you through another day.\n    Sealed in a scroll case tucked into your jerkin is the parchment map your grandfather gave to you on his death-bed. You remember his stirring tales of far sea voyages, of kingdoms beyond the western horizon, of sorcerous islands and ruined palaces filled with treasure. As a child you dreamed of nothing else but the magical quests that were in store if you too became an adventurer.\n    You never expected to die in an open boat before your adventures even began.\n    Securing the tiller, you unroll the map and study it again. You hardly need to. Every detail is etched into your memory by now. According to your reckoning, you should have reached the east coast of Harkuna, the great northern continent, days ago.\n    A pasty grey blob splatters on to the map. After a moment of stunned surprise, you look up and curse the seagull circling directly overhead. Then it strikes you – where there’s a seagull, there may be land.\n    You leap to your feet and scan the horizon. Sure enough, a line of white cliffs lie a league to the north. Have you been sailing along the coast all this time without realising the mainland was so close?\n    Steering towards the cliffs, you feel the boat judder against rough waves. A howling wind whips plumes of spindrift across the sea. Breakers pound the high cliffs. The tiller is yanked out of your hands. The little boat is spun around, out of control, and goes plunging in towards the coast.\n    You leap clear at the last second. There is the snap of timber, the roaring crescendo of the waves – and then silence as you go under. Striking out wildly, you try to swim clear of the razor- sharp rocks. For a while the undertow threatens to drag you down, then suddenly a wave catches you and flings you contemptuously up on to the beach.\n    Battered and bedraggled you lie gasping for breath until you hear someone walking along the shore towards you. Wary of danger, you lose no time in getting to your feet. Confronting you is an old man clad in a dirty loin-cloth. His eyes have a feverish bright look that is suggestive of either a mystic or a madman.\n\n      ')
+	},
+		{
+		id: '#20',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#192')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Follow him')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#128')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Explore the coast')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#257')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Head into the nearby forest')
+			}
+			]),
+		text: $author$project$Screept$S('\n      ‘Well, well, well, what have we here, friends?’ asks the old man. He seems to be talking to someone next to him, although you are certain he is alone. ‘Looks like a washed up adventurer to me!’ he says in answer to his own question, ‘all wet and out of luck.’\n      He carries on having a conversation – a conversation that quickly turns into a heated debate. He is clearly quite mad.\n      ‘Excuse me, umm, EXCUSE ME!,’ you shout above the hubbub in an attempt to grab the old man’s attention. He stops and stares at you.\n      ‘Is this the Isle of the Druids?’ you ask impatiently.\n      ‘Indeed it is,’ says the old man, ‘I see that you are from a far land so it is up to me to welcome you to Harkuna. But I think you may have much to do here as it is written in the stars that someone like you would come. Your destiny awaits you! Follow me, young adventurer.’\n      The old man turns smartly about and begins walking up a path towards some hills. You can just see some sort of monolithic stone structure atop one of them.\n      ‘Come on, come one, I’ll show you the Gates of the World,’ the old man babbles.\n      ')
+	},
+		{
+		id: '#65',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#128')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Explore the coastline')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#257')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Head into the forest')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#8')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Step through the Yellowport arch')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#180')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Step through the Marlock City arch')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#330')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('Step through the Wishport arch')
+			}
+			]),
+		text: $author$project$Screept$S('\n    There are three stone gates engraved with ancient runes. Each gate is marked with a name – Yellowport, Marlock City, and Wishport. From here, you can see the coast and the whole island, which is heavily forested\n    ')
+	},
+		{
+		id: '#128',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#195')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('...')
+			}
+			]),
+		text: $author$project$Screept$S('\n      You make your way around the coast. The interior of the island appears to be heavily forested. After a while, however, you come to a bay in which a couple of ships are anchored. A small settlement nestles on the beach, and you make your way towards it\n      ')
+	},
+		{
+		id: '#192',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$GoAction('#65')
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('...')
+			}
+			]),
+		text: $author$project$Screept$S('\n      During your short trip upward, the old man regales you with tales of your destiny and fate, continuously arguing with himself as he does so.\n      You reach a hill covered with a circle of large obsidian standing stones. Despite the bitter wind that blow across these hills the stones are unweathered and seem almost newly lain.\n      ‘Here are the Gates of the World.’ says the mad old man.\n      The stones are laid in such a way that they form three archways, each carven with mystic symbols and runes of power.\n      ‘Each gate will take you to a part of the world of Harkuna, though I know not where,’ explains the old man. Abruptly, he turns around and sets off down the hill, babbling to himself. His voice fades as he descends the hill, leaving you alone with the brooding stones and the howling wind\n      ')
+	},
+		{
+		id: '#257',
+		options: _List_fromArray(
+			[
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$Screept(
+						A2($author$project$Games$FirstTestGame$testAgainstDifficulty, 'player_scouting', 10)),
+						A3(
+						$author$project$Game$ConditionalAction,
+						$author$project$Game$nonZero(
+							$author$project$Screept$Counter('test_success')),
+						$author$project$Game$GoAction('#630'),
+						$author$project$Game$GoAction('#36'))
+					]),
+				condition: $elm$core$Maybe$Nothing,
+				text: $author$project$Screept$S('...')
+			}
+			]),
+		text: $author$project$Screept$S('\n      The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.\n      As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.\n      ')
 	}
 	]);
 var $elm$random$Random$Generate = function (a) {
@@ -6813,6 +6997,7 @@ var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromLis
 			_Utils_Tuple2('player_stamina', 19),
 			_Utils_Tuple2('player_defence', 7),
 			_Utils_Tuple2('player_combat', 5),
+			_Utils_Tuple2('player_scouting', 6),
 			_Utils_Tuple2('defeated_goblin', 0),
 			_Utils_Tuple2('taken_goblin_treasure', 0),
 			_Utils_Tuple2('defeated_wolf', 0)
@@ -7584,61 +7769,75 @@ var $elm$core$Tuple$second = function (_v0) {
 };
 var $author$project$Game$executeAction = F3(
 	function (turnCallback, dialogActionExecution, gameState) {
-		switch (dialogActionExecution.$) {
-			case 'GoAction':
-				var dialogId = dialogActionExecution.a;
-				return _Utils_update(
-					gameState,
-					{
-						dialogStack: A2($mhoare$elm_stack$Stack$push, dialogId, gameState.dialogStack)
-					});
-			case 'GoBackAction':
-				return _Utils_update(
-					gameState,
-					{
-						dialogStack: $mhoare$elm_stack$Stack$pop(gameState.dialogStack).b
-					});
-			case 'DoNothing':
-				return gameState;
-			case 'Message':
-				var msg = dialogActionExecution.a;
-				return _Utils_update(
-					gameState,
-					{
-						messages: A2(
-							$elm$core$List$cons,
-							A2($author$project$Screept$getText, gameState, msg),
-							gameState.messages)
-					});
-			case 'Turn':
-				var t = dialogActionExecution.a;
-				var runTurn = F2(
-					function (left, gs) {
-						runTurn:
-						while (true) {
-							var currentTurn = A2(
-								$author$project$Screept$getIntValueWithDefault,
-								$author$project$Screept$Counter('turn'),
-								gs);
-							if (!left) {
-								return gs;
-							} else {
-								var $temp$left = left - 1,
-									$temp$gs = A3(
-									$author$project$Screept$addCounter,
-									'turn',
-									1,
-									A2(turnCallback, currentTurn, gs));
-								left = $temp$left;
-								gs = $temp$gs;
-								continue runTurn;
+		executeAction:
+		while (true) {
+			switch (dialogActionExecution.$) {
+				case 'GoAction':
+					var dialogId = dialogActionExecution.a;
+					return _Utils_update(
+						gameState,
+						{
+							dialogStack: A2($mhoare$elm_stack$Stack$push, dialogId, gameState.dialogStack)
+						});
+				case 'GoBackAction':
+					return _Utils_update(
+						gameState,
+						{
+							dialogStack: $mhoare$elm_stack$Stack$pop(gameState.dialogStack).b
+						});
+				case 'DoNothing':
+					return gameState;
+				case 'Message':
+					var msg = dialogActionExecution.a;
+					return _Utils_update(
+						gameState,
+						{
+							messages: A2(
+								$elm$core$List$cons,
+								A2($author$project$Screept$getText, gameState, msg),
+								gameState.messages)
+						});
+				case 'Turn':
+					var t = dialogActionExecution.a;
+					var runTurn = F2(
+						function (left, gs) {
+							runTurn:
+							while (true) {
+								var currentTurn = A2(
+									$author$project$Screept$getIntValueWithDefault,
+									$author$project$Screept$Counter('turn'),
+									gs);
+								if (!left) {
+									return gs;
+								} else {
+									var $temp$left = left - 1,
+										$temp$gs = A3(
+										$author$project$Screept$addCounter,
+										'turn',
+										1,
+										A2(turnCallback, currentTurn, gs));
+									left = $temp$left;
+									gs = $temp$gs;
+									continue runTurn;
+								}
 							}
-						}
-					});
-				return A2(runTurn, t, gameState);
-			default:
-				var statement = dialogActionExecution.a;
-				return A2($author$project$Screept$runStatement, statement, gameState);
+						});
+					return A2(runTurn, t, gameState);
+				case 'Screept':
+					var statement = dialogActionExecution.a;
+					return A2($author$project$Screept$runStatement, statement, gameState);
+				default:
+					var condition = dialogActionExecution.a;
+					var success = dialogActionExecution.b;
+					var failure = dialogActionExecution.c;
+					var $temp$turnCallback = turnCallback,
+						$temp$dialogActionExecution = A2($author$project$Screept$testCondition, condition, gameState) ? success : failure,
+						$temp$gameState = gameState;
+					turnCallback = $temp$turnCallback;
+					dialogActionExecution = $temp$dialogActionExecution;
+					gameState = $temp$gameState;
+					continue executeAction;
+			}
 		}
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -7996,6 +8195,27 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $author$project$Main$viewDialogText = F2(
+	function (textValue, gameState) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (par) {
+					return A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(par)
+							]));
+				},
+				A2(
+					$elm$core$String$split,
+					'\n',
+					A2($author$project$Screept$getText, gameState, textValue))));
+	});
 var $author$project$Main$ClickDialog = function (a) {
 	return {$: 'ClickDialog', a: a};
 };
@@ -8042,14 +8262,7 @@ var $author$project$Main$viewDialog = F2(
 				]),
 			_List_fromArray(
 				[
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							A2($author$project$Screept$getText, gameState, dialog.text))
-						])),
+					A2($author$project$Main$viewDialogText, dialog.text, gameState),
 					A2(
 					$elm$html$Html$div,
 					_List_Nil,
