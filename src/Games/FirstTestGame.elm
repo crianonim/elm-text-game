@@ -75,9 +75,19 @@ exampleCounters =
         |> Dict.fromList
 
 
+exampleLabels : Dict String String
+exampleLabels =
+    [ ( "player_name", "Jan" )
+    , ( "enemy_marker", "" )
+    , ( "enemy_name", "" )
+    ]
+        |> Dict.fromList
+
+
 initialGameState : GameState
 initialGameState =
     { counters = exampleCounters
+    , labels = exampleLabels
     , dialogStack = Stack.push "start" Stack.initialise
     , messages = exampleMessages
     , rnd = Random.initialSeed 666
@@ -160,7 +170,7 @@ dialogs =
             ]
       }
     , { id = "combat"
-      , text = Special [ S "Combat. ", S "You have ", GameValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", GameValueText (Counter "enemy_stamina") ]
+      , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", GameValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", GameValueText (Counter "enemy_stamina") ]
       , options =
             [ { text = S "Hit enemy"
               , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
@@ -197,6 +207,7 @@ dialogs =
                                 (Screept.Block
                                     [ Screept.SetCounter (S "enemy_damage") (Const 0)
                                     , Screept.SetCounter (S "fight_won") (Const 1)
+                                    , Screept.SetCounter (Label "enemy_marker") (Const 1)
                                     ]
                                 )
                             ]
@@ -226,6 +237,8 @@ fightGoblin =
             , Screept.SetCounter (S "enemy_combat") (Const 6)
             , Screept.SetCounter (S "fight_won") (Const 0)
             , Screept.SetCounter (S "fight_lost") (Const 0)
+            , Screept.SetLabel (S "enemy_marker") (S "defeated_goblin")
+            , Screept.SetLabel (S "enemy_name") (S "Old Goblin")
             ]
 
 

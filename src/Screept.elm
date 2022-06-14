@@ -29,10 +29,12 @@ type TextValue
     | Special (List TextValue)
     | Conditional Condition TextValue
     | GameValueText IntValue
+    | Label String
 
 
 type Statement
     = SetCounter TextValue IntValue
+    | SetLabel TextValue TextValue
     | Rnd TextValue IntValue IntValue
     | Block (List Statement)
     | If Condition Statement Statement
@@ -43,9 +45,12 @@ runStatement : Statement -> State a -> State a
 runStatement statement state =
     case statement of
         SetCounter textValue intValue ->
-            getMaybeGameValue intValue state
+            getMaybeIntValue intValue state
                 |> Maybe.map (\v -> setCounter (getText state textValue) v state)
                 |> Maybe.withDefault state
+
+        SetLabel label content ->
+            setLabel (getText state label) (getText state content) state
 
         Rnd counter mx my ->
             Maybe.map2
@@ -62,8 +67,8 @@ runStatement statement state =
                     in
                     setCounter counterName result newState
                 )
-                (getMaybeGameValue mx state)
-                (getMaybeGameValue my state)
+                (getMaybeIntValue mx state)
+                (getMaybeIntValue my state)
                 |> Maybe.withDefault state
 
         Block statements ->
@@ -84,7 +89,7 @@ runStatement statement state =
 
 
 type alias State a =
-    { a | counters : Dict String Int, rnd : Random.Seed }
+    { a | counters : Dict String Int, labels : Dict String String, rnd : Random.Seed }
 
 
 getText : State a -> TextValue -> String
@@ -104,16 +109,19 @@ getText gameState text =
                 ""
 
         GameValueText gameValue ->
-            getGameValueWithDefault gameValue gameState |> String.fromInt
+            getIntValueWithDefault gameValue gameState |> String.fromInt
+
+        Label label ->
+            getLabelWithDefault label gameState
 
 
-getGameValueWithDefault : IntValue -> State a -> Int
-getGameValueWithDefault gameValue gameState =
-    getMaybeGameValue gameValue gameState |> Maybe.withDefault 0
+getIntValueWithDefault : IntValue -> State a -> Int
+getIntValueWithDefault gameValue gameState =
+    getMaybeIntValue gameValue gameState |> Maybe.withDefault 0
 
 
-getMaybeGameValue : IntValue -> State a -> Maybe Int
-getMaybeGameValue gameValue gameState =
+getMaybeIntValue : IntValue -> State a -> Maybe Int
+getMaybeIntValue gameValue gameState =
     case gameValue of
         Const int ->
             Just int
@@ -122,10 +130,20 @@ getMaybeGameValue gameValue gameState =
             Dict.get counter gameState.counters
 
         Addition mx my ->
-            Maybe.map2 (\x y -> x + y) (getMaybeGameValue mx gameState) (getMaybeGameValue my gameState)
+            Maybe.map2 (\x y -> x + y) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
 
         Subtraction mx my ->
-            Maybe.map2 (\x y -> x - y) (getMaybeGameValue mx gameState) (getMaybeGameValue my gameState)
+            Maybe.map2 (\x y -> x - y) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
+
+
+getMaybeLabel : String -> State a -> Maybe String
+getMaybeLabel label state =
+    Dict.get label state.labels
+
+
+getLabelWithDefault : String -> State a -> String
+getLabelWithDefault label state =
+    getMaybeLabel label state |> Maybe.withDefault ""
 
 
 addCounter : String -> Int -> State a -> State a
@@ -136,6 +154,11 @@ addCounter counter add gameState =
 setCounter : String -> Int -> State a -> State a
 setCounter counter x gameState =
     { gameState | counters = Dict.insert counter x gameState.counters }
+
+
+setLabel : String -> String -> State a -> State a
+setLabel counter x gameState =
+    { gameState | labels = Dict.insert counter x gameState.labels }
 
 
 testCondition : Condition -> State a -> Bool
@@ -155,7 +178,7 @@ testCondition condition gameState =
                         Gt ->
                             (>)
             in
-            Maybe.map2 comp (getMaybeGameValue x gameState) (getMaybeGameValue y gameState)
+            Maybe.map2 comp (getMaybeIntValue x gameState) (getMaybeIntValue y gameState)
                 |> Maybe.withDefault False
     in
     case condition of

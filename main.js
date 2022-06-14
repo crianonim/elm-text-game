@@ -5310,6 +5310,9 @@ var $author$project$Screept$If = F3(
 	function (a, b, c) {
 		return {$: 'If', a: a, b: b, c: c};
 	});
+var $author$project$Screept$Label = function (a) {
+	return {$: 'Label', a: a};
+};
 var $author$project$Screept$Lt = {$: 'Lt'};
 var $author$project$Game$Message = function (a) {
 	return {$: 'Message', a: a};
@@ -5349,6 +5352,10 @@ var $author$project$Games$FirstTestGame$backOption = {
 	condition: $elm$core$Maybe$Nothing,
 	text: $author$project$Screept$S('Go back')
 };
+var $author$project$Screept$SetLabel = F2(
+	function (a, b) {
+		return {$: 'SetLabel', a: a, b: b};
+	});
 var $author$project$Games$FirstTestGame$fightGoblin = $author$project$Game$Screept(
 	$author$project$Screept$Block(
 		_List_fromArray(
@@ -5372,7 +5379,15 @@ var $author$project$Games$FirstTestGame$fightGoblin = $author$project$Game$Scree
 				A2(
 				$author$project$Screept$SetCounter,
 				$author$project$Screept$S('fight_lost'),
-				$author$project$Screept$Const(0))
+				$author$project$Screept$Const(0)),
+				A2(
+				$author$project$Screept$SetLabel,
+				$author$project$Screept$S('enemy_marker'),
+				$author$project$Screept$S('defeated_goblin')),
+				A2(
+				$author$project$Screept$SetLabel,
+				$author$project$Screept$S('enemy_name'),
+				$author$project$Screept$S('Old Goblin'))
 			])));
 var $author$project$Screept$inc = function (counter) {
 	return A2(
@@ -5874,6 +5889,10 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 												A2(
 												$author$project$Screept$SetCounter,
 												$author$project$Screept$S('fight_won'),
+												$author$project$Screept$Const(1)),
+												A2(
+												$author$project$Screept$SetCounter,
+												$author$project$Screept$Label('enemy_marker'),
 												$author$project$Screept$Const(1))
 											])))
 								]))),
@@ -5953,7 +5972,9 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			_List_fromArray(
 				[
 					$author$project$Screept$S('Combat. '),
-					$author$project$Screept$S('You have '),
+					$author$project$Screept$S('You are fighting '),
+					$author$project$Screept$Label('enemy_name'),
+					$author$project$Screept$S(' .You have '),
 					$author$project$Screept$GameValueText(
 					$author$project$Screept$Counter('player_stamina')),
 					$author$project$Screept$S(' stamina. '),
@@ -6305,6 +6326,13 @@ var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromLis
 			_Utils_Tuple2('player_combat', 5),
 			_Utils_Tuple2('defeated_goblin', 0)
 		]));
+var $author$project$Games$FirstTestGame$exampleLabels = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('player_name', 'Jan'),
+			_Utils_Tuple2('enemy_marker', ''),
+			_Utils_Tuple2('enemy_name', '')
+		]));
 var $author$project$Games$FirstTestGame$exampleMessages = _List_fromArray(
 	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
 var $mhoare$elm_stack$Stack$Stack = function (a) {
@@ -6320,6 +6348,7 @@ var $mhoare$elm_stack$Stack$push = F2(
 var $author$project$Games$FirstTestGame$initialGameState = {
 	counters: $author$project$Games$FirstTestGame$exampleCounters,
 	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
+	labels: $author$project$Games$FirstTestGame$exampleLabels,
 	messages: $author$project$Games$FirstTestGame$exampleMessages,
 	rnd: $elm$random$Random$initialSeed(666)
 };
@@ -6795,7 +6824,7 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
-var $author$project$Screept$getMaybeGameValue = F2(
+var $author$project$Screept$getMaybeIntValue = F2(
 	function (gameValue, gameState) {
 		switch (gameValue.$) {
 			case 'Const':
@@ -6813,8 +6842,8 @@ var $author$project$Screept$getMaybeGameValue = F2(
 						function (x, y) {
 							return x + y;
 						}),
-					A2($author$project$Screept$getMaybeGameValue, mx, gameState),
-					A2($author$project$Screept$getMaybeGameValue, my, gameState));
+					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
+					A2($author$project$Screept$getMaybeIntValue, my, gameState));
 			default:
 				var mx = gameValue.a;
 				var my = gameValue.b;
@@ -6824,8 +6853,8 @@ var $author$project$Screept$getMaybeGameValue = F2(
 						function (x, y) {
 							return x - y;
 						}),
-					A2($author$project$Screept$getMaybeGameValue, mx, gameState),
-					A2($author$project$Screept$getMaybeGameValue, my, gameState));
+					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
+					A2($author$project$Screept$getMaybeIntValue, my, gameState));
 		}
 	});
 var $elm$core$Maybe$withDefault = F2(
@@ -6837,16 +6866,27 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Screept$getGameValueWithDefault = F2(
+var $author$project$Screept$getIntValueWithDefault = F2(
 	function (gameValue, gameState) {
 		return A2(
 			$elm$core$Maybe$withDefault,
 			0,
-			A2($author$project$Screept$getMaybeGameValue, gameValue, gameState));
+			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
 	});
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
+var $author$project$Screept$getMaybeLabel = F2(
+	function (label, state) {
+		return A2($elm$core$Dict$get, label, state.labels);
+	});
+var $author$project$Screept$getLabelWithDefault = F2(
+	function (label, state) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2($author$project$Screept$getMaybeLabel, label, state));
+	});
 var $elm$core$Basics$not = _Basics_not;
 var $author$project$Screept$testCondition = F2(
 	function (condition, gameState) {
@@ -6868,8 +6908,8 @@ var $author$project$Screept$testCondition = F2(
 					A3(
 						$elm$core$Maybe$map2,
 						comp,
-						A2($author$project$Screept$getMaybeGameValue, x, gameState),
-						A2($author$project$Screept$getMaybeGameValue, y, gameState)));
+						A2($author$project$Screept$getMaybeIntValue, x, gameState),
+						A2($author$project$Screept$getMaybeIntValue, y, gameState)));
 			});
 		switch (condition.$) {
 			case 'Predicate':
@@ -6929,10 +6969,13 @@ var $author$project$Screept$getText = F2(
 					} else {
 						return '';
 					}
-				default:
+				case 'GameValueText':
 					var gameValue = text.a;
 					return $elm$core$String$fromInt(
-						A2($author$project$Screept$getGameValueWithDefault, gameValue, gameState));
+						A2($author$project$Screept$getIntValueWithDefault, gameValue, gameState));
+				default:
+					var label = text.a;
+					return A2($author$project$Screept$getLabelWithDefault, label, gameState);
 			}
 		}
 	});
@@ -6958,6 +7001,14 @@ var $author$project$Screept$setCounter = F3(
 				counters: A3($elm$core$Dict$insert, counter, x, gameState.counters)
 			});
 	});
+var $author$project$Screept$setLabel = F3(
+	function (counter, x, gameState) {
+		return _Utils_update(
+			gameState,
+			{
+				labels: A3($elm$core$Dict$insert, counter, x, gameState.labels)
+			});
+	});
 var $author$project$Screept$runStatement = F2(
 	function (statement, state) {
 		runStatement:
@@ -6978,7 +7029,15 @@ var $author$project$Screept$runStatement = F2(
 									v,
 									state);
 							},
-							A2($author$project$Screept$getMaybeGameValue, intValue, state)));
+							A2($author$project$Screept$getMaybeIntValue, intValue, state)));
+				case 'SetLabel':
+					var label = statement.a;
+					var content = statement.b;
+					return A3(
+						$author$project$Screept$setLabel,
+						A2($author$project$Screept$getText, state, label),
+						A2($author$project$Screept$getText, state, content),
+						state);
 				case 'Rnd':
 					var counter = statement.a;
 					var mx = statement.b;
@@ -7002,8 +7061,8 @@ var $author$project$Screept$runStatement = F2(
 										{rnd: newSeed});
 									return A3($author$project$Screept$setCounter, counterName, result, newState);
 								}),
-							A2($author$project$Screept$getMaybeGameValue, mx, state),
-							A2($author$project$Screept$getMaybeGameValue, my, state)));
+							A2($author$project$Screept$getMaybeIntValue, mx, state),
+							A2($author$project$Screept$getMaybeIntValue, my, state)));
 				case 'Block':
 					var statements = statement.a;
 					return A3(
@@ -7067,7 +7126,7 @@ var $author$project$Game$executeAction = F3(
 						runTurn:
 						while (true) {
 							var currentTurn = A2(
-								$author$project$Screept$getGameValueWithDefault,
+								$author$project$Screept$getIntValueWithDefault,
 								$author$project$Screept$Counter('turn'),
 								gs);
 							if (!left) {

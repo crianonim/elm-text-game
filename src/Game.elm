@@ -8,6 +8,7 @@ import Stack exposing (Stack)
 
 type alias GameState =
     { counters : Dict String Int
+    , labels : Dict String String
     , dialogStack : Stack DialogId
     , messages : List String
     , rnd : Random.Seed
@@ -94,7 +95,7 @@ executeAction turnCallback dialogActionExecution gameState =
                 runTurn left gs =
                     let
                         currentTurn =
-                            Screept.getGameValueWithDefault (Counter "turn") gs
+                            Screept.getIntValueWithDefault (Counter "turn") gs
                     in
                     if left == 0 then
                         gs
