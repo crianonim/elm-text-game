@@ -45,6 +45,7 @@ type DialogActionExecution
     | Turn Int
     | DoNothing
     | Screept Screept.Statement
+    | ConditionalAction Condition DialogActionExecution DialogActionExecution
 
 
 type alias DialogId =
@@ -110,6 +111,16 @@ executeAction turnCallback dialogActionExecution gameState =
 
         Screept statement ->
             Screept.runStatement statement gameState
+
+        ConditionalAction condition success failure ->
+            executeAction turnCallback
+                (if Screept.testCondition condition gameState then
+                    success
+
+                 else
+                    failure
+                )
+                gameState
 
 
 setRndSeed : Random.Seed -> GameState -> GameState
