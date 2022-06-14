@@ -7,6 +7,7 @@ import Games.FirstTestGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Json.Encode as E
 import Platform.Cmd exposing (Cmd)
 import Random
 import Screept
@@ -15,6 +16,10 @@ import Stack exposing (Stack)
 
 main : Program () Model Msg
 main =
+    let
+        _ =
+            Debug.log "JSON" (E.encode 1 (Screept.encodeStatement Screept.example))
+    in
     Browser.element
         { init = init
         , update = update
@@ -96,6 +101,7 @@ view model =
 
           else
             text ""
+        , pre [] [ text (E.encode 1 (Screept.encodeStatement Screept.example)) ]
         ]
 
 

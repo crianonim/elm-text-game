@@ -5242,6 +5242,426 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Screept$encodeIntValue = function (intValue) {
+	switch (intValue.$) {
+		case 'Const':
+			var _int = intValue.a;
+			return $elm$json$Json$Encode$int(_int);
+		case 'Counter':
+			var s = intValue.a;
+			return $elm$json$Json$Encode$string(s);
+		case 'Addition':
+			var x = intValue.a;
+			var y = intValue.b;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'op',
+						$elm$json$Json$Encode$string('+')),
+						_Utils_Tuple2(
+						'x',
+						$author$project$Screept$encodeIntValue(x)),
+						_Utils_Tuple2(
+						'y',
+						$author$project$Screept$encodeIntValue(y))
+					]));
+		default:
+			var x = intValue.a;
+			var y = intValue.b;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'op',
+						$elm$json$Json$Encode$string('-')),
+						_Utils_Tuple2(
+						'x',
+						$author$project$Screept$encodeIntValue(x)),
+						_Utils_Tuple2(
+						'y',
+						$author$project$Screept$encodeIntValue(y))
+					]));
+	}
+};
+var $author$project$Screept$encodePredicateOp = function (predicateOp) {
+	switch (predicateOp.$) {
+		case 'Eq':
+			return $elm$json$Json$Encode$string('=');
+		case 'Gt':
+			return $elm$json$Json$Encode$string('>');
+		default:
+			return $elm$json$Json$Encode$string('<');
+	}
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$Screept$encodeCondition = function (condition) {
+	switch (condition.$) {
+		case 'Predicate':
+			var x = condition.a;
+			var predicateOp = condition.b;
+			var y = condition.c;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'PredOp',
+						$author$project$Screept$encodePredicateOp(predicateOp)),
+						_Utils_Tuple2(
+						'x',
+						$author$project$Screept$encodeIntValue(x)),
+						_Utils_Tuple2(
+						'y',
+						$author$project$Screept$encodeIntValue(y))
+					]));
+		case 'NOT':
+			var c = condition.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'NOT',
+						$author$project$Screept$encodeCondition(c))
+					]));
+		case 'AND':
+			var conditions = condition.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'AND',
+						A2($elm$json$Json$Encode$list, $author$project$Screept$encodeCondition, conditions))
+					]));
+		default:
+			var conditions = condition.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'OR',
+						A2($elm$json$Json$Encode$list, $author$project$Screept$encodeCondition, conditions))
+					]));
+	}
+};
+var $author$project$Screept$encodeTextValue = function (textValue) {
+	switch (textValue.$) {
+		case 'S':
+			var s = textValue.a;
+			return $elm$json$Json$Encode$string(s);
+		case 'Special':
+			var textValues = textValue.a;
+			return A2($elm$json$Json$Encode$list, $author$project$Screept$encodeTextValue, textValues);
+		case 'Conditional':
+			var condition = textValue.a;
+			var t = textValue.b;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'condition',
+						$author$project$Screept$encodeCondition(condition)),
+						_Utils_Tuple2(
+						'text',
+						$author$project$Screept$encodeTextValue(t))
+					]));
+		case 'IntValueText':
+			var intValue = textValue.a;
+			return $author$project$Screept$encodeIntValue(intValue);
+		default:
+			var string = textValue.a;
+			return $elm$json$Json$Encode$string('$' + string);
+	}
+};
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Screept$encodeStatement = function (statement) {
+	switch (statement.$) {
+		case 'SetCounter':
+			var textValue = statement.a;
+			var intValue = statement.b;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'setCounter',
+						$author$project$Screept$encodeTextValue(textValue)),
+						_Utils_Tuple2(
+						'value',
+						$author$project$Screept$encodeIntValue(intValue))
+					]));
+		case 'SetLabel':
+			var textValue = statement.a;
+			var value = statement.b;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'setLabel',
+						$author$project$Screept$encodeTextValue(textValue)),
+						_Utils_Tuple2(
+						'value',
+						$author$project$Screept$encodeTextValue(value))
+					]));
+		case 'Rnd':
+			var counter = statement.a;
+			var min = statement.b;
+			var max = statement.c;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'rnd',
+						$elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'counter',
+									$author$project$Screept$encodeTextValue(counter)),
+									_Utils_Tuple2(
+									'min',
+									$author$project$Screept$encodeIntValue(min)),
+									_Utils_Tuple2(
+									'max',
+									$author$project$Screept$encodeIntValue(max))
+								])))
+					]));
+		case 'Block':
+			var statements = statement.a;
+			return A2($elm$json$Json$Encode$list, $author$project$Screept$encodeStatement, statements);
+		case 'If':
+			var condition = statement.a;
+			var success = statement.b;
+			var failure = statement.c;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'if',
+						$elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'condition',
+									$author$project$Screept$encodeCondition(condition)),
+									_Utils_Tuple2(
+									'success',
+									$author$project$Screept$encodeStatement(success)),
+									_Utils_Tuple2(
+									'failure',
+									$author$project$Screept$encodeStatement(failure))
+								])))
+					]));
+		default:
+			return $elm$json$Json$Encode$null;
+	}
+};
+var $author$project$Screept$Addition = F2(
+	function (a, b) {
+		return {$: 'Addition', a: a, b: b};
+	});
+var $author$project$Screept$Block = function (a) {
+	return {$: 'Block', a: a};
+};
+var $author$project$Screept$Const = function (a) {
+	return {$: 'Const', a: a};
+};
+var $author$project$Screept$Counter = function (a) {
+	return {$: 'Counter', a: a};
+};
+var $author$project$Screept$Gt = {$: 'Gt'};
+var $author$project$Screept$If = F3(
+	function (a, b, c) {
+		return {$: 'If', a: a, b: b, c: c};
+	});
+var $author$project$Screept$Label = function (a) {
+	return {$: 'Label', a: a};
+};
+var $author$project$Screept$Lt = {$: 'Lt'};
+var $author$project$Screept$None = {$: 'None'};
+var $author$project$Screept$Predicate = F3(
+	function (a, b, c) {
+		return {$: 'Predicate', a: a, b: b, c: c};
+	});
+var $author$project$Screept$Rnd = F3(
+	function (a, b, c) {
+		return {$: 'Rnd', a: a, b: b, c: c};
+	});
+var $author$project$Screept$S = function (a) {
+	return {$: 'S', a: a};
+};
+var $author$project$Screept$SetCounter = F2(
+	function (a, b) {
+		return {$: 'SetCounter', a: a, b: b};
+	});
+var $author$project$Screept$Subtraction = F2(
+	function (a, b) {
+		return {$: 'Subtraction', a: a, b: b};
+	});
+var $author$project$Screept$example = $author$project$Screept$Block(
+	_List_fromArray(
+		[
+			A3(
+			$author$project$Screept$Rnd,
+			$author$project$Screept$S('rnd_d6_1'),
+			$author$project$Screept$Const(1),
+			$author$project$Screept$Const(6)),
+			A3(
+			$author$project$Screept$Rnd,
+			$author$project$Screept$S('rnd_d6_2'),
+			$author$project$Screept$Const(1),
+			$author$project$Screept$Const(6)),
+			A2(
+			$author$project$Screept$SetCounter,
+			$author$project$Screept$S('rnd_2d6'),
+			A2(
+				$author$project$Screept$Addition,
+				$author$project$Screept$Counter('rnd_d6_1'),
+				$author$project$Screept$Counter('rnd_d6_2'))),
+			A2(
+			$author$project$Screept$SetCounter,
+			$author$project$Screept$S('player_attack'),
+			A2(
+				$author$project$Screept$Addition,
+				$author$project$Screept$Counter('rnd_2d6'),
+				$author$project$Screept$Counter('player_combat'))),
+			A2(
+			$author$project$Screept$SetCounter,
+			$author$project$Screept$S('player_damage'),
+			A2(
+				$author$project$Screept$Subtraction,
+				$author$project$Screept$Counter('player_attack'),
+				$author$project$Screept$Counter('enemy_defence'))),
+			A3(
+			$author$project$Screept$If,
+			A3(
+				$author$project$Screept$Predicate,
+				$author$project$Screept$Counter('player_damage'),
+				$author$project$Screept$Gt,
+				$author$project$Screept$Const(0)),
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('enemy_stamina'),
+						A2(
+							$author$project$Screept$Subtraction,
+							$author$project$Screept$Counter('enemy_stamina'),
+							$author$project$Screept$Counter('player_damage')))
+					])),
+			$author$project$Screept$None),
+			A3(
+			$author$project$Screept$If,
+			A3(
+				$author$project$Screept$Predicate,
+				$author$project$Screept$Counter('enemy_stamina'),
+				$author$project$Screept$Gt,
+				$author$project$Screept$Const(0)),
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('rnd_d6_1'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('rnd_d6_2'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('rnd_2d6'),
+						A2(
+							$author$project$Screept$Addition,
+							$author$project$Screept$Counter('rnd_d6_1'),
+							$author$project$Screept$Counter('rnd_d6_2'))),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('enemy_attack'),
+						A2(
+							$author$project$Screept$Addition,
+							$author$project$Screept$Counter('rnd_2d6'),
+							$author$project$Screept$Counter('enemy_combat'))),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('enemy_damage'),
+						A2(
+							$author$project$Screept$Subtraction,
+							$author$project$Screept$Counter('enemy_attack'),
+							$author$project$Screept$Counter('player_defence'))),
+						A3(
+						$author$project$Screept$If,
+						A3(
+							$author$project$Screept$Predicate,
+							$author$project$Screept$Counter('enemy_damage'),
+							$author$project$Screept$Gt,
+							$author$project$Screept$Const(0)),
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('player_stamina'),
+									A2(
+										$author$project$Screept$Subtraction,
+										$author$project$Screept$Counter('player_stamina'),
+										$author$project$Screept$Counter('enemy_damage'))),
+									A3(
+									$author$project$Screept$If,
+									A3(
+										$author$project$Screept$Predicate,
+										$author$project$Screept$Counter('player_stamina'),
+										$author$project$Screept$Lt,
+										$author$project$Screept$Const(1)),
+									A2(
+										$author$project$Screept$SetCounter,
+										$author$project$Screept$S('fight_lost'),
+										$author$project$Screept$Const(1)),
+									$author$project$Screept$None)
+								])),
+						$author$project$Screept$None)
+					])),
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('enemy_damage'),
+						$author$project$Screept$Const(0)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('fight_won'),
+						$author$project$Screept$Const(1)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$Label('enemy_marker'),
+						$author$project$Screept$Const(1))
+					])))
+		]));
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
@@ -5280,69 +5700,27 @@ var $author$project$Games$FirstTestGame$config = {showMessages: true, turnCallba
 var $author$project$Screept$AND = function (a) {
 	return {$: 'AND', a: a};
 };
-var $author$project$Screept$Addition = F2(
-	function (a, b) {
-		return {$: 'Addition', a: a, b: b};
-	});
-var $author$project$Screept$Block = function (a) {
-	return {$: 'Block', a: a};
-};
 var $author$project$Screept$Conditional = F2(
 	function (a, b) {
 		return {$: 'Conditional', a: a, b: b};
 	});
-var $author$project$Screept$Const = function (a) {
-	return {$: 'Const', a: a};
-};
-var $author$project$Screept$Counter = function (a) {
-	return {$: 'Counter', a: a};
-};
 var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$Screept$GameValueText = function (a) {
-	return {$: 'GameValueText', a: a};
-};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
 var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
-var $author$project$Screept$Gt = {$: 'Gt'};
-var $author$project$Screept$If = F3(
-	function (a, b, c) {
-		return {$: 'If', a: a, b: b, c: c};
-	});
-var $author$project$Screept$Label = function (a) {
-	return {$: 'Label', a: a};
+var $author$project$Screept$IntValueText = function (a) {
+	return {$: 'IntValueText', a: a};
 };
-var $author$project$Screept$Lt = {$: 'Lt'};
 var $author$project$Game$Message = function (a) {
 	return {$: 'Message', a: a};
-};
-var $author$project$Screept$None = {$: 'None'};
-var $author$project$Screept$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
-var $author$project$Screept$Rnd = F3(
-	function (a, b, c) {
-		return {$: 'Rnd', a: a, b: b, c: c};
-	});
-var $author$project$Screept$S = function (a) {
-	return {$: 'S', a: a};
 };
 var $author$project$Game$Screept = function (a) {
 	return {$: 'Screept', a: a};
 };
-var $author$project$Screept$SetCounter = F2(
-	function (a, b) {
-		return {$: 'SetCounter', a: a, b: b};
-	});
 var $author$project$Screept$Special = function (a) {
 	return {$: 'Special', a: a};
 };
-var $author$project$Screept$Subtraction = F2(
-	function (a, b) {
-		return {$: 'Subtraction', a: a, b: b};
-	});
 var $author$project$Game$Turn = function (a) {
 	return {$: 'Turn', a: a};
 };
@@ -5763,10 +6141,10 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 							_List_fromArray(
 								[
 									$author$project$Screept$S('You found '),
-									$author$project$Screept$GameValueText(
+									$author$project$Screept$IntValueText(
 									$author$project$Screept$Counter('rnd_wood')),
 									$author$project$Screept$S(' of wood and '),
-									$author$project$Screept$GameValueText(
+									$author$project$Screept$IntValueText(
 									$author$project$Screept$Counter('rnd_sticks')),
 									$author$project$Screept$S(' of sticks.')
 								])))
@@ -5954,7 +6332,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 								_List_fromArray(
 									[
 										$author$project$Screept$S('You dealt '),
-										$author$project$Screept$GameValueText(
+										$author$project$Screept$IntValueText(
 										$author$project$Screept$Counter('player_damage')),
 										$author$project$Screept$S(' damage')
 									])))),
@@ -5970,7 +6348,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 								_List_fromArray(
 									[
 										$author$project$Screept$S('You were dealt '),
-										$author$project$Screept$GameValueText(
+										$author$project$Screept$IntValueText(
 										$author$project$Screept$Counter('enemy_damage')),
 										$author$project$Screept$S(' damage')
 									]))))
@@ -6028,11 +6406,11 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					$author$project$Screept$S('You are fighting '),
 					$author$project$Screept$Label('enemy_name'),
 					$author$project$Screept$S(' .You have '),
-					$author$project$Screept$GameValueText(
+					$author$project$Screept$IntValueText(
 					$author$project$Screept$Counter('player_stamina')),
 					$author$project$Screept$S(' stamina. '),
 					$author$project$Screept$S('Your enemy '),
-					$author$project$Screept$GameValueText(
+					$author$project$Screept$IntValueText(
 					$author$project$Screept$Counter('enemy_stamina'))
 				]))
 	},
@@ -7055,7 +7433,7 @@ var $author$project$Screept$getText = F2(
 					} else {
 						return '';
 					}
-				case 'GameValueText':
+				case 'IntValueText':
 					var gameValue = text.a;
 					return $elm$core$String$fromInt(
 						A2($author$project$Screept$getIntValueWithDefault, gameValue, gameState));
@@ -7273,7 +7651,6 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -7295,6 +7672,7 @@ var $author$project$Game$getDialog = F2(
 			$author$project$Game$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
+var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$List$head = function (list) {
@@ -7462,10 +7840,30 @@ var $author$project$Main$view = function (model) {
 			[
 				A2($author$project$Main$viewDialog, model.gameState, dialog),
 				model.config.showMessages ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
-				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text('')
+				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text(''),
+				A2(
+				$elm$html$Html$pre,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A2(
+							$elm$json$Json$Encode$encode,
+							1,
+							$author$project$Screept$encodeStatement($author$project$Screept$example)))
+					]))
 			]));
 };
-var $author$project$Main$main = $elm$browser$Browser$element(
-	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
+var $author$project$Main$main = function () {
+	var _v0 = A2(
+		$elm$core$Debug$log,
+		'JSON',
+		A2(
+			$elm$json$Json$Encode$encode,
+			1,
+			$author$project$Screept$encodeStatement($author$project$Screept$example)));
+	return $elm$browser$Browser$element(
+		{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
+}();
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

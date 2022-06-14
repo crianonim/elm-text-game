@@ -72,7 +72,7 @@ exampleCounters =
     , ( "player_combat", 5 )
     , ( "defeated_goblin", 0 )
     , ( "taken_goblin_treasure", 0 )
-    , ("defeated_wolf",0)
+    , ( "defeated_wolf", 0 )
     ]
         |> Dict.fromList
 
@@ -155,7 +155,7 @@ dialogs =
       , text = S "Has trees"
       , options =
             [ { text = S "Forage"
-              , condition = Just <|nonZero (Counter "defeated_wolf")
+              , condition = Just <| nonZero (Counter "defeated_wolf")
               , action =
                     [ Screept <|
                         Screept.Block
@@ -165,15 +165,15 @@ dialogs =
                             , Screept.SetCounter (S "sticks") (Addition (Counter "sticks") (Counter "rnd_sticks"))
                             ]
                     , Turn 4
-                    , Message <| Special [ S "You found ", GameValueText (Counter "rnd_wood"), S " of wood and ", GameValueText (Counter "rnd_sticks"), S " of sticks." ]
+                    , Message <| Special [ S "You found ", IntValueText (Counter "rnd_wood"), S " of wood and ", IntValueText (Counter "rnd_sticks"), S " of sticks." ]
                     ]
               }
-              , {text = S "Fight Wolf", condition = Just <| zero (Counter "defeated_wolf"), action = [fightWolf, GoAction "combat"]}
+            , { text = S "Fight Wolf", condition = Just <| zero (Counter "defeated_wolf"), action = [ fightWolf, GoAction "combat" ] }
             , backOption
             ]
       }
     , { id = "combat"
-      , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", GameValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", GameValueText (Counter "enemy_stamina") ]
+      , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
       , options =
             [ { text = S "Hit enemy"
               , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
@@ -214,11 +214,11 @@ dialogs =
                                     ]
                                 )
                             ]
-                    , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", GameValueText (Counter "player_damage"), S " damage" ])
-                    , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", GameValueText (Counter "enemy_damage"), S " damage" ])
+                    , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                    , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                     ]
               }
-            , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [Screept <| Screept.SetCounter (S "fight_won") (Const 0), GoBackAction ] }
+            , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ Screept <| Screept.SetCounter (S "fight_won") (Const 0), GoBackAction ] }
             , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [] }
             ]
       }
@@ -254,6 +254,7 @@ fightGoblin =
             , Screept.SetLabel (S "enemy_name") (S "Old Goblin")
             ]
 
+
 fightWolf : DialogActionExecution
 fightWolf =
     Screept <|
@@ -266,6 +267,7 @@ fightWolf =
             , Screept.SetLabel (S "enemy_marker") (S "defeated_wolf")
             , Screept.SetLabel (S "enemy_name") (S "Wild Wolf")
             ]
+
 
 backOption : DialogOption
 backOption =

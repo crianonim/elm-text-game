@@ -1,6 +1,8 @@
 module Screept exposing (..)
 
 import Dict exposing (Dict)
+import Json.Decode as Json
+import Json.Encode as E
 import Random
 
 
@@ -28,7 +30,7 @@ type TextValue
     = S String
     | Special (List TextValue)
     | Conditional Condition TextValue
-    | GameValueText IntValue
+    | IntValueText IntValue
     | Label String
 
 
@@ -108,7 +110,7 @@ getText gameState text =
             else
                 ""
 
-        GameValueText gameValue ->
+        IntValueText gameValue ->
             getIntValueWithDefault gameValue gameState |> String.fromInt
 
         Label label ->
@@ -197,6 +199,106 @@ testCondition condition gameState =
 
 
 -----------
+-- CODEC
+-----------
+
+
+encodeIntValue : IntValue -> E.Value
+encodeIntValue intValue =
+    case intValue of
+        Const int ->
+            E.int int
+
+        Counter s ->
+            E.string s
+
+        Addition x y ->
+            E.object
+                [ ( "op", E.string "+" )
+                , ( "x", encodeIntValue x )
+                , ( "y", encodeIntValue y )
+                ]
+
+        Subtraction x y ->
+            E.object
+                [ ( "op", E.string "-" )
+                , ( "x", encodeIntValue x )
+                , ( "y", encodeIntValue y )
+                ]
+
+
+encodePredicateOp : PredicateOp -> E.Value
+encodePredicateOp predicateOp =
+    case predicateOp of
+        Eq ->
+            E.string "="
+
+        Gt ->
+            E.string ">"
+
+        Lt ->
+            E.string "<"
+
+
+encodeCondition : Condition -> E.Value
+encodeCondition condition =
+    case condition of
+        Predicate x predicateOp y ->
+            E.object [ ( "PredOp", encodePredicateOp predicateOp ), ( "x", encodeIntValue x ), ( "y", encodeIntValue y ) ]
+
+        NOT c ->
+            E.object [ ( "NOT", encodeCondition c ) ]
+
+        AND conditions ->
+            E.object [ ( "AND", E.list encodeCondition conditions ) ]
+
+        OR conditions ->
+            E.object [ ( "OR", E.list encodeCondition conditions ) ]
+
+
+encodeTextValue : TextValue -> E.Value
+encodeTextValue textValue =
+    case textValue of
+        S s ->
+            E.string s
+
+        Special textValues ->
+            E.list encodeTextValue textValues
+
+        Conditional condition t ->
+            E.object [ ( "condition", encodeCondition condition ), ( "text", encodeTextValue t ) ]
+
+        IntValueText intValue ->
+            encodeIntValue intValue
+
+        Label string ->
+            E.string ("$" ++ string)
+
+
+encodeStatement : Statement -> E.Value
+encodeStatement statement =
+    case statement of
+        SetCounter textValue intValue ->
+            E.object [ ( "setCounter", encodeTextValue textValue ), ( "value", encodeIntValue intValue ) ]
+
+        SetLabel textValue value ->
+            E.object [ ( "setLabel", encodeTextValue textValue ), ( "value", encodeTextValue value ) ]
+
+        Rnd counter min max ->
+            E.object [ ( "rnd", E.object [ ( "counter", encodeTextValue counter ), ( "min", encodeIntValue min ), ( "max", encodeIntValue max ) ] ) ]
+
+        Block statements ->
+            E.list encodeStatement statements
+
+        If condition success failure ->
+            E.object [ ( "if", E.object [ ( "condition", encodeCondition condition ), ( "success", encodeStatement success ), ( "failure", encodeStatement failure ) ] ) ]
+
+        None ->
+            E.null
+
+
+
+-----------
 --- Helpers
 -----------
 
@@ -204,3 +306,42 @@ testCondition condition gameState =
 inc : String -> Statement
 inc counter =
     SetCounter (S counter) (Addition (Counter counter) (Const 1))
+
+
+example : Statement
+example =
+    Block
+        [ Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+        , Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+        , SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+        , SetCounter (S "player_attack") (Addition (Counter "rnd_2d6") (Counter "player_combat"))
+        , SetCounter (S "player_damage") (Subtraction (Counter "player_attack") (Counter "enemy_defence"))
+        , If (Predicate (Counter "player_damage") Gt (Const 0))
+            (Block
+                [ SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
+                ]
+            )
+            None
+        , If (Predicate (Counter "enemy_stamina") Gt (Const 0))
+            (Block
+                [ Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                , Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                , SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+                , SetCounter (S "enemy_attack") (Addition (Counter "rnd_2d6") (Counter "enemy_combat"))
+                , SetCounter (S "enemy_damage") (Subtraction (Counter "enemy_attack") (Counter "player_defence"))
+                , If (Predicate (Counter "enemy_damage") Gt (Const 0))
+                    (Block
+                        [ SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
+                        , If (Predicate (Counter "player_stamina") Lt (Const 1)) (SetCounter (S "fight_lost") (Const 1)) None
+                        ]
+                    )
+                    None
+                ]
+            )
+            (Block
+                [ SetCounter (S "enemy_damage") (Const 0)
+                , SetCounter (S "fight_won") (Const 1)
+                , SetCounter (Label "enemy_marker") (Const 1)
+                ]
+            )
+        ]
