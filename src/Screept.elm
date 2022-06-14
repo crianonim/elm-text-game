@@ -342,6 +342,8 @@ example =
                 [ SetCounter (S "enemy_damage") (Const 0)
                 , SetCounter (S "fight_won") (Const 1)
                 , SetCounter (Label "enemy_marker") (Const 1)
+                , SetCounter (Special [ S "test", Label "label", Conditional (Predicate (Counter "enemy_marker") Eq (Const 2)) (S "Success") ]) (Const 5)
+                , SetCounter (Special [ S "prefix_", IntValueText (Counter "enemy_marker") ]) (Const 4)
                 ]
             )
         ]

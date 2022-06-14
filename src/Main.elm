@@ -11,6 +11,7 @@ import Json.Encode as E
 import Platform.Cmd exposing (Cmd)
 import Random
 import Screept
+import ScreeptEditor
 import Stack exposing (Stack)
 
 
@@ -101,7 +102,7 @@ view model =
 
           else
             text ""
-        , pre [] [ text (E.encode 1 (Screept.encodeStatement Screept.example)) ]
+        , ScreeptEditor.view ScreeptEditor.init.screept
         ]
 
 

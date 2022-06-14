@@ -5484,17 +5484,25 @@ var $author$project$Screept$Addition = F2(
 var $author$project$Screept$Block = function (a) {
 	return {$: 'Block', a: a};
 };
+var $author$project$Screept$Conditional = F2(
+	function (a, b) {
+		return {$: 'Conditional', a: a, b: b};
+	});
 var $author$project$Screept$Const = function (a) {
 	return {$: 'Const', a: a};
 };
 var $author$project$Screept$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
+var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Screept$Gt = {$: 'Gt'};
 var $author$project$Screept$If = F3(
 	function (a, b, c) {
 		return {$: 'If', a: a, b: b, c: c};
 	});
+var $author$project$Screept$IntValueText = function (a) {
+	return {$: 'IntValueText', a: a};
+};
 var $author$project$Screept$Label = function (a) {
 	return {$: 'Label', a: a};
 };
@@ -5515,6 +5523,9 @@ var $author$project$Screept$SetCounter = F2(
 	function (a, b) {
 		return {$: 'SetCounter', a: a, b: b};
 	});
+var $author$project$Screept$Special = function (a) {
+	return {$: 'Special', a: a};
+};
 var $author$project$Screept$Subtraction = F2(
 	function (a, b) {
 		return {$: 'Subtraction', a: a, b: b};
@@ -5659,7 +5670,34 @@ var $author$project$Screept$example = $author$project$Screept$Block(
 						A2(
 						$author$project$Screept$SetCounter,
 						$author$project$Screept$Label('enemy_marker'),
-						$author$project$Screept$Const(1))
+						$author$project$Screept$Const(1)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$Special(
+							_List_fromArray(
+								[
+									$author$project$Screept$S('test'),
+									$author$project$Screept$Label('label'),
+									A2(
+									$author$project$Screept$Conditional,
+									A3(
+										$author$project$Screept$Predicate,
+										$author$project$Screept$Counter('enemy_marker'),
+										$author$project$Screept$Eq,
+										$author$project$Screept$Const(2)),
+									$author$project$Screept$S('Success'))
+								])),
+						$author$project$Screept$Const(5)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$Special(
+							_List_fromArray(
+								[
+									$author$project$Screept$S('prefix_'),
+									$author$project$Screept$IntValueText(
+									$author$project$Screept$Counter('enemy_marker'))
+								])),
+						$author$project$Screept$Const(4))
 					])))
 		]));
 var $author$project$Main$SeedGenerated = function (a) {
@@ -5700,26 +5738,15 @@ var $author$project$Games$FirstTestGame$config = {showMessages: true, turnCallba
 var $author$project$Screept$AND = function (a) {
 	return {$: 'AND', a: a};
 };
-var $author$project$Screept$Conditional = F2(
-	function (a, b) {
-		return {$: 'Conditional', a: a, b: b};
-	});
-var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
 var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
-var $author$project$Screept$IntValueText = function (a) {
-	return {$: 'IntValueText', a: a};
-};
 var $author$project$Game$Message = function (a) {
 	return {$: 'Message', a: a};
 };
 var $author$project$Game$Screept = function (a) {
 	return {$: 'Screept', a: a};
-};
-var $author$project$Screept$Special = function (a) {
-	return {$: 'Special', a: a};
 };
 var $author$project$Game$Turn = function (a) {
 	return {$: 'Turn', a: a};
@@ -7672,7 +7699,7 @@ var $author$project$Game$getDialog = F2(
 			$author$project$Game$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
-var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $author$project$ScreeptEditor$init = {screept: $author$project$Screept$example};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$List$head = function (list) {
@@ -7687,6 +7714,252 @@ var $elm$core$List$head = function (list) {
 var $mhoare$elm_stack$Stack$top = function (_v0) {
 	var stack = _v0.a;
 	return $elm$core$List$head(stack);
+};
+var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$ScreeptEditor$viewIntValue = function (intValue) {
+	switch (intValue.$) {
+		case 'Const':
+			var _int = intValue.a;
+			return $elm$html$Html$text(
+				$elm$core$String$fromInt(_int));
+		case 'Counter':
+			var string = intValue.a;
+			return $elm$html$Html$text('$' + string);
+		case 'Addition':
+			var x = intValue.a;
+			var y = intValue.b;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$ScreeptEditor$viewIntValue(x),
+						$elm$html$Html$text(' + '),
+						$author$project$ScreeptEditor$viewIntValue(y)
+					]));
+		default:
+			var x = intValue.a;
+			var y = intValue.b;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$ScreeptEditor$viewIntValue(x),
+						$elm$html$Html$text(' - '),
+						$author$project$ScreeptEditor$viewIntValue(y)
+					]));
+	}
+};
+var $author$project$ScreeptEditor$viewPredicateOp = function (predicateOp) {
+	switch (predicateOp.$) {
+		case 'Eq':
+			return $elm$html$Html$text('==');
+		case 'Gt':
+			return $elm$html$Html$text('>');
+		default:
+			return $elm$html$Html$text('<');
+	}
+};
+var $author$project$ScreeptEditor$viewCondition = function (condition) {
+	switch (condition.$) {
+		case 'Predicate':
+			var x = condition.a;
+			var predicateOp = condition.b;
+			var y = condition.c;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$ScreeptEditor$viewIntValue(x),
+						$author$project$ScreeptEditor$viewPredicateOp(predicateOp),
+						$author$project$ScreeptEditor$viewIntValue(y)
+					]));
+		case 'NOT':
+			var c = condition.a;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('NOT'),
+						$author$project$ScreeptEditor$viewCondition(c)
+					]));
+		case 'AND':
+			var conditions = condition.a;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('AND'),
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						A2($elm$core$List$map, $author$project$ScreeptEditor$viewCondition, conditions))
+					]));
+		default:
+			var conditions = condition.a;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('OR'),
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						A2($elm$core$List$map, $author$project$ScreeptEditor$viewCondition, conditions))
+					]));
+	}
+};
+var $author$project$ScreeptEditor$viewTextValue = function (textValue) {
+	switch (textValue.$) {
+		case 'S':
+			var string = textValue.a;
+			return $elm$html$Html$text('\"' + (string + '\"'));
+		case 'Special':
+			var textValues = textValue.a;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				A2(
+					$elm$core$List$map,
+					function (v) {
+						return $author$project$ScreeptEditor$viewTextValue(v);
+					},
+					textValues));
+		case 'Conditional':
+			var condition = textValue.a;
+			var value = textValue.b;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('('),
+						$author$project$ScreeptEditor$viewCondition(condition),
+						$elm$html$Html$text('?'),
+						$author$project$ScreeptEditor$viewTextValue(value),
+						$elm$html$Html$text(')')
+					]));
+		case 'IntValueText':
+			var intValue = textValue.a;
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$ScreeptEditor$viewIntValue(intValue)
+					]));
+		default:
+			var string = textValue.a;
+			return $elm$html$Html$text('#' + string);
+	}
+};
+var $author$project$ScreeptEditor$view = function (statement) {
+	switch (statement.$) {
+		case 'SetCounter':
+			var textValue = statement.a;
+			var intValue = statement.b;
+			return A2(
+				$elm$html$Html$pre,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('set '),
+						$author$project$ScreeptEditor$viewTextValue(textValue),
+						$elm$html$Html$text(' = '),
+						$author$project$ScreeptEditor$viewIntValue(intValue)
+					]));
+		case 'SetLabel':
+			var label = statement.a;
+			var value = statement.b;
+			return A2(
+				$elm$html$Html$pre,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('set '),
+						$author$project$ScreeptEditor$viewTextValue(label),
+						$elm$html$Html$text(' = '),
+						$author$project$ScreeptEditor$viewTextValue(value)
+					]));
+		case 'Rnd':
+			var textValue = statement.a;
+			var min = statement.b;
+			var max = statement.c;
+			return A2(
+				$elm$html$Html$pre,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('RND '),
+						$author$project$ScreeptEditor$viewTextValue(textValue),
+						$elm$html$Html$text(' '),
+						$author$project$ScreeptEditor$viewIntValue(min),
+						$elm$html$Html$text(' .. '),
+						$author$project$ScreeptEditor$viewIntValue(max)
+					]));
+		case 'Block':
+			var statements = statement.a;
+			return A2(
+				$elm$html$Html$pre,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('screept-statement-block')
+					]),
+				A2($elm$core$List$map, $author$project$ScreeptEditor$view, statements));
+		case 'If':
+			var condition = statement.a;
+			var success = statement.b;
+			var failure = statement.c;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('IF '),
+								$author$project$ScreeptEditor$viewCondition(condition)
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('screept_condition')
+							]),
+						_List_fromArray(
+							[
+								$author$project$ScreeptEditor$view(success)
+							])),
+						_Utils_eq(failure, $author$project$Screept$None) ? $elm$html$Html$text('') : A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('ELSE '),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('screept_condition')
+									]),
+								_List_fromArray(
+									[
+										$author$project$ScreeptEditor$view(failure)
+									]))
+							]))
+					]));
+		default:
+			return $elm$html$Html$text('Nop');
+	}
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewDebug = function (gameState) {
@@ -7841,17 +8114,7 @@ var $author$project$Main$view = function (model) {
 				A2($author$project$Main$viewDialog, model.gameState, dialog),
 				model.config.showMessages ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
 				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text(''),
-				A2(
-				$elm$html$Html$pre,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						A2(
-							$elm$json$Json$Encode$encode,
-							1,
-							$author$project$Screept$encodeStatement($author$project$Screept$example)))
-					]))
+				$author$project$ScreeptEditor$view($author$project$ScreeptEditor$init.screept)
 			]));
 };
 var $author$project$Main$main = function () {
