@@ -5389,6 +5389,39 @@ var $author$project$Games$FirstTestGame$fightGoblin = $author$project$Game$Scree
 				$author$project$Screept$S('enemy_name'),
 				$author$project$Screept$S('Old Goblin'))
 			])));
+var $author$project$Games$FirstTestGame$fightWolf = $author$project$Game$Screept(
+	$author$project$Screept$Block(
+		_List_fromArray(
+			[
+				A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S('enemy_stamina'),
+				$author$project$Screept$Const(4)),
+				A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S('enemy_defence'),
+				$author$project$Screept$Const(6)),
+				A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S('enemy_combat'),
+				$author$project$Screept$Const(5)),
+				A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S('fight_won'),
+				$author$project$Screept$Const(0)),
+				A2(
+				$author$project$Screept$SetCounter,
+				$author$project$Screept$S('fight_lost'),
+				$author$project$Screept$Const(0)),
+				A2(
+				$author$project$Screept$SetLabel,
+				$author$project$Screept$S('enemy_marker'),
+				$author$project$Screept$S('defeated_wolf')),
+				A2(
+				$author$project$Screept$SetLabel,
+				$author$project$Screept$S('enemy_name'),
+				$author$project$Screept$S('Wild Wolf'))
+			])));
 var $author$project$Screept$inc = function (counter) {
 	return A2(
 		$author$project$Screept$SetCounter,
@@ -5738,8 +5771,21 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 									$author$project$Screept$S(' of sticks.')
 								])))
 					]),
-				condition: $elm$core$Maybe$Nothing,
+				condition: $elm$core$Maybe$Just(
+					$author$project$Game$nonZero(
+						$author$project$Screept$Counter('defeated_wolf'))),
 				text: $author$project$Screept$S('Forage')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Games$FirstTestGame$fightWolf,
+						$author$project$Game$GoAction('combat')
+					]),
+				condition: $elm$core$Maybe$Just(
+					$author$project$Game$zero(
+						$author$project$Screept$Counter('defeated_wolf'))),
+				text: $author$project$Screept$S('Fight Wolf')
 			},
 				$author$project$Games$FirstTestGame$backOption
 			]),
@@ -5948,7 +5994,14 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			},
 				{
 				action: _List_fromArray(
-					[$author$project$Game$GoBackAction]),
+					[
+						$author$project$Game$Screept(
+						A2(
+							$author$project$Screept$SetCounter,
+							$author$project$Screept$S('fight_won'),
+							$author$project$Screept$Const(0))),
+						$author$project$Game$GoBackAction
+					]),
 				condition: $elm$core$Maybe$Just(
 					A3(
 						$author$project$Screept$Predicate,
@@ -5997,6 +6050,37 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					$author$project$Game$zero(
 						$author$project$Screept$Counter('defeated_goblin'))),
 				text: $author$project$Screept$S('Fight Goblin')
+			},
+				{
+				action: _List_fromArray(
+					[
+						$author$project$Game$Screept(
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('taken_goblin_treasure'),
+									$author$project$Screept$Const(1)),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('money'),
+									A2(
+										$author$project$Screept$Addition,
+										$author$project$Screept$Counter('money'),
+										$author$project$Screept$Const(10)))
+								])))
+					]),
+				condition: $elm$core$Maybe$Just(
+					$author$project$Screept$AND(
+						_List_fromArray(
+							[
+								$author$project$Game$nonZero(
+								$author$project$Screept$Counter('defeated_goblin')),
+								$author$project$Game$zero(
+								$author$project$Screept$Counter('taken_goblin_treasure'))
+							]))),
+				text: $author$project$Screept$S('Take treasure')
 			}
 			]),
 		text: $author$project$Screept$S('Goblin Cave')
@@ -6324,7 +6408,9 @@ var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromLis
 			_Utils_Tuple2('player_stamina', 19),
 			_Utils_Tuple2('player_defence', 7),
 			_Utils_Tuple2('player_combat', 5),
-			_Utils_Tuple2('defeated_goblin', 0)
+			_Utils_Tuple2('defeated_goblin', 0),
+			_Utils_Tuple2('taken_goblin_treasure', 0),
+			_Utils_Tuple2('defeated_wolf', 0)
 		]));
 var $author$project$Games$FirstTestGame$exampleLabels = $elm$core$Dict$fromList(
 	_List_fromArray(

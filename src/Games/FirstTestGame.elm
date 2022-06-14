@@ -71,6 +71,8 @@ exampleCounters =
     , ( "player_defence", 7 )
     , ( "player_combat", 5 )
     , ( "defeated_goblin", 0 )
+    , ( "taken_goblin_treasure", 0 )
+    , ("defeated_wolf",0)
     ]
         |> Dict.fromList
 
@@ -153,7 +155,7 @@ dialogs =
       , text = S "Has trees"
       , options =
             [ { text = S "Forage"
-              , condition = Nothing
+              , condition = Just <|nonZero (Counter "defeated_wolf")
               , action =
                     [ Screept <|
                         Screept.Block
@@ -166,6 +168,7 @@ dialogs =
                     , Message <| Special [ S "You found ", GameValueText (Counter "rnd_wood"), S " of wood and ", GameValueText (Counter "rnd_sticks"), S " of sticks." ]
                     ]
               }
+              , {text = S "Fight Wolf", condition = Just <| zero (Counter "defeated_wolf"), action = [fightWolf, GoAction "combat"]}
             , backOption
             ]
       }
@@ -215,7 +218,7 @@ dialogs =
                     , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", GameValueText (Counter "enemy_damage"), S " damage" ])
                     ]
               }
-            , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ GoBackAction ] }
+            , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [Screept <| Screept.SetCounter (S "fight_won") (Const 0), GoBackAction ] }
             , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [] }
             ]
       }
@@ -223,6 +226,16 @@ dialogs =
       , text = S "Goblin Cave"
       , options =
             [ { text = S "Fight Goblin", condition = Just <| zero (Counter "defeated_goblin"), action = [ fightGoblin, GoAction "combat" ] }
+            , { text = S "Take treasure"
+              , condition = Just <| AND [ nonZero (Counter "defeated_goblin"), zero (Counter "taken_goblin_treasure") ]
+              , action =
+                    [ Screept <|
+                        Screept.Block
+                            [ Screept.SetCounter (S "taken_goblin_treasure") (Const 1)
+                            , Screept.SetCounter (S "money") (Addition (Counter "money") (Const 10))
+                            ]
+                    ]
+              }
             ]
       }
     ]
@@ -241,6 +254,18 @@ fightGoblin =
             , Screept.SetLabel (S "enemy_name") (S "Old Goblin")
             ]
 
+fightWolf : DialogActionExecution
+fightWolf =
+    Screept <|
+        Screept.Block
+            [ Screept.SetCounter (S "enemy_stamina") (Const 4)
+            , Screept.SetCounter (S "enemy_defence") (Const 6)
+            , Screept.SetCounter (S "enemy_combat") (Const 5)
+            , Screept.SetCounter (S "fight_won") (Const 0)
+            , Screept.SetCounter (S "fight_lost") (Const 0)
+            , Screept.SetLabel (S "enemy_marker") (S "defeated_wolf")
+            , Screept.SetLabel (S "enemy_name") (S "Wild Wolf")
+            ]
 
 backOption : DialogOption
 backOption =
