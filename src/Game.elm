@@ -46,6 +46,7 @@ type DialogActionExecution
     | DoNothing
     | Screept Screept.Statement
     | ConditionalAction Condition DialogActionExecution DialogActionExecution
+    | ActionBlock (List DialogActionExecution)
 
 
 type alias DialogId =
@@ -121,6 +122,9 @@ executeAction turnCallback dialogActionExecution gameState =
                     failure
                 )
                 gameState
+
+        ActionBlock dialogActionExecutions ->
+            List.foldl (\a state -> executeAction turnCallback a state) gameState dialogActionExecutions
 
 
 setRndSeed : Random.Seed -> GameState -> GameState

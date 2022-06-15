@@ -59,7 +59,7 @@ exampleCounters =
     , ( "rnd", 0 )
     , ( "raining", 0 )
     , ( "killed_dragon", 1 )
-    , ( "money", 40 )
+    , ( "money", 16 )
     , ( "wood", 10 )
     , ( "stone", 9 )
     , ( "sticks", 0 )
@@ -67,20 +67,30 @@ exampleCounters =
     , ( "pickaxe", 0 )
     , ( "start_look_around", 0 )
     , ( "start_search_bed", 0 )
-    , ( "player_stamina", 19 )
+    , ( "player_rank", 3 )
+    , ( "player_stamina", 3 )
     , ( "player_defence", 7 )
+    , ( "player_charisma", 5 )
     , ( "player_combat", 5 )
+    , ( "player_magic", 2 )
+    , ( "player_sanctity", 3 )
     , ( "player_scouting", 6 )
+    , ( "player_thievery", 4 )
+    , ( "inv_spear", 1 )
+    , ( "inv_leather_jerkin", 1 )
     , ( "defeated_goblin", 0 )
     , ( "taken_goblin_treasure", 0 )
     , ( "defeated_wolf", 0 )
+    , ( "codeword_apple", 0 )
+    , ( "codeword_aspen", 0 )
     ]
         |> Dict.fromList
 
 
 exampleLabels : Dict String String
 exampleLabels =
-    [ ( "player_name", "Jan" )
+    [ ( "player_name", "Liana" )
+    , ( "player proffesion", "wayfarer" )
     , ( "enemy_marker", "" )
     , ( "enemy_name", "" )
     ]
@@ -91,7 +101,7 @@ initialGameState : GameState
 initialGameState =
     { counters = exampleCounters
     , labels = exampleLabels
-    , dialogStack = Stack.push "start" Stack.initialise
+    , dialogStack = Stack.push "#630" Stack.initialise
     , messages = exampleMessages
     , rnd = Random.initialSeed 666
     }
@@ -173,7 +183,8 @@ dialogs =
             , backOption
             ]
       }
-    , { id = "combat"
+    , standardCombat
+    , { id = "combat_old"
       , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
       , options =
             [ { text = S "Hit enemy"
@@ -283,6 +294,10 @@ dialogs =
     , { id = "#128", text = S """
       You make your way around the coast. The interior of the island appears to be heavily forested. After a while, however, you come to a bay in which a couple of ships are anchored. A small settlement nestles on the beach, and you make your way towards it
       """, options = [ { text = S "...", condition = Nothing, action = [ GoAction "#195" ] } ] }
+    , { id = "#148", text = S """
+   ‘Stop, stop, I surrender!’ yells the tree. You cease your attack. ‘I guess you can pass, in view of recent events!’ it says grudgingly. Then it uproots itself with a great tearing sound, and shuffles out of the way. ‘There you go!’ mutters the tree, ‘You can blooming well pass.’
+   You walk through the thorn bush gate. Beyond, you find several huge oak trees whose branches are so big that they are able to support the homes of many people.
+   """, options = [ { text = S "...", condition = Nothing, action = [ Screept <| Screept.SetCounter (S "codeword_apple") (Const 1), GoAction "#358" ] } ] }
     , { id = "#192", text = S """
       During your short trip upward, the old man regales you with tales of your destiny and fate, continuously arguing with himself as he does so.
       You reach a hill covered with a circle of large obsidian standing stones. Despite the bitter wind that blow across these hills the stones are unweathered and seem almost newly lain.
@@ -290,10 +305,63 @@ dialogs =
       The stones are laid in such a way that they form three archways, each carven with mystic symbols and runes of power.
       ‘Each gate will take you to a part of the world of Harkuna, though I know not where,’ explains the old man. Abruptly, he turns around and sets off down the hill, babbling to himself. His voice fades as he descends the hill, leaving you alone with the brooding stones and the howling wind
       """, options = [ { text = S "...", condition = Nothing, action = [ GoAction "#65" ] } ] }
+    , { id = "#195"
+      , text = S """
+      The Trading Post is a small village, set up here by enterprising settlers from the mainland. Its main export appears to be furs from the forest.
+      The Mayor, a fat genial fellow, who greets you personally, insists that one day the Trading Post will be a thriving town. There is not a lot here yet, however: a small market, a quay, the settler’s houses, and a shrine to Lacuna the Huntress, goddess of nature.
+      """
+      , options =
+            [ { text = S "...", condition = Just <| zero (Counter "codeword_aspen"), action = [ Screept <| Screept.SetCounter (S "codeword_aspen") (Const 1) ] }
+            , { text = S "Visit the shrine to Lacuna", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#544" ] }
+            , { text = S "Visit the market", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#452" ] }
+            , { text = S "Visit the quayside", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#332" ] }
+            , { text = S "Visit the Green Man Inn", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#181" ] }
+            , { text = S "Climb the hill that overlooks the town", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#11" ] }
+            , { text = S "Go inland, into the Old Forest", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#257" ] }
+            ]
+      }
     , { id = "#257", text = S """
       The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.
       As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.
-      """, options = [ { text = S "...", condition = Nothing, action = [ Screept <| testAgainstDifficulty "player_scouting" 10, ConditionalAction (nonZero (Counter "test_success")) (GoAction "#630") (GoAction "#36") ] } ] }
+      """, options = [ { text = S "...", condition = Nothing, action = [ Screept <| testAgainstDifficulty "player_scouting" 10, onTestCondition (GoAction "#630") (GoAction "#36") ] } ] }
+    , { id = "#358"
+      , text = S """
+    ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.
+    The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.
+    """
+      , options = [ { text = S "Finished shopping", condition = Nothing, action = [] } ]
+      }
+    , { id = "#630"
+      , text = S """
+     You struggle deeper into the forest until you come to a thick wall of impenetrable thorn bushes. Circling it, you find there is a break in the hedge, but it is filled by a large tree.
+     To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’
+     """
+      , options =
+            [ { text = S "...", condition = Just <| nonZero (Counter "codeword_apple"), action = [ GoAction "#594" ] }
+            , { text = S "Return to the Trading Post", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#195" ] }
+            , { text = S "Attack the tree", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#570" ] }
+            , { text = S "Try to persuade it to let you pass", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#237" ] }
+            ]
+      }
+    , { id = "#570"
+      , text = S """
+           ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.
+           """
+      , options =
+            [ { text = S "..."
+              , condition = Nothing
+              , action =
+                    [ fightCustom "Tree" "" 10 7 3
+                    , GoAction "combat_tree"
+                    ]
+              }
+            ]
+      }
+    , customCombat "combat_tree"
+        (Predicate (Counter "enemy_stamina") Lt (Const 5))
+        (Predicate (Counter "player_stamina") Lt (Const 1))
+        (GoAction "#148")
+        (ActionBlock [ Message (S "You wake up almost dead with no money..."), Screept <| Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ], GoAction "#195" ])
     ]
 
 
@@ -309,18 +377,99 @@ testAgainstDifficulty counter diff =
         ]
 
 
-fightGoblin : DialogActionExecution
-fightGoblin =
+onTestCondition : DialogActionExecution -> DialogActionExecution -> DialogActionExecution
+onTestCondition success failure =
+    ConditionalAction (nonZero (Counter "test_success")) success failure
+
+
+fightCustom : String -> String -> Int -> Int -> Int -> DialogActionExecution
+fightCustom enemy_name enemy_marker stamina defence combat =
     Screept <|
         Screept.Block
-            [ Screept.SetCounter (S "enemy_stamina") (Const 10)
-            , Screept.SetCounter (S "enemy_defence") (Const 6)
-            , Screept.SetCounter (S "enemy_combat") (Const 6)
+            [ Screept.SetCounter (S "enemy_stamina") (Const stamina)
+            , Screept.SetCounter (S "enemy_defence") (Const defence)
+            , Screept.SetCounter (S "enemy_combat") (Const combat)
             , Screept.SetCounter (S "fight_won") (Const 0)
             , Screept.SetCounter (S "fight_lost") (Const 0)
-            , Screept.SetLabel (S "enemy_marker") (S "defeated_goblin")
-            , Screept.SetLabel (S "enemy_name") (S "Old Goblin")
+            , Screept.SetLabel (S "enemy_marker") (S enemy_marker)
+            , Screept.SetLabel (S "enemy_name") (S enemy_name)
             ]
+
+
+fightGoblin : DialogActionExecution
+fightGoblin =
+    fightCustom "Old Goblin" "defeated_goblin" 10 6 6
+
+
+standardCombat =
+    customCombat "combat"
+        (Predicate (Counter "enemy_stamina") Lt (Const 1))
+        (Predicate (Counter "player_stamina") Lt (Const 1))
+        GoBackAction
+        DoNothing
+
+
+customCombat : String -> Condition -> Condition -> DialogActionExecution -> DialogActionExecution -> Dialog
+customCombat id successTest failureTest successAction failureAction =
+    { id = id
+    , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
+    , options =
+        [ { text = S "Hit enemy"
+          , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
+          , action =
+                [ Screept <|
+                    Screept.Block
+                        [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                        , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                        , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+                        , Screept.SetCounter (S "player_attack") (Addition (Counter "rnd_2d6") (Counter "player_combat"))
+                        , Screept.SetCounter (S "player_damage") (Subtraction (Counter "player_attack") (Counter "enemy_defence"))
+                        , Screept.If (Predicate (Counter "player_damage") Gt (Const 0))
+                            (Screept.Block
+                                [ Screept.SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
+                                ]
+                            )
+                            Screept.None
+                        , Screept.If (NOT successTest)
+                            (Screept.Block
+                                [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                                , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                                , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
+                                , Screept.SetCounter (S "enemy_attack") (Addition (Counter "rnd_2d6") (Counter "enemy_combat"))
+                                , Screept.SetCounter (S "enemy_damage") (Subtraction (Counter "enemy_attack") (Counter "player_defence"))
+                                , Screept.If (Predicate (Counter "enemy_damage") Gt (Const 0))
+                                    (Screept.Block
+                                        [ Screept.SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
+                                        , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                                        ]
+                                    )
+                                    Screept.None
+                                ]
+                            )
+                            Screept.None
+                        , Screept.If successTest
+                            (Screept.Block
+                                [ Screept.SetCounter (S "enemy_damage") (Const 0)
+                                , Screept.SetCounter (S "fight_won") (Const 1)
+                                , Screept.SetCounter (Label "enemy_marker") (Const 1)
+                                ]
+                            )
+                            (Screept.If failureTest
+                                (Screept.Block
+                                    [ Screept.SetCounter (S "fight_lost") (Const 1)
+                                    ]
+                                )
+                                Screept.None
+                            )
+                        ]
+                , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
+                ]
+          }
+        , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
+        , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [ Message (S "You lost!"), failureAction ] }
+        ]
+    }
 
 
 fightWolf : DialogActionExecution
