@@ -3,6 +3,7 @@ module Screept exposing (..)
 import Dict exposing (Dict)
 import Json.Decode as Json
 import Json.Encode as E
+import Parser exposing ((|.), (|=), Parser, spaces, symbol)
 import Random
 
 
@@ -346,4 +347,139 @@ example =
                 , SetCounter (Special [ S "prefix_", IntValueText (Counter "enemy_marker") ]) (Const 4)
                 ]
             )
+        ]
+
+
+toParse : String
+toParse =
+    "($name_el + (23 - 3))"
+
+
+toParse2 =
+    "NOT (AND (NOT ((22 - 3) < $name_el), 1>0))"
+
+
+parsedIntValue : Result (List Parser.DeadEnd) IntValue
+parsedIntValue =
+    Parser.run intValueParser toParse
+
+
+parsedCondtion =
+    Parser.run conditionParser toParse2
+
+
+toParse3 =
+    "[#enemy_marker, \"Janek\", ($enemy_marker==2?\"Success\"), str(12)]"
+
+
+parsedTextValue =
+    Parser.run textValueParser toParse3
+
+
+parsed =
+    parsedTextValue
+
+
+intValueParser : Parser IntValue
+intValueParser =
+    Parser.oneOf
+        [ Parser.succeed (\x fn y -> fn x y)
+            |. Parser.symbol "("
+            |= Parser.lazy (\_ -> intValueParser)
+            |. Parser.spaces
+            |= Parser.oneOf
+                [ Parser.succeed Addition
+                    |. Parser.symbol "+"
+                , Parser.succeed Subtraction
+                    |. Parser.symbol "-"
+                ]
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> intValueParser)
+            |. Parser.symbol ")"
+        , Parser.succeed Const
+            |= Parser.int
+        , Parser.succeed Counter
+            |. Parser.symbol "$"
+            |= Parser.getChompedString
+                (Parser.succeed ()
+                    |. Parser.chompIf (\c -> Char.isAlpha c || c == '_')
+                    |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
+                )
+        ]
+
+
+conditionParser : Parser Condition
+conditionParser =
+    Parser.oneOf
+        [ Parser.succeed Predicate
+            |= intValueParser
+            |. spaces
+            |= Parser.oneOf
+                [ Parser.succeed Eq |. Parser.symbol "=="
+                , Parser.succeed Gt |. Parser.symbol ">"
+                , Parser.succeed Lt |. Parser.symbol "<"
+                ]
+            |. spaces
+            |= intValueParser
+        , Parser.succeed NOT
+            |. Parser.keyword "NOT"
+            |. Parser.spaces
+            |. Parser.symbol "("
+            |= Parser.lazy (\_ -> conditionParser)
+            |. Parser.spaces
+            |. Parser.symbol ")"
+        , Parser.succeed OR
+            |. Parser.keyword "OR"
+            |. Parser.spaces
+            |= Parser.sequence
+                { start = "("
+                , separator = ","
+                , end = ")"
+                , spaces = spaces
+                , item = Parser.lazy (\_ -> conditionParser)
+                , trailing = Parser.Forbidden
+                }
+        , Parser.succeed AND
+            |. Parser.keyword "AND"
+            |. Parser.spaces
+            |= Parser.sequence
+                { start = "("
+                , separator = ","
+                , end = ")"
+                , spaces = spaces
+                , item = Parser.lazy (\_ -> conditionParser)
+                , trailing = Parser.Forbidden
+                }
+        ]
+
+
+textValueParser : Parser TextValue
+textValueParser =
+    Parser.oneOf
+        [ Parser.succeed S
+            |. Parser.symbol "\""
+            |= (Parser.chompWhile (\c -> c /= '"') |> Parser.getChompedString)
+            |. Parser.symbol "\""
+        , Parser.succeed Special
+            |= Parser.sequence
+                { start = "["
+                , separator = ","
+                , end = "]"
+                , spaces = spaces
+                , item = Parser.lazy (\_ -> textValueParser)
+                , trailing = Parser.Forbidden
+                }
+        , Parser.succeed Conditional
+            |. Parser.symbol "("
+            |= conditionParser
+            |. Parser.symbol "?"
+            |= Parser.lazy (\_ -> textValueParser)
+            |. Parser.symbol ")"
+        , Parser.succeed IntValueText
+            |. Parser.symbol "str("
+            |= intValueParser
+            |. Parser.symbol ")"
+        , Parser.succeed Label
+            |. Parser.symbol "#"
+            |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         ]

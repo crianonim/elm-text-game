@@ -19,7 +19,7 @@ main : Program () Model Msg
 main =
     let
         _ =
-            Debug.log "JSON" (E.encode 1 (Screept.encodeStatement Screept.example))
+            Debug.log "Parsed" Screept.parsed
     in
     Browser.element
         { init = init
