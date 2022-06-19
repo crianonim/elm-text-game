@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import DialogGame exposing (..)
+import DialogGameEditor
 import Dict
 import Games.FirstTestGame as TestGame
 import Html exposing (..)
@@ -34,6 +35,7 @@ init _ =
       , gameState = TestGame.initialGameState
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
+      , dialogEditor = DialogGameEditor.init
       }
     , Random.generate SeedGenerated Random.independentSeed
     )
@@ -58,12 +60,16 @@ update msg model =
         ScreeptEditor seMsg ->
             ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
 
+        DialogEditor deMsg ->
+            ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
+
 
 type alias Model =
     { dialogs : DialogGame.Dialogs
     , gameState : GameState
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
+    , dialogEditor : DialogGameEditor.Model
     }
 
 
@@ -72,6 +78,7 @@ type Msg
     | ClickDialog (List DialogActionExecution)
     | SeedGenerated Random.Seed
     | ScreeptEditor ScreeptEditor.Msg
+    | DialogEditor DialogGameEditor.Msg
 
 
 
@@ -94,7 +101,8 @@ view model =
             getDialog (Stack.top model.gameState.dialogStack |> Maybe.withDefault "bad") model.dialogs
     in
     div [ class "container" ]
-        [ viewDialog model.gameState dialog
+        [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
+        , viewDialog model.gameState dialog
         , if List.length model.gameState.messages > 0 then
             viewMessages model.gameState.messages
 

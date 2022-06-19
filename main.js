@@ -8337,6 +8337,7 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
 			seed0);
 	});
+var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
 var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF $rnd_2d6 > 10 THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
 var $author$project$ScreeptEditor$init = {parsed: $elm$core$Maybe$Nothing, text: $author$project$Screept$customCombatString};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
@@ -8535,6 +8536,7 @@ var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
+			dialogEditor: $author$project$DialogGameEditor$init,
 			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogs),
 			gameState: $author$project$Games$FirstTestGame$initialGameState,
 			isDebug: true,
@@ -9342,6 +9344,24 @@ var $author$project$DialogGame$setRndSeed = F2(
 			gameState,
 			{rnd: seed});
 	});
+var $author$project$DialogGameEditor$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'Edit':
+				var dialog = msg.a;
+				return _Utils_update(
+					model,
+					{
+						dialog: $elm$core$Maybe$Just(dialog),
+						id: dialog.id,
+						text: 'dialog.text'
+					});
+			case 'Save':
+				return model;
+			default:
+				return model;
+		}
+	});
 var $author$project$ScreeptEditor$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'ParseClick') {
@@ -9381,7 +9401,7 @@ var $author$project$Main$update = F2(
 							gameState: A2($author$project$DialogGame$setRndSeed, seed, model.gameState)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ScreeptEditor':
 				var seMsg = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -9390,8 +9410,20 @@ var $author$project$Main$update = F2(
 							screeptEditor: A2($author$project$ScreeptEditor$update, seMsg, model.screeptEditor)
 						}),
 					$elm$core$Platform$Cmd$none);
+			default:
+				var deMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							dialogEditor: A2($author$project$DialogGameEditor$update, deMsg, model.dialogEditor)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Main$DialogEditor = function (a) {
+	return {$: 'DialogEditor', a: a};
+};
 var $author$project$Main$ScreeptEditor = function (a) {
 	return {$: 'ScreeptEditor', a: a};
 };
@@ -9612,6 +9644,114 @@ var $author$project$Main$viewDebug = function (gameState) {
 					$elm$core$Dict$toList(gameState.counters)))
 			]));
 };
+var $author$project$DialogGameEditor$Edit = function (a) {
+	return {$: 'Edit', a: a};
+};
+var $author$project$DialogGameEditor$exampleDialog = {
+	id: 'start',
+	options: _List_fromArray(
+		[
+			{
+			action: _List_fromArray(
+				[
+					$author$project$DialogGame$GoAction('second')
+				]),
+			condition: $elm$core$Maybe$Just(
+				$author$project$DialogGame$nonZero(
+					$author$project$Screept$Counter('start_look_around'))),
+			text: $author$project$Screept$S('Go through the exit')
+		},
+			{
+			action: _List_fromArray(
+				[
+					$author$project$DialogGame$Screept(
+					$author$project$Screept$inc('start_look_around')),
+					$author$project$DialogGame$Message(
+					$author$project$Screept$S('You noticed a straw bed')),
+					$author$project$DialogGame$Turn(5),
+					$author$project$DialogGame$Screept(
+					A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('rrr'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(5)))
+				]),
+			condition: $elm$core$Maybe$Just(
+				$author$project$DialogGame$zero(
+					$author$project$Screept$Counter('start_look_around'))),
+			text: $author$project$Screept$S('Look around')
+		},
+			{
+			action: _List_fromArray(
+				[
+					$author$project$DialogGame$Screept(
+					$author$project$Screept$inc('start_search_bed'))
+				]),
+			condition: $elm$core$Maybe$Just(
+				$author$project$Screept$AND(
+					_List_fromArray(
+						[
+							$author$project$DialogGame$zero(
+							$author$project$Screept$Counter('start_search_bed')),
+							$author$project$DialogGame$nonZero(
+							$author$project$Screept$Counter('start_look_around'))
+						]))),
+			text: $author$project$Screept$S('Search the bed')
+		}
+		]),
+	text: $author$project$Screept$Special(
+		_List_fromArray(
+			[
+				$author$project$Screept$S('You\'re in a dark room. '),
+				A2(
+				$author$project$Screept$Conditional,
+				$author$project$DialogGame$zero(
+					$author$project$Screept$Counter('start_look_around')),
+				$author$project$Screept$S('You see nothing. ')),
+				A2(
+				$author$project$Screept$Conditional,
+				$author$project$DialogGame$nonZero(
+					$author$project$Screept$Counter('start_look_around')),
+				$author$project$Screept$S('You see a straw bed. ')),
+				A2(
+				$author$project$Screept$Conditional,
+				$author$project$DialogGame$nonZero(
+					$author$project$Screept$Counter('start_search_bed')),
+				$author$project$Screept$S('There is a rusty key among the straw. '))
+			]))
+};
+var $author$project$DialogGameEditor$viewDialog = function (model) {
+	var _v0 = model.dialog;
+	if (_v0.$ === 'Nothing') {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Events$onClick(
+					$author$project$DialogGameEditor$Edit($author$project$DialogGameEditor$exampleDialog))
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Edit')
+				]));
+	} else {
+		var d = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('id: '),
+							$elm$html$Html$text(d.id)
+						]))
+				]));
+	}
+};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -9735,6 +9875,10 @@ var $author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
+				A2(
+				$elm$html$Html$map,
+				$author$project$Main$DialogEditor,
+				$author$project$DialogGameEditor$viewDialog(model.dialogEditor)),
 				A2($author$project$Main$viewDialog, model.gameState, dialog),
 				($elm$core$List$length(model.gameState.messages) > 0) ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
 				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text(''),
