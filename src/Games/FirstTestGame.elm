@@ -147,6 +147,7 @@ dialogs =
               , condition = Nothing
               , action =
                     [ runScreept "{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }"
+
                     --,Screept <|
                     --    Screept.Block
                     --        [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)

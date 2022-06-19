@@ -35,6 +35,7 @@ init _ =
       , gameState = TestGame.initialGameState
       , config = TestGame.config
       , isDebug = True
+      , screeptEditor = ScreeptEditor.init
       }
     , Random.generate SeedGenerated Random.independentSeed
     )
@@ -56,12 +57,16 @@ update msg model =
         SeedGenerated seed ->
             ( { model | gameState = setRndSeed seed model.gameState }, Cmd.none )
 
+        ScreeptEditor seMsg ->
+            ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
+
 
 type alias Model =
     { dialogs : Game.Dialogs
     , gameState : GameState
     , config : GameConfig
     , isDebug : Bool
+    , screeptEditor : ScreeptEditor.Model
     }
 
 
@@ -69,6 +74,7 @@ type Msg
     = None
     | ClickDialog (List DialogActionExecution)
     | SeedGenerated Random.Seed
+    | ScreeptEditor ScreeptEditor.Msg
 
 
 
@@ -102,7 +108,9 @@ view model =
 
           else
             text ""
-        , ScreeptEditor.view ScreeptEditor.init.screept
+        , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
+
+        --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]
 
 
