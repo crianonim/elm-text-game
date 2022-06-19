@@ -102,6 +102,7 @@ initialGameState =
     { counters = exampleCounters
     , labels = exampleLabels
     , dialogStack = Stack.push "#630" Stack.initialise
+    , procedures = exampleProcedures
     , messages = exampleMessages
     , rnd = Random.initialSeed 666
     }
@@ -115,6 +116,11 @@ exampleMessages =
     , "Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice."
     , "First message test"
     ]
+
+
+exampleProcedures : Dict String Screept.Statement
+exampleProcedures =
+    Dict.empty
 
 
 recipes : List ( String, List ( String, Int ) )

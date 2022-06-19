@@ -48,6 +48,10 @@ view statement =
         Comment string ->
             text ("#" ++ string)
 
+        Procedure procedureCall ->
+            -- TODO
+            text "procedurecall"
+
 
 viewTextValue : TextValue -> Html msg
 viewTextValue textValue =

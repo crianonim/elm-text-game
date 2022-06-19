@@ -8568,6 +8568,7 @@ var $author$project$Games$FirstTestGame$exampleLabels = $elm$core$Dict$fromList(
 		]));
 var $author$project$Games$FirstTestGame$exampleMessages = _List_fromArray(
 	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
+var $author$project$Games$FirstTestGame$exampleProcedures = $elm$core$Dict$empty;
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
@@ -8583,6 +8584,7 @@ var $author$project$Games$FirstTestGame$initialGameState = {
 	dialogStack: A2($mhoare$elm_stack$Stack$push, '#630', $mhoare$elm_stack$Stack$initialise),
 	labels: $author$project$Games$FirstTestGame$exampleLabels,
 	messages: $author$project$Games$FirstTestGame$exampleMessages,
+	procedures: $author$project$Games$FirstTestGame$exampleProcedures,
 	rnd: $elm$random$Random$initialSeed(666)
 };
 var $author$project$Game$listDialogToDictDialog = function (dialogs) {
@@ -9319,8 +9321,19 @@ var $author$project$Screept$runStatement = F2(
 					continue runStatement;
 				case 'None':
 					return state;
-				default:
+				case 'Comment':
 					return state;
+				default:
+					var procedureCall = statement.a;
+					var proc = A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Screept$None,
+						A2($elm$core$Dict$get, procedureCall.name, state.procedures));
+					var $temp$statement = proc,
+						$temp$state = state;
+					statement = $temp$statement;
+					state = $temp$state;
+					continue runStatement;
 			}
 		}
 	});
@@ -9900,9 +9913,12 @@ var $author$project$ScreeptEditor$view = function (statement) {
 					]));
 		case 'None':
 			return $elm$html$Html$text('Nop');
-		default:
+		case 'Comment':
 			var string = statement.a;
 			return $elm$html$Html$text('#' + string);
+		default:
+			var procedureCall = statement.a;
+			return $elm$html$Html$text('procedurecall');
 	}
 };
 var $elm$html$Html$p = _VirtualDom_node('p');

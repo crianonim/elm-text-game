@@ -42,7 +42,15 @@ type Statement
     | Block (List Statement)
     | If Condition Statement Statement
     | Comment String
+    | Procedure ProcedureCall
     | None
+
+
+type alias ProcedureCall =
+    { name : String
+    , intParams : List IntValue
+    , textParams : List TextValue
+    }
 
 
 runStatement : Statement -> State a -> State a
@@ -94,9 +102,17 @@ runStatement statement state =
         Comment _ ->
             state
 
+        -- TODO
+        Procedure procedureCall ->
+            let
+                proc =
+                    Dict.get procedureCall.name state.procedures |> Maybe.withDefault None
+            in
+            runStatement proc state
+
 
 type alias State a =
-    { a | counters : Dict String Int, labels : Dict String String, rnd : Random.Seed }
+    { a | counters : Dict String Int, labels : Dict String String, procedures : Dict String Statement, rnd : Random.Seed }
 
 
 getText : State a -> TextValue -> String
@@ -300,6 +316,10 @@ encodeStatement statement =
 
         Comment comment ->
             E.object [ ( "comment", E.string comment ) ]
+
+        -- TODO
+        Procedure _ ->
+            E.null
 
         None ->
             E.null
@@ -537,8 +557,7 @@ parsedStatement =
 statementParser : Parser Statement
 statementParser =
     Parser.oneOf
-        [
-        Parser.succeed SetCounter
+        [ Parser.succeed SetCounter
             |. Parser.keyword "SET"
             |. Parser.spaces
             |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
@@ -585,9 +604,8 @@ statementParser =
                 , item = Parser.lazy (\_ -> statementParser)
                 , trailing = Parser.Optional
                 }
-
-                , Parser.succeed Comment
-               |= (Parser.lineComment "#" |> Parser.getChompedString )
+        , Parser.succeed Comment
+            |= (Parser.lineComment "#" |> Parser.getChompedString)
         , Parser.succeed None
             |. Parser.spaces
         ]
