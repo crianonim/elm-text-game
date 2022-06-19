@@ -5375,42 +5375,10 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
-var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Games$FirstTestGame$turnActions = _List_fromArray(
-	[
-		_Utils_Tuple2(
-		1,
-		function (gs) {
-			var _v0 = A2($elm$core$Debug$log, 'Turn passed', '1');
-			return gs;
-		}),
-		_Utils_Tuple2(
-		2,
-		function (gs) {
-			var _v1 = A2($elm$core$Debug$log, 'Even Turn passed', '2');
-			return gs;
-		})
-	]);
-var $author$project$Games$FirstTestGame$processTurn = F2(
-	function (turn, gameState) {
-		var _v0 = A2($elm$core$Debug$log, 'Processing turn ', turn);
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v1, acc) {
-					var t = _v1.a;
-					var fn = _v1.b;
-					return (!A2($elm$core$Basics$modBy, t, turn)) ? fn(acc) : acc;
-				}),
-			gameState,
-			$author$project$Games$FirstTestGame$turnActions);
-	});
-var $author$project$Games$FirstTestGame$config = {showMessages: true, turnCallback: $author$project$Games$FirstTestGame$processTurn};
 var $author$project$Screept$AND = function (a) {
 	return {$: 'AND', a: a};
 };
-var $author$project$Game$ActionBlock = function (a) {
+var $author$project$DialogGame$ActionBlock = function (a) {
 	return {$: 'ActionBlock', a: a};
 };
 var $author$project$Screept$Addition = F2(
@@ -5430,10 +5398,10 @@ var $author$project$Screept$Const = function (a) {
 var $author$project$Screept$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
-var $author$project$Game$GoAction = function (a) {
+var $author$project$DialogGame$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
-var $author$project$Game$GoBackAction = {$: 'GoBackAction'};
+var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
 var $author$project$Screept$Gt = {$: 'Gt'};
 var $author$project$Screept$If = F3(
 	function (a, b, c) {
@@ -5446,7 +5414,7 @@ var $author$project$Screept$Label = function (a) {
 	return {$: 'Label', a: a};
 };
 var $author$project$Screept$Lt = {$: 'Lt'};
-var $author$project$Game$Message = function (a) {
+var $author$project$DialogGame$Message = function (a) {
 	return {$: 'Message', a: a};
 };
 var $author$project$Screept$None = {$: 'None'};
@@ -5461,7 +5429,7 @@ var $author$project$Screept$Rnd = F3(
 var $author$project$Screept$S = function (a) {
 	return {$: 'S', a: a};
 };
-var $author$project$Game$Screept = function (a) {
+var $author$project$DialogGame$Screept = function (a) {
 	return {$: 'Screept', a: a};
 };
 var $author$project$Screept$SetCounter = F2(
@@ -5475,12 +5443,12 @@ var $author$project$Screept$Subtraction = F2(
 	function (a, b) {
 		return {$: 'Subtraction', a: a, b: b};
 	});
-var $author$project$Game$Turn = function (a) {
+var $author$project$DialogGame$Turn = function (a) {
 	return {$: 'Turn', a: a};
 };
 var $author$project$Games$FirstTestGame$backOption = {
 	action: _List_fromArray(
-		[$author$project$Game$GoBackAction]),
+		[$author$project$DialogGame$GoBackAction]),
 	condition: $elm$core$Maybe$Nothing,
 	text: $author$project$Screept$S('Go back')
 };
@@ -5496,7 +5464,7 @@ var $author$project$Games$FirstTestGame$customCombat = F5(
 					{
 					action: _List_fromArray(
 						[
-							$author$project$Game$Screept(
+							$author$project$DialogGame$Screept(
 							$author$project$Screept$Block(
 								_List_fromArray(
 									[
@@ -5652,7 +5620,7 @@ var $author$project$Games$FirstTestGame$customCombat = F5(
 													])),
 											$author$project$Screept$None))
 									]))),
-							$author$project$Game$Message(
+							$author$project$DialogGame$Message(
 							A2(
 								$author$project$Screept$Conditional,
 								A3(
@@ -5668,7 +5636,7 @@ var $author$project$Games$FirstTestGame$customCombat = F5(
 											$author$project$Screept$Counter('player_damage')),
 											$author$project$Screept$S(' damage')
 										])))),
-							$author$project$Game$Message(
+							$author$project$DialogGame$Message(
 							A2(
 								$author$project$Screept$Conditional,
 								A3(
@@ -5705,9 +5673,9 @@ var $author$project$Games$FirstTestGame$customCombat = F5(
 					{
 					action: _List_fromArray(
 						[
-							$author$project$Game$Message(
+							$author$project$DialogGame$Message(
 							$author$project$Screept$S('You won!')),
-							$author$project$Game$Screept(
+							$author$project$DialogGame$Screept(
 							A2(
 								$author$project$Screept$SetCounter,
 								$author$project$Screept$S('fight_won'),
@@ -5725,7 +5693,7 @@ var $author$project$Games$FirstTestGame$customCombat = F5(
 					{
 					action: _List_fromArray(
 						[
-							$author$project$Game$Message(
+							$author$project$DialogGame$Message(
 							$author$project$Screept$S('You lost!')),
 							failureAction
 						]),
@@ -5760,7 +5728,7 @@ var $author$project$Screept$SetLabel = F2(
 	});
 var $author$project$Games$FirstTestGame$fightCustom = F5(
 	function (enemy_name, enemy_marker, stamina, defence, combat) {
-		return $author$project$Game$Screept(
+		return $author$project$DialogGame$Screept(
 			$author$project$Screept$Block(
 				_List_fromArray(
 					[
@@ -5795,7 +5763,7 @@ var $author$project$Games$FirstTestGame$fightCustom = F5(
 					])));
 	});
 var $author$project$Games$FirstTestGame$fightGoblin = A5($author$project$Games$FirstTestGame$fightCustom, 'Old Goblin', 'defeated_goblin', 10, 6, 6);
-var $author$project$Games$FirstTestGame$fightWolf = $author$project$Game$Screept(
+var $author$project$Games$FirstTestGame$fightWolf = $author$project$DialogGame$Screept(
 	$author$project$Screept$Block(
 		_List_fromArray(
 			[
@@ -5838,26 +5806,26 @@ var $author$project$Screept$inc = function (counter) {
 			$author$project$Screept$Const(1)));
 };
 var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$Game$zero = function (gameValue) {
+var $author$project$DialogGame$zero = function (gameValue) {
 	return A3(
 		$author$project$Screept$Predicate,
 		gameValue,
 		$author$project$Screept$Eq,
 		$author$project$Screept$Const(0));
 };
-var $author$project$Game$nonZero = function (gameValue) {
+var $author$project$DialogGame$nonZero = function (gameValue) {
 	return $author$project$Screept$NOT(
-		$author$project$Game$zero(gameValue));
+		$author$project$DialogGame$zero(gameValue));
 };
-var $author$project$Game$ConditionalAction = F3(
+var $author$project$DialogGame$ConditionalAction = F3(
 	function (a, b, c) {
 		return {$: 'ConditionalAction', a: a, b: b, c: c};
 	});
 var $author$project$Games$FirstTestGame$onTestCondition = F2(
 	function (success, failure) {
 		return A3(
-			$author$project$Game$ConditionalAction,
-			$author$project$Game$nonZero(
+			$author$project$DialogGame$ConditionalAction,
+			$author$project$DialogGame$nonZero(
 				$author$project$Screept$Counter('test_success')),
 			success,
 			failure);
@@ -5865,7 +5833,7 @@ var $author$project$Games$FirstTestGame$onTestCondition = F2(
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var $author$project$Game$recipeToDialogOption = function (_v0) {
+var $author$project$DialogGame$recipeToDialogOption = function (_v0) {
 	var crafted = _v0.a;
 	var ingredients = _v0.b;
 	var ingredientToString = function (_v3) {
@@ -5886,7 +5854,7 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 	var ingredientToAction = function (_v1) {
 		var item = _v1.a;
 		var amount = _v1.b;
-		return $author$project$Game$Screept(
+		return $author$project$DialogGame$Screept(
 			A2(
 				$author$project$Screept$SetCounter,
 				$author$project$Screept$S(item),
@@ -5898,7 +5866,7 @@ var $author$project$Game$recipeToDialogOption = function (_v0) {
 	return {
 		action: A2(
 			$elm$core$List$cons,
-			$author$project$Game$Screept(
+			$author$project$DialogGame$Screept(
 				$author$project$Screept$inc(crafted)),
 			A2($elm$core$List$map, ingredientToAction, ingredients)),
 		condition: $elm$core$Maybe$Just(
@@ -5928,6 +5896,7 @@ var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
 				_Utils_Tuple2('stone', 2)
 			]))
 	]);
+var $elm$core$Debug$log = _Debug_log;
 var $elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
 		return {col: col, problem: problem, row: row};
@@ -7253,11 +7222,11 @@ var $author$project$Screept$run = function (statement) {
 		return $author$project$Screept$None;
 	}
 };
-var $author$project$Game$runScreept = function (s) {
-	return $author$project$Game$Screept(
+var $author$project$DialogGame$runScreept = function (s) {
+	return $author$project$DialogGame$Screept(
 		$author$project$Screept$run(s));
 };
-var $author$project$Game$DoNothing = {$: 'DoNothing'};
+var $author$project$DialogGame$DoNothing = {$: 'DoNothing'};
 var $author$project$Games$FirstTestGame$standardCombat = A5(
 	$author$project$Games$FirstTestGame$customCombat,
 	'combat',
@@ -7271,8 +7240,8 @@ var $author$project$Games$FirstTestGame$standardCombat = A5(
 		$author$project$Screept$Counter('player_stamina'),
 		$author$project$Screept$Lt,
 		$author$project$Screept$Const(1)),
-	$author$project$Game$GoBackAction,
-	$author$project$Game$DoNothing);
+	$author$project$DialogGame$GoBackAction,
+	$author$project$DialogGame$DoNothing);
 var $author$project$Games$FirstTestGame$testAgainstDifficulty = F2(
 	function (counter, diff) {
 		return $author$project$Screept$Block(
@@ -7324,22 +7293,22 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('second')
+						$author$project$DialogGame$GoAction('second')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('start_look_around'))),
 				text: $author$project$Screept$S('Go through the exit')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						$author$project$Screept$inc('start_look_around')),
-						$author$project$Game$Message(
+						$author$project$DialogGame$Message(
 						$author$project$Screept$S('You noticed a straw bed')),
-						$author$project$Game$Turn(5),
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Turn(5),
+						$author$project$DialogGame$Screept(
 						A3(
 							$author$project$Screept$Rnd,
 							$author$project$Screept$S('rrr'),
@@ -7347,23 +7316,23 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 							$author$project$Screept$Const(5)))
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('start_look_around'))),
 				text: $author$project$Screept$S('Look around')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						$author$project$Screept$inc('start_search_bed'))
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Screept$AND(
 						_List_fromArray(
 							[
-								$author$project$Game$zero(
+								$author$project$DialogGame$zero(
 								$author$project$Screept$Counter('start_search_bed')),
-								$author$project$Game$nonZero(
+								$author$project$DialogGame$nonZero(
 								$author$project$Screept$Counter('start_look_around'))
 							]))),
 				text: $author$project$Screept$S('Search the bed')
@@ -7371,15 +7340,15 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#1')
+						$author$project$DialogGame$GoAction('#1')
 					]),
 				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Game')
+				text: $author$project$Screept$S('DialogGame')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('craft')
+						$author$project$DialogGame$GoAction('craft')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Craft')
@@ -7387,7 +7356,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('forest')
+						$author$project$DialogGame$GoAction('forest')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Forest')
@@ -7396,7 +7365,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$Games$FirstTestGame$fightGoblin,
-						$author$project$Game$GoAction('combat')
+						$author$project$DialogGame$GoAction('combat')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Combat')
@@ -7404,7 +7373,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('goblin_cave')
+						$author$project$DialogGame$GoAction('goblin_cave')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Goblin Cave')
@@ -7412,7 +7381,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$runScreept('{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }')
+						$author$project$DialogGame$runScreept('{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Test Screept')
@@ -7424,17 +7393,17 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 					$author$project$Screept$S('You\'re in a dark room. '),
 					A2(
 					$author$project$Screept$Conditional,
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('start_look_around')),
 					$author$project$Screept$S('You see nothing. ')),
 					A2(
 					$author$project$Screept$Conditional,
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('start_look_around')),
 					$author$project$Screept$S('You see a straw bed. ')),
 					A2(
 					$author$project$Screept$Conditional,
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('start_search_bed')),
 					$author$project$Screept$S('There is a rusty key among the straw. '))
 				]))
@@ -7446,7 +7415,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						A2(
 							$author$project$Screept$SetCounter,
 							$author$project$Screept$S('turn'),
@@ -7454,7 +7423,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 								$author$project$Screept$Addition,
 								$author$project$Screept$Counter('turn'),
 								$author$project$Screept$Const(1)))),
-						$author$project$Game$GoAction('start')
+						$author$project$DialogGame$GoAction('start')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Go start')
@@ -7462,7 +7431,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('third')
+						$author$project$DialogGame$GoAction('third')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Go third')
@@ -7478,7 +7447,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('start')
+						$author$project$DialogGame$GoAction('start')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Go start')
@@ -7489,7 +7458,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 		{
 		id: 'craft',
 		options: _Utils_ap(
-			A2($elm$core$List$map, $author$project$Game$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
+			A2($elm$core$List$map, $author$project$DialogGame$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
 			_List_fromArray(
 				[$author$project$Games$FirstTestGame$backOption])),
 		text: $author$project$Screept$S('You can craft items')
@@ -7501,7 +7470,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						$author$project$Screept$Block(
 							_List_fromArray(
 								[
@@ -7530,8 +7499,8 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 										$author$project$Screept$Counter('sticks'),
 										$author$project$Screept$Counter('rnd_sticks')))
 								]))),
-						$author$project$Game$Turn(4),
-						$author$project$Game$Message(
+						$author$project$DialogGame$Turn(4),
+						$author$project$DialogGame$Message(
 						$author$project$Screept$Special(
 							_List_fromArray(
 								[
@@ -7545,7 +7514,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 								])))
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('defeated_wolf'))),
 				text: $author$project$Screept$S('Forage')
 			},
@@ -7553,10 +7522,10 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$Games$FirstTestGame$fightWolf,
-						$author$project$Game$GoAction('combat')
+						$author$project$DialogGame$GoAction('combat')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('defeated_wolf'))),
 				text: $author$project$Screept$S('Fight Wolf')
 			},
@@ -7572,7 +7541,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						$author$project$Screept$Block(
 							_List_fromArray(
 								[
@@ -7716,7 +7685,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 												$author$project$Screept$Const(1))
 											])))
 								]))),
-						$author$project$Game$Message(
+						$author$project$DialogGame$Message(
 						A2(
 							$author$project$Screept$Conditional,
 							A3(
@@ -7732,7 +7701,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 										$author$project$Screept$Counter('player_damage')),
 										$author$project$Screept$S(' damage')
 									])))),
-						$author$project$Game$Message(
+						$author$project$DialogGame$Message(
 						A2(
 							$author$project$Screept$Conditional,
 							A3(
@@ -7769,12 +7738,12 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						A2(
 							$author$project$Screept$SetCounter,
 							$author$project$Screept$S('fight_won'),
 							$author$project$Screept$Const(0))),
-						$author$project$Game$GoBackAction
+						$author$project$DialogGame$GoBackAction
 					]),
 				condition: $elm$core$Maybe$Just(
 					A3(
@@ -7818,25 +7787,25 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$Games$FirstTestGame$fightGoblin,
-						$author$project$Game$GoAction('combat')
+						$author$project$DialogGame$GoAction('combat')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('defeated_goblin'))),
 				text: $author$project$Screept$S('Fight Goblin')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$runScreept('{ SET $taken_goblin_treasure = 1; SET $money = 10 }')
+						$author$project$DialogGame$runScreept('{ SET $taken_goblin_treasure = 1; SET $money = 10 }')
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Screept$AND(
 						_List_fromArray(
 							[
-								$author$project$Game$nonZero(
+								$author$project$DialogGame$nonZero(
 								$author$project$Screept$Counter('defeated_goblin')),
-								$author$project$Game$zero(
+								$author$project$DialogGame$zero(
 								$author$project$Screept$Counter('taken_goblin_treasure'))
 							]))),
 				text: $author$project$Screept$S('Take treasure')
@@ -7851,7 +7820,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#20')
+						$author$project$DialogGame$GoAction('#20')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -7866,7 +7835,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#192')
+						$author$project$DialogGame$GoAction('#192')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Follow him')
@@ -7874,7 +7843,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#128')
+						$author$project$DialogGame$GoAction('#128')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Explore the coast')
@@ -7882,7 +7851,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#257')
+						$author$project$DialogGame$GoAction('#257')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Head into the nearby forest')
@@ -7897,7 +7866,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#128')
+						$author$project$DialogGame$GoAction('#128')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Explore the coastline')
@@ -7905,7 +7874,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#257')
+						$author$project$DialogGame$GoAction('#257')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Head into the forest')
@@ -7913,7 +7882,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#8')
+						$author$project$DialogGame$GoAction('#8')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Step through the Yellowport arch')
@@ -7921,7 +7890,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#180')
+						$author$project$DialogGame$GoAction('#180')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Step through the Marlock City arch')
@@ -7929,7 +7898,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#330')
+						$author$project$DialogGame$GoAction('#330')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Step through the Wishport arch')
@@ -7944,7 +7913,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#195')
+						$author$project$DialogGame$GoAction('#195')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -7959,12 +7928,12 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						A2(
 							$author$project$Screept$SetCounter,
 							$author$project$Screept$S('codeword_apple'),
 							$author$project$Screept$Const(1))),
-						$author$project$Game$GoAction('#358')
+						$author$project$DialogGame$GoAction('#358')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -7979,7 +7948,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#65')
+						$author$project$DialogGame$GoAction('#65')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -7994,74 +7963,74 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						A2(
 							$author$project$Screept$SetCounter,
 							$author$project$Screept$S('codeword_aspen'),
 							$author$project$Screept$Const(1)))
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('...')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#544')
+						$author$project$DialogGame$GoAction('#544')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Visit the shrine to Lacuna')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#452')
+						$author$project$DialogGame$GoAction('#452')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Visit the market')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#332')
+						$author$project$DialogGame$GoAction('#332')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Visit the quayside')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#181')
+						$author$project$DialogGame$GoAction('#181')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Visit the Green Man Inn')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#11')
+						$author$project$DialogGame$GoAction('#11')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Climb the hill that overlooks the town')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#257')
+						$author$project$DialogGame$GoAction('#257')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('Go inland, into the Old Forest')
 			}
@@ -8075,12 +8044,12 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
+						$author$project$DialogGame$Screept(
 						A2($author$project$Games$FirstTestGame$testAgainstDifficulty, 'player_scouting', 10)),
 						A2(
 						$author$project$Games$FirstTestGame$onTestCondition,
-						$author$project$Game$GoAction('#630'),
-						$author$project$Game$GoAction('#36'))
+						$author$project$DialogGame$GoAction('#630'),
+						$author$project$DialogGame$GoAction('#36'))
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -8107,40 +8076,40 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#594')
+						$author$project$DialogGame$GoAction('#594')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$nonZero(
+					$author$project$DialogGame$nonZero(
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('...')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#195')
+						$author$project$DialogGame$GoAction('#195')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Return to the Trading Post')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#570')
+						$author$project$DialogGame$GoAction('#570')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Attack the tree')
 			},
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$GoAction('#237')
+						$author$project$DialogGame$GoAction('#237')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$Game$zero(
+					$author$project$DialogGame$zero(
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Try to persuade it to let you pass')
 			}
@@ -8155,7 +8124,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						A5($author$project$Games$FirstTestGame$fightCustom, 'Tree', '', 10, 7, 3),
-						$author$project$Game$GoAction('combat_tree')
+						$author$project$DialogGame$GoAction('combat_tree')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
@@ -8176,15 +8145,15 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 			$author$project$Screept$Counter('player_stamina'),
 			$author$project$Screept$Lt,
 			$author$project$Screept$Const(1)),
-		$author$project$Game$GoAction('#148'),
-		$author$project$Game$ActionBlock(
+		$author$project$DialogGame$GoAction('#148'),
+		$author$project$DialogGame$ActionBlock(
 			_List_fromArray(
 				[
-					$author$project$Game$Message(
+					$author$project$DialogGame$Message(
 					$author$project$Screept$S('You wake up almost dead with no money...')),
-					$author$project$Game$Screept(
+					$author$project$DialogGame$Screept(
 					$author$project$Screept$run('{SET $money=0;SET $player_stamina=1 }')),
-					$author$project$Game$GoAction('#195')
+					$author$project$DialogGame$GoAction('#195')
 				])))
 	]);
 var $elm$random$Random$Generate = function (a) {
@@ -8554,7 +8523,7 @@ var $author$project$Games$FirstTestGame$initialGameState = {
 	procedures: $author$project$Games$FirstTestGame$exampleProcedures,
 	rnd: $elm$random$Random$initialSeed(666)
 };
-var $author$project$Game$listDialogToDictDialog = function (dialogs) {
+var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
 	return $elm$core$Dict$fromList(
 		A2(
 			$elm$core$List$map,
@@ -8566,8 +8535,7 @@ var $author$project$Game$listDialogToDictDialog = function (dialogs) {
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			config: $author$project$Games$FirstTestGame$config,
-			dialogs: $author$project$Game$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogs),
+			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogs),
 			gameState: $author$project$Games$FirstTestGame$initialGameState,
 			isDebug: true,
 			screeptEditor: $author$project$ScreeptEditor$init
@@ -9014,6 +8982,9 @@ var $author$project$Screept$addCounter = F3(
 					gameState.counters)
 			});
 	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -9078,9 +9049,6 @@ var $author$project$Screept$getIntValueWithDefault = F2(
 			0,
 			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
 	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
 var $author$project$Screept$getMaybeLabel = F2(
 	function (label, state) {
 		return A2($elm$core$Dict$get, label, state.labels);
@@ -9308,8 +9276,8 @@ var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
 };
-var $author$project$Game$executeAction = F3(
-	function (turnCallback, dialogActionExecution, gameState) {
+var $author$project$DialogGame$executeAction = F2(
+	function (dialogActionExecution, gameState) {
 		executeAction:
 		while (true) {
 			switch (dialogActionExecution.$) {
@@ -9340,30 +9308,7 @@ var $author$project$Game$executeAction = F3(
 						});
 				case 'Turn':
 					var t = dialogActionExecution.a;
-					var runTurn = F2(
-						function (left, gs) {
-							runTurn:
-							while (true) {
-								var currentTurn = A2(
-									$author$project$Screept$getIntValueWithDefault,
-									$author$project$Screept$Counter('turn'),
-									gs);
-								if (!left) {
-									return gs;
-								} else {
-									var $temp$left = left - 1,
-										$temp$gs = A3(
-										$author$project$Screept$addCounter,
-										'turn',
-										1,
-										A2(turnCallback, currentTurn, gs));
-									left = $temp$left;
-									gs = $temp$gs;
-									continue runTurn;
-								}
-							}
-						});
-					return A2(runTurn, t, gameState);
+					return A3($author$project$Screept$addCounter, 'turn', t, gameState);
 				case 'Screept':
 					var statement = dialogActionExecution.a;
 					return A2($author$project$Screept$runStatement, statement, gameState);
@@ -9371,10 +9316,8 @@ var $author$project$Game$executeAction = F3(
 					var condition = dialogActionExecution.a;
 					var success = dialogActionExecution.b;
 					var failure = dialogActionExecution.c;
-					var $temp$turnCallback = turnCallback,
-						$temp$dialogActionExecution = A2($author$project$Screept$testCondition, condition, gameState) ? success : failure,
+					var $temp$dialogActionExecution = A2($author$project$Screept$testCondition, condition, gameState) ? success : failure,
 						$temp$gameState = gameState;
-					turnCallback = $temp$turnCallback;
 					dialogActionExecution = $temp$dialogActionExecution;
 					gameState = $temp$gameState;
 					continue executeAction;
@@ -9384,7 +9327,7 @@ var $author$project$Game$executeAction = F3(
 						$elm$core$List$foldl,
 						F2(
 							function (a, state) {
-								return A3($author$project$Game$executeAction, turnCallback, a, state);
+								return A2($author$project$DialogGame$executeAction, a, state);
 							}),
 						gameState,
 						dialogActionExecutions);
@@ -9393,7 +9336,7 @@ var $author$project$Game$executeAction = F3(
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Game$setRndSeed = F2(
+var $author$project$DialogGame$setRndSeed = F2(
 	function (seed, gameState) {
 		return _Utils_update(
 			gameState,
@@ -9426,11 +9369,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							gameState: A3(
-								$elm$core$List$foldl,
-								$author$project$Game$executeAction(model.config.turnCallback),
-								model.gameState,
-								actions)
+							gameState: A3($elm$core$List$foldl, $author$project$DialogGame$executeAction, model.gameState, actions)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SeedGenerated':
@@ -9439,7 +9378,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							gameState: A2($author$project$Game$setRndSeed, seed, model.gameState)
+							gameState: A2($author$project$DialogGame$setRndSeed, seed, model.gameState)
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
@@ -9466,16 +9405,16 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Game$badDialog = {
+var $author$project$DialogGame$badDialog = {
 	id: 'bad',
 	options: _List_Nil,
 	text: $author$project$Screept$S('BAD Dialog')
 };
-var $author$project$Game$getDialog = F2(
+var $author$project$DialogGame$getDialog = F2(
 	function (dialogId, dialogs) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$author$project$Game$badDialog,
+			$author$project$DialogGame$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
@@ -9782,7 +9721,7 @@ var $author$project$Main$viewMessages = function (msgs) {
 };
 var $author$project$Main$view = function (model) {
 	var dialog = A2(
-		$author$project$Game$getDialog,
+		$author$project$DialogGame$getDialog,
 		A2(
 			$elm$core$Maybe$withDefault,
 			'bad',
@@ -9797,7 +9736,7 @@ var $author$project$Main$view = function (model) {
 		_List_fromArray(
 			[
 				A2($author$project$Main$viewDialog, model.gameState, dialog),
-				model.config.showMessages ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
+				($elm$core$List$length(model.gameState.messages) > 0) ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
 				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text(''),
 				A2(
 				$elm$html$Html$map,

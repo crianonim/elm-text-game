@@ -1,17 +1,10 @@
 module Games.UnderSeaGame exposing (..)
 
+import DialogGame exposing (..)
 import Dict
-import Game exposing (..)
 import Random
 import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), TextValue(..))
 import Stack
-
-
-config : GameConfig
-config =
-    { turnCallback = \_ gs -> gs
-    , showMessages = False
-    }
 
 
 dialogs : List Dialog
@@ -67,4 +60,4 @@ dialogs =
 
 initialGameState : GameState
 initialGameState =
-    { counters = Dict.empty, dialogStack = Stack.push "start" Stack.initialise, messages = [], rnd = Random.initialSeed 666 }
+    { counters = Dict.empty, dialogStack = Stack.push "start" Stack.initialise, labels = Dict.empty, procedures = Dict.empty, messages = [], rnd = Random.initialSeed 666 }

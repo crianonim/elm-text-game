@@ -1,13 +1,12 @@
 module Main exposing (main)
 
 import Browser
+import DialogGame exposing (..)
 import Dict
-import Game exposing (..)
 import Games.FirstTestGame as TestGame
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Json.Encode as E
 import Platform.Cmd exposing (Cmd)
 import Random
 import Screept
@@ -33,7 +32,6 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog TestGame.dialogs
       , gameState = TestGame.initialGameState
-      , config = TestGame.config
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
       }
@@ -49,7 +47,7 @@ update msg model =
 
         ClickDialog actions ->
             ( { model
-                | gameState = List.foldl (executeAction model.config.turnCallback) model.gameState actions
+                | gameState = List.foldl executeAction model.gameState actions
               }
             , Cmd.none
             )
@@ -62,9 +60,8 @@ update msg model =
 
 
 type alias Model =
-    { dialogs : Game.Dialogs
+    { dialogs : DialogGame.Dialogs
     , gameState : GameState
-    , config : GameConfig
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
     }
@@ -98,7 +95,7 @@ view model =
     in
     div [ class "container" ]
         [ viewDialog model.gameState dialog
-        , if model.config.showMessages then
+        , if List.length model.gameState.messages > 0 then
             viewMessages model.gameState.messages
 
           else
@@ -120,7 +117,7 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
-viewDialog : GameState -> Game.Dialog -> Html Msg
+viewDialog : GameState -> DialogGame.Dialog -> Html Msg
 viewDialog gameState dialog =
     div [ class "dialog" ]
         [ viewDialogText dialog.text gameState
@@ -142,6 +139,6 @@ viewDebug gameState =
         ]
 
 
-viewOption : GameState -> Game.DialogOption -> Html Msg
+viewOption : GameState -> DialogGame.DialogOption -> Html Msg
 viewOption gameState dialogOption =
     div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getText gameState dialogOption.text ]

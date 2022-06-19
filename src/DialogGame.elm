@@ -1,4 +1,4 @@
-module Game exposing (..)
+module DialogGame exposing (..)
 
 import Dict exposing (Dict)
 import Random
@@ -17,8 +17,7 @@ type alias GameState =
 
 
 type alias GameConfig =
-    { turnCallback : Int -> GameState -> GameState
-    , showMessages : Bool
+    { showMessages : Bool
     }
 
 
@@ -77,8 +76,8 @@ getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
 
 
-executeAction : (Int -> GameState -> GameState) -> DialogActionExecution -> GameState -> GameState
-executeAction turnCallback dialogActionExecution gameState =
+executeAction : DialogActionExecution -> GameState -> GameState
+executeAction dialogActionExecution gameState =
     case dialogActionExecution of
         GoAction dialogId ->
             { gameState | dialogStack = Stack.push dialogId gameState.dialogStack }
@@ -93,29 +92,13 @@ executeAction turnCallback dialogActionExecution gameState =
             { gameState | messages = Screept.getText gameState msg :: gameState.messages }
 
         Turn t ->
-            let
-                runTurn : Int -> GameState -> GameState
-                runTurn left gs =
-                    let
-                        currentTurn =
-                            Screept.getIntValueWithDefault (Counter "turn") gs
-                    in
-                    if left == 0 then
-                        gs
-
-                    else
-                        runTurn (left - 1)
-                            (turnCallback currentTurn gs
-                                |> Screept.addCounter "turn" 1
-                            )
-            in
-            runTurn t gameState
+            Screept.addCounter "turn" t gameState
 
         Screept statement ->
             Screept.runStatement statement gameState
 
         ConditionalAction condition success failure ->
-            executeAction turnCallback
+            executeAction
                 (if Screept.testCondition condition gameState then
                     success
 
@@ -125,7 +108,7 @@ executeAction turnCallback dialogActionExecution gameState =
                 gameState
 
         ActionBlock dialogActionExecutions ->
-            List.foldl (\a state -> executeAction turnCallback a state) gameState dialogActionExecutions
+            List.foldl (\a state -> executeAction a state) gameState dialogActionExecutions
 
 
 setRndSeed : Random.Seed -> GameState -> GameState

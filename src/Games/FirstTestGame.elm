@@ -1,56 +1,10 @@
 module Games.FirstTestGame exposing (..)
 
+import DialogGame exposing (..)
 import Dict exposing (Dict)
-import Game exposing (..)
 import Random
 import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), TextValue(..))
 import Stack
-
-
-config : GameConfig
-config =
-    { turnCallback = processTurn
-    , showMessages = True
-    }
-
-
-processTurn : Int -> GameState -> GameState
-processTurn turn gameState =
-    let
-        _ =
-            Debug.log "Processing turn " turn
-    in
-    List.foldl
-        (\( t, fn ) acc ->
-            if modBy t turn == 0 then
-                fn acc
-
-            else
-                acc
-        )
-        gameState
-        turnActions
-
-
-turnActions : List ( Int, GameState -> GameState )
-turnActions =
-    [ ( 1
-      , \gs ->
-            let
-                _ =
-                    Debug.log "Turn passed" "1"
-            in
-            gs
-      )
-    , ( 2
-      , \gs ->
-            let
-                _ =
-                    Debug.log "Even Turn passed" "2"
-            in
-            gs
-      )
-    ]
 
 
 exampleCounters : Dict String Int
@@ -138,7 +92,7 @@ dialogs =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
             , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
             , { text = S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
-            , { text = S "Game", condition = Nothing, action = [ GoAction "#1" ] }
+            , { text = S "DialogGame", condition = Nothing, action = [ GoAction "#1" ] }
             , { text = S "Craft", condition = Nothing, action = [ GoAction "craft" ] }
             , { text = S "Forest", condition = Nothing, action = [ GoAction "forest" ] }
             , { text = S "Combat", condition = Nothing, action = [ fightGoblin, GoAction "combat" ] }
