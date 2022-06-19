@@ -157,3 +157,8 @@ recipeToDialogOption ( crafted, ingredients ) =
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
+
+
+runScreept : String -> DialogActionExecution
+runScreept s =
+    Screept <| Screept.run s

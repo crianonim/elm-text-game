@@ -5430,7 +5430,6 @@ var $author$project$Screept$Const = function (a) {
 var $author$project$Screept$Counter = function (a) {
 	return {$: 'Counter', a: a};
 };
-var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Game$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
@@ -5838,6 +5837,7 @@ var $author$project$Screept$inc = function (counter) {
 			$author$project$Screept$Counter(counter),
 			$author$project$Screept$Const(1)));
 };
+var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Game$zero = function (gameValue) {
 	return A3(
 		$author$project$Screept$Predicate,
@@ -7253,6 +7253,10 @@ var $author$project$Screept$run = function (statement) {
 		return $author$project$Screept$None;
 	}
 };
+var $author$project$Game$runScreept = function (s) {
+	return $author$project$Game$Screept(
+		$author$project$Screept$run(s));
+};
 var $author$project$Game$DoNothing = {$: 'DoNothing'};
 var $author$project$Games$FirstTestGame$standardCombat = A5(
 	$author$project$Games$FirstTestGame$customCombat,
@@ -7408,31 +7412,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_1'),
-									$author$project$Screept$Const(0),
-									$author$project$Screept$Const(1)),
-									A3(
-									$author$project$Screept$If,
-									A3(
-										$author$project$Screept$Predicate,
-										$author$project$Screept$Counter('rnd_1'),
-										$author$project$Screept$Eq,
-										$author$project$Screept$Const(1)),
-									A2(
-										$author$project$Screept$SetCounter,
-										$author$project$Screept$S('rnd_s'),
-										$author$project$Screept$Const(100)),
-									A2(
-										$author$project$Screept$SetCounter,
-										$author$project$Screept$S('rnd_s'),
-										$author$project$Screept$Const(200)))
-								])))
+						$author$project$Game$runScreept('{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('Test Screept')
@@ -7848,22 +7828,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						$author$project$Game$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('taken_goblin_treasure'),
-									$author$project$Screept$Const(1)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('money'),
-									A2(
-										$author$project$Screept$Addition,
-										$author$project$Screept$Counter('money'),
-										$author$project$Screept$Const(10)))
-								])))
+						$author$project$Game$runScreept('{ SET $taken_goblin_treasure = 1; SET $money = 10 }')
 					]),
 				condition: $elm$core$Maybe$Just(
 					$author$project$Screept$AND(

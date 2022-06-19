@@ -146,11 +146,12 @@ dialogs =
             , { text = S "Test Screept"
               , condition = Nothing
               , action =
-                    [ Screept <|
-                        Screept.Block
-                            [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)
-                            , Screept.If (Predicate (Counter "rnd_1") Eq (Const 1)) (Screept.SetCounter (S "rnd_s") (Const 100)) (Screept.SetCounter (S "rnd_s") (Const 200))
-                            ]
+                    [ runScreept "{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }"
+                    --,Screept <|
+                    --    Screept.Block
+                    --        [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)
+                    --        , Screept.If (Predicate (Counter "rnd_1") Eq (Const 1)) (Screept.SetCounter (S "rnd_s") (Const 100)) (Screept.SetCounter (S "rnd_s") (Const 200))
+                    --        ]
                     ]
               }
             ]
@@ -247,11 +248,7 @@ dialogs =
             , { text = S "Take treasure"
               , condition = Just <| AND [ nonZero (Counter "defeated_goblin"), zero (Counter "taken_goblin_treasure") ]
               , action =
-                    [ Screept <|
-                        Screept.Block
-                            [ Screept.SetCounter (S "taken_goblin_treasure") (Const 1)
-                            , Screept.SetCounter (S "money") (Addition (Counter "money") (Const 10))
-                            ]
+                    [ runScreept "{ SET $taken_goblin_treasure = 1; SET $money = 10 }"
                     ]
               }
             ]
