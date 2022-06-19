@@ -45,6 +45,9 @@ view statement =
         None ->
             text "Nop"
 
+        Comment string ->
+            text ("#" ++ string)
+
 
 viewTextValue : TextValue -> Html msg
 viewTextValue textValue =

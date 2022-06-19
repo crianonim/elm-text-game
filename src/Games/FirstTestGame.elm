@@ -361,7 +361,14 @@ dialogs =
         (Predicate (Counter "enemy_stamina") Lt (Const 5))
         (Predicate (Counter "player_stamina") Lt (Const 1))
         (GoAction "#148")
-        (ActionBlock [ Message (S "You wake up almost dead with no money..."), Screept <| Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ], GoAction "#195" ])
+        (ActionBlock
+            [ Message (S "You wake up almost dead with no money...")
+            , Screept <| Screept.run "{SET $money=0;SET $player_stamina=1 }"
+
+            --Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ]
+            , GoAction "#195"
+            ]
+        )
     ]
 
 

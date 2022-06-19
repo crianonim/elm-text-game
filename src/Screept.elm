@@ -41,6 +41,7 @@ type Statement
     | Rnd TextValue IntValue IntValue
     | Block (List Statement)
     | If Condition Statement Statement
+    | Comment String
     | None
 
 
@@ -88,6 +89,9 @@ runStatement statement state =
                 state
 
         None ->
+            state
+
+        Comment _ ->
             state
 
 
@@ -294,6 +298,9 @@ encodeStatement statement =
         If condition success failure ->
             E.object [ ( "if", E.object [ ( "condition", encodeCondition condition ), ( "success", encodeStatement success ), ( "failure", encodeStatement failure ) ] ) ]
 
+        Comment comment ->
+            E.object [ ( "comment", E.string comment ) ]
+
         None ->
             E.null
 
@@ -377,7 +384,18 @@ parsedTextValue =
 
 
 parsed =
-    parsedTextValue
+    parsedStatement
+
+
+counterParser : Parser String
+counterParser =
+    Parser.succeed identity
+        |. Parser.symbol "$"
+        |= Parser.getChompedString
+            (Parser.succeed ()
+                |. Parser.chompIf (\c -> Char.isAlpha c || c == '_')
+                |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
+            )
 
 
 intValueParser : Parser IntValue
@@ -398,13 +416,15 @@ intValueParser =
             |. Parser.symbol ")"
         , Parser.succeed Const
             |= Parser.int
-        , Parser.succeed Counter
-            |. Parser.symbol "$"
-            |= Parser.getChompedString
-                (Parser.succeed ()
-                    |. Parser.chompIf (\c -> Char.isAlpha c || c == '_')
-                    |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
-                )
+        , Parser.map Counter
+            counterParser
+
+        --|. Parser.symbol "$"
+        --|= Parser.getChompedString
+        --    (Parser.succeed ()
+        --        |. Parser.chompIf (\c -> Char.isAlpha c || c == '_')
+        --        |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
+        --    )
         ]
 
 
@@ -483,3 +503,108 @@ textValueParser =
             |. Parser.symbol "#"
             |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         ]
+
+
+statementToParse =
+    """if 2 > 2 then {
+label "avc"=str(4);
+
+label "avc"=str(4);
+} else
+    """
+
+
+customCombatString =
+    """{
+RND $rnd_d6_1 1 .. 6;
+RND $rnd_d6_2 1 .. 6;
+SET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);
+SET $player_attack = ($rnd_2d6 + $player_combat);
+
+# comment
+;
+LABEL $player_name = "Jan";
+IF $rnd_2d6 > 10 THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);
+SET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}
+}"""
+
+
+parsedStatement : Result (List Parser.DeadEnd) Statement
+parsedStatement =
+    Parser.run statementParser customCombatString
+
+
+statementParser : Parser Statement
+statementParser =
+    Parser.oneOf
+        [
+        Parser.succeed SetCounter
+            |. Parser.keyword "SET"
+            |. Parser.spaces
+            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= intValueParser
+        , Parser.succeed SetLabel
+            |. Parser.keyword "LABEL"
+            |. Parser.spaces
+            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= textValueParser
+        , Parser.succeed Rnd
+            |. Parser.keyword "RND"
+            |. Parser.spaces
+            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
+            |. Parser.spaces
+            |= intValueParser
+            |. Parser.spaces
+            |. Parser.symbol ".."
+            |. Parser.spaces
+            |= intValueParser
+        , Parser.succeed If
+            |. Parser.keyword "IF"
+            |. Parser.spaces
+            |= conditionParser
+            |. Parser.spaces
+            |. Parser.keyword "THEN"
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> statementParser)
+            |. Parser.spaces
+            |. Parser.keyword "ELSE"
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> statementParser)
+        , Parser.succeed Block
+            |= Parser.sequence
+                { start = "{"
+                , separator = ";"
+                , end = "}"
+                , spaces = spaces
+                , item = Parser.lazy (\_ -> statementParser)
+                , trailing = Parser.Optional
+                }
+
+                , Parser.succeed Comment
+               |= (Parser.lineComment "#" |> Parser.getChompedString )
+        , Parser.succeed None
+            |. Parser.spaces
+        ]
+
+
+run : String -> Statement
+run statement =
+    case Parser.run statementParser statement of
+        Ok value ->
+            value
+
+        Err error ->
+            let
+                _ =
+                    Debug.log "Error parsing : " statement
+
+                _ =
+                    Debug.log "!" error
+            in
+            None
