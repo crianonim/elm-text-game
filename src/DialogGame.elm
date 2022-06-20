@@ -12,6 +12,7 @@ type alias GameState =
     , dialogStack : Stack DialogId
     , messages : List String
     , procedures : Dict String Screept.Statement
+    , functions : Dict String Screept.IntValue
     , rnd : Random.Seed
     }
 

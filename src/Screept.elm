@@ -12,6 +12,7 @@ type IntValue
     | Counter String
     | Unary UnaryOp IntValue
     | Binary IntValue BinaryOp IntValue
+    | Eval String
 
 
 type UnaryOp
@@ -53,6 +54,7 @@ type TextValue
 type Statement
     = SetCounter TextValue IntValue
     | SetLabel TextValue TextValue
+    | SetFunc TextValue IntValue
     | Rnd TextValue IntValue IntValue
     | Block (List Statement)
     | If IntValue Statement Statement
@@ -123,9 +125,18 @@ runStatement statement state =
             in
             runStatement proc state
 
+        SetFunc name fn ->
+            setFunction (getText state name) fn state
+
 
 type alias State a =
-    { a | counters : Dict String Int, labels : Dict String String, procedures : Dict String Statement, rnd : Random.Seed }
+    { a
+        | counters : Dict String Int
+        , labels : Dict String String
+        , procedures : Dict String Statement
+        , functions : Dict String IntValue
+        , rnd : Random.Seed
+    }
 
 
 getText : State a -> TextValue -> String
@@ -227,6 +238,10 @@ getMaybeIntValue gameValue gameState =
         Binary mx op my ->
             Maybe.map2 (binaryOpEval op) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
 
+        Eval func ->
+            Dict.get func gameState.functions
+                |> Maybe.andThen (\x -> getMaybeIntValue x gameState)
+
 
 getMaybeLabel : String -> State a -> Maybe String
 getMaybeLabel label state =
@@ -251,6 +266,11 @@ setCounter counter x gameState =
 setLabel : String -> String -> State a -> State a
 setLabel counter x gameState =
     { gameState | labels = Dict.insert counter x gameState.labels }
+
+
+setFunction : String -> IntValue -> State a -> State a
+setFunction id fn state =
+    { state | functions = Dict.insert id fn state.functions }
 
 
 isTruthy : IntValue -> State a -> Bool
@@ -515,6 +535,10 @@ intValueParser =
             |= Parser.int
         , Parser.map Counter
             counterParser
+        , Parser.succeed Eval
+            |. Parser.keyword "CALL"
+            |. Parser.spaces
+            |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         ]
 
 
@@ -598,6 +622,14 @@ statementParser =
             |. Parser.symbol "="
             |. Parser.spaces
             |= textValueParser
+        , Parser.succeed SetFunc
+            |. Parser.keyword "DEF_FUNC"
+            |. Parser.spaces
+            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= intValueParser
         , Parser.succeed Rnd
             |. Parser.keyword "RND"
             |. Parser.spaces
@@ -634,6 +666,23 @@ statementParser =
         , Parser.succeed None
             |. Parser.spaces
         ]
+
+
+runIntValue : String -> IntValue
+runIntValue intVal =
+    case Parser.run intValueParser intVal of
+        Ok value ->
+            value
+
+        Err error ->
+            let
+                _ =
+                    Debug.log "Error parsing IntVal: " intVal
+
+                _ =
+                    Debug.log "!" error
+            in
+            Const 0
 
 
 run : String -> Statement

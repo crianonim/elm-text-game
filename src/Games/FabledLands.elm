@@ -39,6 +39,12 @@ counters =
         |> Dict.fromList
 
 
+functions : Dict String IntValue
+functions =
+    []
+        |> Dict.fromList
+
+
 procedures : Dict String Statement
 procedures =
     [ ( "test"
@@ -59,6 +65,52 @@ procedures =
             , Screept.SetLabel (S "enemy_name") (S "")
             ]
       )
+    , ( "combat"
+      , Screept.Block
+            [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+            , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+            , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
+            , Screept.SetCounter (S "player_attack") (Binary (Counter "rnd_2d6") Add (Counter "player_combat"))
+            , Screept.SetCounter (S "player_damage") (Binary (Counter "player_attack") Sub (Counter "enemy_defence"))
+            , Screept.If (Binary (Counter "player_damage") Gt (Const 0))
+                (Screept.Block
+                    [ Screept.SetCounter (S "enemy_stamina") (Binary (Counter "enemy_stamina") Sub (Counter "player_damage"))
+                    ]
+                )
+                Screept.None
+            , Screept.If (Unary Not (Eval "combat_player_success"))
+                (Screept.Block
+                    [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
+                    , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
+                    , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
+                    , Screept.SetCounter (S "enemy_attack") (Binary (Counter "rnd_2d6") Add (Counter "enemy_combat"))
+                    , Screept.SetCounter (S "enemy_damage") (Binary (Counter "enemy_attack") Sub (Counter "player_defence"))
+                    , Screept.If (Binary (Counter "enemy_damage") Gt (Const 0))
+                        (Screept.Block
+                            [ Screept.SetCounter (S "player_stamina") (Binary (Counter "player_stamina") Sub (Counter "enemy_damage"))
+                            , Screept.If (Binary (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                            ]
+                        )
+                        Screept.None
+                    ]
+                )
+                Screept.None
+            , Screept.If (Eval "combat_player_success")
+                (Screept.Block
+                    [ Screept.SetCounter (S "enemy_damage") (Const 0)
+                    , Screept.SetCounter (S "fight_won") (Const 1)
+                    , Screept.SetCounter (Label "enemy_marker") (Const 1)
+                    ]
+                )
+                (Screept.If (Eval "combat_player_failure")
+                    (Screept.Block
+                        [ Screept.SetCounter (S "fight_lost") (Const 1)
+                        ]
+                    )
+                    Screept.None
+                )
+            ]
+      )
     ]
         |> Dict.fromList
 
@@ -69,6 +121,7 @@ initialGameState =
     , labels = labels
     , dialogStack = Stack.push "#630" Stack.initialise
     , procedures = procedures
+    , functions = functions
     , messages = []
     , rnd = Random.initialSeed 666
     }
@@ -198,6 +251,8 @@ dialogs =
                             , Screept.SetCounter (S "enemy_defence") (Const 7)
                             , Screept.SetCounter (S "enemy_combat") (Const 3)
                             , Screept.SetLabel (S "enemy_name") (S "Tree")
+                            , Screept.SetFunc (S "combat_player_failure") (Screept.runIntValue "($player_stamina < 1)")
+                            , Screept.SetFunc (S "combat_player_success") (Screept.runIntValue "($enemy_stamina < 5)")
                             ]
 
                     --, fightCustom "Tree" "" 10 7 3
@@ -207,8 +262,10 @@ dialogs =
             ]
       }
     , customCombat "combat_tree"
-        (Binary (Counter "enemy_stamina") Lt (Const 5))
-        (Binary (Counter "player_stamina") Lt (Const 1))
+        --(Screept.runIntValue "($enemy_stamina < 5)")
+        --(Screept.runIntValue "($player_stamina < 1)")
+        ----(Binary (Counter "enemy_stamina") Lt (Const 5))
+        --(Binary (Counter "player_stamina") Lt (Const 1))
         (GoAction "#148")
         (ActionBlock
             [ Message (S "You wake up almost dead with no money...")
@@ -254,59 +311,16 @@ dialogs =
 --
 
 
-customCombat : String -> IntValue -> IntValue -> DialogActionExecution -> DialogActionExecution -> Dialog
-customCombat id successTest failureTest successAction failureAction =
+
+customCombat : String -> DialogActionExecution -> DialogActionExecution -> Dialog
+customCombat id successAction failureAction =
     { id = id
     , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
     , options =
         [ { text = S "Hit enemy"
           , condition = Just <| Binary (Binary (Counter "fight_won") Lt (Const 1)) And (Binary (Counter "fight_lost") Lt (Const 1))
           , action =
-                [ Screept <|
-                    Screept.Block
-                        [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
-                        , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
-                        , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
-                        , Screept.SetCounter (S "player_attack") (Binary (Counter "rnd_2d6") Add (Counter "player_combat"))
-                        , Screept.SetCounter (S "player_damage") (Binary (Counter "player_attack") Sub (Counter "enemy_defence"))
-                        , Screept.If (Binary (Counter "player_damage") Gt (Const 0))
-                            (Screept.Block
-                                [ Screept.SetCounter (S "enemy_stamina") (Binary (Counter "enemy_stamina") Sub (Counter "player_damage"))
-                                ]
-                            )
-                            Screept.None
-                        , Screept.If (Unary Not successTest)
-                            (Screept.Block
-                                [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
-                                , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
-                                , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
-                                , Screept.SetCounter (S "enemy_attack") (Binary (Counter "rnd_2d6") Add (Counter "enemy_combat"))
-                                , Screept.SetCounter (S "enemy_damage") (Binary (Counter "enemy_attack") Sub (Counter "player_defence"))
-                                , Screept.If (Binary (Counter "enemy_damage") Gt (Const 0))
-                                    (Screept.Block
-                                        [ Screept.SetCounter (S "player_stamina") (Binary (Counter "player_stamina") Sub (Counter "enemy_damage"))
-                                        , Screept.If (Binary (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
-                                        ]
-                                    )
-                                    Screept.None
-                                ]
-                            )
-                            Screept.None
-                        , Screept.If successTest
-                            (Screept.Block
-                                [ Screept.SetCounter (S "enemy_damage") (Const 0)
-                                , Screept.SetCounter (S "fight_won") (Const 1)
-                                , Screept.SetCounter (Label "enemy_marker") (Const 1)
-                                ]
-                            )
-                            (Screept.If failureTest
-                                (Screept.Block
-                                    [ Screept.SetCounter (S "fight_lost") (Const 1)
-                                    ]
-                                )
-                                Screept.None
-                            )
-                        ]
+                [ Screept <| Procedure "combat"
                 , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
                 , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                 ]

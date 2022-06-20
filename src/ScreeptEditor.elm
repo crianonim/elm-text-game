@@ -95,6 +95,10 @@ viewStatement statement =
             -- TODO
             text "procedurecall"
 
+        SetFunc textValue intValue ->
+            -- TODO
+            text "procedurecall"
+
 
 viewTextValue : TextValue -> Html msg
 viewTextValue textValue =
