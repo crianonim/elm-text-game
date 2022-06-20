@@ -1,10 +1,12 @@
 module Main exposing (main)
 
+--import Games.FirstTestGame as Game
+
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.FirstTestGame as TestGame
+import Games.FabledLands as Game
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -31,8 +33,8 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { dialogs = listDialogToDictDialog TestGame.dialogs
-      , gameState = TestGame.initialGameState
+    ( { dialogs = listDialogToDictDialog Game.dialogs
+      , gameState = Game.initialGameState
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
       , dialogEditor = DialogGameEditor.init

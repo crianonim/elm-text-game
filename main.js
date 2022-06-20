@@ -5375,11 +5375,38 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
-var $author$project$Screept$AND = function (a) {
-	return {$: 'AND', a: a};
-};
 var $author$project$DialogGame$ActionBlock = function (a) {
 	return {$: 'ActionBlock', a: a};
+};
+var $author$project$Screept$Const = function (a) {
+	return {$: 'Const', a: a};
+};
+var $author$project$Screept$Counter = function (a) {
+	return {$: 'Counter', a: a};
+};
+var $author$project$DialogGame$GoAction = function (a) {
+	return {$: 'GoAction', a: a};
+};
+var $author$project$Screept$Lt = {$: 'Lt'};
+var $author$project$DialogGame$Message = function (a) {
+	return {$: 'Message', a: a};
+};
+var $author$project$Screept$Predicate = F3(
+	function (a, b, c) {
+		return {$: 'Predicate', a: a, b: b, c: c};
+	});
+var $author$project$Screept$S = function (a) {
+	return {$: 'S', a: a};
+};
+var $author$project$DialogGame$Screept = function (a) {
+	return {$: 'Screept', a: a};
+};
+var $author$project$Screept$SetCounter = F2(
+	function (a, b) {
+		return {$: 'SetCounter', a: a, b: b};
+	});
+var $author$project$Screept$AND = function (a) {
+	return {$: 'AND', a: a};
 };
 var $author$project$Screept$Addition = F2(
 	function (a, b) {
@@ -5392,16 +5419,6 @@ var $author$project$Screept$Conditional = F2(
 	function (a, b) {
 		return {$: 'Conditional', a: a, b: b};
 	});
-var $author$project$Screept$Const = function (a) {
-	return {$: 'Const', a: a};
-};
-var $author$project$Screept$Counter = function (a) {
-	return {$: 'Counter', a: a};
-};
-var $author$project$DialogGame$GoAction = function (a) {
-	return {$: 'GoAction', a: a};
-};
-var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
 var $author$project$Screept$Gt = {$: 'Gt'};
 var $author$project$Screept$If = F3(
 	function (a, b, c) {
@@ -5413,28 +5430,13 @@ var $author$project$Screept$IntValueText = function (a) {
 var $author$project$Screept$Label = function (a) {
 	return {$: 'Label', a: a};
 };
-var $author$project$Screept$Lt = {$: 'Lt'};
-var $author$project$DialogGame$Message = function (a) {
-	return {$: 'Message', a: a};
+var $author$project$Screept$NOT = function (a) {
+	return {$: 'NOT', a: a};
 };
 var $author$project$Screept$None = {$: 'None'};
-var $author$project$Screept$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
 var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
 		return {$: 'Rnd', a: a, b: b, c: c};
-	});
-var $author$project$Screept$S = function (a) {
-	return {$: 'S', a: a};
-};
-var $author$project$DialogGame$Screept = function (a) {
-	return {$: 'Screept', a: a};
-};
-var $author$project$Screept$SetCounter = F2(
-	function (a, b) {
-		return {$: 'SetCounter', a: a, b: b};
 	});
 var $author$project$Screept$Special = function (a) {
 	return {$: 'Special', a: a};
@@ -5443,19 +5445,7 @@ var $author$project$Screept$Subtraction = F2(
 	function (a, b) {
 		return {$: 'Subtraction', a: a, b: b};
 	});
-var $author$project$DialogGame$Turn = function (a) {
-	return {$: 'Turn', a: a};
-};
-var $author$project$Games$FirstTestGame$backOption = {
-	action: _List_fromArray(
-		[$author$project$DialogGame$GoBackAction]),
-	condition: $elm$core$Maybe$Nothing,
-	text: $author$project$Screept$S('Go back')
-};
-var $author$project$Screept$NOT = function (a) {
-	return {$: 'NOT', a: a};
-};
-var $author$project$Games$FirstTestGame$customCombat = F5(
+var $author$project$Games$FabledLands$customCombat = F5(
 	function (id, successTest, failureTest, successAction, failureAction) {
 		return {
 			id: id,
@@ -5726,7 +5716,7 @@ var $author$project$Screept$SetLabel = F2(
 	function (a, b) {
 		return {$: 'SetLabel', a: a, b: b};
 	});
-var $author$project$Games$FirstTestGame$fightCustom = F5(
+var $author$project$Games$FabledLands$fightCustom = F5(
 	function (enemy_name, enemy_marker, stamina, defence, combat) {
 		return $author$project$DialogGame$Screept(
 			$author$project$Screept$Block(
@@ -5762,49 +5752,6 @@ var $author$project$Games$FirstTestGame$fightCustom = F5(
 						$author$project$Screept$S(enemy_name))
 					])));
 	});
-var $author$project$Games$FirstTestGame$fightGoblin = A5($author$project$Games$FirstTestGame$fightCustom, 'Old Goblin', 'defeated_goblin', 10, 6, 6);
-var $author$project$Games$FirstTestGame$fightWolf = $author$project$DialogGame$Screept(
-	$author$project$Screept$Block(
-		_List_fromArray(
-			[
-				A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S('enemy_stamina'),
-				$author$project$Screept$Const(4)),
-				A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S('enemy_defence'),
-				$author$project$Screept$Const(6)),
-				A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S('enemy_combat'),
-				$author$project$Screept$Const(5)),
-				A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S('fight_won'),
-				$author$project$Screept$Const(0)),
-				A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S('fight_lost'),
-				$author$project$Screept$Const(0)),
-				A2(
-				$author$project$Screept$SetLabel,
-				$author$project$Screept$S('enemy_marker'),
-				$author$project$Screept$S('defeated_wolf')),
-				A2(
-				$author$project$Screept$SetLabel,
-				$author$project$Screept$S('enemy_name'),
-				$author$project$Screept$S('Wild Wolf'))
-			])));
-var $author$project$Screept$inc = function (counter) {
-	return A2(
-		$author$project$Screept$SetCounter,
-		$author$project$Screept$S(counter),
-		A2(
-			$author$project$Screept$Addition,
-			$author$project$Screept$Counter(counter),
-			$author$project$Screept$Const(1)));
-};
 var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$DialogGame$zero = function (gameValue) {
 	return A3(
@@ -5821,7 +5768,7 @@ var $author$project$DialogGame$ConditionalAction = F3(
 	function (a, b, c) {
 		return {$: 'ConditionalAction', a: a, b: b, c: c};
 	});
-var $author$project$Games$FirstTestGame$onTestCondition = F2(
+var $author$project$Games$FabledLands$onTestCondition = F2(
 	function (success, failure) {
 		return A3(
 			$author$project$DialogGame$ConditionalAction,
@@ -5830,72 +5777,6 @@ var $author$project$Games$FirstTestGame$onTestCondition = F2(
 			success,
 			failure);
 	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$DialogGame$recipeToDialogOption = function (_v0) {
-	var crafted = _v0.a;
-	var ingredients = _v0.b;
-	var ingredientToString = function (_v3) {
-		var item = _v3.a;
-		var amount = _v3.b;
-		return item + (' ' + $elm$core$String$fromInt(amount));
-	};
-	var ingredientToCondition = function (_v2) {
-		var item = _v2.a;
-		var amount = _v2.b;
-		return $author$project$Screept$NOT(
-			A3(
-				$author$project$Screept$Predicate,
-				$author$project$Screept$Counter(item),
-				$author$project$Screept$Lt,
-				$author$project$Screept$Const(amount)));
-	};
-	var ingredientToAction = function (_v1) {
-		var item = _v1.a;
-		var amount = _v1.b;
-		return $author$project$DialogGame$Screept(
-			A2(
-				$author$project$Screept$SetCounter,
-				$author$project$Screept$S(item),
-				A2(
-					$author$project$Screept$Addition,
-					$author$project$Screept$Counter(item),
-					$author$project$Screept$Const(-amount))));
-	};
-	return {
-		action: A2(
-			$elm$core$List$cons,
-			$author$project$DialogGame$Screept(
-				$author$project$Screept$inc(crafted)),
-			A2($elm$core$List$map, ingredientToAction, ingredients)),
-		condition: $elm$core$Maybe$Just(
-			$author$project$Screept$AND(
-				A2($elm$core$List$map, ingredientToCondition, ingredients))),
-		text: $author$project$Screept$S(
-			'Craft ' + (crafted + (' (' + (A2(
-				$elm$core$String$join,
-				', ',
-				A2($elm$core$List$map, ingredientToString, ingredients)) + ')'))))
-	};
-};
-var $author$project$Games$FirstTestGame$recipes = _List_fromArray(
-	[
-		_Utils_Tuple2(
-		'axe',
-		_List_fromArray(
-			[
-				_Utils_Tuple2('wood', 2),
-				_Utils_Tuple2('stone', 1)
-			])),
-		_Utils_Tuple2(
-		'pickaxe',
-		_List_fromArray(
-			[
-				_Utils_Tuple2('wood', 2),
-				_Utils_Tuple2('stone', 2)
-			]))
-	]);
 var $elm$core$Debug$log = _Debug_log;
 var $elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
@@ -6035,6 +5916,9 @@ var $elm$parser$Parser$Advanced$fromState = F2(
 			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $elm$parser$Parser$Advanced$chompIf = F2(
 	function (isGood, expecting) {
 		return $elm$parser$Parser$Advanced$Parser(
@@ -7222,27 +7106,7 @@ var $author$project$Screept$run = function (statement) {
 		return $author$project$Screept$None;
 	}
 };
-var $author$project$DialogGame$runScreept = function (s) {
-	return $author$project$DialogGame$Screept(
-		$author$project$Screept$run(s));
-};
-var $author$project$DialogGame$DoNothing = {$: 'DoNothing'};
-var $author$project$Games$FirstTestGame$standardCombat = A5(
-	$author$project$Games$FirstTestGame$customCombat,
-	'combat',
-	A3(
-		$author$project$Screept$Predicate,
-		$author$project$Screept$Counter('enemy_stamina'),
-		$author$project$Screept$Lt,
-		$author$project$Screept$Const(1)),
-	A3(
-		$author$project$Screept$Predicate,
-		$author$project$Screept$Counter('player_stamina'),
-		$author$project$Screept$Lt,
-		$author$project$Screept$Const(1)),
-	$author$project$DialogGame$GoBackAction,
-	$author$project$DialogGame$DoNothing);
-var $author$project$Games$FirstTestGame$testAgainstDifficulty = F2(
+var $author$project$Games$FabledLands$testAgainstDifficulty = F2(
 	function (counter, diff) {
 		return $author$project$Screept$Block(
 			_List_fromArray(
@@ -7284,535 +7148,8 @@ var $author$project$Games$FirstTestGame$testAgainstDifficulty = F2(
 						$author$project$Screept$Const(0)))
 				]));
 	});
-var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
+var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 	[
-		{
-		id: 'start',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('second')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('start_look_around'))),
-				text: $author$project$Screept$S('Go through the exit')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$inc('start_look_around')),
-						$author$project$DialogGame$Message(
-						$author$project$Screept$S('You noticed a straw bed')),
-						$author$project$DialogGame$Turn(5),
-						$author$project$DialogGame$Screept(
-						A3(
-							$author$project$Screept$Rnd,
-							$author$project$Screept$S('rrr'),
-							$author$project$Screept$Const(1),
-							$author$project$Screept$Const(5)))
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
-						$author$project$Screept$Counter('start_look_around'))),
-				text: $author$project$Screept$S('Look around')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$inc('start_search_bed'))
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$AND(
-						_List_fromArray(
-							[
-								$author$project$DialogGame$zero(
-								$author$project$Screept$Counter('start_search_bed')),
-								$author$project$DialogGame$nonZero(
-								$author$project$Screept$Counter('start_look_around'))
-							]))),
-				text: $author$project$Screept$S('Search the bed')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#1')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('DialogGame')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('craft')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Craft')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('forest')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Forest')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Games$FirstTestGame$fightGoblin,
-						$author$project$DialogGame$GoAction('combat')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Combat')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('goblin_cave')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Goblin Cave')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Test Screept')
-			}
-			]),
-		text: $author$project$Screept$Special(
-			_List_fromArray(
-				[
-					$author$project$Screept$S('You\'re in a dark room. '),
-					A2(
-					$author$project$Screept$Conditional,
-					$author$project$DialogGame$zero(
-						$author$project$Screept$Counter('start_look_around')),
-					$author$project$Screept$S('You see nothing. ')),
-					A2(
-					$author$project$Screept$Conditional,
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('start_look_around')),
-					$author$project$Screept$S('You see a straw bed. ')),
-					A2(
-					$author$project$Screept$Conditional,
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('start_search_bed')),
-					$author$project$Screept$S('There is a rusty key among the straw. '))
-				]))
-	},
-		{
-		id: 'second',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('turn'),
-							A2(
-								$author$project$Screept$Addition,
-								$author$project$Screept$Counter('turn'),
-								$author$project$Screept$Const(1)))),
-						$author$project$DialogGame$GoAction('start')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Go start')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('third')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Go third')
-			},
-				$author$project$Games$FirstTestGame$backOption
-			]),
-		text: $author$project$Screept$S('You\'re at second')
-	},
-		{
-		id: 'third',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('start')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Go start')
-			}
-			]),
-		text: $author$project$Screept$S('You\'re at third')
-	},
-		{
-		id: 'craft',
-		options: _Utils_ap(
-			A2($elm$core$List$map, $author$project$DialogGame$recipeToDialogOption, $author$project$Games$FirstTestGame$recipes),
-			_List_fromArray(
-				[$author$project$Games$FirstTestGame$backOption])),
-		text: $author$project$Screept$S('You can craft items')
-	},
-		{
-		id: 'forest',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_wood'),
-									$author$project$Screept$Const(0),
-									$author$project$Screept$Const(5)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('wood'),
-									A2(
-										$author$project$Screept$Addition,
-										$author$project$Screept$Counter('wood'),
-										$author$project$Screept$Counter('rnd_wood'))),
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_sticks'),
-									$author$project$Screept$Const(0),
-									$author$project$Screept$Const(5)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('sticks'),
-									A2(
-										$author$project$Screept$Addition,
-										$author$project$Screept$Counter('sticks'),
-										$author$project$Screept$Counter('rnd_sticks')))
-								]))),
-						$author$project$DialogGame$Turn(4),
-						$author$project$DialogGame$Message(
-						$author$project$Screept$Special(
-							_List_fromArray(
-								[
-									$author$project$Screept$S('You found '),
-									$author$project$Screept$IntValueText(
-									$author$project$Screept$Counter('rnd_wood')),
-									$author$project$Screept$S(' of wood and '),
-									$author$project$Screept$IntValueText(
-									$author$project$Screept$Counter('rnd_sticks')),
-									$author$project$Screept$S(' of sticks.')
-								])))
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('defeated_wolf'))),
-				text: $author$project$Screept$S('Forage')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Games$FirstTestGame$fightWolf,
-						$author$project$DialogGame$GoAction('combat')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
-						$author$project$Screept$Counter('defeated_wolf'))),
-				text: $author$project$Screept$S('Fight Wolf')
-			},
-				$author$project$Games$FirstTestGame$backOption
-			]),
-		text: $author$project$Screept$S('Has trees')
-	},
-		$author$project$Games$FirstTestGame$standardCombat,
-		{
-		id: 'combat_old',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_1'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_2'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('rnd_2d6'),
-									A2(
-										$author$project$Screept$Addition,
-										$author$project$Screept$Counter('rnd_d6_1'),
-										$author$project$Screept$Counter('rnd_d6_2'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('player_attack'),
-									A2(
-										$author$project$Screept$Addition,
-										$author$project$Screept$Counter('rnd_2d6'),
-										$author$project$Screept$Counter('player_combat'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('player_damage'),
-									A2(
-										$author$project$Screept$Subtraction,
-										$author$project$Screept$Counter('player_attack'),
-										$author$project$Screept$Counter('enemy_defence'))),
-									A3(
-									$author$project$Screept$If,
-									A3(
-										$author$project$Screept$Predicate,
-										$author$project$Screept$Counter('player_damage'),
-										$author$project$Screept$Gt,
-										$author$project$Screept$Const(0)),
-									$author$project$Screept$Block(
-										_List_fromArray(
-											[
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('enemy_stamina'),
-												A2(
-													$author$project$Screept$Subtraction,
-													$author$project$Screept$Counter('enemy_stamina'),
-													$author$project$Screept$Counter('player_damage')))
-											])),
-									$author$project$Screept$None),
-									A3(
-									$author$project$Screept$If,
-									A3(
-										$author$project$Screept$Predicate,
-										$author$project$Screept$Counter('enemy_stamina'),
-										$author$project$Screept$Gt,
-										$author$project$Screept$Const(0)),
-									$author$project$Screept$Block(
-										_List_fromArray(
-											[
-												A3(
-												$author$project$Screept$Rnd,
-												$author$project$Screept$S('rnd_d6_1'),
-												$author$project$Screept$Const(1),
-												$author$project$Screept$Const(6)),
-												A3(
-												$author$project$Screept$Rnd,
-												$author$project$Screept$S('rnd_d6_2'),
-												$author$project$Screept$Const(1),
-												$author$project$Screept$Const(6)),
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('rnd_2d6'),
-												A2(
-													$author$project$Screept$Addition,
-													$author$project$Screept$Counter('rnd_d6_1'),
-													$author$project$Screept$Counter('rnd_d6_2'))),
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('enemy_attack'),
-												A2(
-													$author$project$Screept$Addition,
-													$author$project$Screept$Counter('rnd_2d6'),
-													$author$project$Screept$Counter('enemy_combat'))),
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('enemy_damage'),
-												A2(
-													$author$project$Screept$Subtraction,
-													$author$project$Screept$Counter('enemy_attack'),
-													$author$project$Screept$Counter('player_defence'))),
-												A3(
-												$author$project$Screept$If,
-												A3(
-													$author$project$Screept$Predicate,
-													$author$project$Screept$Counter('enemy_damage'),
-													$author$project$Screept$Gt,
-													$author$project$Screept$Const(0)),
-												$author$project$Screept$Block(
-													_List_fromArray(
-														[
-															A2(
-															$author$project$Screept$SetCounter,
-															$author$project$Screept$S('player_stamina'),
-															A2(
-																$author$project$Screept$Subtraction,
-																$author$project$Screept$Counter('player_stamina'),
-																$author$project$Screept$Counter('enemy_damage'))),
-															A3(
-															$author$project$Screept$If,
-															A3(
-																$author$project$Screept$Predicate,
-																$author$project$Screept$Counter('player_stamina'),
-																$author$project$Screept$Lt,
-																$author$project$Screept$Const(1)),
-															A2(
-																$author$project$Screept$SetCounter,
-																$author$project$Screept$S('fight_lost'),
-																$author$project$Screept$Const(1)),
-															$author$project$Screept$None)
-														])),
-												$author$project$Screept$None)
-											])),
-									$author$project$Screept$Block(
-										_List_fromArray(
-											[
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('enemy_damage'),
-												$author$project$Screept$Const(0)),
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('fight_won'),
-												$author$project$Screept$Const(1)),
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$Label('enemy_marker'),
-												$author$project$Screept$Const(1))
-											])))
-								]))),
-						$author$project$DialogGame$Message(
-						A2(
-							$author$project$Screept$Conditional,
-							A3(
-								$author$project$Screept$Predicate,
-								$author$project$Screept$Counter('player_damage'),
-								$author$project$Screept$Gt,
-								$author$project$Screept$Const(0)),
-							$author$project$Screept$Special(
-								_List_fromArray(
-									[
-										$author$project$Screept$S('You dealt '),
-										$author$project$Screept$IntValueText(
-										$author$project$Screept$Counter('player_damage')),
-										$author$project$Screept$S(' damage')
-									])))),
-						$author$project$DialogGame$Message(
-						A2(
-							$author$project$Screept$Conditional,
-							A3(
-								$author$project$Screept$Predicate,
-								$author$project$Screept$Counter('enemy_damage'),
-								$author$project$Screept$Gt,
-								$author$project$Screept$Const(0)),
-							$author$project$Screept$Special(
-								_List_fromArray(
-									[
-										$author$project$Screept$S('You were dealt '),
-										$author$project$Screept$IntValueText(
-										$author$project$Screept$Counter('enemy_damage')),
-										$author$project$Screept$S(' damage')
-									]))))
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$AND(
-						_List_fromArray(
-							[
-								A3(
-								$author$project$Screept$Predicate,
-								$author$project$Screept$Counter('fight_won'),
-								$author$project$Screept$Lt,
-								$author$project$Screept$Const(1)),
-								A3(
-								$author$project$Screept$Predicate,
-								$author$project$Screept$Counter('fight_lost'),
-								$author$project$Screept$Lt,
-								$author$project$Screept$Const(1))
-							]))),
-				text: $author$project$Screept$S('Hit enemy')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('fight_won'),
-							$author$project$Screept$Const(0))),
-						$author$project$DialogGame$GoBackAction
-					]),
-				condition: $elm$core$Maybe$Just(
-					A3(
-						$author$project$Screept$Predicate,
-						$author$project$Screept$Counter('fight_won'),
-						$author$project$Screept$Gt,
-						$author$project$Screept$Const(0))),
-				text: $author$project$Screept$S('You won!')
-			},
-				{
-				action: _List_Nil,
-				condition: $elm$core$Maybe$Just(
-					A3(
-						$author$project$Screept$Predicate,
-						$author$project$Screept$Counter('fight_lost'),
-						$author$project$Screept$Gt,
-						$author$project$Screept$Const(0))),
-				text: $author$project$Screept$S('You lost!')
-			}
-			]),
-		text: $author$project$Screept$Special(
-			_List_fromArray(
-				[
-					$author$project$Screept$S('Combat. '),
-					$author$project$Screept$S('You are fighting '),
-					$author$project$Screept$Label('enemy_name'),
-					$author$project$Screept$S(' .You have '),
-					$author$project$Screept$IntValueText(
-					$author$project$Screept$Counter('player_stamina')),
-					$author$project$Screept$S(' stamina. '),
-					$author$project$Screept$S('Your enemy '),
-					$author$project$Screept$IntValueText(
-					$author$project$Screept$Counter('enemy_stamina'))
-				]))
-	},
-		{
-		id: 'goblin_cave',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$Games$FirstTestGame$fightGoblin,
-						$author$project$DialogGame$GoAction('combat')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
-						$author$project$Screept$Counter('defeated_goblin'))),
-				text: $author$project$Screept$S('Fight Goblin')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{ SET $taken_goblin_treasure = 1; SET $money = 10 }')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$AND(
-						_List_fromArray(
-							[
-								$author$project$DialogGame$nonZero(
-								$author$project$Screept$Counter('defeated_goblin')),
-								$author$project$DialogGame$zero(
-								$author$project$Screept$Counter('taken_goblin_treasure'))
-							]))),
-				text: $author$project$Screept$S('Take treasure')
-			}
-			]),
-		text: $author$project$Screept$S('Goblin Cave')
-	},
 		{
 		id: '#1',
 		options: _List_fromArray(
@@ -8045,9 +7382,9 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				action: _List_fromArray(
 					[
 						$author$project$DialogGame$Screept(
-						A2($author$project$Games$FirstTestGame$testAgainstDifficulty, 'player_scouting', 10)),
+						A2($author$project$Games$FabledLands$testAgainstDifficulty, 'player_scouting', 10)),
 						A2(
-						$author$project$Games$FirstTestGame$onTestCondition,
+						$author$project$Games$FabledLands$onTestCondition,
 						$author$project$DialogGame$GoAction('#630'),
 						$author$project$DialogGame$GoAction('#36'))
 					]),
@@ -8123,7 +7460,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 				{
 				action: _List_fromArray(
 					[
-						A5($author$project$Games$FirstTestGame$fightCustom, 'Tree', '', 10, 7, 3),
+						A5($author$project$Games$FabledLands$fightCustom, 'Tree', '', 10, 7, 3),
 						$author$project$DialogGame$GoAction('combat_tree')
 					]),
 				condition: $elm$core$Maybe$Nothing,
@@ -8133,7 +7470,7 @@ var $author$project$Games$FirstTestGame$dialogs = _List_fromArray(
 		text: $author$project$Screept$S('\n           ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.\n           ')
 	},
 		A5(
-		$author$project$Games$FirstTestGame$customCombat,
+		$author$project$Games$FabledLands$customCombat,
 		'combat_tree',
 		A3(
 			$author$project$Screept$Predicate,
@@ -8463,21 +7800,11 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromList(
+var $author$project$Games$FabledLands$counters = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
-			_Utils_Tuple2('turn', 1),
 			_Utils_Tuple2('rnd', 0),
-			_Utils_Tuple2('raining', 0),
-			_Utils_Tuple2('killed_dragon', 1),
 			_Utils_Tuple2('money', 16),
-			_Utils_Tuple2('wood', 10),
-			_Utils_Tuple2('stone', 9),
-			_Utils_Tuple2('sticks', 0),
-			_Utils_Tuple2('axe', 0),
-			_Utils_Tuple2('pickaxe', 0),
-			_Utils_Tuple2('start_look_around', 0),
-			_Utils_Tuple2('start_search_bed', 0),
 			_Utils_Tuple2('player_rank', 3),
 			_Utils_Tuple2('player_stamina', 3),
 			_Utils_Tuple2('player_defence', 7),
@@ -8495,7 +7822,11 @@ var $author$project$Games$FirstTestGame$exampleCounters = $elm$core$Dict$fromLis
 			_Utils_Tuple2('codeword_apple', 0),
 			_Utils_Tuple2('codeword_aspen', 0)
 		]));
-var $author$project$Games$FirstTestGame$exampleLabels = $elm$core$Dict$fromList(
+var $mhoare$elm_stack$Stack$Stack = function (a) {
+	return {$: 'Stack', a: a};
+};
+var $mhoare$elm_stack$Stack$initialise = $mhoare$elm_stack$Stack$Stack(_List_Nil);
+var $author$project$Games$FabledLands$labels = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
 			_Utils_Tuple2('player_name', 'Liana'),
@@ -8503,25 +7834,18 @@ var $author$project$Games$FirstTestGame$exampleLabels = $elm$core$Dict$fromList(
 			_Utils_Tuple2('enemy_marker', ''),
 			_Utils_Tuple2('enemy_name', '')
 		]));
-var $author$project$Games$FirstTestGame$exampleMessages = _List_fromArray(
-	['Last one I promise', 'Need more messages to see the scrolling', 'Third message', 'Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice. Second message that is a bit longer than the first one so will probably overflow and we need to deal with that, especially that I will repeat it twice.', 'First message test']);
-var $author$project$Games$FirstTestGame$exampleProcedures = $elm$core$Dict$empty;
-var $mhoare$elm_stack$Stack$Stack = function (a) {
-	return {$: 'Stack', a: a};
-};
-var $mhoare$elm_stack$Stack$initialise = $mhoare$elm_stack$Stack$Stack(_List_Nil);
 var $mhoare$elm_stack$Stack$push = F2(
 	function (item, _v0) {
 		var stack = _v0.a;
 		return $mhoare$elm_stack$Stack$Stack(
 			A2($elm$core$List$cons, item, stack));
 	});
-var $author$project$Games$FirstTestGame$initialGameState = {
-	counters: $author$project$Games$FirstTestGame$exampleCounters,
-	dialogStack: A2($mhoare$elm_stack$Stack$push, '#630', $mhoare$elm_stack$Stack$initialise),
-	labels: $author$project$Games$FirstTestGame$exampleLabels,
-	messages: $author$project$Games$FirstTestGame$exampleMessages,
-	procedures: $author$project$Games$FirstTestGame$exampleProcedures,
+var $author$project$Games$FabledLands$initialGameState = {
+	counters: $author$project$Games$FabledLands$counters,
+	dialogStack: A2($mhoare$elm_stack$Stack$push, '#1', $mhoare$elm_stack$Stack$initialise),
+	labels: $author$project$Games$FabledLands$labels,
+	messages: _List_Nil,
+	procedures: $elm$core$Dict$empty,
 	rnd: $elm$random$Random$initialSeed(666)
 };
 var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
@@ -8537,8 +7861,8 @@ var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			dialogEditor: $author$project$DialogGameEditor$init,
-			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FirstTestGame$dialogs),
-			gameState: $author$project$Games$FirstTestGame$initialGameState,
+			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FabledLands$dialogs),
+			gameState: $author$project$Games$FabledLands$initialGameState,
 			isDebug: true,
 			screeptEditor: $author$project$ScreeptEditor$init
 		},
@@ -9646,6 +8970,18 @@ var $author$project$Main$viewDebug = function (gameState) {
 };
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
+};
+var $author$project$DialogGame$Turn = function (a) {
+	return {$: 'Turn', a: a};
+};
+var $author$project$Screept$inc = function (counter) {
+	return A2(
+		$author$project$Screept$SetCounter,
+		$author$project$Screept$S(counter),
+		A2(
+			$author$project$Screept$Addition,
+			$author$project$Screept$Counter(counter),
+			$author$project$Screept$Const(1)));
 };
 var $author$project$DialogGameEditor$exampleDialog = {
 	id: 'start',
