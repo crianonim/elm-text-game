@@ -42,15 +42,8 @@ type Statement
     | Block (List Statement)
     | If Condition Statement Statement
     | Comment String
-    | Procedure ProcedureCall
+    | Procedure String
     | None
-
-
-type alias ProcedureCall =
-    { name : String
-    , intParams : List IntValue
-    , textParams : List TextValue
-    }
 
 
 runStatement : Statement -> State a -> State a
@@ -102,11 +95,10 @@ runStatement statement state =
         Comment _ ->
             state
 
-        -- TODO
-        Procedure procedureCall ->
+        Procedure name ->
             let
                 proc =
-                    Dict.get procedureCall.name state.procedures |> Maybe.withDefault None
+                    Dict.get name state.procedures |> Maybe.withDefault None
             in
             runStatement proc state
 

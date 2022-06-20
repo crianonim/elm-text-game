@@ -1,14 +1,14 @@
 module Main exposing (main)
 
---import Games.FirstTestGame as Game
+--import Games.FabledLands as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.FabledLands as Game
+import Games.FirstTestGame as Game
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Platform.Cmd exposing (Cmd)
 import Random
@@ -145,7 +145,7 @@ viewDialogText textValue gameState =
 viewDebug : GameState -> Html a
 viewDebug gameState =
     div [ class "status" ]
-        [ p [] (Dict.toList gameState.counters |> List.map (\( k, v ) -> text <| k ++ ":" ++ String.fromInt v ++ ", "))
+        [ div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.counters |> List.sort |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ String.fromInt v ]))
         ]
 
 

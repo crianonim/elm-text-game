@@ -55,7 +55,7 @@ initialGameState : GameState
 initialGameState =
     { counters = exampleCounters
     , labels = exampleLabels
-    , dialogStack = Stack.push "#630" Stack.initialise
+    , dialogStack = Stack.push "start" Stack.initialise
     , procedures = exampleProcedures
     , messages = exampleMessages
     , rnd = Random.initialSeed 666
@@ -74,7 +74,14 @@ exampleMessages =
 
 exampleProcedures : Dict String Screept.Statement
 exampleProcedures =
-    Dict.empty
+    [ ( "rand"
+      , Screept.Block
+            [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)
+            , Screept.If (Predicate (Counter "rnd_1") Eq (Const 1)) (Screept.SetCounter (S "rnd_s") (Const 100)) (Screept.SetCounter (S "rnd_s") (Const 200))
+            ]
+      )
+    ]
+        |> Dict.fromList
 
 
 recipes : List ( String, List ( String, Int ) )
@@ -100,8 +107,9 @@ dialogs =
             , { text = S "Test Screept"
               , condition = Nothing
               , action =
-                    [ runScreept "{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }"
+                    [ Screept <| Screept.Procedure "rand"
 
+                    --runScreept "{RND $rnd_1 0 .. 1;IF $rnd_1 == 1 THEN SET $rnd_s=100 ELSE SET $rnd_s = 200 }"
                     --,Screept <|
                     --    Screept.Block
                     --        [ Screept.Rnd (S "rnd_1") (Const 0) (Const 1)
