@@ -1,12 +1,12 @@
 module Main exposing (main)
 
---import Games.FabledLands as Game
+--import Games.FirstTestGame as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.FirstTestGame as Game
+import Games.FabledLands as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)

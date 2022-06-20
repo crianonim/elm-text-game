@@ -33,10 +33,32 @@ counters =
     , ( "inv_spear", 1 )
     , ( "inv_leather_jerkin", 1 )
     , ( "defeated_goblin", 0 )
-    , ( "taken_goblin_treasure", 0 )
-    , ( "defeated_wolf", 0 )
     , ( "codeword_apple", 0 )
     , ( "codeword_aspen", 0 )
+    ]
+        |> Dict.fromList
+
+
+procedures : Dict String Statement
+procedures =
+    [ ( "test"
+      , Screept.Block
+            [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
+            , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
+            , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
+            , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter "test_score")) Screept.Gt (Counter "test_difficulty"))
+                (Screept.SetCounter (S "test_success") (Const 1))
+                (Screept.SetCounter (S "test_success") (Const 0))
+            ]
+      )
+    , ( "combat_reset"
+      , Screept.Block
+            [ Screept.SetCounter (S "fight_won") (Const 0)
+            , Screept.SetCounter (S "fight_lost") (Const 0)
+            , Screept.SetLabel (S "enemy_marker") (S "")
+            , Screept.SetLabel (S "enemy_name") (S "")
+            ]
+      )
     ]
         |> Dict.fromList
 
@@ -45,8 +67,8 @@ initialGameState : GameState
 initialGameState =
     { counters = counters
     , labels = labels
-    , dialogStack = Stack.push "#1" Stack.initialise
-    , procedures = Dict.empty
+    , dialogStack = Stack.push "#630" Stack.initialise
+    , procedures = procedures
     , messages = []
     , rnd = Random.initialSeed 666
     }
@@ -124,10 +146,23 @@ dialogs =
             , { text = S "Go inland, into the Old Forest", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#257" ] }
             ]
       }
-    , { id = "#257", text = S """
+    , { id = "#257"
+      , text = S """
       The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.
       As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.
-      """, options = [ { text = S "...", condition = Nothing, action = [ Screept <| testAgainstDifficulty "player_scouting" 10, onTestCondition (GoAction "#630") (GoAction "#36") ] } ] }
+      """
+      , options =
+            [ { text = S "..."
+              , condition = Nothing
+              , action =
+                    [ Screept <| Screept.Block [ SetCounter (S "test_score") (Counter "player_scouting"), SetCounter (S "test_difficulty") (Const 10), Procedure "test" ]
+                    , ConditionalAction (nonZero (Counter "test_success")) (GoAction "#630") (GoAction "#36")
+                    --, testAgainstDifficulty "player_scouting" 10
+                    --, onTestCondition (GoAction "#630") (GoAction "#36")
+                    ]
+              }
+            ]
+      }
     , { id = "#358"
       , text = S """
     ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.
@@ -155,7 +190,15 @@ dialogs =
             [ { text = S "..."
               , condition = Nothing
               , action =
-                    [ fightCustom "Tree" "" 10 7 3
+                    [ Screept <|
+                        Screept.Block
+                            [ Procedure "combat_reset"
+                            , Screept.SetCounter (S "enemy_stamina") (Const 10)
+                            , Screept.SetCounter (S "enemy_defence") (Const 7)
+                            , Screept.SetCounter (S "enemy_combat") (Const 3)
+                            , Screept.SetLabel (S "enemy_name") (S "Tree")
+                            ]
+                    --, fightCustom "Tree" "" 10 7 3
                     , GoAction "combat_tree"
                     ]
               }
@@ -176,36 +219,38 @@ dialogs =
     ]
 
 
-testAgainstDifficulty : String -> Int -> Screept.Statement
-testAgainstDifficulty counter diff =
-    Screept.Block
-        [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
-        , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
-        , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
-        , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter counter)) Screept.Gt (Const diff))
-            (Screept.SetCounter (S "test_success") (Const 1))
-            (Screept.SetCounter (S "test_success") (Const 0))
-        ]
 
+--
+--testAgainstDifficulty : String -> Int -> Screept.Statement
+--testAgainstDifficulty counter diff =
+--    Screept.Block
+--        [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
+--        , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
+--        , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
+--        , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter counter)) Screept.Gt (Const diff))
+--            (Screept.SetCounter (S "test_success") (Const 1))
+--            (Screept.SetCounter (S "test_success") (Const 0))
+--        ]
 
-onTestCondition : DialogActionExecution -> DialogActionExecution -> DialogActionExecution
-onTestCondition success failure =
-    ConditionalAction (nonZero (Counter "test_success")) success failure
-
-
-fightCustom : String -> String -> Int -> Int -> Int -> DialogActionExecution
-fightCustom enemy_name enemy_marker stamina defence combat =
-    Screept <|
-        Screept.Block
-            [ Screept.SetCounter (S "enemy_stamina") (Const stamina)
-            , Screept.SetCounter (S "enemy_defence") (Const defence)
-            , Screept.SetCounter (S "enemy_combat") (Const combat)
-            , Screept.SetCounter (S "fight_won") (Const 0)
-            , Screept.SetCounter (S "fight_lost") (Const 0)
-            , Screept.SetLabel (S "enemy_marker") (S enemy_marker)
-            , Screept.SetLabel (S "enemy_name") (S enemy_name)
-            ]
-
+--
+--onTestCondition : DialogActionExecution -> DialogActionExecution -> DialogActionExecution
+--onTestCondition success failure =
+--    ConditionalAction (nonZero (Counter "test_success")) success failure
+--
+--
+--fightCustom : String -> String -> Int -> Int -> Int -> DialogActionExecution
+--fightCustom enemy_name enemy_marker stamina defence combat =
+--    Screept <|
+--        Screept.Block
+--            [ Screept.SetCounter (S "enemy_stamina") (Const stamina)
+--            , Screept.SetCounter (S "enemy_defence") (Const defence)
+--            , Screept.SetCounter (S "enemy_combat") (Const combat)
+--            , Screept.SetCounter (S "fight_won") (Const 0)
+--            , Screept.SetCounter (S "fight_lost") (Const 0)
+--            , Screept.SetLabel (S "enemy_marker") (S enemy_marker)
+--            , Screept.SetLabel (S "enemy_name") (S enemy_name)
+--            ]
+--
 
 customCombat : String -> Condition -> Condition -> DialogActionExecution -> DialogActionExecution -> Dialog
 customCombat id successTest failureTest successAction failureAction =
@@ -268,22 +313,3 @@ customCombat id successTest failureTest successAction failureAction =
         , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [ Message (S "You lost!"), failureAction ] }
         ]
     }
-
-
-fightWolf : DialogActionExecution
-fightWolf =
-    Screept <|
-        Screept.Block
-            [ Screept.SetCounter (S "enemy_stamina") (Const 4)
-            , Screept.SetCounter (S "enemy_defence") (Const 6)
-            , Screept.SetCounter (S "enemy_combat") (Const 5)
-            , Screept.SetCounter (S "fight_won") (Const 0)
-            , Screept.SetCounter (S "fight_lost") (Const 0)
-            , Screept.SetLabel (S "enemy_marker") (S "defeated_wolf")
-            , Screept.SetLabel (S "enemy_name") (S "Wild Wolf")
-            ]
-
-
-backOption : DialogOption
-backOption =
-    { text = S "Go back", condition = Nothing, action = [ GoBackAction ] }
