@@ -45,8 +45,8 @@ procedures =
       , Screept.Block
             [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
             , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
-            , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
-            , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter "test_score")) Screept.Gt (Counter "test_difficulty"))
+            , Screept.SetCounter (S "2d6") (Binary (Counter "d6_1") Add (Counter "d6_2"))
+            , Screept.If (Screept.Binary (Binary (Counter "2d6") Add (Counter "test_score")) Screept.Gt (Counter "test_difficulty"))
                 (Screept.SetCounter (S "test_success") (Const 1))
                 (Screept.SetCounter (S "test_success") (Const 0))
             ]
@@ -137,13 +137,13 @@ dialogs =
       The Mayor, a fat genial fellow, who greets you personally, insists that one day the Trading Post will be a thriving town. There is not a lot here yet, however: a small market, a quay, the settler’s houses, and a shrine to Lacuna the Huntress, goddess of nature.
       """
       , options =
-            [ { text = S "...", condition = Just <| zero (Counter "codeword_aspen"), action = [ Screept <| Screept.SetCounter (S "codeword_aspen") (Const 1) ] }
-            , { text = S "Visit the shrine to Lacuna", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#544" ] }
-            , { text = S "Visit the market", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#452" ] }
-            , { text = S "Visit the quayside", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#332" ] }
-            , { text = S "Visit the Green Man Inn", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#181" ] }
-            , { text = S "Climb the hill that overlooks the town", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#11" ] }
-            , { text = S "Go inland, into the Old Forest", condition = Just <| nonZero (Counter "codeword_aspen"), action = [ GoAction "#257" ] }
+            [ { text = S "...", condition = Just <| Unary Not (Counter "codeword_aspen"), action = [ Screept <| Screept.SetCounter (S "codeword_aspen") (Const 1) ] }
+            , { text = S "Visit the shrine to Lacuna", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#544" ] }
+            , { text = S "Visit the market", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#452" ] }
+            , { text = S "Visit the quayside", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#332" ] }
+            , { text = S "Visit the Green Man Inn", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#181" ] }
+            , { text = S "Climb the hill that overlooks the town", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#11" ] }
+            , { text = S "Go inland, into the Old Forest", condition = Just (Counter "codeword_aspen"), action = [ GoAction "#257" ] }
             ]
       }
     , { id = "#257"
@@ -156,7 +156,8 @@ dialogs =
               , condition = Nothing
               , action =
                     [ Screept <| Screept.Block [ SetCounter (S "test_score") (Counter "player_scouting"), SetCounter (S "test_difficulty") (Const 10), Procedure "test" ]
-                    , ConditionalAction (nonZero (Counter "test_success")) (GoAction "#630") (GoAction "#36")
+                    , ConditionalAction (Counter "test_success") (GoAction "#630") (GoAction "#36")
+
                     --, testAgainstDifficulty "player_scouting" 10
                     --, onTestCondition (GoAction "#630") (GoAction "#36")
                     ]
@@ -176,10 +177,10 @@ dialogs =
      To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’
      """
       , options =
-            [ { text = S "...", condition = Just <| nonZero (Counter "codeword_apple"), action = [ GoAction "#594" ] }
-            , { text = S "Return to the Trading Post", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#195" ] }
-            , { text = S "Attack the tree", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#570" ] }
-            , { text = S "Try to persuade it to let you pass", condition = Just <| zero (Counter "codeword_apple"), action = [ GoAction "#237" ] }
+            [ { text = S "...", condition = Just (Counter "codeword_apple"), action = [ GoAction "#594" ] }
+            , { text = S "Return to the Trading Post", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#195" ] }
+            , { text = S "Attack the tree", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#570" ] }
+            , { text = S "Try to persuade it to let you pass", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#237" ] }
             ]
       }
     , { id = "#570"
@@ -198,6 +199,7 @@ dialogs =
                             , Screept.SetCounter (S "enemy_combat") (Const 3)
                             , Screept.SetLabel (S "enemy_name") (S "Tree")
                             ]
+
                     --, fightCustom "Tree" "" 10 7 3
                     , GoAction "combat_tree"
                     ]
@@ -205,8 +207,8 @@ dialogs =
             ]
       }
     , customCombat "combat_tree"
-        (Predicate (Counter "enemy_stamina") Lt (Const 5))
-        (Predicate (Counter "player_stamina") Lt (Const 1))
+        (Binary (Counter "enemy_stamina") Lt (Const 5))
+        (Binary (Counter "player_stamina") Lt (Const 1))
         (GoAction "#148")
         (ActionBlock
             [ Message (S "You wake up almost dead with no money...")
@@ -231,7 +233,6 @@ dialogs =
 --            (Screept.SetCounter (S "test_success") (Const 1))
 --            (Screept.SetCounter (S "test_success") (Const 0))
 --        ]
-
 --
 --onTestCondition : DialogActionExecution -> DialogActionExecution -> DialogActionExecution
 --onTestCondition success failure =
@@ -252,38 +253,39 @@ dialogs =
 --            ]
 --
 
-customCombat : String -> Condition -> Condition -> DialogActionExecution -> DialogActionExecution -> Dialog
+
+customCombat : String -> IntValue -> IntValue -> DialogActionExecution -> DialogActionExecution -> Dialog
 customCombat id successTest failureTest successAction failureAction =
     { id = id
     , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
     , options =
         [ { text = S "Hit enemy"
-          , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
+          , condition = Just <| Binary (Binary (Counter "fight_won") Lt (Const 1)) And (Binary (Counter "fight_lost") Lt (Const 1))
           , action =
                 [ Screept <|
                     Screept.Block
                         [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
                         , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
-                        , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
-                        , Screept.SetCounter (S "player_attack") (Addition (Counter "rnd_2d6") (Counter "player_combat"))
-                        , Screept.SetCounter (S "player_damage") (Subtraction (Counter "player_attack") (Counter "enemy_defence"))
-                        , Screept.If (Predicate (Counter "player_damage") Gt (Const 0))
+                        , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
+                        , Screept.SetCounter (S "player_attack") (Binary (Counter "rnd_2d6") Add (Counter "player_combat"))
+                        , Screept.SetCounter (S "player_damage") (Binary (Counter "player_attack") Sub (Counter "enemy_defence"))
+                        , Screept.If (Binary (Counter "player_damage") Gt (Const 0))
                             (Screept.Block
-                                [ Screept.SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
+                                [ Screept.SetCounter (S "enemy_stamina") (Binary (Counter "enemy_stamina") Sub (Counter "player_damage"))
                                 ]
                             )
                             Screept.None
-                        , Screept.If (NOT successTest)
+                        , Screept.If (Unary Not successTest)
                             (Screept.Block
                                 [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
                                 , Screept.Rnd (S "rnd_d6_2") (Const 1) (Const 6)
-                                , Screept.SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
-                                , Screept.SetCounter (S "enemy_attack") (Addition (Counter "rnd_2d6") (Counter "enemy_combat"))
-                                , Screept.SetCounter (S "enemy_damage") (Subtraction (Counter "enemy_attack") (Counter "player_defence"))
-                                , Screept.If (Predicate (Counter "enemy_damage") Gt (Const 0))
+                                , Screept.SetCounter (S "rnd_2d6") (Binary (Counter "rnd_d6_1") Add (Counter "rnd_d6_2"))
+                                , Screept.SetCounter (S "enemy_attack") (Binary (Counter "rnd_2d6") Add (Counter "enemy_combat"))
+                                , Screept.SetCounter (S "enemy_damage") (Binary (Counter "enemy_attack") Sub (Counter "player_defence"))
+                                , Screept.If (Binary (Counter "enemy_damage") Gt (Const 0))
                                     (Screept.Block
-                                        [ Screept.SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
-                                        , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                                        [ Screept.SetCounter (S "player_stamina") (Binary (Counter "player_stamina") Sub (Counter "enemy_damage"))
+                                        , Screept.If (Binary (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
                                         ]
                                     )
                                     Screept.None
@@ -305,11 +307,11 @@ customCombat id successTest failureTest successAction failureAction =
                                 Screept.None
                             )
                         ]
-                , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
-                , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
+                , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                 ]
           }
-        , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
-        , { text = S "You lost!", condition = Just <| Predicate (Counter "fight_lost") Gt (Const 0), action = [ Message (S "You lost!"), failureAction ] }
+        , { text = S "You won!", condition = Just <| Binary (Counter "fight_won") Gt (Const 0), action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
+        , { text = S "You lost!", condition = Just <| Binary (Counter "fight_lost") Gt (Const 0), action = [ Message (S "You lost!"), failureAction ] }
         ]
     }

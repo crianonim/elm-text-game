@@ -76,7 +76,7 @@ viewStatement statement =
 
         If condition success failure ->
             div []
-                [ span [] [ text "IF ", viewCondition condition ]
+                [ span [] [ text "IF ", viewIntValue condition ]
                 , div [ class "screept_condition" ] [ viewStatement success ]
                 , if failure == None then
                     text ""
@@ -106,7 +106,7 @@ viewTextValue textValue =
             span [] <| List.map (\v -> viewTextValue v) textValues
 
         Conditional condition value ->
-            span [] [ text "(", viewCondition condition, text "?", viewTextValue value, text ")" ]
+            span [] [ text "(", viewIntValue condition, text "?", viewTextValue value, text ")" ]
 
         IntValueText intValue ->
             span [] [ viewIntValue intValue ]
@@ -124,40 +124,45 @@ viewIntValue intValue =
         Counter string ->
             text <| "$" ++ string
 
-        Addition x y ->
-            span [] [ viewIntValue x, text " + ", viewIntValue y ]
-
-        Subtraction x y ->
-            span [] [ viewIntValue x, text " - ", viewIntValue y ]
+        _ ->
+            text "TODO"
 
 
-viewPredicateOp : PredicateOp -> Html msg
-viewPredicateOp predicateOp =
-    case predicateOp of
-        Eq ->
-            text "=="
 
-        Gt ->
-            text ">"
-
-        Lt ->
-            text "<"
-
-
-viewCondition : Condition -> Html msg
-viewCondition condition =
-    case condition of
-        Predicate x predicateOp y ->
-            span [] [ viewIntValue x, viewPredicateOp predicateOp, viewIntValue y ]
-
-        NOT c ->
-            span [] [ text "NOT", viewCondition c ]
-
-        AND conditions ->
-            span [] [ text "AND", span [] <| List.map viewCondition conditions ]
-
-        OR conditions ->
-            span [] [ text "OR", span [] <| List.map viewCondition conditions ]
+--- TODO
+--Addition x y ->
+--    span [] [ viewIntValue x, text " + ", viewIntValue y ]
+--
+--Subtraction x y ->
+--    span [] [ viewIntValue x, text " - ", viewIntValue y ]
+--
+--viewPredicateOp : PredicateOp -> Html msg
+--viewPredicateOp predicateOp =
+--    case predicateOp of
+--        Eq ->
+--            text "=="
+--
+--        Gt ->
+--            text ">"
+--
+--        Lt ->
+--            text "<"
+--
+--viewCondition : Condition -> Html msg
+--viewCondition condition =
+--    case condition of
+--        Predicate x predicateOp y ->
+--            span [] [ viewIntValue x, viewPredicateOp predicateOp, viewIntValue y ]
+--
+--        NOT c ->
+--            span [] [ text "NOT", viewCondition c ]
+--
+--        AND conditions ->
+--            span [] [ text "AND", span [] <| List.map viewCondition conditions ]
+--
+--        OR conditions ->
+--            span [] [ text "OR", span [] <| List.map viewCondition conditions ]
+--
 
 
 problemToString : Parser.Problem -> String

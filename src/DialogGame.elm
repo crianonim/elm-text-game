@@ -2,7 +2,7 @@ module DialogGame exposing (..)
 
 import Dict exposing (Dict)
 import Random
-import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), State, TextValue(..))
+import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
 
 
@@ -21,19 +21,21 @@ type alias GameConfig =
     }
 
 
-nonZero : IntValue -> Condition
-nonZero gameValue =
-    NOT (zero gameValue)
 
-
-zero : IntValue -> Condition
-zero gameValue =
-    Predicate gameValue Eq (Const 0)
+--
+--nonZero : IntValue -> Condition
+--nonZero gameValue =
+--    NOT (zero gameValue)
+--
+--
+--zero : IntValue -> Condition
+--zero gameValue =
+--    Predicate gameValue Eq (Const 0)
 
 
 type alias DialogOption =
     { text : TextValue
-    , condition : Maybe Condition
+    , condition : Maybe IntValue
     , action : List DialogActionExecution
     }
 
@@ -45,7 +47,7 @@ type DialogActionExecution
     | Turn Int
     | DoNothing
     | Screept Screept.Statement
-    | ConditionalAction Condition DialogActionExecution DialogActionExecution
+    | ConditionalAction IntValue DialogActionExecution DialogActionExecution
     | ActionBlock (List DialogActionExecution)
 
 
@@ -99,7 +101,7 @@ executeAction dialogActionExecution gameState =
 
         ConditionalAction condition success failure ->
             executeAction
-                (if Screept.testCondition condition gameState then
+                (if Screept.isTruthy condition gameState then
                     success
 
                  else
@@ -116,25 +118,29 @@ setRndSeed seed gameState =
     { gameState | rnd = seed }
 
 
-recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
-recipeToDialogOption ( crafted, ingredients ) =
-    let
-        ingredientToCondition : ( String, Int ) -> Condition
-        ingredientToCondition ( item, amount ) =
-            NOT <| Predicate (Counter item) Lt (Const amount)
 
-        ingredientToAction : ( String, Int ) -> DialogActionExecution
-        ingredientToAction ( item, amount ) =
-            Screept (Screept.SetCounter (S item) (Addition (Counter item) (Const -amount)))
-
-        ingredientToString : ( String, Int ) -> String
-        ingredientToString ( item, amount ) =
-            item ++ " " ++ String.fromInt amount
-    in
-    { text = S <| "Craft " ++ crafted ++ " (" ++ String.join ", " (List.map ingredientToString ingredients) ++ ")"
-    , condition = Just <| AND (List.map ingredientToCondition ingredients)
-    , action = Screept (Screept.inc crafted) :: List.map ingredientToAction ingredients
-    }
+--
+--recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
+--recipeToDialogOption ( crafted, ingredients ) =
+--    let
+--        ingredientToCondition : ( String, Int ) -> IntValue
+--        ingredientToCondition ( item, amount ) =
+--           Unary Screept.Not <| Binary (Counter item) Screept.Lt (Const amount)
+--
+--        ingredientToAction : ( String, Int ) -> DialogActionExecution
+--        ingredientToAction ( item, amount ) =
+--            Screept (Screept.SetCounter (S item) (Binary (Counter item) Screept.Add (Const -amount)))
+--
+--        ingredientToString : ( String, Int ) -> String
+--        ingredientToString ( item, amount ) =
+--            item ++ " " ++ String.fromInt amount
+--
+--        foldConditions = List.foldl () (True,) ingredients
+--    in
+--    { text = S <| "Craft " ++ crafted ++ " (" ++ String.join ", " (List.map ingredientToString ingredients) ++ ")"
+--    , condition = Just <| Screept.Binary Screept.And (List.map ingredientToCondition ingredients)
+--    , action = Screept (Screept.inc crafted) :: List.map ingredientToAction ingredients
+--    }
 
 
 badDialog : Dialog

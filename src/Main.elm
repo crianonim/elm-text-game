@@ -132,7 +132,7 @@ viewDialog gameState dialog =
     div [ class "dialog" ]
         [ viewDialogText dialog.text gameState
         , div [] <|
-            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.testCondition check gameState) |> Maybe.withDefault True))
+            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
         ]
 
 

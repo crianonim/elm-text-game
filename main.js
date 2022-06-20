@@ -5378,6 +5378,10 @@ var $author$project$Main$SeedGenerated = function (a) {
 var $author$project$DialogGame$ActionBlock = function (a) {
 	return {$: 'ActionBlock', a: a};
 };
+var $author$project$Screept$Binary = F3(
+	function (a, b, c) {
+		return {$: 'Binary', a: a, b: b, c: c};
+	});
 var $author$project$Screept$Block = function (a) {
 	return {$: 'Block', a: a};
 };
@@ -5398,10 +5402,7 @@ var $author$project$Screept$Lt = {$: 'Lt'};
 var $author$project$DialogGame$Message = function (a) {
 	return {$: 'Message', a: a};
 };
-var $author$project$Screept$Predicate = F3(
-	function (a, b, c) {
-		return {$: 'Predicate', a: a, b: b, c: c};
-	});
+var $author$project$Screept$Not = {$: 'Not'};
 var $author$project$Screept$Procedure = function (a) {
 	return {$: 'Procedure', a: a};
 };
@@ -5419,13 +5420,12 @@ var $author$project$Screept$SetLabel = F2(
 	function (a, b) {
 		return {$: 'SetLabel', a: a, b: b};
 	});
-var $author$project$Screept$AND = function (a) {
-	return {$: 'AND', a: a};
-};
-var $author$project$Screept$Addition = F2(
+var $author$project$Screept$Unary = F2(
 	function (a, b) {
-		return {$: 'Addition', a: a, b: b};
+		return {$: 'Unary', a: a, b: b};
 	});
+var $author$project$Screept$Add = {$: 'Add'};
+var $author$project$Screept$And = {$: 'And'};
 var $author$project$Screept$Conditional = F2(
 	function (a, b) {
 		return {$: 'Conditional', a: a, b: b};
@@ -5441,9 +5441,6 @@ var $author$project$Screept$IntValueText = function (a) {
 var $author$project$Screept$Label = function (a) {
 	return {$: 'Label', a: a};
 };
-var $author$project$Screept$NOT = function (a) {
-	return {$: 'NOT', a: a};
-};
 var $author$project$Screept$None = {$: 'None'};
 var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
@@ -5452,10 +5449,7 @@ var $author$project$Screept$Rnd = F3(
 var $author$project$Screept$Special = function (a) {
 	return {$: 'Special', a: a};
 };
-var $author$project$Screept$Subtraction = F2(
-	function (a, b) {
-		return {$: 'Subtraction', a: a, b: b};
-	});
+var $author$project$Screept$Sub = {$: 'Sub'};
 var $author$project$Games$FabledLands$customCombat = F5(
 	function (id, successTest, failureTest, successAction, failureAction) {
 		return {
@@ -5482,28 +5476,31 @@ var $author$project$Games$FabledLands$customCombat = F5(
 										A2(
 										$author$project$Screept$SetCounter,
 										$author$project$Screept$S('rnd_2d6'),
-										A2(
-											$author$project$Screept$Addition,
+										A3(
+											$author$project$Screept$Binary,
 											$author$project$Screept$Counter('rnd_d6_1'),
+											$author$project$Screept$Add,
 											$author$project$Screept$Counter('rnd_d6_2'))),
 										A2(
 										$author$project$Screept$SetCounter,
 										$author$project$Screept$S('player_attack'),
-										A2(
-											$author$project$Screept$Addition,
+										A3(
+											$author$project$Screept$Binary,
 											$author$project$Screept$Counter('rnd_2d6'),
+											$author$project$Screept$Add,
 											$author$project$Screept$Counter('player_combat'))),
 										A2(
 										$author$project$Screept$SetCounter,
 										$author$project$Screept$S('player_damage'),
-										A2(
-											$author$project$Screept$Subtraction,
+										A3(
+											$author$project$Screept$Binary,
 											$author$project$Screept$Counter('player_attack'),
+											$author$project$Screept$Sub,
 											$author$project$Screept$Counter('enemy_defence'))),
 										A3(
 										$author$project$Screept$If,
 										A3(
-											$author$project$Screept$Predicate,
+											$author$project$Screept$Binary,
 											$author$project$Screept$Counter('player_damage'),
 											$author$project$Screept$Gt,
 											$author$project$Screept$Const(0)),
@@ -5513,15 +5510,16 @@ var $author$project$Games$FabledLands$customCombat = F5(
 													A2(
 													$author$project$Screept$SetCounter,
 													$author$project$Screept$S('enemy_stamina'),
-													A2(
-														$author$project$Screept$Subtraction,
+													A3(
+														$author$project$Screept$Binary,
 														$author$project$Screept$Counter('enemy_stamina'),
+														$author$project$Screept$Sub,
 														$author$project$Screept$Counter('player_damage')))
 												])),
 										$author$project$Screept$None),
 										A3(
 										$author$project$Screept$If,
-										$author$project$Screept$NOT(successTest),
+										A2($author$project$Screept$Unary, $author$project$Screept$Not, successTest),
 										$author$project$Screept$Block(
 											_List_fromArray(
 												[
@@ -5538,28 +5536,31 @@ var $author$project$Games$FabledLands$customCombat = F5(
 													A2(
 													$author$project$Screept$SetCounter,
 													$author$project$Screept$S('rnd_2d6'),
-													A2(
-														$author$project$Screept$Addition,
+													A3(
+														$author$project$Screept$Binary,
 														$author$project$Screept$Counter('rnd_d6_1'),
+														$author$project$Screept$Add,
 														$author$project$Screept$Counter('rnd_d6_2'))),
 													A2(
 													$author$project$Screept$SetCounter,
 													$author$project$Screept$S('enemy_attack'),
-													A2(
-														$author$project$Screept$Addition,
+													A3(
+														$author$project$Screept$Binary,
 														$author$project$Screept$Counter('rnd_2d6'),
+														$author$project$Screept$Add,
 														$author$project$Screept$Counter('enemy_combat'))),
 													A2(
 													$author$project$Screept$SetCounter,
 													$author$project$Screept$S('enemy_damage'),
-													A2(
-														$author$project$Screept$Subtraction,
+													A3(
+														$author$project$Screept$Binary,
 														$author$project$Screept$Counter('enemy_attack'),
+														$author$project$Screept$Sub,
 														$author$project$Screept$Counter('player_defence'))),
 													A3(
 													$author$project$Screept$If,
 													A3(
-														$author$project$Screept$Predicate,
+														$author$project$Screept$Binary,
 														$author$project$Screept$Counter('enemy_damage'),
 														$author$project$Screept$Gt,
 														$author$project$Screept$Const(0)),
@@ -5569,14 +5570,15 @@ var $author$project$Games$FabledLands$customCombat = F5(
 																A2(
 																$author$project$Screept$SetCounter,
 																$author$project$Screept$S('player_stamina'),
-																A2(
-																	$author$project$Screept$Subtraction,
+																A3(
+																	$author$project$Screept$Binary,
 																	$author$project$Screept$Counter('player_stamina'),
+																	$author$project$Screept$Sub,
 																	$author$project$Screept$Counter('enemy_damage'))),
 																A3(
 																$author$project$Screept$If,
 																A3(
-																	$author$project$Screept$Predicate,
+																	$author$project$Screept$Binary,
 																	$author$project$Screept$Counter('player_stamina'),
 																	$author$project$Screept$Lt,
 																	$author$project$Screept$Const(1)),
@@ -5625,7 +5627,7 @@ var $author$project$Games$FabledLands$customCombat = F5(
 							A2(
 								$author$project$Screept$Conditional,
 								A3(
-									$author$project$Screept$Predicate,
+									$author$project$Screept$Binary,
 									$author$project$Screept$Counter('player_damage'),
 									$author$project$Screept$Gt,
 									$author$project$Screept$Const(0)),
@@ -5641,7 +5643,7 @@ var $author$project$Games$FabledLands$customCombat = F5(
 							A2(
 								$author$project$Screept$Conditional,
 								A3(
-									$author$project$Screept$Predicate,
+									$author$project$Screept$Binary,
 									$author$project$Screept$Counter('enemy_damage'),
 									$author$project$Screept$Gt,
 									$author$project$Screept$Const(0)),
@@ -5655,20 +5657,19 @@ var $author$project$Games$FabledLands$customCombat = F5(
 										]))))
 						]),
 					condition: $elm$core$Maybe$Just(
-						$author$project$Screept$AND(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Predicate,
-									$author$project$Screept$Counter('fight_won'),
-									$author$project$Screept$Lt,
-									$author$project$Screept$Const(1)),
-									A3(
-									$author$project$Screept$Predicate,
-									$author$project$Screept$Counter('fight_lost'),
-									$author$project$Screept$Lt,
-									$author$project$Screept$Const(1))
-								]))),
+						A3(
+							$author$project$Screept$Binary,
+							A3(
+								$author$project$Screept$Binary,
+								$author$project$Screept$Counter('fight_won'),
+								$author$project$Screept$Lt,
+								$author$project$Screept$Const(1)),
+							$author$project$Screept$And,
+							A3(
+								$author$project$Screept$Binary,
+								$author$project$Screept$Counter('fight_lost'),
+								$author$project$Screept$Lt,
+								$author$project$Screept$Const(1)))),
 					text: $author$project$Screept$S('Hit enemy')
 				},
 					{
@@ -5685,7 +5686,7 @@ var $author$project$Games$FabledLands$customCombat = F5(
 						]),
 					condition: $elm$core$Maybe$Just(
 						A3(
-							$author$project$Screept$Predicate,
+							$author$project$Screept$Binary,
 							$author$project$Screept$Counter('fight_won'),
 							$author$project$Screept$Gt,
 							$author$project$Screept$Const(0))),
@@ -5700,7 +5701,7 @@ var $author$project$Games$FabledLands$customCombat = F5(
 						]),
 					condition: $elm$core$Maybe$Just(
 						A3(
-							$author$project$Screept$Predicate,
+							$author$project$Screept$Binary,
 							$author$project$Screept$Counter('fight_lost'),
 							$author$project$Screept$Gt,
 							$author$project$Screept$Const(0))),
@@ -5723,18 +5724,6 @@ var $author$project$Games$FabledLands$customCombat = F5(
 					]))
 		};
 	});
-var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$DialogGame$zero = function (gameValue) {
-	return A3(
-		$author$project$Screept$Predicate,
-		gameValue,
-		$author$project$Screept$Eq,
-		$author$project$Screept$Const(0));
-};
-var $author$project$DialogGame$nonZero = function (gameValue) {
-	return $author$project$Screept$NOT(
-		$author$project$DialogGame$zero(gameValue));
-};
 var $elm$core$Debug$log = _Debug_log;
 var $elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
@@ -5799,14 +5788,7 @@ var $author$project$Screept$Comment = function (a) {
 	return {$: 'Comment', a: a};
 };
 var $elm$parser$Parser$Optional = {$: 'Optional'};
-var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
-var $author$project$Screept$OR = function (a) {
-	return {$: 'OR', a: a};
-};
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
+var $elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
 		return {$: 'Bad', a: a, b: b};
@@ -5818,45 +5800,6 @@ var $elm$parser$Parser$Advanced$Good = F3(
 var $elm$parser$Parser$Advanced$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
-var $elm$parser$Parser$Advanced$map2 = F3(
-	function (func, _v0, _v1) {
-		var parseA = _v0.a;
-		var parseB = _v1.a;
-		return $elm$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _v2 = parseA(s0);
-				if (_v2.$ === 'Bad') {
-					var p = _v2.a;
-					var x = _v2.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p, x);
-				} else {
-					var p1 = _v2.a;
-					var a = _v2.b;
-					var s1 = _v2.c;
-					var _v3 = parseB(s1);
-					if (_v3.$ === 'Bad') {
-						var p2 = _v3.a;
-						var x = _v3.b;
-						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
-					} else {
-						var p2 = _v3.a;
-						var b = _v3.b;
-						var s2 = _v3.c;
-						return A3(
-							$elm$parser$Parser$Advanced$Good,
-							p1 || p2,
-							A2(func, a, b),
-							s2);
-					}
-				}
-			});
-	});
-var $elm$parser$Parser$Advanced$ignorer = F2(
-	function (keepParser, ignoreParser) {
-		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
-	});
-var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
-var $elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
 var $elm$parser$Parser$Advanced$AddRight = F2(
 	function (a, b) {
 		return {$: 'AddRight', a: a, b: b};
@@ -5946,6 +5889,10 @@ var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
 		});
 };
 var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
 		var parse = _v0.a;
@@ -5975,6 +5922,44 @@ var $elm$parser$Parser$Advanced$getChompedString = function (parser) {
 	return A2($elm$parser$Parser$Advanced$mapChompedString, $elm$core$Basics$always, parser);
 };
 var $elm$parser$Parser$getChompedString = $elm$parser$Parser$Advanced$getChompedString;
+var $elm$parser$Parser$Advanced$map2 = F3(
+	function (func, _v0, _v1) {
+		var parseA = _v0.a;
+		var parseB = _v1.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v2 = parseA(s0);
+				if (_v2.$ === 'Bad') {
+					var p = _v2.a;
+					var x = _v2.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _v2.a;
+					var a = _v2.b;
+					var s1 = _v2.c;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3(
+							$elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
+				}
+			});
+	});
+var $elm$parser$Parser$Advanced$ignorer = F2(
+	function (keepParser, ignoreParser) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
+	});
+var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
 var $elm$parser$Parser$Advanced$keeper = F2(
 	function (parseFunc, parseArg) {
 		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
@@ -6048,6 +6033,7 @@ var $author$project$Screept$counterParser = A2(
 						c,
 						_Utils_chr('_'));
 				}))));
+var $author$project$Screept$Or = {$: 'Or'};
 var $elm$parser$Parser$ExpectingInt = {$: 'ExpectingInt'};
 var $elm$parser$Parser$Advanced$consumeBase = _Parser_consumeBase;
 var $elm$parser$Parser$Advanced$consumeBase16 = _Parser_consumeBase16;
@@ -6300,6 +6286,19 @@ function $author$project$Screept$cyclic$intValueParser() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
 			[
+				$author$project$Screept$cyclic$binaryOpParser(),
+				$author$project$Screept$cyclic$unaryOpParser(),
+				A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed($author$project$Screept$Const),
+				$elm$parser$Parser$int),
+				A2($elm$parser$Parser$map, $author$project$Screept$Counter, $author$project$Screept$counterParser)
+			]));
+}
+function $author$project$Screept$cyclic$binaryOpParser() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
 				A2(
 				$elm$parser$Parser$keeper,
 				A2(
@@ -6308,16 +6307,12 @@ function $author$project$Screept$cyclic$intValueParser() {
 						$elm$parser$Parser$keeper,
 						A2(
 							$elm$parser$Parser$ignorer,
-							$elm$parser$Parser$succeed(
-								F3(
-									function (x, fn, y) {
-										return A2(fn, x, y);
-									})),
+							$elm$parser$Parser$succeed($author$project$Screept$Binary),
 							$elm$parser$Parser$symbol('(')),
 						A2(
 							$elm$parser$Parser$ignorer,
 							$elm$parser$Parser$lazy(
-								function (_v0) {
+								function (_v1) {
 									return $author$project$Screept$cyclic$intValueParser();
 								}),
 							$elm$parser$Parser$spaces)),
@@ -6328,26 +6323,69 @@ function $author$project$Screept$cyclic$intValueParser() {
 								[
 									A2(
 									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Addition),
+									$elm$parser$Parser$succeed($author$project$Screept$Add),
 									$elm$parser$Parser$symbol('+')),
 									A2(
 									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Subtraction),
-									$elm$parser$Parser$symbol('-'))
+									$elm$parser$Parser$succeed($author$project$Screept$Sub),
+									$elm$parser$Parser$symbol('-')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Gt),
+									$elm$parser$Parser$symbol('>')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Lt),
+									$elm$parser$Parser$symbol('<')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$And),
+									$elm$parser$Parser$symbol('&&')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Or),
+									$elm$parser$Parser$symbol('||'))
 								])),
 						$elm$parser$Parser$spaces)),
 				A2(
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$lazy(
-						function (_v1) {
+						function (_v2) {
 							return $author$project$Screept$cyclic$intValueParser();
 						}),
-					$elm$parser$Parser$symbol(')'))),
+					$elm$parser$Parser$symbol(')')))
+			]));
+}
+function $author$project$Screept$cyclic$unaryOpParser() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
 				A2(
 				$elm$parser$Parser$keeper,
-				$elm$parser$Parser$succeed($author$project$Screept$Const),
-				$elm$parser$Parser$int),
-				A2($elm$parser$Parser$map, $author$project$Screept$Counter, $author$project$Screept$counterParser)
+				A2(
+					$elm$parser$Parser$keeper,
+					$elm$parser$Parser$succeed($author$project$Screept$Unary),
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$oneOf(
+							_List_fromArray(
+								[
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Not),
+									$elm$parser$Parser$symbol('!'))
+								])),
+						$elm$parser$Parser$symbol('('))),
+				A2(
+					$elm$parser$Parser$ignorer,
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$lazy(
+							function (_v0) {
+								return $author$project$Screept$cyclic$intValueParser();
+							}),
+						$elm$parser$Parser$spaces),
+					$elm$parser$Parser$symbol(')')))
 			]));
 }
 try {
@@ -6355,8 +6393,16 @@ try {
 	$author$project$Screept$cyclic$intValueParser = function () {
 		return $author$project$Screept$intValueParser;
 	};
+	var $author$project$Screept$binaryOpParser = $author$project$Screept$cyclic$binaryOpParser();
+	$author$project$Screept$cyclic$binaryOpParser = function () {
+		return $author$project$Screept$binaryOpParser;
+	};
+	var $author$project$Screept$unaryOpParser = $author$project$Screept$cyclic$unaryOpParser();
+	$author$project$Screept$cyclic$unaryOpParser = function () {
+		return $author$project$Screept$unaryOpParser;
+	};
 } catch ($) {
-	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    intValueParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    intValueParser\n  │     ↓\n  │    binaryOpParser\n  │     ↓\n  │    unaryOpParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $elm$parser$Parser$ExpectingKeyword = function (a) {
 	return {$: 'ExpectingKeyword', a: a};
 };
@@ -6394,6 +6440,40 @@ var $elm$parser$Parser$keyword = function (kwd) {
 			$elm$parser$Parser$Advanced$Token,
 			kwd,
 			$elm$parser$Parser$ExpectingKeyword(kwd)));
+};
+var $elm$parser$Parser$Advanced$chompUntilEndOr = function (str) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v0 = A5(_Parser_findSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v0.a;
+			var newRow = _v0.b;
+			var newCol = _v0.c;
+			var adjustedOffset = (newOffset < 0) ? $elm$core$String$length(s.src) : newOffset;
+			return A3(
+				$elm$parser$Parser$Advanced$Good,
+				_Utils_cmp(s.offset, adjustedOffset) < 0,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: adjustedOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$Advanced$lineComment = function (start) {
+	return A2(
+		$elm$parser$Parser$Advanced$ignorer,
+		$elm$parser$Parser$Advanced$token(start),
+		$elm$parser$Parser$Advanced$chompUntilEndOr('\n'));
+};
+var $elm$parser$Parser$Expecting = function (a) {
+	return {$: 'Expecting', a: a};
+};
+var $elm$parser$Parser$toToken = function (str) {
+	return A2(
+		$elm$parser$Parser$Advanced$Token,
+		str,
+		$elm$parser$Parser$Expecting(str));
+};
+var $elm$parser$Parser$lineComment = function (str) {
+	return $elm$parser$Parser$Advanced$lineComment(
+		$elm$parser$Parser$toToken(str));
 };
 var $elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _v0) {
@@ -6657,15 +6737,6 @@ var $elm$parser$Parser$toAdvancedTrailing = function (trailing) {
 			return $elm$parser$Parser$Advanced$Mandatory;
 	}
 };
-var $elm$parser$Parser$Expecting = function (a) {
-	return {$: 'Expecting', a: a};
-};
-var $elm$parser$Parser$toToken = function (str) {
-	return A2(
-		$elm$parser$Parser$Advanced$Token,
-		str,
-		$elm$parser$Parser$Expecting(str));
-};
 var $elm$parser$Parser$sequence = function (i) {
 	return $elm$parser$Parser$Advanced$sequence(
 		{
@@ -6677,136 +6748,7 @@ var $elm$parser$Parser$sequence = function (i) {
 			trailing: $elm$parser$Parser$toAdvancedTrailing(i.trailing)
 		});
 };
-function $author$project$Screept$cyclic$conditionParser() {
-	return $elm$parser$Parser$oneOf(
-		_List_fromArray(
-			[
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$keeper,
-					A2(
-						$elm$parser$Parser$keeper,
-						$elm$parser$Parser$succeed($author$project$Screept$Predicate),
-						A2($elm$parser$Parser$ignorer, $author$project$Screept$intValueParser, $elm$parser$Parser$spaces)),
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$oneOf(
-							_List_fromArray(
-								[
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Eq),
-									$elm$parser$Parser$symbol('==')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Gt),
-									$elm$parser$Parser$symbol('>')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Lt),
-									$elm$parser$Parser$symbol('<'))
-								])),
-						$elm$parser$Parser$spaces)),
-				$author$project$Screept$intValueParser),
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						A2(
-							$elm$parser$Parser$ignorer,
-							$elm$parser$Parser$succeed($author$project$Screept$NOT),
-							$elm$parser$Parser$keyword('NOT')),
-						$elm$parser$Parser$spaces),
-					$elm$parser$Parser$symbol('(')),
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$lazy(
-							function (_v0) {
-								return $author$project$Screept$cyclic$conditionParser();
-							}),
-						$elm$parser$Parser$spaces),
-					$elm$parser$Parser$symbol(')'))),
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$succeed($author$project$Screept$OR),
-						$elm$parser$Parser$keyword('OR')),
-					$elm$parser$Parser$spaces),
-				$elm$parser$Parser$sequence(
-					{
-						end: ')',
-						item: $elm$parser$Parser$lazy(
-							function (_v1) {
-								return $author$project$Screept$cyclic$conditionParser();
-							}),
-						separator: ',',
-						spaces: $elm$parser$Parser$spaces,
-						start: '(',
-						trailing: $elm$parser$Parser$Forbidden
-					})),
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$succeed($author$project$Screept$AND),
-						$elm$parser$Parser$keyword('AND')),
-					$elm$parser$Parser$spaces),
-				$elm$parser$Parser$sequence(
-					{
-						end: ')',
-						item: $elm$parser$Parser$lazy(
-							function (_v2) {
-								return $author$project$Screept$cyclic$conditionParser();
-							}),
-						separator: ',',
-						spaces: $elm$parser$Parser$spaces,
-						start: '(',
-						trailing: $elm$parser$Parser$Forbidden
-					}))
-			]));
-}
-try {
-	var $author$project$Screept$conditionParser = $author$project$Screept$cyclic$conditionParser();
-	$author$project$Screept$cyclic$conditionParser = function () {
-		return $author$project$Screept$conditionParser;
-	};
-} catch ($) {
-	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    conditionParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
-var $elm$parser$Parser$Advanced$chompUntilEndOr = function (str) {
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			var _v0 = A5(_Parser_findSubString, str, s.offset, s.row, s.col, s.src);
-			var newOffset = _v0.a;
-			var newRow = _v0.b;
-			var newCol = _v0.c;
-			var adjustedOffset = (newOffset < 0) ? $elm$core$String$length(s.src) : newOffset;
-			return A3(
-				$elm$parser$Parser$Advanced$Good,
-				_Utils_cmp(s.offset, adjustedOffset) < 0,
-				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: adjustedOffset, row: newRow, src: s.src});
-		});
-};
-var $elm$parser$Parser$Advanced$lineComment = function (start) {
-	return A2(
-		$elm$parser$Parser$Advanced$ignorer,
-		$elm$parser$Parser$Advanced$token(start),
-		$elm$parser$Parser$Advanced$chompUntilEndOr('\n'));
-};
-var $elm$parser$Parser$lineComment = function (str) {
-	return $elm$parser$Parser$Advanced$lineComment(
-		$elm$parser$Parser$toToken(str));
-};
+var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
 var $elm$core$Basics$neq = _Utils_notEqual;
 function $author$project$Screept$cyclic$textValueParser() {
 	return $elm$parser$Parser$oneOf(
@@ -6853,7 +6795,7 @@ function $author$project$Screept$cyclic$textValueParser() {
 						$elm$parser$Parser$symbol('(')),
 					A2(
 						$elm$parser$Parser$ignorer,
-						$author$project$Screept$conditionParser,
+						$author$project$Screept$intValueParser,
 						$elm$parser$Parser$symbol('?'))),
 				A2(
 					$elm$parser$Parser$ignorer,
@@ -6999,7 +6941,7 @@ function $author$project$Screept$cyclic$statementParser() {
 							$elm$parser$Parser$ignorer,
 							A2(
 								$elm$parser$Parser$ignorer,
-								A2($elm$parser$Parser$ignorer, $author$project$Screept$conditionParser, $elm$parser$Parser$spaces),
+								A2($elm$parser$Parser$ignorer, $author$project$Screept$intValueParser, $elm$parser$Parser$spaces),
 								$elm$parser$Parser$keyword('THEN')),
 							$elm$parser$Parser$spaces)),
 					A2(
@@ -7223,7 +7165,9 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 							$author$project$Screept$Const(1)))
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
+					A2(
+						$author$project$Screept$Unary,
+						$author$project$Screept$Not,
 						$author$project$Screept$Counter('codeword_aspen'))),
 				text: $author$project$Screept$S('...')
 			},
@@ -7233,8 +7177,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#544')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Visit the shrine to Lacuna')
 			},
 				{
@@ -7243,8 +7186,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#452')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Visit the market')
 			},
 				{
@@ -7253,8 +7195,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#332')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Visit the quayside')
 			},
 				{
@@ -7263,8 +7204,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#181')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Visit the Green Man Inn')
 			},
 				{
@@ -7273,8 +7213,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#11')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Climb the hill that overlooks the town')
 			},
 				{
@@ -7283,8 +7222,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#257')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_aspen'))),
+					$author$project$Screept$Counter('codeword_aspen')),
 				text: $author$project$Screept$S('Go inland, into the Old Forest')
 			}
 			]),
@@ -7313,8 +7251,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 								]))),
 						A3(
 						$author$project$DialogGame$ConditionalAction,
-						$author$project$DialogGame$nonZero(
-							$author$project$Screept$Counter('test_success')),
+						$author$project$Screept$Counter('test_success'),
 						$author$project$DialogGame$GoAction('#630'),
 						$author$project$DialogGame$GoAction('#36'))
 					]),
@@ -7346,8 +7283,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#594')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$nonZero(
-						$author$project$Screept$Counter('codeword_apple'))),
+					$author$project$Screept$Counter('codeword_apple')),
 				text: $author$project$Screept$S('...')
 			},
 				{
@@ -7356,7 +7292,9 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#195')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
+					A2(
+						$author$project$Screept$Unary,
+						$author$project$Screept$Not,
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Return to the Trading Post')
 			},
@@ -7366,7 +7304,9 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#570')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
+					A2(
+						$author$project$Screept$Unary,
+						$author$project$Screept$Not,
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Attack the tree')
 			},
@@ -7376,7 +7316,9 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 						$author$project$DialogGame$GoAction('#237')
 					]),
 				condition: $elm$core$Maybe$Just(
-					$author$project$DialogGame$zero(
+					A2(
+						$author$project$Screept$Unary,
+						$author$project$Screept$Not,
 						$author$project$Screept$Counter('codeword_apple'))),
 				text: $author$project$Screept$S('Try to persuade it to let you pass')
 			}
@@ -7424,12 +7366,12 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 		$author$project$Games$FabledLands$customCombat,
 		'combat_tree',
 		A3(
-			$author$project$Screept$Predicate,
+			$author$project$Screept$Binary,
 			$author$project$Screept$Counter('enemy_stamina'),
 			$author$project$Screept$Lt,
 			$author$project$Screept$Const(5)),
 		A3(
-			$author$project$Screept$Predicate,
+			$author$project$Screept$Binary,
 			$author$project$Screept$Counter('player_stamina'),
 			$author$project$Screept$Lt,
 			$author$project$Screept$Const(1)),
@@ -7626,7 +7568,7 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			seed0);
 	});
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
-var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF $rnd_2d6 > 10 THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
+var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF (($rnd_2d6 > 10) && ($rnd_2d6 > 10)) THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
 var $author$project$ScreeptEditor$init = {parsed: $elm$core$Maybe$Nothing, text: $author$project$Screept$customCombatString};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -7804,17 +7746,19 @@ var $author$project$Games$FabledLands$procedures = $elm$core$Dict$fromList(
 						A2(
 						$author$project$Screept$SetCounter,
 						$author$project$Screept$S('2d6'),
-						A2(
-							$author$project$Screept$Addition,
+						A3(
+							$author$project$Screept$Binary,
 							$author$project$Screept$Counter('d6_1'),
+							$author$project$Screept$Add,
 							$author$project$Screept$Counter('d6_2'))),
 						A3(
 						$author$project$Screept$If,
 						A3(
-							$author$project$Screept$Predicate,
-							A2(
-								$author$project$Screept$Addition,
+							$author$project$Screept$Binary,
+							A3(
+								$author$project$Screept$Binary,
 								$author$project$Screept$Counter('2d6'),
+								$author$project$Screept$Add,
 								$author$project$Screept$Counter('test_score')),
 							$author$project$Screept$Gt,
 							$author$project$Screept$Counter('test_difficulty')),
@@ -8327,6 +8271,25 @@ var $author$project$Screept$addCounter = F3(
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
+var $author$project$Screept$binaryOpEval = F3(
+	function (op, x, y) {
+		switch (op.$) {
+			case 'Add':
+				return x + y;
+			case 'Sub':
+				return x - y;
+			case 'Gt':
+				return (_Utils_cmp(x, y) > 0) ? 1 : 0;
+			case 'Lt':
+				return (_Utils_cmp(x, y) < 0) ? 1 : 0;
+			case 'Eq':
+				return _Utils_eq(x, y) ? 1 : 0;
+			case 'And':
+				return (!(x * y)) ? 0 : 1;
+			default:
+				return (!(x + y)) ? 0 : 1;
+		}
+	});
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -8342,6 +8305,10 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
+var $author$project$Screept$unaryOpEval = F2(
+	function (op, x) {
+		return (!x) ? 1 : 0;
+	});
 var $author$project$Screept$getMaybeIntValue = F2(
 	function (gameValue, gameState) {
 		switch (gameValue.$) {
@@ -8351,26 +8318,20 @@ var $author$project$Screept$getMaybeIntValue = F2(
 			case 'Counter':
 				var counter = gameValue.a;
 				return A2($elm$core$Dict$get, counter, gameState.counters);
-			case 'Addition':
-				var mx = gameValue.a;
-				var my = gameValue.b;
-				return A3(
-					$elm$core$Maybe$map2,
-					F2(
-						function (x, y) {
-							return x + y;
-						}),
-					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
-					A2($author$project$Screept$getMaybeIntValue, my, gameState));
+			case 'Unary':
+				var op = gameValue.a;
+				var mx = gameValue.b;
+				return A2(
+					$elm$core$Maybe$map,
+					$author$project$Screept$unaryOpEval(op),
+					A2($author$project$Screept$getMaybeIntValue, mx, gameState));
 			default:
 				var mx = gameValue.a;
-				var my = gameValue.b;
+				var op = gameValue.b;
+				var my = gameValue.c;
 				return A3(
 					$elm$core$Maybe$map2,
-					F2(
-						function (x, y) {
-							return x - y;
-						}),
+					$author$project$Screept$binaryOpEval(op),
 					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
 					A2($author$project$Screept$getMaybeIntValue, my, gameState));
 		}
@@ -8402,59 +8363,9 @@ var $author$project$Screept$getLabelWithDefault = F2(
 			'',
 			A2($author$project$Screept$getMaybeLabel, label, state));
 	});
-var $author$project$Screept$testCondition = F2(
-	function (condition, gameState) {
-		var testPredicate = F3(
-			function (x, predicate, y) {
-				var comp = function () {
-					switch (predicate.$) {
-						case 'Lt':
-							return $elm$core$Basics$lt;
-						case 'Eq':
-							return $elm$core$Basics$eq;
-						default:
-							return $elm$core$Basics$gt;
-					}
-				}();
-				return A2(
-					$elm$core$Maybe$withDefault,
-					false,
-					A3(
-						$elm$core$Maybe$map2,
-						comp,
-						A2($author$project$Screept$getMaybeIntValue, x, gameState),
-						A2($author$project$Screept$getMaybeIntValue, y, gameState)));
-			});
-		switch (condition.$) {
-			case 'Predicate':
-				var v1 = condition.a;
-				var ops = condition.b;
-				var v2 = condition.c;
-				return A3(testPredicate, v1, ops, v2);
-			case 'NOT':
-				var innerTest = condition.a;
-				return !A2($author$project$Screept$testCondition, innerTest, gameState);
-			case 'AND':
-				var conditions = condition.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (c, acc) {
-							return A2($author$project$Screept$testCondition, c, gameState) && acc;
-						}),
-					true,
-					conditions);
-			default:
-				var conditions = condition.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (c, acc) {
-							return A2($author$project$Screept$testCondition, c, gameState) || acc;
-						}),
-					false,
-					conditions);
-		}
+var $author$project$Screept$isTruthy = F2(
+	function (intValue, state) {
+		return (!A2($author$project$Screept$getIntValueWithDefault, intValue, state)) ? false : true;
 	});
 var $author$project$Screept$getText = F2(
 	function (gameState, text) {
@@ -8474,7 +8385,7 @@ var $author$project$Screept$getText = F2(
 				case 'Conditional':
 					var gameCheck = text.a;
 					var conditionalText = text.b;
-					if (A2($author$project$Screept$testCondition, gameCheck, gameState)) {
+					if (A2($author$project$Screept$isTruthy, gameCheck, gameState)) {
 						var $temp$gameState = gameState,
 							$temp$text = conditionalText;
 						gameState = $temp$gameState;
@@ -8591,7 +8502,7 @@ var $author$project$Screept$runStatement = F2(
 					var condition = statement.a;
 					var success = statement.b;
 					var failure = statement.c;
-					var $temp$statement = A2($author$project$Screept$testCondition, condition, state) ? success : failure,
+					var $temp$statement = A2($author$project$Screept$isTruthy, condition, state) ? success : failure,
 						$temp$state = state;
 					statement = $temp$statement;
 					state = $temp$state;
@@ -8658,7 +8569,7 @@ var $author$project$DialogGame$executeAction = F2(
 					var condition = dialogActionExecution.a;
 					var success = dialogActionExecution.b;
 					var failure = dialogActionExecution.c;
-					var $temp$dialogActionExecution = A2($author$project$Screept$testCondition, condition, gameState) ? success : failure,
+					var $temp$dialogActionExecution = A2($author$project$Screept$isTruthy, condition, gameState) ? success : failure,
 						$temp$gameState = gameState;
 					dialogActionExecution = $temp$dialogActionExecution;
 					gameState = $temp$gameState;
@@ -9001,18 +8912,6 @@ var $author$project$Main$viewDebug = function (gameState) {
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
 };
-var $author$project$DialogGame$Turn = function (a) {
-	return {$: 'Turn', a: a};
-};
-var $author$project$Screept$inc = function (counter) {
-	return A2(
-		$author$project$Screept$SetCounter,
-		$author$project$Screept$S(counter),
-		A2(
-			$author$project$Screept$Addition,
-			$author$project$Screept$Counter(counter),
-			$author$project$Screept$Const(1)));
-};
 var $author$project$DialogGameEditor$exampleDialog = {
 	id: 'start',
 	options: _List_fromArray(
@@ -9023,67 +8922,14 @@ var $author$project$DialogGameEditor$exampleDialog = {
 					$author$project$DialogGame$GoAction('second')
 				]),
 			condition: $elm$core$Maybe$Just(
-				$author$project$DialogGame$nonZero(
-					$author$project$Screept$Counter('start_look_around'))),
+				$author$project$Screept$Counter('start_look_around')),
 			text: $author$project$Screept$S('Go through the exit')
-		},
-			{
-			action: _List_fromArray(
-				[
-					$author$project$DialogGame$Screept(
-					$author$project$Screept$inc('start_look_around')),
-					$author$project$DialogGame$Message(
-					$author$project$Screept$S('You noticed a straw bed')),
-					$author$project$DialogGame$Turn(5),
-					$author$project$DialogGame$Screept(
-					A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('rrr'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(5)))
-				]),
-			condition: $elm$core$Maybe$Just(
-				$author$project$DialogGame$zero(
-					$author$project$Screept$Counter('start_look_around'))),
-			text: $author$project$Screept$S('Look around')
-		},
-			{
-			action: _List_fromArray(
-				[
-					$author$project$DialogGame$Screept(
-					$author$project$Screept$inc('start_search_bed'))
-				]),
-			condition: $elm$core$Maybe$Just(
-				$author$project$Screept$AND(
-					_List_fromArray(
-						[
-							$author$project$DialogGame$zero(
-							$author$project$Screept$Counter('start_search_bed')),
-							$author$project$DialogGame$nonZero(
-							$author$project$Screept$Counter('start_look_around'))
-						]))),
-			text: $author$project$Screept$S('Search the bed')
 		}
 		]),
 	text: $author$project$Screept$Special(
 		_List_fromArray(
 			[
-				$author$project$Screept$S('You\'re in a dark room. '),
-				A2(
-				$author$project$Screept$Conditional,
-				$author$project$DialogGame$zero(
-					$author$project$Screept$Counter('start_look_around')),
-				$author$project$Screept$S('You see nothing. ')),
-				A2(
-				$author$project$Screept$Conditional,
-				$author$project$DialogGame$nonZero(
-					$author$project$Screept$Counter('start_look_around')),
-				$author$project$Screept$S('You see a straw bed. ')),
-				A2(
-				$author$project$Screept$Conditional,
-				$author$project$DialogGame$nonZero(
-					$author$project$Screept$Counter('start_search_bed')),
-				$author$project$Screept$S('There is a rusty key among the straw. '))
+				$author$project$Screept$S('You\'re in a dark room. ')
 			]))
 };
 var $author$project$DialogGameEditor$viewDialog = function (model) {
@@ -9196,7 +9042,7 @@ var $author$project$Main$viewDialog = F2(
 									A2(
 										$elm$core$Maybe$map,
 										function (check) {
-											return A2($author$project$Screept$testCondition, check, gameState);
+											return A2($author$project$Screept$isTruthy, check, gameState);
 										},
 										o.condition));
 							},
