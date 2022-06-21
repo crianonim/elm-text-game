@@ -2,21 +2,10 @@ module Games.FabledLands exposing (..)
 
 import DialogGame exposing (..)
 import Dict exposing (Dict)
-import Random
 import Screept exposing (..)
-import Stack
 
 
-initialGameState : GameState
-initialGameState =
-    { counters = counters
-    , labels = labels
-    , dialogStack = Stack.push "#630" Stack.initialise
-    , procedures = procedures
-    , functions = functions
-    , messages = []
-    , rnd = Random.initialSeed 666
-    }
+initialDialogId = "#630"
 
 
 labels : Dict String String
@@ -31,7 +20,6 @@ labels =
 counters : Dict String Int
 counters =
     [ ( "rnd", 0 )
-    , ( "fight_won", 0 )
     , ( "money", 126 )
     , ( "player_profession", 1 )
     , ( "player_rank", 3 )
@@ -45,7 +33,6 @@ counters =
     , ( "player_thievery", 4 )
     , ( "inv_weapon", 1 )
     , ( "inv_armor_leather", 1 )
-    , ( "defeated_goblin", 0 )
     , ( "codeword_apple", 0 )
     , ( "codeword_aspen", 0 )
     , ( "test_success", 0 )

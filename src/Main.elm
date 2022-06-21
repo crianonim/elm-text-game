@@ -34,7 +34,14 @@ main =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog Game.dialogs
-      , gameState = Game.initialGameState
+      , gameState = { counters = Game.counters
+                        , labels = Game.labels
+                        , dialogStack = Stack.push (Game.initialDialogId) Stack.initialise
+                        , procedures = Game.procedures
+                        , functions = Game.functions
+                        , messages = []
+                        , rnd = Random.initialSeed 666
+                        }
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
       , dialogEditor = DialogGameEditor.init

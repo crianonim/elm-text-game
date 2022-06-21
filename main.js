@@ -5375,6 +5375,151 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $author$project$Games$FabledLands$counters = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('rnd', 0),
+			_Utils_Tuple2('money', 126),
+			_Utils_Tuple2('player_profession', 1),
+			_Utils_Tuple2('player_rank', 3),
+			_Utils_Tuple2('player_stamina', 3),
+			_Utils_Tuple2('player_defence', 7),
+			_Utils_Tuple2('player_charisma', 5),
+			_Utils_Tuple2('player_combat', 5),
+			_Utils_Tuple2('player_magic', 2),
+			_Utils_Tuple2('player_sanctity', 3),
+			_Utils_Tuple2('player_scouting', 1),
+			_Utils_Tuple2('player_thievery', 4),
+			_Utils_Tuple2('inv_weapon', 1),
+			_Utils_Tuple2('inv_armor_leather', 1),
+			_Utils_Tuple2('codeword_apple', 0),
+			_Utils_Tuple2('codeword_aspen', 0),
+			_Utils_Tuple2('test_success', 0),
+			_Utils_Tuple2('fought_tree', 0)
+		]));
 var $author$project$DialogGame$ActionBlock = function (a) {
 	return {$: 'ActionBlock', a: a};
 };
@@ -7463,6 +7608,7 @@ var $author$project$Games$FabledLands$dialogs = _List_fromArray(
 		text: $author$project$Screept$S('You lost the game. Try again!')
 	}
 	]);
+var $author$project$Games$FabledLands$functions = $elm$core$Dict$fromList(_List_Nil);
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -7647,154 +7793,7 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
 var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF (($rnd_2d6 > 10) && ($rnd_2d6 > 10)) THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
 var $author$project$ScreeptEditor$init = {parsed: $elm$core$Maybe$Nothing, text: $author$project$Screept$customCombatString};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = {$: 'Red'};
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $author$project$Games$FabledLands$counters = $elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2('rnd', 0),
-			_Utils_Tuple2('fight_won', 0),
-			_Utils_Tuple2('money', 126),
-			_Utils_Tuple2('player_profession', 1),
-			_Utils_Tuple2('player_rank', 3),
-			_Utils_Tuple2('player_stamina', 3),
-			_Utils_Tuple2('player_defence', 7),
-			_Utils_Tuple2('player_charisma', 5),
-			_Utils_Tuple2('player_combat', 5),
-			_Utils_Tuple2('player_magic', 2),
-			_Utils_Tuple2('player_sanctity', 3),
-			_Utils_Tuple2('player_scouting', 1),
-			_Utils_Tuple2('player_thievery', 4),
-			_Utils_Tuple2('inv_weapon', 1),
-			_Utils_Tuple2('inv_armor_leather', 1),
-			_Utils_Tuple2('defeated_goblin', 0),
-			_Utils_Tuple2('codeword_apple', 0),
-			_Utils_Tuple2('codeword_aspen', 0),
-			_Utils_Tuple2('test_success', 0),
-			_Utils_Tuple2('fought_tree', 0)
-		]));
-var $author$project$Games$FabledLands$functions = $elm$core$Dict$fromList(_List_Nil);
+var $author$project$Games$FabledLands$initialDialogId = '#630';
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
@@ -7806,6 +7805,15 @@ var $author$project$Games$FabledLands$labels = $elm$core$Dict$fromList(
 			_Utils_Tuple2('player_profession', 'wayfarer'),
 			_Utils_Tuple2('enemy_name', '')
 		]));
+var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
+	return $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (dial) {
+				return _Utils_Tuple2(dial.id, dial);
+			},
+			dialogs));
+};
 var $author$project$Games$FabledLands$procedures = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
@@ -8041,30 +8049,20 @@ var $mhoare$elm_stack$Stack$push = F2(
 		return $mhoare$elm_stack$Stack$Stack(
 			A2($elm$core$List$cons, item, stack));
 	});
-var $author$project$Games$FabledLands$initialGameState = {
-	counters: $author$project$Games$FabledLands$counters,
-	dialogStack: A2($mhoare$elm_stack$Stack$push, '#630', $mhoare$elm_stack$Stack$initialise),
-	functions: $author$project$Games$FabledLands$functions,
-	labels: $author$project$Games$FabledLands$labels,
-	messages: _List_Nil,
-	procedures: $author$project$Games$FabledLands$procedures,
-	rnd: $elm$random$Random$initialSeed(666)
-};
-var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
-	return $elm$core$Dict$fromList(
-		A2(
-			$elm$core$List$map,
-			function (dial) {
-				return _Utils_Tuple2(dial.id, dial);
-			},
-			dialogs));
-};
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			dialogEditor: $author$project$DialogGameEditor$init,
 			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FabledLands$dialogs),
-			gameState: $author$project$Games$FabledLands$initialGameState,
+			gameState: {
+				counters: $author$project$Games$FabledLands$counters,
+				dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$FabledLands$initialDialogId, $mhoare$elm_stack$Stack$initialise),
+				functions: $author$project$Games$FabledLands$functions,
+				labels: $author$project$Games$FabledLands$labels,
+				messages: _List_Nil,
+				procedures: $author$project$Games$FabledLands$procedures,
+				rnd: $elm$random$Random$initialSeed(666)
+			},
 			isDebug: true,
 			screeptEditor: $author$project$ScreeptEditor$init
 		},
