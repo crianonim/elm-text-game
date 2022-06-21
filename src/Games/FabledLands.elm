@@ -23,7 +23,6 @@ labels : Dict String String
 labels =
     [ ( "player_name", "Liana" )
     , ( "player_profession", "wayfarer" )
-    , ( "enemy_marker", "" )
     , ( "enemy_name", "" )
     ]
         |> Dict.fromList
@@ -32,6 +31,7 @@ labels =
 counters : Dict String Int
 counters =
     [ ( "rnd", 0 )
+    , ( "fight_won", 0 )
     , ( "money", 126 )
     , ( "player_profession", 1 )
     , ( "player_rank", 3 )
@@ -41,7 +41,7 @@ counters =
     , ( "player_combat", 5 )
     , ( "player_magic", 2 )
     , ( "player_sanctity", 3 )
-    , ( "player_scouting", 6 )
+    , ( "player_scouting", 1 )
     , ( "player_thievery", 4 )
     , ( "inv_weapon", 1 )
     , ( "inv_armor_leather", 1 )
@@ -49,6 +49,7 @@ counters =
     , ( "codeword_apple", 0 )
     , ( "codeword_aspen", 0 )
     , ( "test_success", 0 )
+    , ( "fought_tree", 0 )
     ]
         |> Dict.fromList
 
@@ -75,7 +76,6 @@ procedures =
       , Screept.Block
             [ Screept.SetCounter (S "fight_won") (Const 0)
             , Screept.SetCounter (S "fight_lost") (Const 0)
-            , Screept.SetLabel (S "enemy_marker") (S "")
             , Screept.SetLabel (S "enemy_name") (S "")
             ]
       )
@@ -113,7 +113,6 @@ procedures =
                 (Screept.Block
                     [ Screept.SetCounter (S "enemy_damage") (Const 0)
                     , Screept.SetCounter (S "fight_won") (Const 1)
-                    , Screept.SetCounter (Label "enemy_marker") (Const 1)
                     ]
                 )
                 (Screept.If (Eval "combat_player_failure")
@@ -164,7 +163,13 @@ dialogs =
       , text = S """
     Soon you realize you are completely lost in this strange, magical forest. You wander around for days, barely able to find enough food and water. Lose 4 Stamina points.
     """
-      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $player_stamina = ($player_stamina - 4);}" ] } ]
+      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $player_stamina = ($player_stamina - 4);}", ConditionalAction (runIntValue "($player_stamina < 1)") (GoAction "game_over") (GoAction "#36_") ] } ]
+      }
+    , { id = "#36_"
+      , text = S """
+       ...you eventually stagger out of the forest to the coast.
+       """
+      , options = [ { text = S "...", condition = Nothing, action = [ GoAction "#128" ] } ]
       }
     , { id = "#65"
       , text = S """
@@ -218,9 +223,6 @@ dialogs =
               , action =
                     [ Screept <| Screept.Block [ SetCounter (S "test_score") (Counter "player_scouting"), SetCounter (S "test_difficulty") (Const 10), Procedure "test" ]
                     , ConditionalAction (Counter "test_success") (GoAction "#630") (GoAction "#36")
-
-                    --, testAgainstDifficulty "player_scouting" 10
-                    --, onTestCondition (GoAction "#630") (GoAction "#36")
                     ]
               }
             ]
@@ -237,12 +239,15 @@ dialogs =
             ]
       }
     , { id = "#570"
-      , text = S """
+      , text =
+            Conditional (Counter "fought_tree")
+                (Conditional (Counter "fight_won") (S "You managed to overcome the tree") (S "You wake up almost dead with no money..."))
+                (S """
                  ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.
-                 """
+                 """)
       , options =
             [ { text = S "..."
-              , condition = Nothing
+              , condition = Just <| Unary Not (Counter "fought_tree")
               , action =
                     [ Screept <|
                         Screept.Block
@@ -251,12 +256,23 @@ dialogs =
                             , Screept.SetCounter (S "enemy_defence") (Const 7)
                             , Screept.SetCounter (S "enemy_combat") (Const 3)
                             , Screept.SetLabel (S "enemy_name") (S "Tree")
+                            , Screept.SetCounter (S "fought_tree") (Const 1)
                             , Screept.SetFunc (S "combat_player_failure") (Screept.runIntValue "($player_stamina < 1)")
                             , Screept.SetFunc (S "combat_player_success") (Screept.runIntValue "($enemy_stamina < 5)")
                             ]
-
-                    --, fightCustom "Tree" "" 10 7 3
-                    , GoAction "combat_tree"
+                    , GoAction "combat"
+                    ]
+              }
+            , { text = S "..."
+              , condition = Just (Counter "fought_tree")
+              , action =
+                    [ ConditionalAction (Counter "fight_won")
+                        (GoAction "#148")
+                        (ActionBlock
+                            [ Screept <| Screept.run "{SET $money=0;SET $player_stamina=1 }"
+                            , GoAction "#195"
+                            ]
+                        )
                     ]
               }
             ]
@@ -299,73 +315,23 @@ dialogs =
             [ { text = S "...", condition = Nothing, action = [ GoAction "#128" ] }
             ]
       }
-    , customCombat "combat_tree"
-        --(Screept.runIntValue "($enemy_stamina < 5)")
-        --(Screept.runIntValue "($player_stamina < 1)")
-        ----(Binary (Counter "enemy_stamina") Lt (Const 5))
-        --(Binary (Counter "player_stamina") Lt (Const 1))
-        GoBackAction
-        GoBackAction
-
-    --(GoAction "#148")
-    --(ActionBlock
-    --    [ Message (S "You wake up almost dead with no money...")
-    --    , Screept <| Screept.run "{SET $money=0;SET $player_stamina=1 }"
-    --
-    --    --Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ]
-    --    , GoAction "#195"
-    --    ]
-    --)
+    , { id = "combat"
+      , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
+      , options =
+            [ { text = S "Hit enemy"
+              , condition = Just <| Binary (Unary Not (Counter "fight_won")) And (Unary Not (Counter "fight_lost"))
+              , action =
+                    [ Screept <| Procedure "combat"
+                    , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ]) (S "")
+                    , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Concat [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ]) (S "")
+                    ]
+              }
+            , { text = S "You won!", condition = Just <| Counter "fight_won", action = [ Message (S "You won!"), GoBackAction ] }
+            , { text = S "You lost!", condition = Just <| Counter "fight_lost", action = [ Message (S "You lost!"), GoBackAction ] }
+            ]
+      }
+    , { id = "game_over"
+      , text = S "You lost the game. Try again!"
+      , options = []
+      }
     ]
-
-
-
---
---testAgainstDifficulty : String -> Int -> Screept.Statement
---testAgainstDifficulty counter diff =
---    Screept.Block
---        [ Screept.Rnd (S "d6_1") (Const 1) (Const 6)
---        , Screept.Rnd (S "d6_2") (Const 1) (Const 6)
---        , Screept.SetCounter (S "2d6") (Addition (Counter "d6_1") (Counter "d6_2"))
---        , Screept.If (Screept.Predicate (Addition (Counter "2d6") (Counter counter)) Screept.Gt (Const diff))
---            (Screept.SetCounter (S "test_success") (Const 1))
---            (Screept.SetCounter (S "test_success") (Const 0))
---        ]
---
---onTestCondition : DialogActionExecution -> DialogActionExecution -> DialogActionExecution
---onTestCondition success failure =
---    ConditionalAction (nonZero (Counter "test_success")) success failure
---
---
---fightCustom : String -> String -> Int -> Int -> Int -> DialogActionExecution
---fightCustom enemy_name enemy_marker stamina defence combat =
---    Screept <|
---        Screept.Block
---            [ Screept.SetCounter (S "enemy_stamina") (Const stamina)
---            , Screept.SetCounter (S "enemy_defence") (Const defence)
---            , Screept.SetCounter (S "enemy_combat") (Const combat)
---            , Screept.SetCounter (S "fight_won") (Const 0)
---            , Screept.SetCounter (S "fight_lost") (Const 0)
---            , Screept.SetLabel (S "enemy_marker") (S enemy_marker)
---            , Screept.SetLabel (S "enemy_name") (S enemy_name)
---            ]
---
-
-
-customCombat : String -> DialogActionExecution -> DialogActionExecution -> Dialog
-customCombat id successAction failureAction =
-    { id = id
-    , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
-    , options =
-        [ { text = S "Hit enemy"
-          , condition = Just <| Binary (Unary Not (Counter "fight_won")) And (Unary Not (Counter "fight_lost"))
-          , action =
-                [ Screept <| Procedure "combat"
-                , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
-                , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Concat [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
-                ]
-          }
-        , { text = S "You won!", condition = Just <| Counter "fight_won", action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
-        , { text = S "You lost!", condition = Just <| Counter "fight_lost", action = [ Message (S "You lost!"), failureAction ] }
-        ]
-    }

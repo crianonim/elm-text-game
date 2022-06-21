@@ -109,8 +109,8 @@ viewTextValue textValue =
         Concat textValues ->
             span [] <| List.map (\v -> viewTextValue v) textValues
 
-        Conditional condition value ->
-            span [] [ text "(", viewIntValue condition, text "?", viewTextValue value, text ")" ]
+        Conditional condition value altValue ->
+            span [] [ text "(", viewIntValue condition, text "?", viewTextValue value, text ":", viewTextValue altValue, text ")" ]
 
         IntValueText intValue ->
             span [] [ viewIntValue intValue ]

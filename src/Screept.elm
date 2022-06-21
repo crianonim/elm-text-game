@@ -46,7 +46,7 @@ type BinaryOp
 type TextValue
     = S String
     | Concat (List TextValue)
-    | Conditional IntValue TextValue
+    | Conditional IntValue TextValue TextValue
     | IntValueText IntValue
     | Label String
 
@@ -148,12 +148,12 @@ getText gameState text =
         Concat specialTexts ->
             List.map (getText gameState) specialTexts |> String.concat
 
-        Conditional gameCheck conditionalText ->
+        Conditional gameCheck conditionalText alternativeText ->
             if isTruthy gameCheck gameState then
                 getText gameState conditionalText
 
             else
-                ""
+                getText gameState alternativeText
 
         IntValueText gameValue ->
             getIntValueWithDefault gameValue gameState |> String.fromInt
@@ -564,6 +564,8 @@ textValueParser =
             |. Parser.symbol "("
             |= intValueParser
             |. Parser.symbol "?"
+            |= Parser.lazy (\_ -> textValueParser)
+            |. Parser.symbol ":"
             |= Parser.lazy (\_ -> textValueParser)
             |. Parser.symbol ")"
         , Parser.succeed IntValueText
