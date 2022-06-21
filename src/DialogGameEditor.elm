@@ -42,7 +42,7 @@ init =
 
 exampleDialog =
     { id = "start"
-    , text = Screept.Special [ Screept.S "You're in a dark room. " ]
+    , text = Screept.Concat [ Screept.S "You're in a dark room. " ]
     , options =
         [ { text = Screept.S "Go through the exit", condition = Just (Counter "start_look_around"), action = [ GoAction "second" ] }
 

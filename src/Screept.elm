@@ -45,7 +45,7 @@ type BinaryOp
 
 type TextValue
     = S String
-    | Special (List TextValue)
+    | Concat (List TextValue)
     | Conditional IntValue TextValue
     | IntValueText IntValue
     | Label String
@@ -145,7 +145,7 @@ getText gameState text =
         S string ->
             string
 
-        Special specialTexts ->
+        Concat specialTexts ->
             List.map (getText gameState) specialTexts |> String.concat
 
         Conditional gameCheck conditionalText ->
@@ -515,6 +515,8 @@ binaryOpParser =
                     |. Parser.symbol ">"
                 , Parser.succeed Lt
                     |. Parser.symbol "<"
+                , Parser.succeed Eq
+                    |. Parser.symbol "=="
                 , Parser.succeed And
                     |. Parser.symbol "&&"
                 , Parser.succeed Or
@@ -549,7 +551,7 @@ textValueParser =
             |. Parser.symbol "\""
             |= (Parser.chompWhile (\c -> c /= '"') |> Parser.getChompedString)
             |. Parser.symbol "\""
-        , Parser.succeed Special
+        , Parser.succeed Concat
             |= Parser.sequence
                 { start = "["
                 , separator = ","
@@ -661,6 +663,10 @@ statementParser =
                 , item = Parser.lazy (\_ -> statementParser)
                 , trailing = Parser.Optional
                 }
+        , Parser.succeed Procedure
+            |. Parser.symbol "RUN"
+            |. Parser.spaces
+            |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         , Parser.succeed Comment
             |= (Parser.lineComment "#" |> Parser.getChompedString)
         , Parser.succeed None

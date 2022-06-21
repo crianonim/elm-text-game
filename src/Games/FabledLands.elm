@@ -7,10 +7,22 @@ import Screept exposing (..)
 import Stack
 
 
+initialGameState : GameState
+initialGameState =
+    { counters = counters
+    , labels = labels
+    , dialogStack = Stack.push "#630" Stack.initialise
+    , procedures = procedures
+    , functions = functions
+    , messages = []
+    , rnd = Random.initialSeed 666
+    }
+
+
 labels : Dict String String
 labels =
     [ ( "player_name", "Liana" )
-    , ( "player proffesion", "wayfarer" )
+    , ( "player_profession", "wayfarer" )
     , ( "enemy_marker", "" )
     , ( "enemy_name", "" )
     ]
@@ -20,7 +32,8 @@ labels =
 counters : Dict String Int
 counters =
     [ ( "rnd", 0 )
-    , ( "money", 16 )
+    , ( "money", 126 )
+    , ( "player_profession", 1 )
     , ( "player_rank", 3 )
     , ( "player_stamina", 3 )
     , ( "player_defence", 7 )
@@ -30,11 +43,12 @@ counters =
     , ( "player_sanctity", 3 )
     , ( "player_scouting", 6 )
     , ( "player_thievery", 4 )
-    , ( "inv_spear", 1 )
-    , ( "inv_leather_jerkin", 1 )
+    , ( "inv_weapon", 1 )
+    , ( "inv_armor_leather", 1 )
     , ( "defeated_goblin", 0 )
     , ( "codeword_apple", 0 )
     , ( "codeword_aspen", 0 )
+    , ( "test_success", 0 )
     ]
         |> Dict.fromList
 
@@ -115,18 +129,6 @@ procedures =
         |> Dict.fromList
 
 
-initialGameState : GameState
-initialGameState =
-    { counters = counters
-    , labels = labels
-    , dialogStack = Stack.push "#630" Stack.initialise
-    , procedures = procedures
-    , functions = functions
-    , messages = []
-    , rnd = Random.initialSeed 666
-    }
-
-
 dialogs : List Dialog
 dialogs =
     [ { id = "#1", text = S """
@@ -157,6 +159,12 @@ dialogs =
             , { text = S "Explore the coast", condition = Nothing, action = [ GoAction "#128" ] }
             , { text = S "Head into the nearby forest", condition = Nothing, action = [ GoAction "#257" ] }
             ]
+      }
+    , { id = "#36"
+      , text = S """
+    Soon you realize you are completely lost in this strange, magical forest. You wander around for days, barely able to find enough food and water. Lose 4 Stamina points.
+    """
+      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $player_stamina = ($player_stamina - 4);}" ] } ]
       }
     , { id = "#65"
       , text = S """
@@ -222,24 +230,16 @@ dialogs =
     ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.
     The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.
     """
-      , options = [ { text = S "Finished shopping", condition = Nothing, action = [] } ]
-      }
-    , { id = "#630"
-      , text = S """
-     You struggle deeper into the forest until you come to a thick wall of impenetrable thorn bushes. Circling it, you find there is a break in the hedge, but it is filled by a large tree.
-     To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’
-     """
       , options =
-            [ { text = S "...", condition = Just (Counter "codeword_apple"), action = [ GoAction "#594" ] }
-            , { text = S "Return to the Trading Post", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#195" ] }
-            , { text = S "Attack the tree", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#570" ] }
-            , { text = S "Try to persuade it to let you pass", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#237" ] }
+            [ { text = Concat [ S "Buy leather armour for 50 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| runIntValue "!(($money < 50))", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather + 1) ; SET $money = ($money - 50)}" ] }
+            , { text = Concat [ S "Sell leather armour for 45 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| runIntValue "($inv_armor_leather > 0)", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather - 1) ; SET $money = ($money + 45)}" ] }
+            , { text = S "Finished shopping", condition = Nothing, action = [ ConditionalAction (runIntValue "($player_profession == 1)") (ConditionalAction (Counter "box_645") (GoAction "#248") (GoAction "#645")) (GoAction "#678") ] }
             ]
       }
     , { id = "#570"
       , text = S """
-           ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.
-           """
+                 ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.
+                 """
       , options =
             [ { text = S "..."
               , condition = Nothing
@@ -261,20 +261,61 @@ dialogs =
               }
             ]
       }
+    , { id = "#630"
+      , text = S """
+     You struggle deeper into the forest until you come to a thick wall of impenetrable thorn bushes. Circling it, you find there is a break in the hedge, but it is filled by a large tree.
+     To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’
+     """
+      , options =
+            [ { text = S "...", condition = Just (Counter "codeword_apple"), action = [ GoAction "#594" ] }
+            , { text = S "Return to the Trading Post", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#195" ] }
+            , { text = S "Attack the tree", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#570" ] }
+            , { text = S "Try to persuade it to let you pass", condition = Just <| Unary Not (Counter "codeword_apple"), action = [ GoAction "#237" ] }
+            ]
+      }
+    , { id = "#645"
+      , text = S """
+         You are brought before the druids’ leader, the Oak Druid, a bearded fellow with earth and leaves all tangled up in his hair. He asks you to perform a service for them.
+         ‘Take this oak staff to the Willow Druid in the forest of Larun. The sacred grove where he lives will be hard to find, but I’m sure you can do it. The Willow Druid will give you something to bring back to me. When you return with it, I will make you a better Wayfarer.’
+         """
+      , options =
+            [ { text = S "...", condition = Nothing, action = [ runScreept "SET $inv_oak_staff = 1", ConditionalAction (runIntValue "($codeword_aspen)") (GoAction "#195") (GoAction "#678") ] }
+            ]
+      }
+    , { id = "#678"
+      , text = S """
+             The journey through the trees proves as difficult as when you first ventured into the Old Forest.
+             (SCOUTING TEST)
+             """
+      , options =
+            [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $test_score = $player_scouting;SET $test_difficulty = 10; RUN test }", ConditionalAction (runIntValue "$test_success") (GoAction "#679") (GoAction "#36") ] }
+            ]
+      }
+    , { id = "#679"
+      , text = S """
+                 The scent of the sea proves strongest in one direction. Following your nose, you eventually break free of the trees and find yourself on the coast.
+                 """
+      , options =
+            [ { text = S "...", condition = Nothing, action = [ GoAction "#128" ] }
+            ]
+      }
     , customCombat "combat_tree"
         --(Screept.runIntValue "($enemy_stamina < 5)")
         --(Screept.runIntValue "($player_stamina < 1)")
         ----(Binary (Counter "enemy_stamina") Lt (Const 5))
         --(Binary (Counter "player_stamina") Lt (Const 1))
-        (GoAction "#148")
-        (ActionBlock
-            [ Message (S "You wake up almost dead with no money...")
-            , Screept <| Screept.run "{SET $money=0;SET $player_stamina=1 }"
+        GoBackAction
+        GoBackAction
 
-            --Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ]
-            , GoAction "#195"
-            ]
-        )
+    --(GoAction "#148")
+    --(ActionBlock
+    --    [ Message (S "You wake up almost dead with no money...")
+    --    , Screept <| Screept.run "{SET $money=0;SET $player_stamina=1 }"
+    --
+    --    --Screept.Block [ Screept.SetCounter (S "money") (Const 0), Screept.SetCounter (S "player_stamina") (Const 1) ]
+    --    , GoAction "#195"
+    --    ]
+    --)
     ]
 
 
@@ -311,21 +352,20 @@ dialogs =
 --
 
 
-
 customCombat : String -> DialogActionExecution -> DialogActionExecution -> Dialog
 customCombat id successAction failureAction =
     { id = id
-    , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
+    , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
     , options =
         [ { text = S "Hit enemy"
-          , condition = Just <| Binary (Binary (Counter "fight_won") Lt (Const 1)) And (Binary (Counter "fight_lost") Lt (Const 1))
+          , condition = Just <| Binary (Unary Not (Counter "fight_won")) And (Unary Not (Counter "fight_lost"))
           , action =
                 [ Screept <| Procedure "combat"
-                , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
-                , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
+                , Message <| Conditional (Binary (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                , Message <| Conditional (Binary (Counter "enemy_damage") Gt (Const 0)) (Concat [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                 ]
           }
-        , { text = S "You won!", condition = Just <| Binary (Counter "fight_won") Gt (Const 0), action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
-        , { text = S "You lost!", condition = Just <| Binary (Counter "fight_lost") Gt (Const 0), action = [ Message (S "You lost!"), failureAction ] }
+        , { text = S "You won!", condition = Just <| Counter "fight_won", action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
+        , { text = S "You lost!", condition = Just <| Counter "fight_lost", action = [ Message (S "You lost!"), failureAction ] }
         ]
     }

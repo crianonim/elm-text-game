@@ -106,7 +106,7 @@ viewTextValue textValue =
         S string ->
             text <| "\"" ++ string ++ "\""
 
-        Special textValues ->
+        Concat textValues ->
             span [] <| List.map (\v -> viewTextValue v) textValues
 
         Conditional condition value ->

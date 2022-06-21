@@ -94,7 +94,7 @@ recipes =
 dialogs : List Dialog
 dialogs =
     [ { id = "start"
-      , text = Special [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
+      , text = Concat [ S "You're in a dark room. ", Conditional (zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
       , options =
             [ { text = S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
             , { text = S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
@@ -146,7 +146,7 @@ dialogs =
                             , Screept.SetCounter (S "sticks") (Addition (Counter "sticks") (Counter "rnd_sticks"))
                             ]
                     , Turn 4
-                    , Message <| Special [ S "You found ", IntValueText (Counter "rnd_wood"), S " of wood and ", IntValueText (Counter "rnd_sticks"), S " of sticks." ]
+                    , Message <| Concat [ S "You found ", IntValueText (Counter "rnd_wood"), S " of wood and ", IntValueText (Counter "rnd_sticks"), S " of sticks." ]
                     ]
               }
             , { text = S "Fight Wolf", condition = Just <| zero (Counter "defeated_wolf"), action = [ fightWolf, GoAction "combat" ] }
@@ -155,7 +155,7 @@ dialogs =
       }
     , standardCombat
     , { id = "combat_old"
-      , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
+      , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
       , options =
             [ { text = S "Hit enemy"
               , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
@@ -196,8 +196,8 @@ dialogs =
                                     ]
                                 )
                             ]
-                    , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
-                    , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
+                    , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                    , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Concat [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                     ]
               }
             , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ Screept <| Screept.SetCounter (S "fight_won") (Const 0), GoBackAction ] }
@@ -249,7 +249,7 @@ standardCombat =
 customCombat : String -> Condition -> Condition -> DialogActionExecution -> DialogActionExecution -> Dialog
 customCombat id successTest failureTest successAction failureAction =
     { id = id
-    , text = Special [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
+    , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
     , options =
         [ { text = S "Hit enemy"
           , condition = Just <| AND [ Predicate (Counter "fight_won") Lt (Const 1), Predicate (Counter "fight_lost") Lt (Const 1) ]
@@ -299,8 +299,8 @@ customCombat id successTest failureTest successAction failureAction =
                                 Screept.None
                             )
                         ]
-                , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Special [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
-                , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Special [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
+                , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])
+                , Message <| Conditional (Predicate (Counter "enemy_damage") Gt (Const 0)) (Concat [ S "You were dealt ", IntValueText (Counter "enemy_damage"), S " damage" ])
                 ]
           }
         , { text = S "You won!", condition = Just <| Predicate (Counter "fight_won") Gt (Const 0), action = [ Message (S "You won!"), Screept <| Screept.SetCounter (S "fight_won") (Const 0), successAction ] }
