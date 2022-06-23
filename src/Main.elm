@@ -1,12 +1,13 @@
 module Main exposing (main)
 
 --import Games.FirstTestGame as Game
+--import Games.FabledLands as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.FabledLands as Game
+import Games.TestSanbox as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -34,17 +35,20 @@ main =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { dialogs = listDialogToDictDialog Game.dialogs
-      , gameState = { counters = Game.counters
-                        , labels = Game.labels
-                        , dialogStack = Stack.push (Game.initialDialogId) Stack.initialise
-                        , procedures = Game.procedures
-                        , functions = Game.functions
-                        , messages = []
-                        , rnd = Random.initialSeed 666
-                        }
+      , gameState =
+            { counters = Game.counters
+            , labels = Game.labels
+            , dialogStack = Stack.push Game.initialDialogId Stack.initialise
+            , procedures = Game.procedures
+            , functions = Game.functions
+            , messages = []
+            , rnd = Random.initialSeed 666
+
+            }
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
       , dialogEditor = DialogGameEditor.init
+      , statusLine = Just Game.statusLine
       }
     , Random.generate SeedGenerated Random.independentSeed
     )
@@ -79,6 +83,7 @@ type alias Model =
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
     , dialogEditor : DialogGameEditor.Model
+    , statusLine : Maybe Screept.TextValue
     }
 
 
@@ -111,7 +116,7 @@ view model =
     in
     div [ class "container" ]
         [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
-        , viewDialog model.gameState dialog
+        , viewDialog model dialog
         , if List.length model.gameState.messages > 0 then
             viewMessages model.gameState.messages
 
@@ -134,10 +139,13 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
-viewDialog : GameState -> DialogGame.Dialog -> Html Msg
-viewDialog gameState dialog =
+viewDialog : Model -> DialogGame.Dialog -> Html Msg
+viewDialog {gameState,statusLine} dialog =
     div [ class "dialog" ]
-        [ viewDialogText dialog.text gameState
+        [
+         Maybe.map (\t->viewDialogText t gameState ) statusLine |> Maybe.withDefault (text "")
+
+        , viewDialogText dialog.text gameState
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
         ]
