@@ -5,7 +5,8 @@ import Dict exposing (Dict)
 import Screept exposing (..)
 
 
-initialDialogId = "#630"
+initialDialogId =
+    "#630"
 
 
 labels : Dict String String
