@@ -22,6 +22,9 @@ type UnaryOp
 type BinaryOp
     = Add
     | Sub
+    | Mul
+    | Div
+    | Mod
     | Gt
     | Lt
     | Eq
@@ -186,6 +189,15 @@ binaryOpEval op x y =
 
         Sub ->
             x - y
+
+        Mod ->
+            modBy y x
+
+        Mul ->
+            x * y
+
+        Div ->
+            x // y
 
         Gt ->
             if x > y then
@@ -511,6 +523,12 @@ binaryOpParser =
                     |. Parser.symbol "+"
                 , Parser.succeed Sub
                     |. Parser.symbol "-"
+                , Parser.succeed Mul
+                    |. Parser.symbol "*"
+                , Parser.succeed Div
+                    |. Parser.symbol "/"
+                , Parser.succeed Mod
+                    |. Parser.symbol "%%"
                 , Parser.succeed Gt
                     |. Parser.symbol ">"
                 , Parser.succeed Lt
@@ -691,6 +709,23 @@ runIntValue intVal =
                     Debug.log "!" error
             in
             Const 0
+
+
+runTextValue : String -> TextValue
+runTextValue string =
+    case Parser.run textValueParser string of
+        Ok value ->
+            value
+
+        Err error ->
+            let
+                _ =
+                    Debug.log "Error parsing TextVal: " string
+
+                _ =
+                    Debug.log "!" error
+            in
+            S ""
 
 
 run : String -> Statement
