@@ -23,6 +23,9 @@ main =
     let
         _ =
             Debug.log "Parsed" Screept.parsed
+
+        _ =
+            Debug.log "Test" ( Screept.exampleIntVal, Screept.intValueStringify Screept.exampleRun, Screept.exampleRun )
     in
     Browser.element
         { init = init
@@ -43,7 +46,6 @@ init _ =
             , functions = Game.functions
             , messages = []
             , rnd = Random.initialSeed 666
-
             }
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
@@ -140,11 +142,9 @@ viewMessages msgs =
 
 
 viewDialog : Model -> DialogGame.Dialog -> Html Msg
-viewDialog {gameState,statusLine} dialog =
+viewDialog { gameState, statusLine } dialog =
     div [ class "dialog" ]
-        [
-         Maybe.map (\t->viewDialogText t gameState ) statusLine |> Maybe.withDefault (text "")
-
+        [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
         , viewDialogText dialog.text gameState
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))

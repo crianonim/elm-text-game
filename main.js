@@ -80,190 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
 var _List_Nil_UNUSED = { $: 0 };
 var _List_Nil = { $: '[]' };
 
@@ -789,6 +605,190 @@ function _Debug_regionToString(region)
 		return 'on line ' + region.start.line;
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
+}
+
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
 }
 
 
@@ -4584,9 +4584,32 @@ function _Time_getZoneName()
 	});
 }
 var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -4639,30 +4662,7 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
-	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
-};
+var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5372,240 +5372,85 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$SeedGenerated = function (a) {
-	return {$: 'SeedGenerated', a: a};
+var $author$project$Screept$exampleIntVal = '!(($rnd_2d6 > 10) && ($rnd_2d6 > 10))';
+var $author$project$Screept$binaryOpStringify = function (binaryOp) {
+	switch (binaryOp.$) {
+		case 'Add':
+			return '+';
+		case 'Sub':
+			return '-';
+		case 'Mul':
+			return '*';
+		case 'Div':
+			return '/';
+		case 'Mod':
+			return '%%';
+		case 'Gt':
+			return '>';
+		case 'Lt':
+			return '<';
+		case 'Eq':
+			return '==';
+		case 'And':
+			return '&&';
+		default:
+			return '||';
+	}
 };
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = {$: 'Red'};
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
+var $author$project$Screept$unaryOpStrinfify = function (unaryOp) {
+	return '!';
 };
-var $author$project$Games$TestSanbox$counters = $elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2('turn', 1),
-			_Utils_Tuple2('turns_count', 3),
-			_Utils_Tuple2('turns_per_hour', 2),
-			_Utils_Tuple2('hour', 0),
-			_Utils_Tuple2('minutes', 0)
-		]));
-var $author$project$Screept$Concat = function (a) {
-	return {$: 'Concat', a: a};
+var $author$project$Screept$intValueStringify = function (intValue) {
+	switch (intValue.$) {
+		case 'Const':
+			var _int = intValue.a;
+			return $elm$core$String$fromInt(_int);
+		case 'Counter':
+			var string = intValue.a;
+			return '$' + string;
+		case 'Unary':
+			var unaryOp = intValue.a;
+			var x = intValue.b;
+			return _Utils_ap(
+				$author$project$Screept$unaryOpStrinfify(unaryOp),
+				$author$project$Screept$intValueStringify(x));
+		case 'Binary':
+			var x = intValue.a;
+			var binaryOp = intValue.b;
+			var y = intValue.c;
+			return '(' + ($author$project$Screept$intValueStringify(x) + (' ' + ($author$project$Screept$binaryOpStringify(binaryOp) + (' ' + ($author$project$Screept$intValueStringify(y) + ')')))));
+		default:
+			var string = intValue.a;
+			return 'CALL ' + string;
+	}
 };
-var $author$project$Screept$S = function (a) {
-	return {$: 'S', a: a};
+var $author$project$Screept$Const = function (a) {
+	return {$: 'Const', a: a};
 };
-var $author$project$DialogGame$Screept = function (a) {
-	return {$: 'Screept', a: a};
-};
-var $author$project$Screept$None = {$: 'None'};
-var $elm$core$Debug$log = _Debug_log;
-var $elm$parser$Parser$DeadEnd = F3(
-	function (row, col, problem) {
-		return {col: col, problem: problem, row: row};
-	});
-var $elm$parser$Parser$problemToDeadEnd = function (p) {
-	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
-};
-var $elm$parser$Parser$Advanced$bagToList = F2(
-	function (bag, list) {
-		bagToList:
-		while (true) {
-			switch (bag.$) {
-				case 'Empty':
-					return list;
-				case 'AddRight':
-					var bag1 = bag.a;
-					var x = bag.b;
-					var $temp$bag = bag1,
-						$temp$list = A2($elm$core$List$cons, x, list);
-					bag = $temp$bag;
-					list = $temp$list;
-					continue bagToList;
-				default:
-					var bag1 = bag.a;
-					var bag2 = bag.b;
-					var $temp$bag = bag1,
-						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
-					bag = $temp$bag;
-					list = $temp$list;
-					continue bagToList;
-			}
-		}
-	});
-var $elm$parser$Parser$Advanced$run = F2(
-	function (_v0, src) {
-		var parse = _v0.a;
-		var _v1 = parse(
-			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
-		if (_v1.$ === 'Good') {
-			var value = _v1.b;
-			return $elm$core$Result$Ok(value);
-		} else {
-			var bag = _v1.b;
-			return $elm$core$Result$Err(
-				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
-		}
-	});
-var $elm$parser$Parser$run = F2(
-	function (parser, source) {
-		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
-		if (_v0.$ === 'Ok') {
-			var a = _v0.a;
-			return $elm$core$Result$Ok(a);
-		} else {
-			var problems = _v0.a;
-			return $elm$core$Result$Err(
-				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
-		}
-	});
-var $author$project$Screept$Block = function (a) {
-	return {$: 'Block', a: a};
-};
-var $author$project$Screept$Comment = function (a) {
-	return {$: 'Comment', a: a};
-};
-var $author$project$Screept$If = F3(
+var $author$project$Screept$Add = {$: 'Add'};
+var $author$project$Screept$And = {$: 'And'};
+var $author$project$Screept$Binary = F3(
 	function (a, b, c) {
-		return {$: 'If', a: a, b: b, c: c};
+		return {$: 'Binary', a: a, b: b, c: c};
 	});
-var $elm$parser$Parser$Optional = {$: 'Optional'};
-var $author$project$Screept$Procedure = function (a) {
-	return {$: 'Procedure', a: a};
+var $author$project$Screept$Counter = function (a) {
+	return {$: 'Counter', a: a};
 };
-var $author$project$Screept$Rnd = F3(
-	function (a, b, c) {
-		return {$: 'Rnd', a: a, b: b, c: c};
-	});
-var $author$project$Screept$SetCounter = F2(
+var $author$project$Screept$Div = {$: 'Div'};
+var $author$project$Screept$Eq = {$: 'Eq'};
+var $author$project$Screept$Eval = function (a) {
+	return {$: 'Eval', a: a};
+};
+var $author$project$Screept$Gt = {$: 'Gt'};
+var $author$project$Screept$Lt = {$: 'Lt'};
+var $author$project$Screept$Mod = {$: 'Mod'};
+var $author$project$Screept$Mul = {$: 'Mul'};
+var $author$project$Screept$Not = {$: 'Not'};
+var $author$project$Screept$Or = {$: 'Or'};
+var $author$project$Screept$Sub = {$: 'Sub'};
+var $author$project$Screept$Unary = F2(
 	function (a, b) {
-		return {$: 'SetCounter', a: a, b: b};
-	});
-var $author$project$Screept$SetFunc = F2(
-	function (a, b) {
-		return {$: 'SetFunc', a: a, b: b};
-	});
-var $author$project$Screept$SetLabel = F2(
-	function (a, b) {
-		return {$: 'SetLabel', a: a, b: b};
+		return {$: 'Unary', a: a, b: b};
 	});
 var $elm$parser$Parser$Advanced$Parser = function (a) {
 	return {$: 'Parser', a: a};
@@ -5852,34 +5697,6 @@ var $author$project$Screept$counterParser = A2(
 						c,
 						_Utils_chr('_'));
 				}))));
-var $author$project$Screept$Add = {$: 'Add'};
-var $author$project$Screept$And = {$: 'And'};
-var $author$project$Screept$Binary = F3(
-	function (a, b, c) {
-		return {$: 'Binary', a: a, b: b, c: c};
-	});
-var $author$project$Screept$Const = function (a) {
-	return {$: 'Const', a: a};
-};
-var $author$project$Screept$Counter = function (a) {
-	return {$: 'Counter', a: a};
-};
-var $author$project$Screept$Div = {$: 'Div'};
-var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$Screept$Eval = function (a) {
-	return {$: 'Eval', a: a};
-};
-var $author$project$Screept$Gt = {$: 'Gt'};
-var $author$project$Screept$Lt = {$: 'Lt'};
-var $author$project$Screept$Mod = {$: 'Mod'};
-var $author$project$Screept$Mul = {$: 'Mul'};
-var $author$project$Screept$Not = {$: 'Not'};
-var $author$project$Screept$Or = {$: 'Or'};
-var $author$project$Screept$Sub = {$: 'Sub'};
-var $author$project$Screept$Unary = F2(
-	function (a, b) {
-		return {$: 'Unary', a: a, b: b};
-	});
 var $elm$parser$Parser$ExpectingInt = {$: 'ExpectingInt'};
 var $elm$parser$Parser$Advanced$consumeBase = _Parser_consumeBase;
 var $elm$parser$Parser$Advanced$consumeBase16 = _Parser_consumeBase16;
@@ -6281,27 +6098,18 @@ function $author$project$Screept$cyclic$unaryOpParser() {
 				A2(
 					$elm$parser$Parser$keeper,
 					$elm$parser$Parser$succeed($author$project$Screept$Unary),
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$oneOf(
-							_List_fromArray(
-								[
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Not),
-									$elm$parser$Parser$symbol('!'))
-								])),
-						$elm$parser$Parser$symbol('('))),
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$lazy(
-							function (_v0) {
-								return $author$project$Screept$cyclic$intValueParser();
-							}),
-						$elm$parser$Parser$spaces),
-					$elm$parser$Parser$symbol(')')))
+					$elm$parser$Parser$oneOf(
+						_List_fromArray(
+							[
+								A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed($author$project$Screept$Not),
+								$elm$parser$Parser$symbol('!'))
+							]))),
+				$elm$parser$Parser$lazy(
+					function (_v0) {
+						return $author$project$Screept$cyclic$intValueParser();
+					}))
 			]));
 }
 try {
@@ -6319,6 +6127,256 @@ try {
 	};
 } catch ($) {
 	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    intValueParser\n  │     ↓\n  │    binaryOpParser\n  │     ↓\n  │    unaryOpParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $elm$core$Debug$log = _Debug_log;
+var $elm$parser$Parser$DeadEnd = F3(
+	function (row, col, problem) {
+		return {col: col, problem: problem, row: row};
+	});
+var $elm$parser$Parser$problemToDeadEnd = function (p) {
+	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
+};
+var $elm$parser$Parser$Advanced$bagToList = F2(
+	function (bag, list) {
+		bagToList:
+		while (true) {
+			switch (bag.$) {
+				case 'Empty':
+					return list;
+				case 'AddRight':
+					var bag1 = bag.a;
+					var x = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$core$List$cons, x, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+				default:
+					var bag1 = bag.a;
+					var bag2 = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$run = F2(
+	function (_v0, src) {
+		var parse = _v0.a;
+		var _v1 = parse(
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_v1.$ === 'Good') {
+			var value = _v1.b;
+			return $elm$core$Result$Ok(value);
+		} else {
+			var bag = _v1.b;
+			return $elm$core$Result$Err(
+				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
+		}
+	});
+var $elm$parser$Parser$run = F2(
+	function (parser, source) {
+		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
+		if (_v0.$ === 'Ok') {
+			var a = _v0.a;
+			return $elm$core$Result$Ok(a);
+		} else {
+			var problems = _v0.a;
+			return $elm$core$Result$Err(
+				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
+		}
+	});
+var $author$project$Screept$runIntValue = function (intVal) {
+	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$intValueParser, intVal);
+	if (_v0.$ === 'Ok') {
+		var value = _v0.a;
+		return value;
+	} else {
+		var error = _v0.a;
+		var _v1 = A2($elm$core$Debug$log, 'Error parsing IntVal: ', intVal);
+		var _v2 = A2($elm$core$Debug$log, '!', error);
+		return $author$project$Screept$Const(0);
+	}
+};
+var $author$project$Screept$exampleRun = $author$project$Screept$runIntValue(
+	$author$project$Screept$intValueStringify(
+		$author$project$Screept$runIntValue($author$project$Screept$exampleIntVal)));
+var $author$project$Main$SeedGenerated = function (a) {
+	return {$: 'SeedGenerated', a: a};
+};
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $author$project$Games$TestSanbox$counters = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('turn', 1),
+			_Utils_Tuple2('turns_count', 3),
+			_Utils_Tuple2('turns_per_hour', 2),
+			_Utils_Tuple2('hour', 0),
+			_Utils_Tuple2('minutes', 0)
+		]));
+var $author$project$Screept$Concat = function (a) {
+	return {$: 'Concat', a: a};
+};
+var $author$project$Screept$S = function (a) {
+	return {$: 'S', a: a};
+};
+var $author$project$DialogGame$Screept = function (a) {
+	return {$: 'Screept', a: a};
+};
+var $author$project$Screept$None = {$: 'None'};
+var $author$project$Screept$Block = function (a) {
+	return {$: 'Block', a: a};
+};
+var $author$project$Screept$Comment = function (a) {
+	return {$: 'Comment', a: a};
+};
+var $author$project$Screept$If = F3(
+	function (a, b, c) {
+		return {$: 'If', a: a, b: b, c: c};
+	});
+var $elm$parser$Parser$Optional = {$: 'Optional'};
+var $author$project$Screept$Procedure = function (a) {
+	return {$: 'Procedure', a: a};
+};
+var $author$project$Screept$Rnd = F3(
+	function (a, b, c) {
+		return {$: 'Rnd', a: a, b: b, c: c};
+	});
+var $author$project$Screept$SetCounter = F2(
+	function (a, b) {
+		return {$: 'SetCounter', a: a, b: b};
+	});
+var $author$project$Screept$SetFunc = F2(
+	function (a, b) {
+		return {$: 'SetFunc', a: a, b: b};
+	});
+var $author$project$Screept$SetLabel = F2(
+	function (a, b) {
+		return {$: 'SetLabel', a: a, b: b};
+	});
 var $elm$parser$Parser$Advanced$chompUntilEndOr = function (str) {
 	return $elm$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -7151,8 +7209,15 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			seed0);
 	});
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
-var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF (($rnd_2d6 > 10) && ($rnd_2d6 > 10)) THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
-var $author$project$ScreeptEditor$init = {parsed: $elm$core$Maybe$Nothing, text: $author$project$Screept$customCombatString};
+var $author$project$ParsedEditable$init = F2(
+	function (text, parser) {
+		return {parsed: $elm$core$Maybe$Nothing, parser: parser, text: text};
+	});
+var $author$project$ScreeptEditor$init = {
+	intValueEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$intValueParser),
+	statementEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$statementParser),
+	value: $elm$core$Maybe$Nothing
+};
 var $author$project$Games$TestSanbox$initialDialogId = 'start';
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
@@ -7220,6 +7285,7 @@ var $author$project$Main$init = function (_v0) {
 		},
 		A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
 };
+var $author$project$Screept$customCombatString = '{\nRND $rnd_d6_1 1 .. 6;\nRND $rnd_d6_2 1 .. 6;\nSET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack = ($rnd_2d6 + $player_combat);\n\n# comment\n;\nLABEL $player_name = "Jan";\nIF (($rnd_2d6 > 10) && ($rnd_2d6 > 10)) THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);\nSET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}\n}';
 var $author$project$Screept$parsedStatement = A2($elm$parser$Parser$run, $author$project$Screept$statementParser, $author$project$Screept$customCombatString);
 var $author$project$Screept$parsed = $author$project$Screept$parsedStatement;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -8050,20 +8116,340 @@ var $author$project$DialogGameEditor$update = F2(
 				return model;
 		}
 	});
-var $author$project$ScreeptEditor$update = F2(
+var $author$project$ScreeptEditor$exampleCounters = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('turn', 1),
+			_Utils_Tuple2('rnd', 0),
+			_Utils_Tuple2('raining', 0),
+			_Utils_Tuple2('killed_dragon', 1),
+			_Utils_Tuple2('money', 16),
+			_Utils_Tuple2('wood', 10),
+			_Utils_Tuple2('stone', 9),
+			_Utils_Tuple2('sticks', 0),
+			_Utils_Tuple2('axe', 0),
+			_Utils_Tuple2('pickaxe', 0),
+			_Utils_Tuple2('start_look_around', 0),
+			_Utils_Tuple2('start_search_bed', 0),
+			_Utils_Tuple2('player_rank', 3),
+			_Utils_Tuple2('player_stamina', 3),
+			_Utils_Tuple2('player_defence', 7),
+			_Utils_Tuple2('player_charisma', 5),
+			_Utils_Tuple2('player_combat', 5),
+			_Utils_Tuple2('player_magic', 2),
+			_Utils_Tuple2('player_sanctity', 3),
+			_Utils_Tuple2('player_scouting', 6),
+			_Utils_Tuple2('player_thievery', 4),
+			_Utils_Tuple2('inv_spear', 1),
+			_Utils_Tuple2('inv_leather_jerkin', 1),
+			_Utils_Tuple2('defeated_goblin', 0),
+			_Utils_Tuple2('taken_goblin_treasure', 0),
+			_Utils_Tuple2('defeated_wolf', 0),
+			_Utils_Tuple2('codeword_apple', 0),
+			_Utils_Tuple2('codeword_aspen', 0)
+		]));
+var $author$project$ScreeptEditor$exampleLabels = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2('player_name', 'Liana'),
+			_Utils_Tuple2('player proffesion', 'wayfarer'),
+			_Utils_Tuple2('enemy_marker', ''),
+			_Utils_Tuple2('enemy_name', '')
+		]));
+var $author$project$ScreeptEditor$procedures = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			'test',
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('d6_1'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('d6_2'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('2d6'),
+						A3(
+							$author$project$Screept$Binary,
+							$author$project$Screept$Counter('d6_1'),
+							$author$project$Screept$Add,
+							$author$project$Screept$Counter('d6_2'))),
+						A3(
+						$author$project$Screept$If,
+						A3(
+							$author$project$Screept$Binary,
+							A3(
+								$author$project$Screept$Binary,
+								$author$project$Screept$Counter('2d6'),
+								$author$project$Screept$Add,
+								$author$project$Screept$Counter('test_score')),
+							$author$project$Screept$Gt,
+							$author$project$Screept$Counter('test_difficulty')),
+						A2(
+							$author$project$Screept$SetCounter,
+							$author$project$Screept$S('test_success'),
+							$author$project$Screept$Const(1)),
+						A2(
+							$author$project$Screept$SetCounter,
+							$author$project$Screept$S('test_success'),
+							$author$project$Screept$Const(0)))
+					]))),
+			_Utils_Tuple2(
+			'combat_reset',
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('fight_won'),
+						$author$project$Screept$Const(0)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('fight_lost'),
+						$author$project$Screept$Const(0)),
+						A2(
+						$author$project$Screept$SetLabel,
+						$author$project$Screept$S('enemy_name'),
+						$author$project$Screept$S(''))
+					]))),
+			_Utils_Tuple2(
+			'combat',
+			$author$project$Screept$Block(
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('rnd_d6_1'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A3(
+						$author$project$Screept$Rnd,
+						$author$project$Screept$S('rnd_d6_2'),
+						$author$project$Screept$Const(1),
+						$author$project$Screept$Const(6)),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('rnd_2d6'),
+						A3(
+							$author$project$Screept$Binary,
+							$author$project$Screept$Counter('rnd_d6_1'),
+							$author$project$Screept$Add,
+							$author$project$Screept$Counter('rnd_d6_2'))),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('player_attack'),
+						A3(
+							$author$project$Screept$Binary,
+							$author$project$Screept$Counter('rnd_2d6'),
+							$author$project$Screept$Add,
+							$author$project$Screept$Counter('player_combat'))),
+						A2(
+						$author$project$Screept$SetCounter,
+						$author$project$Screept$S('player_damage'),
+						A3(
+							$author$project$Screept$Binary,
+							$author$project$Screept$Counter('player_attack'),
+							$author$project$Screept$Sub,
+							$author$project$Screept$Counter('enemy_defence'))),
+						A3(
+						$author$project$Screept$If,
+						A3(
+							$author$project$Screept$Binary,
+							$author$project$Screept$Counter('player_damage'),
+							$author$project$Screept$Gt,
+							$author$project$Screept$Const(0)),
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('enemy_stamina'),
+									A3(
+										$author$project$Screept$Binary,
+										$author$project$Screept$Counter('enemy_stamina'),
+										$author$project$Screept$Sub,
+										$author$project$Screept$Counter('player_damage')))
+								])),
+						$author$project$Screept$None),
+						A3(
+						$author$project$Screept$If,
+						A2(
+							$author$project$Screept$Unary,
+							$author$project$Screept$Not,
+							$author$project$Screept$Eval('combat_player_success')),
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A3(
+									$author$project$Screept$Rnd,
+									$author$project$Screept$S('rnd_d6_1'),
+									$author$project$Screept$Const(1),
+									$author$project$Screept$Const(6)),
+									A3(
+									$author$project$Screept$Rnd,
+									$author$project$Screept$S('rnd_d6_2'),
+									$author$project$Screept$Const(1),
+									$author$project$Screept$Const(6)),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('rnd_2d6'),
+									A3(
+										$author$project$Screept$Binary,
+										$author$project$Screept$Counter('rnd_d6_1'),
+										$author$project$Screept$Add,
+										$author$project$Screept$Counter('rnd_d6_2'))),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('enemy_attack'),
+									A3(
+										$author$project$Screept$Binary,
+										$author$project$Screept$Counter('rnd_2d6'),
+										$author$project$Screept$Add,
+										$author$project$Screept$Counter('enemy_combat'))),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('enemy_damage'),
+									A3(
+										$author$project$Screept$Binary,
+										$author$project$Screept$Counter('enemy_attack'),
+										$author$project$Screept$Sub,
+										$author$project$Screept$Counter('player_defence'))),
+									A3(
+									$author$project$Screept$If,
+									A3(
+										$author$project$Screept$Binary,
+										$author$project$Screept$Counter('enemy_damage'),
+										$author$project$Screept$Gt,
+										$author$project$Screept$Const(0)),
+									$author$project$Screept$Block(
+										_List_fromArray(
+											[
+												A2(
+												$author$project$Screept$SetCounter,
+												$author$project$Screept$S('player_stamina'),
+												A3(
+													$author$project$Screept$Binary,
+													$author$project$Screept$Counter('player_stamina'),
+													$author$project$Screept$Sub,
+													$author$project$Screept$Counter('enemy_damage'))),
+												A3(
+												$author$project$Screept$If,
+												A3(
+													$author$project$Screept$Binary,
+													$author$project$Screept$Counter('player_stamina'),
+													$author$project$Screept$Lt,
+													$author$project$Screept$Const(1)),
+												A2(
+													$author$project$Screept$SetCounter,
+													$author$project$Screept$S('fight_lost'),
+													$author$project$Screept$Const(1)),
+												$author$project$Screept$None)
+											])),
+									$author$project$Screept$None)
+								])),
+						$author$project$Screept$None),
+						A3(
+						$author$project$Screept$If,
+						$author$project$Screept$Eval('combat_player_success'),
+						$author$project$Screept$Block(
+							_List_fromArray(
+								[
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('enemy_damage'),
+									$author$project$Screept$Const(0)),
+									A2(
+									$author$project$Screept$SetCounter,
+									$author$project$Screept$S('fight_won'),
+									$author$project$Screept$Const(1))
+								])),
+						A3(
+							$author$project$Screept$If,
+							$author$project$Screept$Eval('combat_player_failure'),
+							$author$project$Screept$Block(
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Screept$SetCounter,
+										$author$project$Screept$S('fight_lost'),
+										$author$project$Screept$Const(1))
+									])),
+							$author$project$Screept$None))
+					])))
+		]));
+var $author$project$ScreeptEditor$gameState = {
+	counters: $author$project$ScreeptEditor$exampleCounters,
+	dialogStack: $mhoare$elm_stack$Stack$initialise,
+	functions: $elm$core$Dict$empty,
+	labels: $author$project$ScreeptEditor$exampleLabels,
+	messages: _List_Nil,
+	procedures: $author$project$ScreeptEditor$procedures,
+	rnd: $elm$random$Random$initialSeed(666)
+};
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$ParsedEditable$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'ParseClick') {
 			return _Utils_update(
 				model,
 				{
 					parsed: $elm$core$Maybe$Just(
-						A2($elm$parser$Parser$run, $author$project$Screept$statementParser, model.text))
+						A2($elm$parser$Parser$run, model.parser, model.text))
 				});
 		} else {
 			var v = msg.a;
 			return _Utils_update(
 				model,
-				{text: v});
+				{
+					parsed: $elm$core$Maybe$Just(
+						A2($elm$parser$Parser$run, model.parser, v)),
+					text: v
+				});
+		}
+	});
+var $author$project$ScreeptEditor$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'StatementEditor':
+				var m = msg.a;
+				return _Utils_update(
+					model,
+					{
+						statementEditor: A2($author$project$ParsedEditable$update, m, model.statementEditor)
+					});
+			case 'IntValueEditor':
+				var m = msg.a;
+				return _Utils_update(
+					model,
+					{
+						intValueEditor: A2($author$project$ParsedEditable$update, m, model.intValueEditor)
+					});
+			default:
+				return _Utils_update(
+					model,
+					{
+						value: A2(
+							$elm$core$Maybe$andThen,
+							function (r) {
+								return A2($author$project$Screept$getMaybeIntValue, r, $author$project$ScreeptEditor$gameState);
+							},
+							A2($elm$core$Maybe$andThen, $elm$core$Result$toMaybe, model.intValueEditor.parsed))
+					});
 		}
 	});
 var $author$project$Main$update = F2(
@@ -8154,9 +8540,9 @@ var $mhoare$elm_stack$Stack$top = function (_v0) {
 	var stack = _v0.a;
 	return $elm$core$List$head(stack);
 };
-var $author$project$ScreeptEditor$ParseClick = {$: 'ParseClick'};
-var $author$project$ScreeptEditor$TextEdit = function (a) {
-	return {$: 'TextEdit', a: a};
+var $author$project$ScreeptEditor$ClickRun = {$: 'ClickRun'};
+var $author$project$ScreeptEditor$IntValueEditor = function (a) {
+	return {$: 'IntValueEditor', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -8175,6 +8561,10 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$ParsedEditable$ParseClick = {$: 'ParseClick'};
+var $author$project$ParsedEditable$TextEdit = function (a) {
+	return {$: 'TextEdit', a: a};
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -8209,7 +8599,7 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $author$project$ScreeptEditor$problemToString = function (problem) {
+var $author$project$ParsedEditable$problemToString = function (problem) {
 	switch (problem.$) {
 		case 'Expecting':
 			var string = problem.a;
@@ -8249,7 +8639,7 @@ var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$ScreeptEditor$view = function (model) {
+var $author$project$ParsedEditable$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -8259,7 +8649,7 @@ var $author$project$ScreeptEditor$view = function (model) {
 				$elm$html$Html$button,
 				_List_fromArray(
 					[
-						$elm$html$Html$Events$onClick($author$project$ScreeptEditor$ParseClick)
+						$elm$html$Html$Events$onClick($author$project$ParsedEditable$ParseClick)
 					]),
 				_List_fromArray(
 					[
@@ -8270,7 +8660,7 @@ var $author$project$ScreeptEditor$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$value(model.text),
-						$elm$html$Html$Events$onInput($author$project$ScreeptEditor$TextEdit),
+						$elm$html$Html$Events$onInput($author$project$ParsedEditable$TextEdit),
 						A2($elm$html$Html$Attributes$style, 'width', '100%'),
 						A2($elm$html$Html$Attributes$style, 'height', '10em'),
 						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace')
@@ -8296,7 +8686,7 @@ var $author$project$ScreeptEditor$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$text(
-										'row: ' + ($elm$core$String$fromInt(row) + (', col: ' + ($elm$core$String$fromInt(col) + (', problem: ' + $author$project$ScreeptEditor$problemToString(problem))))))
+										'row: ' + ($elm$core$String$fromInt(row) + (', col: ' + ($elm$core$String$fromInt(col) + (', problem: ' + $author$project$ParsedEditable$problemToString(problem))))))
 									]));
 						};
 						return A2(
@@ -8306,6 +8696,38 @@ var $author$project$ScreeptEditor$view = function (model) {
 					}
 				}
 			}()
+			]));
+};
+var $author$project$ScreeptEditor$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$map,
+				$author$project$ScreeptEditor$IntValueEditor,
+				$author$project$ParsedEditable$view(model.intValueEditor)),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$ScreeptEditor$ClickRun)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('RUN')
+					])),
+				A2(
+				$elm$core$Maybe$withDefault,
+				$elm$html$Html$text('not run'),
+				A2(
+					$elm$core$Maybe$map,
+					function (x) {
+						return $elm$html$Html$text(
+							$elm$core$String$fromInt(x));
+					},
+					model.value))
 			]));
 };
 var $elm$core$List$sortBy = _List_sortBy;
@@ -8554,6 +8976,13 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = function () {
 	var _v0 = A2($elm$core$Debug$log, 'Parsed', $author$project$Screept$parsed);
+	var _v1 = A2(
+		$elm$core$Debug$log,
+		'Test',
+		_Utils_Tuple3(
+			$author$project$Screept$exampleIntVal,
+			$author$project$Screept$intValueStringify($author$project$Screept$exampleRun),
+			$author$project$Screept$exampleRun));
 	return $elm$browser$Browser$element(
 		{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 }();

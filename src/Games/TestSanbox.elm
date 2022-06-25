@@ -57,7 +57,7 @@ procedures =
 dialogs : List Dialog
 dialogs =
     [ { id = "start"
-      , text = Concat [  ]
+      , text = Concat []
       , options = [ { text = S "...", condition = Nothing, action = [ runScreept "RUN turn" ] } ]
       }
     ]
