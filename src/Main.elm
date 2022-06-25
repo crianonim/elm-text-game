@@ -20,13 +20,6 @@ import Stack exposing (Stack)
 
 main : Program () Model Msg
 main =
-    let
-        _ =
-            Debug.log "Parsed" Screept.parsed
-
-        _ =
-            Debug.log "Test" ( Screept.exampleIntVal, Screept.intValueStringify Screept.exampleRun, Screept.exampleRun )
-    in
     Browser.element
         { init = init
         , update = update

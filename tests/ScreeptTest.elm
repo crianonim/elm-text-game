@@ -1,5 +1,6 @@
 module ScreeptTest exposing (..)
 
+import Char as Chat
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Parser
@@ -42,13 +43,45 @@ intValParsingAndStringify =
                 Expect.equal (intValueStringify (Eval "test")) "CALL test"
         , fuzz (fuzzIntVal 10) "round stringify and parse" <|
             \v ->
-             --let
-                 --_  = Debug.log "FUZZ" v
-
-             --in
-
+                --let
+                --_  = Debug.log "FUZZ" v
+                --in
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
         ]
+
+
+textValueParseAndStringify : Test
+textValueParseAndStringify =
+    describe "TextValue parsing and stringify"
+        [ fuzz (textValueFuzzer 10) "Round trip" <|
+            \v ->
+                Expect.equal (Screept.textValueStringify v |> Parser.run textValueParser) (Ok v)
+        ]
+
+
+textValueFuzzer : Int -> Fuzzer TextValue
+textValueFuzzer x =
+    if x < 0 then
+        validStringFuzzer |> Fuzz.map S
+
+    else
+        Fuzz.oneOf
+            [ Fuzz.map S validStringFuzzer
+            , Fuzz.list (textValueFuzzer -1) |> Fuzz.map Concat
+            , Fuzz.map3 Conditional (fuzzIntVal 2) (textValueFuzzer (x - 1)) (textValueFuzzer (x - 1))
+            , Fuzz.map IntValueText (fuzzIntVal 2)
+            , Fuzz.map Label validLabelFuzzer
+            ]
+
+
+validStringFuzzer : Fuzzer String
+validStringFuzzer =
+    Fuzz.map (String.filter (\c -> c /= '"')) string
+
+
+validLabelFuzzer : Fuzzer String
+validLabelFuzzer =
+    Fuzz.map (String.filter Chat.isAlphaNum) string
 
 
 fuzzConst : Fuzzer IntValue
@@ -85,4 +118,4 @@ fuzzUnaryOp =
 fuzzBinaryOp : Fuzzer BinaryOp
 fuzzBinaryOp =
     Fuzz.oneOf <|
-        List.map (Fuzz.constant) [Add, Sub, Mul, Div, Mod, Gt, Lt,Eq,And,Or]
+        List.map Fuzz.constant [ Add, Sub, Mul, Div, Mod, Gt, Lt, Eq, And, Or ]

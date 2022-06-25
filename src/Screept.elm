@@ -32,20 +32,6 @@ type BinaryOp
     | Or
 
 
-
---
---type Condition
---    = Predicate IntValue PredicateOp IntValue
---    | NOT Condition
---    | AND (List Condition)
---    | OR (List Condition)
---
---type PredicateOp
---    = Eq
---    | Gt
---    | Lt
-
-
 type TextValue
     = S String
     | Concat (List TextValue)
@@ -296,111 +282,6 @@ isTruthy intValue state =
 
 
 -----------
--- CODEC
------------
---
---
---encodeIntValue : IntValue -> E.Value
---encodeIntValue intValue =
---    case intValue of
---        Const int ->
---            E.int int
---
---        Counter s ->
---            E.string s
---
---        Addition x y ->
---            E.object
---                [ ( "op", E.string "+" )
---                , ( "x", encodeIntValue x )
---                , ( "y", encodeIntValue y )
---                ]
---
---        Subtraction x y ->
---            E.object
---                [ ( "op", E.string "-" )
---                , ( "x", encodeIntValue x )
---                , ( "y", encodeIntValue y )
---                ]
---
---
---encodePredicateOp : PredicateOp -> E.Value
---encodePredicateOp predicateOp =
---    case predicateOp of
---        Eq ->
---            E.string "="
---
---        Gt ->
---            E.string ">"
---
---        Lt ->
---            E.string "<"
---
---
---encodeCondition : Condition -> E.Value
---encodeCondition condition =
---    case condition of
---        Predicate x predicateOp y ->
---            E.object [ ( "PredOp", encodePredicateOp predicateOp ), ( "x", encodeIntValue x ), ( "y", encodeIntValue y ) ]
---
---        NOT c ->
---            E.object [ ( "NOT", encodeCondition c ) ]
---
---        AND conditions ->
---            E.object [ ( "AND", E.list encodeCondition conditions ) ]
---
---        OR conditions ->
---            E.object [ ( "OR", E.list encodeCondition conditions ) ]
---
---
---encodeTextValue : TextValue -> E.Value
---encodeTextValue textValue =
---    case textValue of
---        S s ->
---            E.string s
---
---        Special textValues ->
---            E.list encodeTextValue textValues
---
---        Conditional condition t ->
---            E.object [ ( "condition", encodeCondition condition ), ( "text", encodeTextValue t ) ]
---
---        IntValueText intValue ->
---            encodeIntValue intValue
---
---        Label string ->
---            E.string ("$" ++ string)
---
---
---encodeStatement : Statement -> E.Value
---encodeStatement statement =
---    case statement of
---        SetCounter textValue intValue ->
---            E.object [ ( "setCounter", encodeTextValue textValue ), ( "value", encodeIntValue intValue ) ]
---
---        SetLabel textValue value ->
---            E.object [ ( "setLabel", encodeTextValue textValue ), ( "value", encodeTextValue value ) ]
---
---        Rnd counter min max ->
---            E.object [ ( "rnd", E.object [ ( "counter", encodeTextValue counter ), ( "min", encodeIntValue min ), ( "max", encodeIntValue max ) ] ) ]
---
---        Block statements ->
---            E.list encodeStatement statements
---
---        If condition success failure ->
---            E.object [ ( "if", E.object [ ( "condition", encodeCondition condition ), ( "success", encodeStatement success ), ( "failure", encodeStatement failure ) ] ) ]
---
---        Comment comment ->
---            E.object [ ( "comment", E.string comment ) ]
---
---        -- TODO
---        Procedure _ ->
---            E.null
---
---        None ->
---            E.null
---
------------
 --- Helpers
 -----------
 
@@ -408,49 +289,6 @@ isTruthy intValue state =
 inc : String -> Statement
 inc counter =
     SetCounter (S counter) (Binary (Counter counter) Add (Const 1))
-
-
-
---
---example : Statement
---example =
---    Block
---        [ Rnd (S "rnd_d6_1") (Const 1) (Const 6)
---        , Rnd (S "rnd_d6_2") (Const 1) (Const 6)
---        , SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
---        , SetCounter (S "player_attack") (Addition (Counter "rnd_2d6") (Counter "player_combat"))
---        , SetCounter (S "player_damage") (Subtraction (Counter "player_attack") (Counter "enemy_defence"))
---        , If (Predicate (Counter "player_damage") Gt (Const 0))
---            (Block
---                [ SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
---                ]
---            )
---            None
---        , If (Predicate (Counter "enemy_stamina") Gt (Const 0))
---            (Block
---                [ Rnd (S "rnd_d6_1") (Const 1) (Const 6)
---                , Rnd (S "rnd_d6_2") (Const 1) (Const 6)
---                , SetCounter (S "rnd_2d6") (Addition (Counter "rnd_d6_1") (Counter "rnd_d6_2"))
---                , SetCounter (S "enemy_attack") (Addition (Counter "rnd_2d6") (Counter "enemy_combat"))
---                , SetCounter (S "enemy_damage") (Subtraction (Counter "enemy_attack") (Counter "player_defence"))
---                , If (Predicate (Counter "enemy_damage") Gt (Const 0))
---                    (Block
---                        [ SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
---                        , If (Predicate (Counter "player_stamina") Lt (Const 1)) (SetCounter (S "fight_lost") (Const 1)) None
---                        ]
---                    )
---                    None
---                ]
---            )
---            (Block
---                [ SetCounter (S "enemy_damage") (Const 0)
---                , SetCounter (S "fight_won") (Const 1)
---                , SetCounter (Label "enemy_marker") (Const 1)
---                , SetCounter (Special [ S "test", Label "label", Conditional (Predicate (Counter "enemy_marker") Eq (Const 2)) (S "Success") ]) (Const 5)
---                , SetCounter (Special [ S "prefix_", IntValueText (Counter "enemy_marker") ]) (Const 4)
---                ]
---            )
---        ]
 
 
 intWithPotentialMinus : Parser Int
@@ -461,38 +299,6 @@ intWithPotentialMinus =
             |= Parser.int
         , Parser.int
         ]
-
-
-toParse : String
-toParse =
-    "($name_el + (23 - 3))"
-
-
-toParse2 =
-    "NOT (AND (NOT ((22 - 3) < $name_el), 1>0))"
-
-
-parsedIntValue : Result (List Parser.DeadEnd) IntValue
-parsedIntValue =
-    Parser.run intValueParser toParse
-
-
-
---
---parsedCondtion =
---    Parser.run conditionParser toParse2
-
-
-toParse3 =
-    "[#enemy_marker, \"Janek\", ($enemy_marker==2?\"Success\"), str(12)]"
-
-
-parsedTextValue =
-    Parser.run textValueParser toParse3
-
-
-parsed =
-    parsedStatement
 
 
 counterParser : Parser String
@@ -552,8 +358,8 @@ binaryOpStringify binaryOp =
             "||"
 
 
-unaryOpStrinfify : UnaryOp -> String
-unaryOpStrinfify unaryOp =
+unaryOpStringify : UnaryOp -> String
+unaryOpStringify unaryOp =
     case unaryOp of
         Not ->
             "!"
@@ -569,7 +375,7 @@ intValueStringify intValue =
             "$" ++ string
 
         Unary unaryOp x ->
-            unaryOpStrinfify unaryOp ++ intValueStringify x
+            unaryOpStringify unaryOp ++ intValueStringify x
 
         Binary x binaryOp y ->
             "("
@@ -635,6 +441,25 @@ intValueParser =
         ]
 
 
+textValueStringify : TextValue -> String
+textValueStringify textValue =
+    case textValue of
+        S string ->
+            "\"" ++ string ++ "\""
+
+        Concat textValues ->
+            "[ " ++ String.join ", " (List.map textValueStringify textValues) ++ " ]"
+
+        Conditional cond success failure ->
+            "(" ++ intValueStringify cond ++ "?" ++ textValueStringify success ++ ":" ++ textValueStringify failure ++ ")"
+
+        IntValueText intValue ->
+            "str(" ++ intValueStringify intValue ++ ")"
+
+        Label string ->
+            "#" ++ string
+
+
 textValueParser : Parser TextValue
 textValueParser =
     Parser.oneOf
@@ -667,35 +492,6 @@ textValueParser =
             |. Parser.symbol "#"
             |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         ]
-
-
-statementToParse =
-    """if 2 > 2 then {
-label "avc"=str(4);
-
-label "avc"=str(4);
-} else
-    """
-
-
-customCombatString =
-    """{
-RND $rnd_d6_1 1 .. 6;
-RND $rnd_d6_2 1 .. 6;
-SET $rnd_2d6 = ($rnd_d6_1 + $rnd_d6_2);
-SET $player_attack = ($rnd_2d6 + $player_combat);
-
-# comment
-;
-LABEL $player_name = "Jan";
-IF (($rnd_2d6 > 10) && ($rnd_2d6 > 10)) THEN {SET $rnd_2d6=($rnd_d6_1 + $rnd_d6_2);
-SET $player_attack=($rnd_2d6 + $player_combat);} ELSE {}
-}"""
-
-
-parsedStatement : Result (List Parser.DeadEnd) Statement
-parsedStatement =
-    Parser.run statementParser customCombatString
 
 
 statementParser : Parser Statement
@@ -816,12 +612,3 @@ run statement =
                     Debug.log "!" error
             in
             None
-
-
-exampleIntVal =
-    "!(($rnd_2d6 > 10) && ($rnd_2d6 > 10))"
-
-
-exampleRun : IntValue
-exampleRun =
-    runIntValue exampleIntVal |> intValueStringify |> runIntValue
