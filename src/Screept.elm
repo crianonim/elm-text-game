@@ -49,7 +49,6 @@ type Statement
     | If IntValue Statement Statement
     | Comment String
     | Procedure String
-    | None
 
 
 runStatement : Statement -> State a -> State a
@@ -101,16 +100,13 @@ runStatement statement state =
                 --)
                 state
 
-        None ->
-            state
-
         Comment _ ->
             state
 
         Procedure name ->
             let
                 proc =
-                    Dict.get name state.procedures |> Maybe.withDefault None
+                    Dict.get name state.procedures |> Maybe.withDefault (Block [])
             in
             runStatement proc state
 
@@ -307,7 +303,6 @@ counterParser =
         |. Parser.symbol "$"
         |= Parser.getChompedString
             (Parser.succeed ()
-                |. Parser.chompIf (\c -> Char.isAlpha c || c == '_')
                 |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
             )
 
@@ -494,6 +489,44 @@ textValueParser =
         ]
 
 
+counterStringify : TextValue -> String
+counterStringify textValue =
+    case textValue of
+        S x ->
+            "$" ++ x
+
+        x ->
+            textValueStringify x
+
+
+statementStringify : Statement -> String
+statementStringify statement =
+    case statement of
+        SetCounter textValue intValue ->
+            "SET " ++ counterStringify textValue ++ " = " ++ intValueStringify intValue
+
+        SetLabel t1 t2 ->
+            "LABEL " ++ counterStringify t1 ++ " = " ++ textValueStringify t2
+
+        SetFunc textValue intValue ->
+            "DEF_FUNC " ++ counterStringify textValue ++ " = " ++ intValueStringify intValue
+
+        Rnd textValue i1 i2 ->
+            "RND " ++ counterStringify textValue ++ " " ++ intValueStringify i1 ++ " .. " ++ intValueStringify i2
+
+        Block statements ->
+            "{ " ++ String.join ";\n" (List.map statementStringify statements) ++ " }"
+
+        If intValue success failure ->
+            "IF " ++ intValueStringify intValue ++ " THEN " ++ statementStringify success ++ " ELSE " ++ statementStringify failure
+
+        Comment string ->
+            "#" ++ string ++ "\n"
+
+        Procedure string ->
+            "RUN " ++ string
+
+
 statementParser : Parser Statement
 statementParser =
     Parser.oneOf
@@ -557,9 +590,8 @@ statementParser =
             |. Parser.spaces
             |= (Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString)
         , Parser.succeed Comment
-            |= (Parser.lineComment "#" |> Parser.getChompedString)
-        , Parser.succeed None
-            |. Parser.spaces
+            |. Parser.symbol "#"
+            |= (Parser.chompWhile (\c -> c /= '\n') |> Parser.getChompedString)
         ]
 
 
@@ -611,4 +643,4 @@ run statement =
                 _ =
                     Debug.log "!" error
             in
-            None
+            Block []

@@ -96,7 +96,7 @@ procedures =
                         Screept.None
                     ]
                 )
-                Screept.None
+                (Screept.Block [])
             , Screept.If (Eval "combat_player_success")
                 (Screept.Block
                     [ Screept.SetCounter (S "enemy_damage") (Const 0)
@@ -108,7 +108,7 @@ procedures =
                         [ Screept.SetCounter (S "fight_lost") (Const 1)
                         ]
                     )
-                    Screept.None
+                    (Screept.Block [])
                 )
             ]
       )

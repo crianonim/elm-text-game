@@ -8,8 +8,8 @@ import Screept exposing (..)
 import Test exposing (..)
 
 
-intValParsingAndStringify : Test
-intValParsingAndStringify =
+intValParseAndStringify : Test
+intValParseAndStringify =
     describe "Parsing IntVal"
         [ fuzz int "should parse each int to Const" <|
             \x ->
@@ -43,9 +43,6 @@ intValParsingAndStringify =
                 Expect.equal (intValueStringify (Eval "test")) "CALL test"
         , fuzz (fuzzIntVal 10) "round stringify and parse" <|
             \v ->
-                --let
-                --_  = Debug.log "FUZZ" v
-                --in
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
         ]
 
@@ -53,35 +50,80 @@ intValParsingAndStringify =
 textValueParseAndStringify : Test
 textValueParseAndStringify =
     describe "TextValue parsing and stringify"
-        [ fuzz (textValueFuzzer 10) "Round trip" <|
+        [ fuzz (fuzzTextValue 10) "Round trip" <|
             \v ->
                 Expect.equal (Screept.textValueStringify v |> Parser.run textValueParser) (Ok v)
         ]
 
 
-textValueFuzzer : Int -> Fuzzer TextValue
-textValueFuzzer x =
+statementParseAndStringify : Test
+statementParseAndStringify =
+    describe "Statement parsing and stringify"
+        [ fuzz (fuzzStatement 0) "Round trip stringify and parse" <|
+            \v ->
+                Expect.equal (Screept.statementStringify v |> Parser.run statementParser) (Ok v)
+        ]
+
+
+fuzzStatement : Int -> Fuzzer Statement
+fuzzStatement x =
     if x < 0 then
-        validStringFuzzer |> Fuzz.map S
+        Fuzz.oneOf
+            [ Fuzz.map2 SetCounter (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal -1)
+            , Fuzz.map2 SetCounter (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1)
+            , Fuzz.map2 SetLabel (fuzzValidLabel |> Fuzz.map S) (fuzzTextValue 1)
+            , Fuzz.map2 SetFunc (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1)
+            , Fuzz.map3 Rnd (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1) (fuzzIntVal 1)
+            , Fuzz.map Procedure fuzzValidLabel
+            , Fuzz.map Comment fuzzValidComment
+            ]
 
     else
         Fuzz.oneOf
-            [ Fuzz.map S validStringFuzzer
-            , Fuzz.list (textValueFuzzer -1) |> Fuzz.map Concat
-            , Fuzz.map3 Conditional (fuzzIntVal 2) (textValueFuzzer (x - 1)) (textValueFuzzer (x - 1))
-            , Fuzz.map IntValueText (fuzzIntVal 2)
-            , Fuzz.map Label validLabelFuzzer
+            [ Fuzz.map Block <| Fuzz.list (fuzzStatement (x - 1))
+            , Fuzz.map3 If (fuzzIntVal 1) (fuzzStatement (x - 1)) (fuzzStatement (x - 1))
             ]
 
 
-validStringFuzzer : Fuzzer String
-validStringFuzzer =
+fuzzValidComment : Fuzzer String
+fuzzValidComment =
+    string |> Fuzz.map (String.filter ((/=) '\n'))
+
+
+fuzzTextValue : Int -> Fuzzer TextValue
+fuzzTextValue x =
+    if x < 0 then
+        fuzzValidTextString |> Fuzz.map S
+
+    else
+        Fuzz.oneOf
+            [ Fuzz.map S fuzzValidTextString
+            , Fuzz.list (fuzzTextValue -1) |> Fuzz.map Concat
+            , Fuzz.map3 Conditional (fuzzIntVal 2) (fuzzTextValue (x - 1)) (fuzzTextValue (x - 1))
+            , Fuzz.map IntValueText (fuzzIntVal 2)
+            , Fuzz.map Label fuzzValidLabel
+            ]
+
+
+fuzzValidTextString : Fuzzer String
+fuzzValidTextString =
     Fuzz.map (String.filter (\c -> c /= '"')) string
 
 
-validLabelFuzzer : Fuzzer String
-validLabelFuzzer =
-    Fuzz.map (String.filter Chat.isAlphaNum) string
+fuzzValidLabel : Fuzzer String
+fuzzValidLabel =
+    Fuzz.map
+        (\s ->
+            String.filter Chat.isAlphaNum s
+                |> (\x ->
+                        if String.length x < 1 then
+                            "_" ++ x
+
+                        else
+                            x
+                   )
+        )
+        string
 
 
 fuzzConst : Fuzzer IntValue

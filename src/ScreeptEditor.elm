@@ -243,7 +243,7 @@ procedures =
                     [ Screept.SetCounter (S "enemy_stamina") (Binary (Counter "enemy_stamina") Sub (Counter "player_damage"))
                     ]
                 )
-                Screept.None
+                (Screept.Block [])
             , Screept.If (Unary Not (Eval "combat_player_success"))
                 (Screept.Block
                     [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
@@ -254,13 +254,13 @@ procedures =
                     , Screept.If (Binary (Counter "enemy_damage") Gt (Const 0))
                         (Screept.Block
                             [ Screept.SetCounter (S "player_stamina") (Binary (Counter "player_stamina") Sub (Counter "enemy_damage"))
-                            , Screept.If (Binary (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                            , Screept.If (Binary (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) (Screept.Block [])
                             ]
                         )
-                        Screept.None
+                        (Screept.Block [])
                     ]
                 )
-                Screept.None
+                (Screept.Block [])
             , Screept.If (Eval "combat_player_success")
                 (Screept.Block
                     [ Screept.SetCounter (S "enemy_damage") (Const 0)
@@ -272,7 +272,7 @@ procedures =
                         [ Screept.SetCounter (S "fight_lost") (Const 1)
                         ]
                     )
-                    Screept.None
+                    (Screept.Block [])
                 )
             ]
       )

@@ -172,7 +172,7 @@ dialogs =
                                     [ Screept.SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
                                     ]
                                 )
-                                Screept.None
+                                (Screept.Block [])
                             , Screept.If (Predicate (Counter "enemy_stamina") Gt (Const 0))
                                 (Screept.Block
                                     [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
@@ -183,10 +183,10 @@ dialogs =
                                     , Screept.If (Predicate (Counter "enemy_damage") Gt (Const 0))
                                         (Screept.Block
                                             [ Screept.SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
-                                            , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                                            , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) (Screept.Block [])
                                             ]
                                         )
-                                        Screept.None
+                                        (Screept.Block [])
                                     ]
                                 )
                                 (Screept.Block
@@ -266,7 +266,7 @@ customCombat id successTest failureTest successAction failureAction =
                                 [ Screept.SetCounter (S "enemy_stamina") (Subtraction (Counter "enemy_stamina") (Counter "player_damage"))
                                 ]
                             )
-                            Screept.None
+                            (Screept.Block [])
                         , Screept.If (NOT successTest)
                             (Screept.Block
                                 [ Screept.Rnd (S "rnd_d6_1") (Const 1) (Const 6)
@@ -277,13 +277,13 @@ customCombat id successTest failureTest successAction failureAction =
                                 , Screept.If (Predicate (Counter "enemy_damage") Gt (Const 0))
                                     (Screept.Block
                                         [ Screept.SetCounter (S "player_stamina") (Subtraction (Counter "player_stamina") (Counter "enemy_damage"))
-                                        , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) Screept.None
+                                        , Screept.If (Predicate (Counter "player_stamina") Lt (Const 1)) (Screept.SetCounter (S "fight_lost") (Const 1)) (Screept.Block [])
                                         ]
                                     )
-                                    Screept.None
+                                    (Screept.Block [])
                                 ]
                             )
-                            Screept.None
+                            (Screept.Block [])
                         , Screept.If successTest
                             (Screept.Block
                                 [ Screept.SetCounter (S "enemy_damage") (Const 0)
@@ -296,7 +296,7 @@ customCombat id successTest failureTest successAction failureAction =
                                     [ Screept.SetCounter (S "fight_lost") (Const 1)
                                     ]
                                 )
-                                Screept.None
+                                (Screept.Block [])
                             )
                         ]
                 , Message <| Conditional (Predicate (Counter "player_damage") Gt (Const 0)) (Concat [ S "You dealt ", IntValueText (Counter "player_damage"), S " damage" ])

@@ -20,6 +20,10 @@ import Stack exposing (Stack)
 
 main : Program () Model Msg
 main =
+    let
+        _ =
+            Debug.log "MAN" (Screept.run "#")
+    in
     Browser.element
         { init = init
         , update = update
