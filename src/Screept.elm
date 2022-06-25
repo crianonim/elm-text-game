@@ -504,11 +504,74 @@ unaryOpParser =
                 [ Parser.succeed Not
                     |. Parser.symbol "!"
                 ]
-            |. Parser.symbol "("
             |= Parser.lazy (\_ -> intValueParser)
-            |. Parser.spaces
-            |. Parser.symbol ")"
         ]
+
+
+binaryOpStringify : BinaryOp -> String
+binaryOpStringify binaryOp =
+    case binaryOp of
+        Add ->
+            "+"
+
+        Sub ->
+            "-"
+
+        Mul ->
+            "*"
+
+        Div ->
+            "/"
+
+        Mod ->
+            "%%"
+
+        Gt ->
+            ">"
+
+        Lt ->
+            "<"
+
+        Eq ->
+            "=="
+
+        And ->
+            "&&"
+
+        Or ->
+            "||"
+
+
+unaryOpStrinfify : UnaryOp -> String
+unaryOpStrinfify unaryOp =
+    case unaryOp of
+        Not ->
+            "!"
+
+
+intValueStringify : IntValue -> String
+intValueStringify intValue =
+    case intValue of
+        Const int ->
+            String.fromInt int
+
+        Counter string ->
+            "$" ++ string
+
+        Unary unaryOp x ->
+            unaryOpStrinfify unaryOp ++ intValueStringify x
+
+        Binary x binaryOp y ->
+            "("
+                ++ intValueStringify x
+                ++ " "
+                ++ binaryOpStringify binaryOp
+                ++ " "
+                ++ intValueStringify y
+                ++ ")"
+
+        Eval string ->
+            "CALL " ++ string
 
 
 binaryOpParser : Parser IntValue
@@ -743,3 +806,12 @@ run statement =
                     Debug.log "!" error
             in
             None
+
+
+exampleIntVal =
+    "!(($rnd_2d6 > 10) && ($rnd_2d6 > 10))"
+
+
+exampleRun : IntValue
+exampleRun =
+    runIntValue exampleIntVal |> intValueStringify |> runIntValue
