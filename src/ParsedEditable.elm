@@ -33,7 +33,7 @@ update msg model =
             { model | parsed = Just <| Parser.run model.parser model.text }
 
         TextEdit v ->
-            { model | text = v,  parsed = Just <| Parser.run model.parser v }
+            { model | text = v, parsed = Just <| Parser.run model.parser v }
 
 
 view : Model a -> Html Msg

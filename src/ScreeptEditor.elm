@@ -15,8 +15,7 @@ import Stack
 type alias Model =
     { statementEditor : ParsedEditable.Model Statement
     , intValueEditor : ParsedEditable.Model IntValue
-   , value : Maybe Int
-
+    , value : Maybe Int
     }
 
 
@@ -44,16 +43,16 @@ update msg model =
             { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 
         ClickRun ->
-            { model | value = Maybe.andThen (\r-> Screept.getMaybeIntValue r gameState ) (Maybe.andThen (Result.toMaybe )  model.intValueEditor.parsed)}
+            { model | value = Maybe.andThen (\r -> Screept.getMaybeIntValue r gameState) (Maybe.andThen Result.toMaybe model.intValueEditor.parsed) }
 
 
 view : Model -> Html Msg
 view model =
-    div [] [
-     ParsedEditable.view model.intValueEditor |> Html.map IntValueEditor
-    , button [onClick ClickRun] [text "RUN"]
-    , Maybe.map (\x->text (String.fromInt x)) model.value |> Maybe.withDefault (text "not run")
-    ]
+    div []
+        [ ParsedEditable.view model.intValueEditor |> Html.map IntValueEditor
+        , button [ onClick ClickRun ] [ text "RUN" ]
+        , Maybe.map (\x -> text (String.fromInt x)) model.value |> Maybe.withDefault (text "not run")
+        ]
 
 
 
@@ -283,7 +282,7 @@ procedures =
 
 gameState =
     { counters = exampleCounters
-    , labels =exampleLabels
+    , labels = exampleLabels
     , dialogStack = Stack.initialise
     , messages = []
     , procedures = procedures

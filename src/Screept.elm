@@ -453,6 +453,16 @@ inc counter =
 --        ]
 
 
+intWithPotentialMinus : Parser Int
+intWithPotentialMinus =
+    Parser.oneOf
+        [ Parser.succeed negate
+            |. symbol "-"
+            |= Parser.int
+        , Parser.int
+        ]
+
+
 toParse : String
 toParse =
     "($name_el + (23 - 3))"
@@ -615,7 +625,7 @@ intValueParser =
         [ binaryOpParser
         , unaryOpParser
         , Parser.succeed Const
-            |= Parser.int
+            |= intWithPotentialMinus
         , Parser.map Counter
             counterParser
         , Parser.succeed Eval
