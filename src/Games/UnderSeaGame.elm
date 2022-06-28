@@ -57,14 +57,26 @@ dialogs =
       }
     ]
 
-counters = Dict.empty
 
-labels = Dict.empty
+counters =
+    Dict.empty
 
-functions = Dict.empty
 
-statusLine = S ""
+labels =
+    Dict.empty
 
-procedures = Dict.empty
 
-initialDialogId = "start"
+functions =
+    Dict.empty
+
+
+statusLine =
+    S ""
+
+
+procedures =
+    Dict.empty
+
+
+initialDialogId =
+    "start"

@@ -1,16 +1,36 @@
-[
-  {
-    "id": "start",
-    "text": "[  ]",
-    "options": [
-      {
-        "text": "\"...\"",
-        "action": [
-          {
-            "screept": "RUN turn"
-          }
-        ]
-      }
-    ]
-  }
-]
+{
+  "dialogs": [
+    {
+      "id": "start",
+      "text": "[  ]",
+      "options": [
+        {
+          "text": "\"...\"",
+          "action": [
+            {
+              "screept": "RUN turn"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "startDialogId": "start",
+  "counters": {
+    "hour": 0,
+    "minutes": 0,
+    "turn": 1,
+    "turns_count": 3,
+    "turns_per_hour": 2
+  },
+  "labels": {
+    "enemy_name": "",
+    "player_name": "Liana",
+    "player_profession": "wayfarer"
+  },
+  "procedures": {
+    "turn": "{ SET $turn = ($turn + 1);\nSET $turns_count = ($turns_count - 1);\nSET $minutes = (($turn %% $turns_per_hour) * (60 / $turns_per_hour));\nSET $hour = (($turn / $turns_per_hour) %% 24);\nSET $day = ($turn / ($turns_per_hour * 24));\nIF ($turns_count > 0) THEN RUN turn ELSE { SET $turns_count = 1 } }"
+  },
+  "functions": {},
+  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", str($hour), \":\", str($minutes) ]"
+}

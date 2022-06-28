@@ -26,6 +26,16 @@ type alias DialogOption =
     }
 
 
+type alias GameDefinition =
+    { dialogs : List Dialog
+    , statusLine : Maybe Screept.TextValue
+    , startDialogId : String
+    , counters : Dict String Int
+    , labels : Dict String String
+    , procedures : Dict String Screept.Statement
+    , functions : Dict String Screept.IntValue
+    }
+
 
 type DialogAction
     = GoAction DialogId
@@ -158,6 +168,26 @@ encodeDialog { id, text, options } =
         ]
 
 
-stringifyDialog : Dialog -> String
-stringifyDialog dialog =
-    E.encode 2 (encodeDialog dialog)
+stringifyGameDefinition : GameDefinition -> String
+stringifyGameDefinition gd =
+    E.encode 2 (encodeGameDefinition gd)
+
+
+encodeGameDefinition : GameDefinition -> E.Value
+encodeGameDefinition { dialogs, startDialogId, counters, labels, procedures, functions, statusLine } =
+    E.object
+        ([ ( "dialogs", E.list encodeDialog dialogs )
+         , ( "startDialogId", E.string startDialogId )
+         , ( "counters", E.dict identity E.int counters )
+         , ( "labels", E.dict identity E.string labels )
+         , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
+         , ( "functions", E.dict identity (Screept.intValueStringify >> E.string) functions )
+         ]
+            ++ (case statusLine of
+                    Nothing ->
+                        []
+
+                    Just x ->
+                        [ ( "statusLine", Screept.textValueStringify x |> E.string ) ]
+               )
+        )

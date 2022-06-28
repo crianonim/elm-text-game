@@ -1,12 +1,13 @@
 module Main exposing (main)
 
-import Games.TestSanbox as Game
---import Games.UnderSeaGame as Game
+import Games.UnderSeaGame as Game
+--import Games.FabledLands as Game
+
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
---import Games.FabledLands as Game
+--import Games.TestSanbox as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -19,10 +20,10 @@ import Stack exposing (Stack)
 
 main : Program () Model Msg
 main =
-    let
-        _ =
-            Debug.log "MAN" (List.map stringifyDialog Game.dialogs)
-    in
+    --let
+    --    _ =
+    --        Debug.log "MAN" (List.map stringifyGameDefinition Game.dialogs)
+    --in
     Browser.element
         { init = init
         , update = update
@@ -126,7 +127,7 @@ view model =
           else
             text ""
         , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-        , textarea [] [ text ("[\n" ++ (List.map stringifyDialog Game.dialogs |> String.join "\n,") ++ "\n]") ]
+        , textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs|> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions)]
 
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]
