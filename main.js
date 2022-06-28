@@ -4663,82 +4663,23 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
-var $author$project$DialogGame$ActionBlock = function (a) {
-	return {$: 'ActionBlock', a: a};
-};
-var $author$project$Screept$And = {$: 'And'};
-var $author$project$Screept$Binary = F3(
-	function (a, b, c) {
-		return {$: 'Binary', a: a, b: b, c: c};
-	});
-var $author$project$Screept$Block = function (a) {
-	return {$: 'Block', a: a};
-};
 var $author$project$Screept$Concat = function (a) {
 	return {$: 'Concat', a: a};
 };
-var $author$project$Screept$Conditional = F3(
-	function (a, b, c) {
-		return {$: 'Conditional', a: a, b: b, c: c};
-	});
-var $author$project$DialogGame$ConditionalAction = F3(
-	function (a, b, c) {
-		return {$: 'ConditionalAction', a: a, b: b, c: c};
-	});
-var $author$project$Screept$Const = function (a) {
-	return {$: 'Const', a: a};
-};
-var $author$project$Screept$Counter = function (a) {
-	return {$: 'Counter', a: a};
-};
-var $author$project$DialogGame$GoAction = function (a) {
-	return {$: 'GoAction', a: a};
-};
-var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
-var $author$project$Screept$Gt = {$: 'Gt'};
-var $author$project$Screept$IntValueText = function (a) {
-	return {$: 'IntValueText', a: a};
-};
-var $elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var $author$project$Screept$Label = function (a) {
-	return {$: 'Label', a: a};
-};
-var $author$project$DialogGame$Message = function (a) {
-	return {$: 'Message', a: a};
-};
-var $author$project$Screept$Not = {$: 'Not'};
 var $elm$core$Maybe$Nothing = {$: 'Nothing'};
-var $author$project$Screept$Procedure = function (a) {
-	return {$: 'Procedure', a: a};
-};
 var $author$project$Screept$S = function (a) {
 	return {$: 'S', a: a};
 };
 var $author$project$DialogGame$Screept = function (a) {
 	return {$: 'Screept', a: a};
 };
-var $author$project$Screept$SetCounter = F2(
-	function (a, b) {
-		return {$: 'SetCounter', a: a, b: b};
-	});
-var $author$project$Screept$SetFunc = F2(
-	function (a, b) {
-		return {$: 'SetFunc', a: a, b: b};
-	});
-var $author$project$Screept$SetLabel = F2(
-	function (a, b) {
-		return {$: 'SetLabel', a: a, b: b};
-	});
-var $author$project$Screept$Unary = F2(
-	function (a, b) {
-		return {$: 'Unary', a: a, b: b};
-	});
 var $elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
 	});
+var $author$project$Screept$Block = function (a) {
+	return {$: 'Block', a: a};
+};
 var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
@@ -4906,9 +4847,24 @@ var $author$project$Screept$If = F3(
 		return {$: 'If', a: a, b: b, c: c};
 	});
 var $elm$parser$Parser$Optional = {$: 'Optional'};
+var $author$project$Screept$Procedure = function (a) {
+	return {$: 'Procedure', a: a};
+};
 var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
 		return {$: 'Rnd', a: a, b: b, c: c};
+	});
+var $author$project$Screept$SetCounter = F2(
+	function (a, b) {
+		return {$: 'SetCounter', a: a, b: b};
+	});
+var $author$project$Screept$SetFunc = F2(
+	function (a, b) {
+		return {$: 'SetFunc', a: a, b: b};
+	});
+var $author$project$Screept$SetLabel = F2(
+	function (a, b) {
+		return {$: 'SetLabel', a: a, b: b};
 	});
 var $elm$core$Basics$apR = F2(
 	function (x, f) {
@@ -4985,6 +4941,9 @@ var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
 		return {$: 'Bad', a: a, b: b};
 	});
+var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
 var $elm$core$String$slice = _String_slice;
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
@@ -5158,16 +5117,33 @@ var $author$project$Screept$counterParser = A2(
 						_Utils_chr('_'));
 				}))));
 var $author$project$Screept$Add = {$: 'Add'};
+var $author$project$Screept$And = {$: 'And'};
+var $author$project$Screept$Binary = F3(
+	function (a, b, c) {
+		return {$: 'Binary', a: a, b: b, c: c};
+	});
+var $author$project$Screept$Const = function (a) {
+	return {$: 'Const', a: a};
+};
+var $author$project$Screept$Counter = function (a) {
+	return {$: 'Counter', a: a};
+};
 var $author$project$Screept$Div = {$: 'Div'};
 var $author$project$Screept$Eq = {$: 'Eq'};
 var $author$project$Screept$Eval = function (a) {
 	return {$: 'Eval', a: a};
 };
+var $author$project$Screept$Gt = {$: 'Gt'};
 var $author$project$Screept$Lt = {$: 'Lt'};
 var $author$project$Screept$Mod = {$: 'Mod'};
 var $author$project$Screept$Mul = {$: 'Mul'};
+var $author$project$Screept$Not = {$: 'Not'};
 var $author$project$Screept$Or = {$: 'Or'};
 var $author$project$Screept$Sub = {$: 'Sub'};
+var $author$project$Screept$Unary = F2(
+	function (a, b) {
+		return {$: 'Unary', a: a, b: b};
+	});
 var $elm$parser$Parser$ExpectingInt = {$: 'ExpectingInt'};
 var $elm$parser$Parser$Advanced$consumeBase = _Parser_consumeBase;
 var $elm$parser$Parser$Advanced$consumeBase16 = _Parser_consumeBase16;
@@ -5899,7 +5875,17 @@ var $elm$parser$Parser$sequence = function (i) {
 			trailing: $elm$parser$Parser$toAdvancedTrailing(i.trailing)
 		});
 };
+var $author$project$Screept$Conditional = F3(
+	function (a, b, c) {
+		return {$: 'Conditional', a: a, b: b, c: c};
+	});
 var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
+var $author$project$Screept$IntValueText = function (a) {
+	return {$: 'IntValueText', a: a};
+};
+var $author$project$Screept$Label = function (a) {
+	return {$: 'Label', a: a};
+};
 function $author$project$Screept$cyclic$textValueParser() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -6212,654 +6198,26 @@ var $author$project$Screept$run = function (statement) {
 		return $author$project$Screept$Block(_List_Nil);
 	}
 };
-var $author$project$Screept$runIntValue = function (intVal) {
-	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$intValueParser, intVal);
-	if (_v0.$ === 'Ok') {
-		var value = _v0.a;
-		return value;
-	} else {
-		var error = _v0.a;
-		var _v1 = A2($elm$core$Debug$log, 'Error parsing IntVal: ', intVal);
-		var _v2 = A2($elm$core$Debug$log, '!', error);
-		return $author$project$Screept$Const(0);
-	}
-};
 var $author$project$DialogGame$runScreept = function (s) {
 	return $author$project$DialogGame$Screept(
 		$author$project$Screept$run(s));
 };
-var $author$project$Games$FabledLands$dialogs = _List_fromArray(
+var $author$project$Games$TestSanbox$dialogs = _List_fromArray(
 	[
 		{
-		id: '#1',
+		id: 'start',
 		options: _List_fromArray(
 			[
 				{
 				action: _List_fromArray(
 					[
-						$author$project$DialogGame$GoAction('#20')
+						$author$project$DialogGame$runScreept('RUN turn')
 					]),
 				condition: $elm$core$Maybe$Nothing,
 				text: $author$project$Screept$S('...')
 			}
 			]),
-		text: $author$project$Screept$S('\n    The approach of dawn has turned the sky a milky grey-green, like jade. The sea is a luminous pane of silver. Holding the tiller of your sailing boat, you keep your gaze fixed on the glittering constellation known as the Spider. It marks the north, and by keeping it to port you know you are still on course.\n    The sun appears in a trembling burst of red fire at the rim of the world. Slowly the chill of night gives way to brazen warmth. You lick your parched lips. There is a little water sloshing in the bottom of the barrel by your feet, but not enough to see you through another day.\n    Sealed in a scroll case tucked into your jerkin is the parchment map your grandfather gave to you on his death-bed. You remember his stirring tales of far sea voyages, of kingdoms beyond the western horizon, of sorcerous islands and ruined palaces filled with treasure. As a child you dreamed of nothing else but the magical quests that were in store if you too became an adventurer.\n    You never expected to die in an open boat before your adventures even began.\n    Securing the tiller, you unroll the map and study it again. You hardly need to. Every detail is etched into your memory by now. According to your reckoning, you should have reached the east coast of Harkuna, the great northern continent, days ago.\n    A pasty grey blob splatters on to the map. After a moment of stunned surprise, you look up and curse the seagull circling directly overhead. Then it strikes you – where there’s a seagull, there may be land.\n    You leap to your feet and scan the horizon. Sure enough, a line of white cliffs lie a league to the north. Have you been sailing along the coast all this time without realising the mainland was so close?\n    Steering towards the cliffs, you feel the boat judder against rough waves. A howling wind whips plumes of spindrift across the sea. Breakers pound the high cliffs. The tiller is yanked out of your hands. The little boat is spun around, out of control, and goes plunging in towards the coast.\n    You leap clear at the last second. There is the snap of timber, the roaring crescendo of the waves – and then silence as you go under. Striking out wildly, you try to swim clear of the razor- sharp rocks. For a while the undertow threatens to drag you down, then suddenly a wave catches you and flings you contemptuously up on to the beach.\n    Battered and bedraggled you lie gasping for breath until you hear someone walking along the shore towards you. Wary of danger, you lose no time in getting to your feet. Confronting you is an old man clad in a dirty loin-cloth. His eyes have a feverish bright look that is suggestive of either a mystic or a madman.\n\n      ')
-	},
-		{
-		id: '#20',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#192')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Follow him')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#128')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Explore the coast')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#257')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Head into the nearby forest')
-			}
-			]),
-		text: $author$project$Screept$S('\n      ‘Well, well, well, what have we here, friends?’ asks the old man. He seems to be talking to someone next to him, although you are certain he is alone. ‘Looks like a washed up adventurer to me!’ he says in answer to his own question, ‘all wet and out of luck.’\n      He carries on having a conversation – a conversation that quickly turns into a heated debate. He is clearly quite mad.\n      ‘Excuse me, umm, EXCUSE ME!,’ you shout above the hubbub in an attempt to grab the old man’s attention. He stops and stares at you.\n      ‘Is this the Isle of the Druids?’ you ask impatiently.\n      ‘Indeed it is,’ says the old man, ‘I see that you are from a far land so it is up to me to welcome you to Harkuna. But I think you may have much to do here as it is written in the stars that someone like you would come. Your destiny awaits you! Follow me, young adventurer.’\n      The old man turns smartly about and begins walking up a path towards some hills. You can just see some sort of monolithic stone structure atop one of them.\n      ‘Come on, come one, I’ll show you the Gates of the World,’ the old man babbles.\n      ')
-	},
-		{
-		id: '#36',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{SET $player_stamina = ($player_stamina - 4);}'),
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$runIntValue('($player_stamina < 1)'),
-						$author$project$DialogGame$GoAction('game_over'),
-						$author$project$DialogGame$GoAction('#36_'))
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n    Soon you realize you are completely lost in this strange, magical forest. You wander around for days, barely able to find enough food and water. Lose 4 Stamina points.\n    ')
-	},
-		{
-		id: '#36_',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#128')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n       ...you eventually stagger out of the forest to the coast.\n       ')
-	},
-		{
-		id: '#65',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#128')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Explore the coastline')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#257')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Head into the forest')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#8')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Step through the Yellowport arch')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#180')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Step through the Marlock City arch')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#330')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Step through the Wishport arch')
-			}
-			]),
-		text: $author$project$Screept$S('\n    There are three stone gates engraved with ancient runes. Each gate is marked with a name – Yellowport, Marlock City, and Wishport. From here, you can see the coast and the whole island, which is heavily forested\n    ')
-	},
-		{
-		id: '#128',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#195')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n      You make your way around the coast. The interior of the island appears to be heavily forested. After a while, however, you come to a bay in which a couple of ships are anchored. A small settlement nestles on the beach, and you make your way towards it\n      ')
-	},
-		{
-		id: '#148',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('codeword_apple'),
-							$author$project$Screept$Const(1))),
-						$author$project$DialogGame$GoAction('#358')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n   ‘Stop, stop, I surrender!’ yells the tree. You cease your attack. ‘I guess you can pass, in view of recent events!’ it says grudgingly. Then it uproots itself with a great tearing sound, and shuffles out of the way. ‘There you go!’ mutters the tree, ‘You can blooming well pass.’\n   You walk through the thorn bush gate. Beyond, you find several huge oak trees whose branches are so big that they are able to support the homes of many people.\n   ')
-	},
-		{
-		id: '#192',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#65')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n      During your short trip upward, the old man regales you with tales of your destiny and fate, continuously arguing with himself as he does so.\n      You reach a hill covered with a circle of large obsidian standing stones. Despite the bitter wind that blow across these hills the stones are unweathered and seem almost newly lain.\n      ‘Here are the Gates of the World.’ says the mad old man.\n      The stones are laid in such a way that they form three archways, each carven with mystic symbols and runes of power.\n      ‘Each gate will take you to a part of the world of Harkuna, though I know not where,’ explains the old man. Abruptly, he turns around and sets off down the hill, babbling to himself. His voice fades as he descends the hill, leaving you alone with the brooding stones and the howling wind\n      ')
-	},
-		{
-		id: '#195',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('codeword_aspen'),
-							$author$project$Screept$Const(1)))
-					]),
-				condition: $elm$core$Maybe$Just(
-					A2(
-						$author$project$Screept$Unary,
-						$author$project$Screept$Not,
-						$author$project$Screept$Counter('codeword_aspen'))),
-				text: $author$project$Screept$S('...')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#544')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Visit the shrine to Lacuna')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#452')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Visit the market')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#332')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Visit the quayside')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#181')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Visit the Green Man Inn')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#11')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Climb the hill that overlooks the town')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#257')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_aspen')),
-				text: $author$project$Screept$S('Go inland, into the Old Forest')
-			}
-			]),
-		text: $author$project$Screept$S('\n      The Trading Post is a small village, set up here by enterprising settlers from the mainland. Its main export appears to be furs from the forest.\n      The Mayor, a fat genial fellow, who greets you personally, insists that one day the Trading Post will be a thriving town. There is not a lot here yet, however: a small market, a quay, the settler’s houses, and a shrine to Lacuna the Huntress, goddess of nature.\n      ')
-	},
-		{
-		id: '#257',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('test_score'),
-									$author$project$Screept$Counter('player_scouting')),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('test_difficulty'),
-									$author$project$Screept$Const(10)),
-									$author$project$Screept$Procedure('test')
-								]))),
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$Counter('test_success'),
-						$author$project$DialogGame$GoAction('#630'),
-						$author$project$DialogGame$GoAction('#36'))
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n      The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.\n      As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.\n      ')
-	},
-		{
-		id: '#358',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{ SET $inv_armor_leather = ($inv_armor_leather + 1) ; SET $money = ($money - 50)}')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$runIntValue('!(($money < 50))')),
-				text: $author$project$Screept$Concat(
-					_List_fromArray(
-						[
-							$author$project$Screept$S('Buy leather armour for 50 shards. Already have ('),
-							$author$project$Screept$IntValueText(
-							$author$project$Screept$Counter('inv_armor_leather')),
-							$author$project$Screept$S(')')
-						]))
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{ SET $inv_armor_leather = ($inv_armor_leather - 1) ; SET $money = ($money + 45)}')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$runIntValue('($inv_armor_leather > 0)')),
-				text: $author$project$Screept$Concat(
-					_List_fromArray(
-						[
-							$author$project$Screept$S('Sell leather armour for 45 shards. Already have ('),
-							$author$project$Screept$IntValueText(
-							$author$project$Screept$Counter('inv_armor_leather')),
-							$author$project$Screept$S(')')
-						]))
-			},
-				{
-				action: _List_fromArray(
-					[
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$runIntValue('($player_profession == 1)'),
-						A3(
-							$author$project$DialogGame$ConditionalAction,
-							$author$project$Screept$Counter('box_645'),
-							$author$project$DialogGame$GoAction('#248'),
-							$author$project$DialogGame$GoAction('#645')),
-						$author$project$DialogGame$GoAction('#678'))
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Finished shopping')
-			}
-			]),
-		text: $author$project$Screept$S('\n    ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.\n    The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.\n    ')
-	},
-		{
-		id: '#570',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									$author$project$Screept$Procedure('combat_reset'),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_stamina'),
-									$author$project$Screept$Const(10)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_defence'),
-									$author$project$Screept$Const(7)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_combat'),
-									$author$project$Screept$Const(3)),
-									A2(
-									$author$project$Screept$SetLabel,
-									$author$project$Screept$S('enemy_name'),
-									$author$project$Screept$S('Tree')),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('fought_tree'),
-									$author$project$Screept$Const(1)),
-									A2(
-									$author$project$Screept$SetFunc,
-									$author$project$Screept$S('combat_player_failure'),
-									$author$project$Screept$runIntValue('($player_stamina < 1)')),
-									A2(
-									$author$project$Screept$SetFunc,
-									$author$project$Screept$S('combat_player_success'),
-									$author$project$Screept$runIntValue('($enemy_stamina < 5)'))
-								]))),
-						$author$project$DialogGame$GoAction('combat')
-					]),
-				condition: $elm$core$Maybe$Just(
-					A2(
-						$author$project$Screept$Unary,
-						$author$project$Screept$Not,
-						$author$project$Screept$Counter('fought_tree'))),
-				text: $author$project$Screept$S('...')
-			},
-				{
-				action: _List_fromArray(
-					[
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$Counter('fight_won'),
-						$author$project$DialogGame$GoAction('#148'),
-						$author$project$DialogGame$ActionBlock(
-							_List_fromArray(
-								[
-									$author$project$DialogGame$Screept(
-									$author$project$Screept$run('{SET $money=0;SET $player_stamina=1 }')),
-									$author$project$DialogGame$GoAction('#195')
-								])))
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('fought_tree')),
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: A3(
-			$author$project$Screept$Conditional,
-			$author$project$Screept$Counter('fought_tree'),
-			A3(
-				$author$project$Screept$Conditional,
-				$author$project$Screept$Counter('fight_won'),
-				$author$project$Screept$S('You managed to overcome the tree'),
-				$author$project$Screept$S('You wake up almost dead with no money...')),
-			$author$project$Screept$S('\n                 ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.\n                 '))
-	},
-		{
-		id: '#630',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#594')
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('codeword_apple')),
-				text: $author$project$Screept$S('...')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#195')
-					]),
-				condition: $elm$core$Maybe$Just(
-					A2(
-						$author$project$Screept$Unary,
-						$author$project$Screept$Not,
-						$author$project$Screept$Counter('codeword_apple'))),
-				text: $author$project$Screept$S('Return to the Trading Post')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#570')
-					]),
-				condition: $elm$core$Maybe$Just(
-					A2(
-						$author$project$Screept$Unary,
-						$author$project$Screept$Not,
-						$author$project$Screept$Counter('codeword_apple'))),
-				text: $author$project$Screept$S('Attack the tree')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#237')
-					]),
-				condition: $elm$core$Maybe$Just(
-					A2(
-						$author$project$Screept$Unary,
-						$author$project$Screept$Not,
-						$author$project$Screept$Counter('codeword_apple'))),
-				text: $author$project$Screept$S('Try to persuade it to let you pass')
-			}
-			]),
-		text: $author$project$Screept$S('\n     You struggle deeper into the forest until you come to a thick wall of impenetrable thorn bushes. Circling it, you find there is a break in the hedge, but it is filled by a large tree.\n     To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’\n     ')
-	},
-		{
-		id: '#645',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('SET $inv_oak_staff = 1'),
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$runIntValue('($codeword_aspen)'),
-						$author$project$DialogGame$GoAction('#195'),
-						$author$project$DialogGame$GoAction('#678'))
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n         You are brought before the druids’ leader, the Oak Druid, a bearded fellow with earth and leaves all tangled up in his hair. He asks you to perform a service for them.\n         ‘Take this oak staff to the Willow Druid in the forest of Larun. The sacred grove where he lives will be hard to find, but I’m sure you can do it. The Willow Druid will give you something to bring back to me. When you return with it, I will make you a better Wayfarer.’\n         ')
-	},
-		{
-		id: '#678',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$runScreept('{SET $test_score = $player_scouting;SET $test_difficulty = 10; RUN test }'),
-						A3(
-						$author$project$DialogGame$ConditionalAction,
-						$author$project$Screept$runIntValue('$test_success'),
-						$author$project$DialogGame$GoAction('#679'),
-						$author$project$DialogGame$GoAction('#36'))
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n             The journey through the trees proves as difficult as when you first ventured into the Old Forest.\n             (SCOUTING TEST)\n             ')
-	},
-		{
-		id: '#679',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('#128')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('...')
-			}
-			]),
-		text: $author$project$Screept$S('\n                 The scent of the sea proves strongest in one direction. Following your nose, you eventually break free of the trees and find yourself on the coast.\n                 ')
-	},
-		{
-		id: 'combat',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Screept(
-						$author$project$Screept$Procedure('combat')),
-						$author$project$DialogGame$Message(
-						A3(
-							$author$project$Screept$Conditional,
-							A3(
-								$author$project$Screept$Binary,
-								$author$project$Screept$Counter('player_damage'),
-								$author$project$Screept$Gt,
-								$author$project$Screept$Const(0)),
-							$author$project$Screept$Concat(
-								_List_fromArray(
-									[
-										$author$project$Screept$S('You dealt '),
-										$author$project$Screept$IntValueText(
-										$author$project$Screept$Counter('player_damage')),
-										$author$project$Screept$S(' damage')
-									])),
-							$author$project$Screept$S(''))),
-						$author$project$DialogGame$Message(
-						A3(
-							$author$project$Screept$Conditional,
-							A3(
-								$author$project$Screept$Binary,
-								$author$project$Screept$Counter('enemy_damage'),
-								$author$project$Screept$Gt,
-								$author$project$Screept$Const(0)),
-							$author$project$Screept$Concat(
-								_List_fromArray(
-									[
-										$author$project$Screept$S('You were dealt '),
-										$author$project$Screept$IntValueText(
-										$author$project$Screept$Counter('enemy_damage')),
-										$author$project$Screept$S(' damage')
-									])),
-							$author$project$Screept$S('')))
-					]),
-				condition: $elm$core$Maybe$Just(
-					A3(
-						$author$project$Screept$Binary,
-						A2(
-							$author$project$Screept$Unary,
-							$author$project$Screept$Not,
-							$author$project$Screept$Counter('fight_won')),
-						$author$project$Screept$And,
-						A2(
-							$author$project$Screept$Unary,
-							$author$project$Screept$Not,
-							$author$project$Screept$Counter('fight_lost')))),
-				text: $author$project$Screept$S('Hit enemy')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Message(
-						$author$project$Screept$S('You won!')),
-						$author$project$DialogGame$GoBackAction
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('fight_won')),
-				text: $author$project$Screept$S('You won!')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$Message(
-						$author$project$Screept$S('You lost!')),
-						$author$project$DialogGame$GoBackAction
-					]),
-				condition: $elm$core$Maybe$Just(
-					$author$project$Screept$Counter('fight_lost')),
-				text: $author$project$Screept$S('You lost!')
-			}
-			]),
-		text: $author$project$Screept$Concat(
-			_List_fromArray(
-				[
-					$author$project$Screept$S('Combat. '),
-					$author$project$Screept$S('You are fighting '),
-					$author$project$Screept$Label('enemy_name'),
-					$author$project$Screept$S(' .You have '),
-					$author$project$Screept$IntValueText(
-					$author$project$Screept$Counter('player_stamina')),
-					$author$project$Screept$S(' stamina. '),
-					$author$project$Screept$S('Your enemy '),
-					$author$project$Screept$IntValueText(
-					$author$project$Screept$Counter('enemy_stamina'))
-				]))
-	},
-		{
-		id: 'game_over',
-		options: _List_Nil,
-		text: $author$project$Screept$S('You lost the game. Try again!')
+		text: $author$project$Screept$Concat(_List_Nil)
 	}
 	]);
 var $elm$json$Json$Decode$Failure = F2(
@@ -7551,29 +6909,16 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $author$project$Games$FabledLands$counters = $elm$core$Dict$fromList(
+var $author$project$Games$TestSanbox$counters = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
-			_Utils_Tuple2('rnd', 0),
-			_Utils_Tuple2('money', 126),
-			_Utils_Tuple2('player_profession', 1),
-			_Utils_Tuple2('player_rank', 3),
-			_Utils_Tuple2('player_stamina', 3),
-			_Utils_Tuple2('player_defence', 7),
-			_Utils_Tuple2('player_charisma', 5),
-			_Utils_Tuple2('player_combat', 5),
-			_Utils_Tuple2('player_magic', 2),
-			_Utils_Tuple2('player_sanctity', 3),
-			_Utils_Tuple2('player_scouting', 1),
-			_Utils_Tuple2('player_thievery', 4),
-			_Utils_Tuple2('inv_weapon', 1),
-			_Utils_Tuple2('inv_armor_leather', 1),
-			_Utils_Tuple2('codeword_apple', 0),
-			_Utils_Tuple2('codeword_aspen', 0),
-			_Utils_Tuple2('test_success', 0),
-			_Utils_Tuple2('fought_tree', 0)
+			_Utils_Tuple2('turn', 1),
+			_Utils_Tuple2('turns_count', 3),
+			_Utils_Tuple2('turns_per_hour', 2),
+			_Utils_Tuple2('hour', 0),
+			_Utils_Tuple2('minutes', 0)
 		]));
-var $author$project$Games$FabledLands$functions = $elm$core$Dict$fromList(_List_Nil);
+var $author$project$Games$TestSanbox$functions = $elm$core$Dict$fromList(_List_Nil);
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -7765,12 +7110,12 @@ var $author$project$ScreeptEditor$init = {
 	statementEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$statementParser),
 	value: $elm$core$Maybe$Nothing
 };
-var $author$project$Games$FabledLands$initialDialogId = '#630';
+var $author$project$Games$TestSanbox$initialDialogId = 'start';
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
 var $mhoare$elm_stack$Stack$initialise = $mhoare$elm_stack$Stack$Stack(_List_Nil);
-var $author$project$Games$FabledLands$labels = $elm$core$Dict$fromList(
+var $author$project$Games$TestSanbox$labels = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
 			_Utils_Tuple2('player_name', 'Liana'),
@@ -7786,234 +7131,12 @@ var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
 			},
 			dialogs));
 };
-var $author$project$Games$FabledLands$procedures = $elm$core$Dict$fromList(
+var $author$project$Games$TestSanbox$procedures = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
 			_Utils_Tuple2(
-			'test',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('d6_1'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('d6_2'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('2d6'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('d6_1'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('d6_2'))),
-						A3(
-						$author$project$Screept$If,
-						A3(
-							$author$project$Screept$Binary,
-							A3(
-								$author$project$Screept$Binary,
-								$author$project$Screept$Counter('2d6'),
-								$author$project$Screept$Add,
-								$author$project$Screept$Counter('test_score')),
-							$author$project$Screept$Gt,
-							$author$project$Screept$Counter('test_difficulty')),
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('test_success'),
-							$author$project$Screept$Const(1)),
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('test_success'),
-							$author$project$Screept$Const(0)))
-					]))),
-			_Utils_Tuple2(
-			'combat_reset',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('fight_won'),
-						$author$project$Screept$Const(0)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('fight_lost'),
-						$author$project$Screept$Const(0)),
-						A2(
-						$author$project$Screept$SetLabel,
-						$author$project$Screept$S('enemy_name'),
-						$author$project$Screept$S(''))
-					]))),
-			_Utils_Tuple2(
-			'combat',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('rnd_d6_1'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('rnd_d6_2'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('rnd_2d6'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('rnd_d6_1'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('rnd_d6_2'))),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('player_attack'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('rnd_2d6'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('player_combat'))),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('player_damage'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('player_attack'),
-							$author$project$Screept$Sub,
-							$author$project$Screept$Counter('enemy_defence'))),
-						A3(
-						$author$project$Screept$If,
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('player_damage'),
-							$author$project$Screept$Gt,
-							$author$project$Screept$Const(0)),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_stamina'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_stamina'),
-										$author$project$Screept$Sub,
-										$author$project$Screept$Counter('player_damage')))
-								])),
-						$author$project$Screept$Block(_List_Nil)),
-						A3(
-						$author$project$Screept$If,
-						A2(
-							$author$project$Screept$Unary,
-							$author$project$Screept$Not,
-							$author$project$Screept$Eval('combat_player_success')),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_1'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_2'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('rnd_2d6'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('rnd_d6_1'),
-										$author$project$Screept$Add,
-										$author$project$Screept$Counter('rnd_d6_2'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_attack'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('rnd_2d6'),
-										$author$project$Screept$Add,
-										$author$project$Screept$Counter('enemy_combat'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_damage'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_attack'),
-										$author$project$Screept$Sub,
-										$author$project$Screept$Counter('player_defence'))),
-									A3(
-									$author$project$Screept$If,
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_damage'),
-										$author$project$Screept$Gt,
-										$author$project$Screept$Const(0)),
-									$author$project$Screept$Block(
-										_List_fromArray(
-											[
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('player_stamina'),
-												A3(
-													$author$project$Screept$Binary,
-													$author$project$Screept$Counter('player_stamina'),
-													$author$project$Screept$Sub,
-													$author$project$Screept$Counter('enemy_damage'))),
-												A3(
-												$author$project$Screept$If,
-												A3(
-													$author$project$Screept$Binary,
-													$author$project$Screept$Counter('player_stamina'),
-													$author$project$Screept$Lt,
-													$author$project$Screept$Const(1)),
-												A2(
-													$author$project$Screept$SetCounter,
-													$author$project$Screept$S('fight_lost'),
-													$author$project$Screept$Const(1)),
-												$author$project$Screept$Block(_List_Nil))
-											])),
-									$author$project$Screept$Block(_List_Nil))
-								])),
-						$author$project$Screept$Block(_List_Nil)),
-						A3(
-						$author$project$Screept$If,
-						$author$project$Screept$Eval('combat_player_success'),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_damage'),
-									$author$project$Screept$Const(0)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('fight_won'),
-									$author$project$Screept$Const(1))
-								])),
-						A3(
-							$author$project$Screept$If,
-							$author$project$Screept$Eval('combat_player_failure'),
-							$author$project$Screept$Block(
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Screept$SetCounter,
-										$author$project$Screept$S('fight_lost'),
-										$author$project$Screept$Const(1))
-									])),
-							$author$project$Screept$Block(_List_Nil)))
-					])))
+			'turn',
+			$author$project$Screept$run('{\n SET $turn = ($turn + 1);\n SET $turns_count = ($turns_count - 1);\n\n SET $minutes = (($turn %% $turns_per_hour) * (60 / $turns_per_hour));\n SET $hour = (($turn / $turns_per_hour) %% 24);\n SET $day = ($turn / ($turns_per_hour * 24));\n IF ($turns_count > 0) THEN RUN turn ELSE {SET $turns_count = 1}\n}'))
 		]));
 var $mhoare$elm_stack$Stack$push = F2(
 	function (item, _v0) {
@@ -8021,24 +7144,36 @@ var $mhoare$elm_stack$Stack$push = F2(
 		return $mhoare$elm_stack$Stack$Stack(
 			A2($elm$core$List$cons, item, stack));
 	});
-var $author$project$Games$FabledLands$statusLine = $author$project$Screept$S('');
+var $author$project$Screept$runTextValue = function (string) {
+	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$textValueParser, string);
+	if (_v0.$ === 'Ok') {
+		var value = _v0.a;
+		return value;
+	} else {
+		var error = _v0.a;
+		var _v1 = A2($elm$core$Debug$log, 'Error parsing TextVal: ', string);
+		var _v2 = A2($elm$core$Debug$log, '!', error);
+		return $author$project$Screept$S('');
+	}
+};
+var $author$project$Games$TestSanbox$statusLine = $author$project$Screept$runTextValue('["Turn: ", str($turn), " Time: ", str($hour), ":", str($minutes)]');
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			dialogEditor: $author$project$DialogGameEditor$init,
-			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FabledLands$dialogs),
+			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$TestSanbox$dialogs),
 			gameState: {
-				counters: $author$project$Games$FabledLands$counters,
-				dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$FabledLands$initialDialogId, $mhoare$elm_stack$Stack$initialise),
-				functions: $author$project$Games$FabledLands$functions,
-				labels: $author$project$Games$FabledLands$labels,
+				counters: $author$project$Games$TestSanbox$counters,
+				dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$TestSanbox$initialDialogId, $mhoare$elm_stack$Stack$initialise),
+				functions: $author$project$Games$TestSanbox$functions,
+				labels: $author$project$Games$TestSanbox$labels,
 				messages: _List_Nil,
-				procedures: $author$project$Games$FabledLands$procedures,
+				procedures: $author$project$Games$TestSanbox$procedures,
 				rnd: $elm$random$Random$initialSeed(666)
 			},
 			isDebug: true,
 			screeptEditor: $author$project$ScreeptEditor$init,
-			statusLine: $elm$core$Maybe$Just($author$project$Games$FabledLands$statusLine)
+			statusLine: $elm$core$Maybe$Just($author$project$Games$TestSanbox$statusLine)
 		},
 		A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
 };
@@ -9382,6 +8517,9 @@ var $author$project$Main$viewDebug = function (gameState) {
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
 };
+var $author$project$DialogGame$GoAction = function (a) {
+	return {$: 'GoAction', a: a};
+};
 var $author$project$DialogGameEditor$exampleDialog = {
 	id: 'start',
 	options: _List_fromArray(
@@ -9586,10 +8724,10 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						A2(
+						'[\n' + (A2(
 							$elm$core$String$join,
-							'\n',
-							A2($elm$core$List$map, $author$project$DialogGame$stringifyDialog, $author$project$Games$FabledLands$dialogs)))
+							'\n,',
+							A2($elm$core$List$map, $author$project$DialogGame$stringifyDialog, $author$project$Games$TestSanbox$dialogs)) + '\n]'))
 					]))
 			]));
 };
@@ -9597,7 +8735,7 @@ var $author$project$Main$main = function () {
 	var _v0 = A2(
 		$elm$core$Debug$log,
 		'MAN',
-		A2($elm$core$List$map, $author$project$DialogGame$stringifyDialog, $author$project$Games$FabledLands$dialogs));
+		A2($elm$core$List$map, $author$project$DialogGame$stringifyDialog, $author$project$Games$TestSanbox$dialogs));
 	return $elm$browser$Browser$element(
 		{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 }();

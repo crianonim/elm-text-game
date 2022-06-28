@@ -1,13 +1,12 @@
 module Main exposing (main)
 
---import Games.FirstTestGame as Game
-import Games.FabledLands as Game
-
+import Games.TestSanbox as Game
+--import Games.UnderSeaGame as Game
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
---import Games.TestSanbox as Game
+--import Games.FabledLands as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -127,7 +126,8 @@ view model =
           else
             text ""
         , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-        , textarea [] [text (List.map stringifyDialog Game.dialogs |> String.join "\n")]
+        , textarea [] [ text ("[\n" ++ (List.map stringifyDialog Game.dialogs |> String.join "\n,") ++ "\n]") ]
+
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]
 

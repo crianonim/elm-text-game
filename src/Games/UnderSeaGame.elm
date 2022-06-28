@@ -3,7 +3,7 @@ module Games.UnderSeaGame exposing (..)
 import DialogGame exposing (..)
 import Dict
 import Random
-import Screept exposing (Condition(..), IntValue(..), PredicateOp(..), TextValue(..))
+import Screept exposing (IntValue(..), TextValue(..))
 import Stack
 
 
@@ -57,7 +57,14 @@ dialogs =
       }
     ]
 
+counters = Dict.empty
 
-initialGameState : GameState
-initialGameState =
-    { counters = Dict.empty, dialogStack = Stack.push "start" Stack.initialise, labels = Dict.empty, procedures = Dict.empty, messages = [], rnd = Random.initialSeed 666 }
+labels = Dict.empty
+
+functions = Dict.empty
+
+statusLine = S ""
+
+procedures = Dict.empty
+
+initialDialogId = "start"

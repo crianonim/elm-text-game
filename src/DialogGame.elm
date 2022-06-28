@@ -19,28 +19,12 @@ type alias GameState =
     }
 
 
-type alias GameConfig =
-    { showMessages : Bool
-    }
-
-
-
---
---nonZero : IntValue -> Condition
---nonZero gameValue =
---    NOT (zero gameValue)
---
---
---zero : IntValue -> Condition
---zero gameValue =
---    Predicate gameValue Eq (Const 0)
-
-
 type alias DialogOption =
     { text : TextValue
     , condition : Maybe IntValue
     , action : List DialogAction
     }
+
 
 
 type DialogAction
@@ -172,6 +156,7 @@ encodeDialog { id, text, options } =
         , ( "text", E.string <| Screept.textValueStringify text )
         , ( "options", E.list encodeDialogOption options )
         ]
+
 
 stringifyDialog : Dialog -> String
 stringifyDialog dialog =

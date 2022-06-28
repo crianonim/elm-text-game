@@ -1,0 +1,496 @@
+[
+  {
+    "id": "#1",
+    "text": "\"\n    The approach of dawn has turned the sky a milky grey-green, like jade. The sea is a luminous pane of silver. Holding the tiller of your sailing boat, you keep your gaze fixed on the glittering constellation known as the Spider. It marks the north, and by keeping it to port you know you are still on course.\n    The sun appears in a trembling burst of red fire at the rim of the world. Slowly the chill of night gives way to brazen warmth. You lick your parched lips. There is a little water sloshing in the bottom of the barrel by your feet, but not enough to see you through another day.\n    Sealed in a scroll case tucked into your jerkin is the parchment map your grandfather gave to you on his death-bed. You remember his stirring tales of far sea voyages, of kingdoms beyond the western horizon, of sorcerous islands and ruined palaces filled with treasure. As a child you dreamed of nothing else but the magical quests that were in store if you too became an adventurer.\n    You never expected to die in an open boat before your adventures even began.\n    Securing the tiller, you unroll the map and study it again. You hardly need to. Every detail is etched into your memory by now. According to your reckoning, you should have reached the east coast of Harkuna, the great northern continent, days ago.\n    A pasty grey blob splatters on to the map. After a moment of stunned surprise, you look up and curse the seagull circling directly overhead. Then it strikes you – where there’s a seagull, there may be land.\n    You leap to your feet and scan the horizon. Sure enough, a line of white cliffs lie a league to the north. Have you been sailing along the coast all this time without realising the mainland was so close?\n    Steering towards the cliffs, you feel the boat judder against rough waves. A howling wind whips plumes of spindrift across the sea. Breakers pound the high cliffs. The tiller is yanked out of your hands. The little boat is spun around, out of control, and goes plunging in towards the coast.\n    You leap clear at the last second. There is the snap of timber, the roaring crescendo of the waves – and then silence as you go under. Striking out wildly, you try to swim clear of the razor- sharp rocks. For a while the undertow threatens to drag you down, then suddenly a wave catches you and flings you contemptuously up on to the beach.\n    Battered and bedraggled you lie gasping for breath until you hear someone walking along the shore towards you. Wary of danger, you lose no time in getting to your feet. Confronting you is an old man clad in a dirty loin-cloth. His eyes have a feverish bright look that is suggestive of either a mystic or a madman.\n\n      \"",
+    "options": [
+      {
+        "text": "\"...\"",
+        "action": [
+          {
+            "go_dialog": "#20"
+          }
+        ]
+      }
+    ]
+  }
+,{
+  "id": "#20",
+  "text": "\"\n      ‘Well, well, well, what have we here, friends?’ asks the old man. He seems to be talking to someone next to him, although you are certain he is alone. ‘Looks like a washed up adventurer to me!’ he says in answer to his own question, ‘all wet and out of luck.’\n      He carries on having a conversation – a conversation that quickly turns into a heated debate. He is clearly quite mad.\n      ‘Excuse me, umm, EXCUSE ME!,’ you shout above the hubbub in an attempt to grab the old man’s attention. He stops and stares at you.\n      ‘Is this the Isle of the Druids?’ you ask impatiently.\n      ‘Indeed it is,’ says the old man, ‘I see that you are from a far land so it is up to me to welcome you to Harkuna. But I think you may have much to do here as it is written in the stars that someone like you would come. Your destiny awaits you! Follow me, young adventurer.’\n      The old man turns smartly about and begins walking up a path towards some hills. You can just see some sort of monolithic stone structure atop one of them.\n      ‘Come on, come one, I’ll show you the Gates of the World,’ the old man babbles.\n      \"",
+  "options": [
+    {
+      "text": "\"Follow him\"",
+      "action": [
+        {
+          "go_dialog": "#192"
+        }
+      ]
+    },
+    {
+      "text": "\"Explore the coast\"",
+      "action": [
+        {
+          "go_dialog": "#128"
+        }
+      ]
+    },
+    {
+      "text": "\"Head into the nearby forest\"",
+      "action": [
+        {
+          "go_dialog": "#257"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#36",
+  "text": "\"\n    Soon you realize you are completely lost in this strange, magical forest. You wander around for days, barely able to find enough food and water. Lose 4 Stamina points.\n    \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "{ SET $player_stamina = ($player_stamina - 4) }"
+        },
+        {
+          "if": "($player_stamina < 1)",
+          "then": {
+            "go_dialog": "game_over"
+          },
+          "else": {
+            "go_dialog": "#36_"
+          }
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#36_",
+  "text": "\"\n       ...you eventually stagger out of the forest to the coast.\n       \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "go_dialog": "#128"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#65",
+  "text": "\"\n    There are three stone gates engraved with ancient runes. Each gate is marked with a name – Yellowport, Marlock City, and Wishport. From here, you can see the coast and the whole island, which is heavily forested\n    \"",
+  "options": [
+    {
+      "text": "\"Explore the coastline\"",
+      "action": [
+        {
+          "go_dialog": "#128"
+        }
+      ]
+    },
+    {
+      "text": "\"Head into the forest\"",
+      "action": [
+        {
+          "go_dialog": "#257"
+        }
+      ]
+    },
+    {
+      "text": "\"Step through the Yellowport arch\"",
+      "action": [
+        {
+          "go_dialog": "#8"
+        }
+      ]
+    },
+    {
+      "text": "\"Step through the Marlock City arch\"",
+      "action": [
+        {
+          "go_dialog": "#180"
+        }
+      ]
+    },
+    {
+      "text": "\"Step through the Wishport arch\"",
+      "action": [
+        {
+          "go_dialog": "#330"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#128",
+  "text": "\"\n      You make your way around the coast. The interior of the island appears to be heavily forested. After a while, however, you come to a bay in which a couple of ships are anchored. A small settlement nestles on the beach, and you make your way towards it\n      \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "go_dialog": "#195"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#148",
+  "text": "\"\n   ‘Stop, stop, I surrender!’ yells the tree. You cease your attack. ‘I guess you can pass, in view of recent events!’ it says grudgingly. Then it uproots itself with a great tearing sound, and shuffles out of the way. ‘There you go!’ mutters the tree, ‘You can blooming well pass.’\n   You walk through the thorn bush gate. Beyond, you find several huge oak trees whose branches are so big that they are able to support the homes of many people.\n   \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "SET $codeword_apple = 1"
+        },
+        {
+          "go_dialog": "#358"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#192",
+  "text": "\"\n      During your short trip upward, the old man regales you with tales of your destiny and fate, continuously arguing with himself as he does so.\n      You reach a hill covered with a circle of large obsidian standing stones. Despite the bitter wind that blow across these hills the stones are unweathered and seem almost newly lain.\n      ‘Here are the Gates of the World.’ says the mad old man.\n      The stones are laid in such a way that they form three archways, each carven with mystic symbols and runes of power.\n      ‘Each gate will take you to a part of the world of Harkuna, though I know not where,’ explains the old man. Abruptly, he turns around and sets off down the hill, babbling to himself. His voice fades as he descends the hill, leaving you alone with the brooding stones and the howling wind\n      \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "go_dialog": "#65"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#195",
+  "text": "\"\n      The Trading Post is a small village, set up here by enterprising settlers from the mainland. Its main export appears to be furs from the forest.\n      The Mayor, a fat genial fellow, who greets you personally, insists that one day the Trading Post will be a thriving town. There is not a lot here yet, however: a small market, a quay, the settler’s houses, and a shrine to Lacuna the Huntress, goddess of nature.\n      \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "SET $codeword_aspen = 1"
+        }
+      ],
+      "condition": "!$codeword_aspen"
+    },
+    {
+      "text": "\"Visit the shrine to Lacuna\"",
+      "action": [
+        {
+          "go_dialog": "#544"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    },
+    {
+      "text": "\"Visit the market\"",
+      "action": [
+        {
+          "go_dialog": "#452"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    },
+    {
+      "text": "\"Visit the quayside\"",
+      "action": [
+        {
+          "go_dialog": "#332"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    },
+    {
+      "text": "\"Visit the Green Man Inn\"",
+      "action": [
+        {
+          "go_dialog": "#181"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    },
+    {
+      "text": "\"Climb the hill that overlooks the town\"",
+      "action": [
+        {
+          "go_dialog": "#11"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    },
+    {
+      "text": "\"Go inland, into the Old Forest\"",
+      "action": [
+        {
+          "go_dialog": "#257"
+        }
+      ],
+      "condition": "$codeword_aspen"
+    }
+  ]
+}
+,{
+  "id": "#257",
+  "text": "\"\n      The trees are closely packed, leaning together as if in conference, whispering quietly among themselves. Birds twitter in the distance, and slivers of sunlight lance down through the musty gloom.\n      As you proceed along a forest track, you think you hear a rustling in the bushes. Later, you spot a shadowy figure darting through the trees – or was it your imagination? An animal snuffling sound right behind you makes you spin round, but there is nothing there.\n      \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "{ SET $test_score = $player_scouting;\nSET $test_difficulty = 10;\nRUN test }"
+        },
+        {
+          "if": "$test_success",
+          "then": {
+            "go_dialog": "#630"
+          },
+          "else": {
+            "go_dialog": "#36"
+          }
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#358",
+  "text": "\"\n    ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.\n    The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.\n    \"",
+  "options": [
+    {
+      "text": "[ \"Buy leather armour for 50 shards. Already have (\", str($inv_armor_leather), \")\" ]",
+      "action": [
+        {
+          "screept": "{ SET $inv_armor_leather = ($inv_armor_leather + 1);\nSET $money = ($money - 50) }"
+        }
+      ],
+      "condition": "0"
+    },
+    {
+      "text": "[ \"Sell leather armour for 45 shards. Already have (\", str($inv_armor_leather), \")\" ]",
+      "action": [
+        {
+          "screept": "{ SET $inv_armor_leather = ($inv_armor_leather - 1);\nSET $money = ($money + 45) }"
+        }
+      ],
+      "condition": "($inv_armor_leather > 0)"
+    },
+    {
+      "text": "\"Finished shopping\"",
+      "action": [
+        {
+          "if": "($player_profession == 1)",
+          "then": {
+            "if": "$box_645",
+            "then": {
+              "go_dialog": "#248"
+            },
+            "else": {
+              "go_dialog": "#645"
+            }
+          },
+          "else": {
+            "go_dialog": "#678"
+          }
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#570",
+  "text": "($fought_tree?($fight_won?\"You managed to overcome the tree\":\"You wake up almost dead with no money...\"):\"\n                 ‘Aargh, you fiendish human!’ roars the tree, flailing its branches at you. You must fight.\n                 \")",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "{ RUN combat_reset;\nSET $enemy_stamina = 10;\nSET $enemy_defence = 7;\nSET $enemy_combat = 3;\nLABEL $enemy_name = \"Tree\";\nSET $fought_tree = 1;\nDEF_FUNC $combat_player_failure = ($player_stamina < 1);\nDEF_FUNC $combat_player_success = ($enemy_stamina < 5) }"
+        },
+        {
+          "go_dialog": "combat"
+        }
+      ],
+      "condition": "!$fought_tree"
+    },
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "if": "$fight_won",
+          "then": {
+            "go_dialog": "#148"
+          },
+          "else": [
+            {
+              "screept": "{ SET $money = 0;\nSET $player_stamina = 1 }"
+            },
+            {
+              "go_dialog": "#195"
+            }
+          ]
+        }
+      ],
+      "condition": "$fought_tree"
+    }
+  ]
+}
+,{
+  "id": "#630",
+  "text": "\"\n     You struggle deeper into the forest until you come to a thick wall of impenetrable thorn bushes. Circling it, you find there is a break in the hedge, but it is filled by a large tree.\n     To your surprise, a face forms in the trunk, and speaks in a woody voice, ‘None can pass – begone, human!’\n     \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "go_dialog": "#594"
+        }
+      ],
+      "condition": "$codeword_apple"
+    },
+    {
+      "text": "\"Return to the Trading Post\"",
+      "action": [
+        {
+          "go_dialog": "#195"
+        }
+      ],
+      "condition": "!$codeword_apple"
+    },
+    {
+      "text": "\"Attack the tree\"",
+      "action": [
+        {
+          "go_dialog": "#570"
+        }
+      ],
+      "condition": "!$codeword_apple"
+    },
+    {
+      "text": "\"Try to persuade it to let you pass\"",
+      "action": [
+        {
+          "go_dialog": "#237"
+        }
+      ],
+      "condition": "!$codeword_apple"
+    }
+  ]
+}
+,{
+  "id": "#645",
+  "text": "\"\n         You are brought before the druids’ leader, the Oak Druid, a bearded fellow with earth and leaves all tangled up in his hair. He asks you to perform a service for them.\n         ‘Take this oak staff to the Willow Druid in the forest of Larun. The sacred grove where he lives will be hard to find, but I’m sure you can do it. The Willow Druid will give you something to bring back to me. When you return with it, I will make you a better Wayfarer.’\n         \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "SET $inv_oak_staff = 1"
+        },
+        {
+          "if": "0",
+          "then": {
+            "go_dialog": "#195"
+          },
+          "else": {
+            "go_dialog": "#678"
+          }
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#678",
+  "text": "\"\n             The journey through the trees proves as difficult as when you first ventured into the Old Forest.\n             (SCOUTING TEST)\n             \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "screept": "{ SET $test_score = $player_scouting;\nSET $test_difficulty = 10;\nRUN test }"
+        },
+        {
+          "if": "$test_success",
+          "then": {
+            "go_dialog": "#679"
+          },
+          "else": {
+            "go_dialog": "#36"
+          }
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "#679",
+  "text": "\"\n                 The scent of the sea proves strongest in one direction. Following your nose, you eventually break free of the trees and find yourself on the coast.\n                 \"",
+  "options": [
+    {
+      "text": "\"...\"",
+      "action": [
+        {
+          "go_dialog": "#128"
+        }
+      ]
+    }
+  ]
+}
+,{
+  "id": "combat",
+  "text": "[ \"Combat. \", \"You are fighting \", #enemy_name, \" .You have \", str($player_stamina), \" stamina. \", \"Your enemy \", str($enemy_stamina) ]",
+  "options": [
+    {
+      "text": "\"Hit enemy\"",
+      "action": [
+        {
+          "screept": "RUN combat"
+        },
+        {
+          "msg": "(($player_damage > 0)?[ \"You dealt \", str($player_damage), \" damage\" ]:\"\")"
+        },
+        {
+          "msg": "(($enemy_damage > 0)?[ \"You were dealt \", str($enemy_damage), \" damage\" ]:\"\")"
+        }
+      ],
+      "condition": "(!$fight_won && !$fight_lost)"
+    },
+    {
+      "text": "\"You won!\"",
+      "action": [
+        {
+          "msg": "\"You won!\""
+        },
+        "go_back"
+      ],
+      "condition": "$fight_won"
+    },
+    {
+      "text": "\"You lost!\"",
+      "action": [
+        {
+          "msg": "\"You lost!\""
+        },
+        "go_back"
+      ],
+      "condition": "$fight_lost"
+    }
+  ]
+}
+,{
+  "id": "game_over",
+  "text": "\"You lost the game. Try again!\"",
+  "options": []
+}
+]
