@@ -1,6 +1,8 @@
 module DialogGame exposing (..)
 
 import Dict exposing (Dict)
+import Json.Decode as Json
+import Json.Encode as E
 import Random
 import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
@@ -37,19 +39,17 @@ type alias GameConfig =
 type alias DialogOption =
     { text : TextValue
     , condition : Maybe IntValue
-    , action : List DialogActionExecution
+    , action : List DialogAction
     }
 
 
-type DialogActionExecution
+type DialogAction
     = GoAction DialogId
     | GoBackAction
     | Message TextValue
-    | Turn Int
-    | DoNothing
     | Screept Screept.Statement
-    | ConditionalAction IntValue DialogActionExecution DialogActionExecution
-    | ActionBlock (List DialogActionExecution)
+    | ConditionalAction IntValue DialogAction DialogAction
+    | ActionBlock (List DialogAction)
 
 
 type alias DialogId =
@@ -79,7 +79,7 @@ getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
 
 
-executeAction : DialogActionExecution -> GameState -> GameState
+executeAction : DialogAction -> GameState -> GameState
 executeAction dialogActionExecution gameState =
     case dialogActionExecution of
         GoAction dialogId ->
@@ -88,14 +88,8 @@ executeAction dialogActionExecution gameState =
         GoBackAction ->
             { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }
 
-        DoNothing ->
-            gameState
-
         Message msg ->
             { gameState | messages = Screept.getText gameState msg :: gameState.messages }
-
-        Turn t ->
-            Screept.addCounter "turn" t gameState
 
         Screept statement ->
             Screept.runStatement statement gameState
@@ -120,35 +114,38 @@ setRndSeed seed gameState =
 
 
 
---
---recipeToDialogOption : ( String, List ( String, Int ) ) -> DialogOption
---recipeToDialogOption ( crafted, ingredients ) =
---    let
---        ingredientToCondition : ( String, Int ) -> IntValue
---        ingredientToCondition ( item, amount ) =
---           Unary Screept.Not <| Binary (Counter item) Screept.Lt (Const amount)
---
---        ingredientToAction : ( String, Int ) -> DialogActionExecution
---        ingredientToAction ( item, amount ) =
---            Screept (Screept.SetCounter (S item) (Binary (Counter item) Screept.Add (Const -amount)))
---
---        ingredientToString : ( String, Int ) -> String
---        ingredientToString ( item, amount ) =
---            item ++ " " ++ String.fromInt amount
---
---        foldConditions = List.foldl () (True,) ingredients
---    in
---    { text = S <| "Craft " ++ crafted ++ " (" ++ String.join ", " (List.map ingredientToString ingredients) ++ ")"
---    , condition = Just <| Screept.Binary Screept.And (List.map ingredientToCondition ingredients)
---    , action = Screept (Screept.inc crafted) :: List.map ingredientToAction ingredients
---    }
-
 
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
 
 
-runScreept : String -> DialogActionExecution
+runScreept : String -> DialogAction
 runScreept s =
     Screept <| Screept.run s
+
+
+encodeDialogAction : DialogAction -> E.Value
+encodeDialogAction dialogAction =
+    case dialogAction of
+        GoAction dialogId ->
+            E.object [ ( "go_dialog", E.string dialogId ) ]
+
+        GoBackAction ->
+            E.string "go_back"
+
+        Message textValue ->
+            E.object [ ( "msg", E.string <| Screept.textValueStringify textValue ) ]
+
+        Screept statement ->
+            E.object [ ( "screept", E.string <| Screept.statementStringify statement ) ]
+
+        ConditionalAction intValue success failure ->
+            E.object
+                [ ( "if", E.string <| Screept.intValueStringify intValue )
+                , ( "then", encodeDialogAction success )
+                , ( "else", encodeDialogAction failure )
+                ]
+
+        ActionBlock dialogActions ->
+            E.list encodeDialogAction dialogActions

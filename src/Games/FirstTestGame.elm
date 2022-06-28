@@ -219,7 +219,7 @@ dialogs =
     ]
 
 
-fightCustom : String -> String -> Int -> Int -> Int -> DialogActionExecution
+fightCustom : String -> String -> Int -> Int -> Int -> DialogAction
 fightCustom enemy_name enemy_marker stamina defence combat =
     Screept <|
         Screept.Block
@@ -233,7 +233,7 @@ fightCustom enemy_name enemy_marker stamina defence combat =
             ]
 
 
-fightGoblin : DialogActionExecution
+fightGoblin : DialogAction
 fightGoblin =
     fightCustom "Old Goblin" "defeated_goblin" 10 6 6
 
@@ -246,7 +246,7 @@ standardCombat =
         DoNothing
 
 
-customCombat : String -> Condition -> Condition -> DialogActionExecution -> DialogActionExecution -> Dialog
+customCombat : String -> Condition -> Condition -> DialogAction -> DialogAction -> Dialog
 customCombat id successTest failureTest successAction failureAction =
     { id = id
     , text = Concat [ S "Combat. ", S "You are fighting ", Label "enemy_name", S " .You have ", IntValueText (Counter "player_stamina"), S " stamina. ", S "Your enemy ", IntValueText (Counter "enemy_stamina") ]
@@ -309,7 +309,7 @@ customCombat id successTest failureTest successAction failureAction =
     }
 
 
-fightWolf : DialogActionExecution
+fightWolf : DialogAction
 fightWolf =
     Screept <|
         Screept.Block

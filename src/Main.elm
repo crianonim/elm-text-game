@@ -88,7 +88,7 @@ type alias Model =
 
 type Msg
     = None
-    | ClickDialog (List DialogActionExecution)
+    | ClickDialog (List DialogAction)
     | SeedGenerated Random.Seed
     | ScreeptEditor ScreeptEditor.Msg
     | DialogEditor DialogGameEditor.Msg
