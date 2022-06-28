@@ -113,8 +113,6 @@ setRndSeed seed gameState =
     { gameState | rnd = seed }
 
 
-
-
 badDialog : Dialog
 badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
@@ -149,3 +147,32 @@ encodeDialogAction dialogAction =
 
         ActionBlock dialogActions ->
             E.list encodeDialogAction dialogActions
+
+
+encodeDialogOption : DialogOption -> E.Value
+encodeDialogOption { text, condition, action } =
+    E.object
+        ([ ( "text", E.string <| Screept.textValueStringify text )
+         , ( "action", E.list encodeDialogAction action )
+         ]
+            ++ (case condition of
+                    Just a ->
+                        [ ( "condition", E.string <| Screept.intValueStringify a ) ]
+
+                    Nothing ->
+                        []
+               )
+        )
+
+
+encodeDialog : Dialog -> E.Value
+encodeDialog { id, text, options } =
+    E.object
+        [ ( "id", E.string id )
+        , ( "text", E.string <| Screept.textValueStringify text )
+        , ( "options", E.list encodeDialogOption options )
+        ]
+
+stringifyDialog : Dialog -> String
+stringifyDialog dialog =
+    E.encode 2 (encodeDialog dialog)

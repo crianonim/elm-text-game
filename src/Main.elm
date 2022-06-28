@@ -1,13 +1,13 @@
 module Main exposing (main)
 
 --import Games.FirstTestGame as Game
---import Games.FabledLands as Game
+import Games.FabledLands as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.TestSanbox as Game
+--import Games.TestSanbox as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -22,7 +22,7 @@ main : Program () Model Msg
 main =
     let
         _ =
-            Debug.log "MAN" (Screept.run "#")
+            Debug.log "MAN" (List.map stringifyDialog Game.dialogs)
     in
     Browser.element
         { init = init
@@ -127,7 +127,7 @@ view model =
           else
             text ""
         , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-
+        , textarea [] [text (List.map stringifyDialog Game.dialogs |> String.join "\n")]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]
 
