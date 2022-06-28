@@ -1,21 +1,23 @@
 module Main exposing (main)
 
-import Games.UnderSeaGame as Game
---import Games.FabledLands as Game
+--import Games.UnderSeaGame as Game
+--import Games.TestSanbox as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
---import Games.TestSanbox as Game
+import Games.FabledLands as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
+import Http
 import Platform.Cmd exposing (Cmd)
 import Random
 import Screept
 import ScreeptEditor
 import Stack exposing (Stack)
+import Task
 
 
 main : Program () Model Msg
@@ -48,8 +50,12 @@ init _ =
       , screeptEditor = ScreeptEditor.init
       , dialogEditor = DialogGameEditor.init
       , statusLine = Just Game.statusLine
+      , gameDefinition = Nothing
       }
-    , Random.generate SeedGenerated Random.independentSeed
+    , Cmd.batch
+        [ Random.generate SeedGenerated Random.independentSeed
+        , Http.get { url = "/games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        ]
     )
 
 
@@ -75,6 +81,22 @@ update msg model =
         DialogEditor deMsg ->
             ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
 
+        GotGameDefinition result ->
+            case result of
+                Err e ->
+                    let
+                        _ =
+                            Debug.log "Error" e
+                    in
+                    ( model, Cmd.none )
+
+                Ok value ->
+                    let
+                        _ =
+                            Debug.log "Success decode" value
+                    in
+                    ( model, Cmd.none )
+
 
 type alias Model =
     { dialogs : DialogGame.Dialogs
@@ -83,6 +105,7 @@ type alias Model =
     , screeptEditor : ScreeptEditor.Model
     , dialogEditor : DialogGameEditor.Model
     , statusLine : Maybe Screept.TextValue
+    , gameDefinition : Maybe GameDefinition
     }
 
 
@@ -92,6 +115,7 @@ type Msg
     | SeedGenerated Random.Seed
     | ScreeptEditor ScreeptEditor.Msg
     | DialogEditor DialogGameEditor.Msg
+    | GotGameDefinition (Result Http.Error GameDefinition)
 
 
 
@@ -127,7 +151,7 @@ view model =
           else
             text ""
         , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-        , textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs|> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions)]
+        , textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
 
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]

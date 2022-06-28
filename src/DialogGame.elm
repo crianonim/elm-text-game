@@ -3,6 +3,7 @@ module DialogGame exposing (..)
 import Dict exposing (Dict)
 import Json.Decode as Json
 import Json.Encode as E
+import Parser
 import Random
 import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
@@ -191,3 +192,59 @@ encodeGameDefinition { dialogs, startDialogId, counters, labels, procedures, fun
                         [ ( "statusLine", Screept.textValueStringify x |> E.string ) ]
                )
         )
+
+
+decodeAction : Json.Decoder DialogAction
+decodeAction =
+    Json.oneOf
+        [ Json.map GoAction (Json.field "go_dialog" Json.string)
+        , Json.string
+            |> Json.andThen
+                (\x ->
+                    if x == "go_back" then
+                        Json.succeed GoBackAction
+
+                    else
+                        Json.fail ""
+                )
+        , Json.map Message (Json.field "msg" (Json.string |> Json.map Screept.parseTextValue))
+        , Json.map Screept (Json.field "screept" (Json.string |> Json.map Screept.parseStatement))
+        , Json.map3 ConditionalAction
+            (Json.field "if" (Json.string |> Json.map Screept.parseIntValue))
+            (Json.field "then" (Json.lazy (\_ -> decodeAction)))
+            (Json.field "else" (Json.lazy (\_ -> decodeAction)))
+        , Json.map ActionBlock <| Json.list (Json.lazy (\_ -> decodeAction))
+        ]
+
+
+decodeOption : Json.Decoder DialogOption
+decodeOption =
+    Json.map3 DialogOption
+        (Json.field "text" (Json.string |> Json.map Screept.parseTextValue))
+        (Json.maybe <| Json.field "condition" (Json.string |> Json.map Screept.parseIntValue))
+        (Json.field "action" <| Json.list decodeAction)
+
+
+decodeDialog : Json.Decoder Dialog
+decodeDialog =
+    Json.map3 Dialog
+        (Json.field "id" Json.string)
+        (Json.field "text" (Json.string |> Json.map Screept.parseTextValue))
+        (Json.field "options" <| Json.list decodeOption)
+
+
+decodeDialogs : Json.Decoder (List Dialog)
+decodeDialogs =
+    Json.list decodeDialog
+
+
+decodeGameDefinition : Json.Decoder GameDefinition
+decodeGameDefinition =
+    Json.map7 GameDefinition
+        (Json.field "dialogs" decodeDialogs)
+        (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
+        (Json.field "startDialogId" Json.string)
+        (Json.field "counters" <| Json.dict Json.int)
+        (Json.field "labels" <| Json.dict Json.string)
+        (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
+        (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))

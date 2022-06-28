@@ -31,7 +31,7 @@ counters =
 
 statusLine : TextValue
 statusLine =
-    runTextValue """["Turn: ", str($turn), " Time: ", str($hour), ":", str($minutes)]"""
+    parseTextValue """["Turn: ", str($turn), " Time: ", str($hour), ":", str($minutes)]"""
 
 
 functions : Dict String IntValue

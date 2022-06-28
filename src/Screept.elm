@@ -595,8 +595,25 @@ statementParser =
         ]
 
 
-runIntValue : String -> IntValue
-runIntValue intVal =
+parseStatement : String -> Statement
+parseStatement statement =
+    case Parser.run statementParser statement of
+        Ok value ->
+            value
+
+        Err error ->
+            let
+                _ =
+                    Debug.log "Error parsing Statement: " statement
+
+                _ =
+                    Debug.log "!" error
+            in
+            Block []
+
+
+parseIntValue : String -> IntValue
+parseIntValue intVal =
     case Parser.run intValueParser intVal of
         Ok value ->
             value
@@ -612,8 +629,8 @@ runIntValue intVal =
             Const 0
 
 
-runTextValue : String -> TextValue
-runTextValue string =
+parseTextValue : String -> TextValue
+parseTextValue string =
     case Parser.run textValueParser string of
         Ok value ->
             value

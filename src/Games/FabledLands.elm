@@ -156,7 +156,7 @@ dialogs =
       , text = S """
     Soon you realize you are completely lost in this strange, magical forest. You wander around for days, barely able to find enough food and water. Lose 4 Stamina points.
     """
-      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $player_stamina = ($player_stamina - 4);}", ConditionalAction (runIntValue "($player_stamina < 1)") (GoAction "game_over") (GoAction "#36_") ] } ]
+      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $player_stamina = ($player_stamina - 4);}", ConditionalAction (parseIntValue "($player_stamina < 1)") (GoAction "game_over") (GoAction "#36_") ] } ]
       }
     , { id = "#36_"
       , text = S """
@@ -226,9 +226,9 @@ dialogs =
     The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.
     """
       , options =
-            [ { text = Concat [ S "Buy leather armour for 50 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| runIntValue "!(($money < 50))", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather + 1) ; SET $money = ($money - 50)}" ] }
-            , { text = Concat [ S "Sell leather armour for 45 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| runIntValue "($inv_armor_leather > 0)", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather - 1) ; SET $money = ($money + 45)}" ] }
-            , { text = S "Finished shopping", condition = Nothing, action = [ ConditionalAction (runIntValue "($player_profession == 1)") (ConditionalAction (Counter "box_645") (GoAction "#248") (GoAction "#645")) (GoAction "#678") ] }
+            [ { text = Concat [ S "Buy leather armour for 50 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| parseIntValue "!(($money < 50))", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather + 1) ; SET $money = ($money - 50)}" ] }
+            , { text = Concat [ S "Sell leather armour for 45 shards. Already have (", IntValueText (Counter "inv_armor_leather"), S ")" ], condition = Just <| parseIntValue "($inv_armor_leather > 0)", action = [ runScreept "{ SET $inv_armor_leather = ($inv_armor_leather - 1) ; SET $money = ($money + 45)}" ] }
+            , { text = S "Finished shopping", condition = Nothing, action = [ ConditionalAction (parseIntValue "($player_profession == 1)") (ConditionalAction (Counter "box_645") (GoAction "#248") (GoAction "#645")) (GoAction "#678") ] }
             ]
       }
     , { id = "#570"
@@ -250,8 +250,8 @@ dialogs =
                             , Screept.SetCounter (S "enemy_combat") (Const 3)
                             , Screept.SetLabel (S "enemy_name") (S "Tree")
                             , Screept.SetCounter (S "fought_tree") (Const 1)
-                            , Screept.SetFunc (S "combat_player_failure") (Screept.runIntValue "($player_stamina < 1)")
-                            , Screept.SetFunc (S "combat_player_success") (Screept.runIntValue "($enemy_stamina < 5)")
+                            , Screept.SetFunc (S "combat_player_failure") (Screept.parseIntValue "($player_stamina < 1)")
+                            , Screept.SetFunc (S "combat_player_success") (Screept.parseIntValue "($enemy_stamina < 5)")
                             ]
                     , GoAction "combat"
                     ]
@@ -288,7 +288,7 @@ dialogs =
          ‘Take this oak staff to the Willow Druid in the forest of Larun. The sacred grove where he lives will be hard to find, but I’m sure you can do it. The Willow Druid will give you something to bring back to me. When you return with it, I will make you a better Wayfarer.’
          """
       , options =
-            [ { text = S "...", condition = Nothing, action = [ runScreept "SET $inv_oak_staff = 1", ConditionalAction (runIntValue "($codeword_aspen)") (GoAction "#195") (GoAction "#678") ] }
+            [ { text = S "...", condition = Nothing, action = [ runScreept "SET $inv_oak_staff = 1", ConditionalAction (parseIntValue "($codeword_aspen)") (GoAction "#195") (GoAction "#678") ] }
             ]
       }
     , { id = "#678"
@@ -297,7 +297,7 @@ dialogs =
              (SCOUTING TEST)
              """
       , options =
-            [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $test_score = $player_scouting;SET $test_difficulty = 10; RUN test }", ConditionalAction (runIntValue "$test_success") (GoAction "#679") (GoAction "#36") ] }
+            [ { text = S "...", condition = Nothing, action = [ runScreept "{SET $test_score = $player_scouting;SET $test_difficulty = 10; RUN test }", ConditionalAction (parseIntValue "$test_success") (GoAction "#679") (GoAction "#36") ] }
             ]
       }
     , { id = "#679"
