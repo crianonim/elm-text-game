@@ -1,6 +1,9 @@
 module DialogGame exposing (..)
 
 import Dict exposing (Dict)
+import Html exposing (..)
+import Html.Attributes exposing (class, style)
+import Html.Events exposing (onClick)
 import Json.Decode as Json
 import Json.Encode as E
 import Parser
@@ -20,11 +23,19 @@ type alias GameState =
     }
 
 
+type alias Model =
+    { gameState : GameState, statusLine : Maybe Screept.TextValue, dialogs : Dialogs }
+
+
 type alias DialogOption =
     { text : TextValue
     , condition : Maybe IntValue
     , action : List DialogAction
     }
+
+
+type Msg
+    = ClickDialog (List DialogAction)
 
 
 type alias GameDefinition =
@@ -38,6 +49,11 @@ type alias GameDefinition =
     }
 
 
+init : GameState -> Dialogs -> Maybe Screept.TextValue -> Model
+init gs dialogs statusLine =
+    { gameState = gs, statusLine = statusLine, dialogs = dialogs }
+
+
 type DialogAction
     = GoAction DialogId
     | GoBackAction
@@ -45,6 +61,7 @@ type DialogAction
     | Screept Screept.Statement
     | ConditionalAction IntValue DialogAction DialogAction
     | ActionBlock (List DialogAction)
+    | Exit String
 
 
 type alias DialogId =
@@ -102,10 +119,13 @@ executeAction dialogActionExecution gameState =
         ActionBlock dialogActionExecutions ->
             List.foldl (\a state -> executeAction a state) gameState dialogActionExecutions
 
+        Exit string ->
+            gameState
 
-setRndSeed : Random.Seed -> GameState -> GameState
-setRndSeed seed gameState =
-    { gameState | rnd = seed }
+
+setRndSeed : Random.Seed -> Model -> Model
+setRndSeed seed ({ gameState } as model) =
+    { model | gameState = { gameState | rnd = seed } }
 
 
 badDialog : Dialog
@@ -142,6 +162,9 @@ encodeDialogAction dialogAction =
 
         ActionBlock dialogActions ->
             E.list encodeDialogAction dialogActions
+
+        Exit s ->
+            E.object [ ( "exit", E.string s ) ]
 
 
 encodeDialogOption : DialogOption -> E.Value
@@ -248,3 +271,71 @@ decodeGameDefinition =
         (Json.field "labels" <| Json.dict Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
         (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        ClickDialog actions ->
+            let
+                gs =
+                    List.foldl executeAction model.gameState actions
+            in
+            { model
+                | gameState = gs
+            }
+
+
+view : Model -> Html Msg
+view { gameState, statusLine, dialogs } =
+    let
+        dialog =
+            getDialog (Stack.top gameState.dialogStack |> Maybe.withDefault "bad") dialogs
+    in
+    div [ class "container" ]
+        [ div [ class "dialog" ]
+            [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
+            , viewDialogText dialog.text gameState
+            , div [] <|
+                List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
+            ]
+        , if List.length gameState.messages > 0 then
+            viewMessages gameState.messages
+
+          else
+            text ""
+        ]
+
+
+viewMessages : List String -> Html msg
+viewMessages msgs =
+    div [ class "messages" ] <|
+        List.map (\m -> p [ class "message" ] [ text m ]) msgs
+
+
+viewDialog : Model -> Dialog -> Html Msg
+viewDialog { gameState, statusLine } dialog =
+    div [ class "dialog" ]
+        [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
+        , viewDialogText dialog.text gameState
+        , div [] <|
+            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
+        ]
+
+
+viewDialogText : Screept.TextValue -> GameState -> Html msg
+viewDialogText textValue gameState =
+    div []
+        (Screept.getText gameState textValue |> String.split "\n" |> List.map (\par -> p [] [ text par ]))
+
+
+viewDebug : GameState -> Html a
+viewDebug gameState =
+    div [ class "status" ]
+        [ div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.counters |> List.sort |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ String.fromInt v ]))
+        ]
+
+
+viewOption : GameState -> DialogOption -> Html Msg
+viewOption gameState dialogOption =
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getText gameState dialogOption.text ]

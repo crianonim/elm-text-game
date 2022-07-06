@@ -58,6 +58,9 @@ dialogs : List Dialog
 dialogs =
     [ { id = "start"
       , text = Concat []
-      , options = [ { text = S "...", condition = Nothing, action = [ runScreept "RUN turn" ] } ]
+      , options =
+            [ { text = S "...", condition = Nothing, action = [ runScreept "RUN turn" ] }
+            , { text = S "end", condition = Nothing, action = [ Exit "bye" ] }
+            ]
       }
     ]

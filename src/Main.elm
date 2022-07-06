@@ -36,20 +36,21 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { dialogs = listDialogToDictDialog Game.dialogs
-      , gameState =
-            { counters = Game.counters
-            , labels = Game.labels
-            , dialogStack = Stack.push Game.initialDialogId Stack.initialise
-            , procedures = Game.procedures
-            , functions = Game.functions
-            , messages = []
-            , rnd = Random.initialSeed 666
-            }
+    ( { gameDialog =
+            DialogGame.init
+                { counters = Game.counters
+                , labels = Game.labels
+                , dialogStack = Stack.push Game.initialDialogId Stack.initialise
+                , procedures = Game.procedures
+                , functions = Game.functions
+                , messages = []
+                , rnd = Random.initialSeed 666
+                }
+                (listDialogToDictDialog Game.dialogs)
+                (Just Game.statusLine)
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
       , dialogEditor = DialogGameEditor.init
-      , statusLine = Just Game.statusLine
       , gameDefinition = Nothing
       }
     , Cmd.batch
@@ -65,15 +66,11 @@ update msg model =
         None ->
             ( model, Cmd.none )
 
-        ClickDialog actions ->
-            ( { model
-                | gameState = List.foldl executeAction model.gameState actions
-              }
-            , Cmd.none
-            )
+        GameDialog gdm ->
+            ( { model | gameDialog = DialogGame.update gdm model.gameDialog }, Cmd.none )
 
         SeedGenerated seed ->
-            ( { model | gameState = setRndSeed seed model.gameState }, Cmd.none )
+            ( { model | gameDialog = DialogGame.setRndSeed seed model.gameDialog }, Cmd.none )
 
         ScreeptEditor seMsg ->
             ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
@@ -99,19 +96,17 @@ update msg model =
 
 
 type alias Model =
-    { dialogs : DialogGame.Dialogs
-    , gameState : GameState
+    { gameDialog : DialogGame.Model
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
     , dialogEditor : DialogGameEditor.Model
-    , statusLine : Maybe Screept.TextValue
     , gameDefinition : Maybe GameDefinition
     }
 
 
 type Msg
     = None
-    | ClickDialog (List DialogAction)
+    | GameDialog DialogGame.Msg
     | SeedGenerated Random.Seed
     | ScreeptEditor ScreeptEditor.Msg
     | DialogEditor DialogGameEditor.Msg
@@ -133,59 +128,11 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        dialog =
-            getDialog (Stack.top model.gameState.dialogStack |> Maybe.withDefault "bad") model.dialogs
-    in
     div [ class "container" ]
         [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
-        , viewDialog model dialog
-        , if List.length model.gameState.messages > 0 then
-            viewMessages model.gameState.messages
-
-          else
-            text ""
-        , if model.isDebug then
-            viewDebug model.gameState
-
-          else
-            text ""
+        , DialogGame.view model.gameDialog |> Html.map GameDialog
         , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-        , textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
 
+        --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         ]
-
-
-viewMessages : List String -> Html msg
-viewMessages msgs =
-    div [ class "messages" ] <|
-        List.map (\m -> p [ class "message" ] [ text m ]) msgs
-
-
-viewDialog : Model -> DialogGame.Dialog -> Html Msg
-viewDialog { gameState, statusLine } dialog =
-    div [ class "dialog" ]
-        [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
-        , viewDialogText dialog.text gameState
-        , div [] <|
-            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
-        ]
-
-
-viewDialogText : Screept.TextValue -> GameState -> Html msg
-viewDialogText textValue gameState =
-    div []
-        (Screept.getText gameState textValue |> String.split "\n" |> List.map (\par -> p [] [ text par ]))
-
-
-viewDebug : GameState -> Html a
-viewDebug gameState =
-    div [ class "status" ]
-        [ div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.counters |> List.sort |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ String.fromInt v ]))
-        ]
-
-
-viewOption : GameState -> DialogGame.DialogOption -> Html Msg
-viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getText gameState dialogOption.text ]

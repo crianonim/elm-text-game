@@ -8799,6 +8799,10 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
 			seed0);
 	});
+var $author$project$DialogGame$init = F3(
+	function (gs, dialogs, statusLine) {
+		return {dialogs: dialogs, gameState: gs, statusLine: statusLine};
+	});
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
 var $author$project$ParsedEditable$init = F2(
 	function (text, parser) {
@@ -9070,20 +9074,22 @@ var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			dialogEditor: $author$project$DialogGameEditor$init,
-			dialogs: $author$project$DialogGame$listDialogToDictDialog($author$project$Games$FabledLands$dialogs),
 			gameDefinition: $elm$core$Maybe$Nothing,
-			gameState: {
-				counters: $author$project$Games$FabledLands$counters,
-				dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$FabledLands$initialDialogId, $mhoare$elm_stack$Stack$initialise),
-				functions: $author$project$Games$FabledLands$functions,
-				labels: $author$project$Games$FabledLands$labels,
-				messages: _List_Nil,
-				procedures: $author$project$Games$FabledLands$procedures,
-				rnd: $elm$random$Random$initialSeed(666)
-			},
+			gameDialog: A3(
+				$author$project$DialogGame$init,
+				{
+					counters: $author$project$Games$FabledLands$counters,
+					dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$FabledLands$initialDialogId, $mhoare$elm_stack$Stack$initialise),
+					functions: $author$project$Games$FabledLands$functions,
+					labels: $author$project$Games$FabledLands$labels,
+					messages: _List_Nil,
+					procedures: $author$project$Games$FabledLands$procedures,
+					rnd: $elm$random$Random$initialSeed(666)
+				},
+				$author$project$DialogGame$listDialogToDictDialog($author$project$Games$FabledLands$dialogs),
+				$elm$core$Maybe$Just($author$project$Games$FabledLands$statusLine)),
 			isDebug: true,
-			screeptEditor: $author$project$ScreeptEditor$init,
-			statusLine: $elm$core$Maybe$Just($author$project$Games$FabledLands$statusLine)
+			screeptEditor: $author$project$ScreeptEditor$init
 		},
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
@@ -9101,6 +9107,18 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$DialogGame$setRndSeed = F2(
+	function (seed, model) {
+		var gameState = model.gameState;
+		return _Utils_update(
+			model,
+			{
+				gameState: _Utils_update(
+					gameState,
+					{rnd: seed})
+			});
+	});
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
@@ -9455,7 +9473,7 @@ var $author$project$DialogGame$executeAction = F2(
 					dialogActionExecution = $temp$dialogActionExecution;
 					gameState = $temp$gameState;
 					continue executeAction;
-				default:
+				case 'ActionBlock':
 					var dialogActionExecutions = dialogActionExecution.a;
 					return A3(
 						$elm$core$List$foldl,
@@ -9465,15 +9483,19 @@ var $author$project$DialogGame$executeAction = F2(
 							}),
 						gameState,
 						dialogActionExecutions);
+				default:
+					var string = dialogActionExecution.a;
+					return gameState;
 			}
 		}
 	});
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$DialogGame$setRndSeed = F2(
-	function (seed, gameState) {
+var $author$project$DialogGame$update = F2(
+	function (msg, model) {
+		var actions = msg.a;
+		var gs = A3($elm$core$List$foldl, $author$project$DialogGame$executeAction, model.gameState, actions);
 		return _Utils_update(
-			gameState,
-			{rnd: seed});
+			model,
+			{gameState: gs});
 	});
 var $author$project$DialogGameEditor$update = F2(
 	function (msg, model) {
@@ -9834,13 +9856,13 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'None':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 'ClickDialog':
-				var actions = msg.a;
+			case 'GameDialog':
+				var gdm = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							gameState: A3($elm$core$List$foldl, $author$project$DialogGame$executeAction, model.gameState, actions)
+							gameDialog: A2($author$project$DialogGame$update, gdm, model.gameDialog)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SeedGenerated':
@@ -9849,7 +9871,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							gameState: A2($author$project$DialogGame$setRndSeed, seed, model.gameState)
+							gameDialog: A2($author$project$DialogGame$setRndSeed, seed, model.gameDialog)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ScreeptEditor':
@@ -9886,6 +9908,9 @@ var $author$project$Main$update = F2(
 var $author$project$Main$DialogEditor = function (a) {
 	return {$: 'DialogEditor', a: a};
 };
+var $author$project$Main$GameDialog = function (a) {
+	return {$: 'GameDialog', a: a};
+};
 var $author$project$Main$ScreeptEditor = function (a) {
 	return {$: 'ScreeptEditor', a: a};
 };
@@ -9899,6 +9924,19 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $author$project$DialogGame$badDialog = {
 	id: 'bad',
 	options: _List_Nil,
@@ -9911,363 +9949,8 @@ var $author$project$DialogGame$getDialog = F2(
 			$author$project$DialogGame$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
-var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
-var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$json$Json$Encode$dict = F3(
-	function (toKey, toValue, dictionary) {
-		return _Json_wrap(
-			A3(
-				$elm$core$Dict$foldl,
-				F3(
-					function (key, value, obj) {
-						return A3(
-							_Json_addField,
-							toKey(key),
-							toValue(value),
-							obj);
-					}),
-				_Json_emptyObject(_Utils_Tuple0),
-				dictionary));
-	});
-var $author$project$Screept$binaryOpStringify = function (binaryOp) {
-	switch (binaryOp.$) {
-		case 'Add':
-			return '+';
-		case 'Sub':
-			return '-';
-		case 'Mul':
-			return '*';
-		case 'Div':
-			return '/';
-		case 'Mod':
-			return '%%';
-		case 'Gt':
-			return '>';
-		case 'Lt':
-			return '<';
-		case 'Eq':
-			return '==';
-		case 'And':
-			return '&&';
-		default:
-			return '||';
-	}
-};
-var $author$project$Screept$unaryOpStringify = function (unaryOp) {
-	return '!';
-};
-var $author$project$Screept$intValueStringify = function (intValue) {
-	switch (intValue.$) {
-		case 'Const':
-			var _int = intValue.a;
-			return $elm$core$String$fromInt(_int);
-		case 'Counter':
-			var string = intValue.a;
-			return '$' + string;
-		case 'Unary':
-			var unaryOp = intValue.a;
-			var x = intValue.b;
-			return _Utils_ap(
-				$author$project$Screept$unaryOpStringify(unaryOp),
-				$author$project$Screept$intValueStringify(x));
-		case 'Binary':
-			var x = intValue.a;
-			var binaryOp = intValue.b;
-			var y = intValue.c;
-			return '(' + ($author$project$Screept$intValueStringify(x) + (' ' + ($author$project$Screept$binaryOpStringify(binaryOp) + (' ' + ($author$project$Screept$intValueStringify(y) + ')')))));
-		default:
-			var string = intValue.a;
-			return 'CALL ' + string;
-	}
-};
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $author$project$Screept$textValueStringify = function (textValue) {
-	switch (textValue.$) {
-		case 'S':
-			var string = textValue.a;
-			return '\"' + (string + '\"');
-		case 'Concat':
-			var textValues = textValue.a;
-			return '[ ' + (A2(
-				$elm$core$String$join,
-				', ',
-				A2($elm$core$List$map, $author$project$Screept$textValueStringify, textValues)) + ' ]');
-		case 'Conditional':
-			var cond = textValue.a;
-			var success = textValue.b;
-			var failure = textValue.c;
-			return '(' + ($author$project$Screept$intValueStringify(cond) + ('?' + ($author$project$Screept$textValueStringify(success) + (':' + ($author$project$Screept$textValueStringify(failure) + ')')))));
-		case 'IntValueText':
-			var intValue = textValue.a;
-			return 'str(' + ($author$project$Screept$intValueStringify(intValue) + ')');
-		default:
-			var string = textValue.a;
-			return '#' + string;
-	}
-};
-var $author$project$Screept$counterStringify = function (textValue) {
-	if (textValue.$ === 'S') {
-		var x = textValue.a;
-		return '$' + x;
-	} else {
-		var x = textValue;
-		return $author$project$Screept$textValueStringify(x);
-	}
-};
-var $author$project$Screept$statementStringify = function (statement) {
-	switch (statement.$) {
-		case 'SetCounter':
-			var textValue = statement.a;
-			var intValue = statement.b;
-			return 'SET ' + ($author$project$Screept$counterStringify(textValue) + (' = ' + $author$project$Screept$intValueStringify(intValue)));
-		case 'SetLabel':
-			var t1 = statement.a;
-			var t2 = statement.b;
-			return 'LABEL ' + ($author$project$Screept$counterStringify(t1) + (' = ' + $author$project$Screept$textValueStringify(t2)));
-		case 'SetFunc':
-			var textValue = statement.a;
-			var intValue = statement.b;
-			return 'DEF_FUNC ' + ($author$project$Screept$counterStringify(textValue) + (' = ' + $author$project$Screept$intValueStringify(intValue)));
-		case 'Rnd':
-			var textValue = statement.a;
-			var i1 = statement.b;
-			var i2 = statement.c;
-			return 'RND ' + ($author$project$Screept$counterStringify(textValue) + (' ' + ($author$project$Screept$intValueStringify(i1) + (' .. ' + $author$project$Screept$intValueStringify(i2)))));
-		case 'Block':
-			var statements = statement.a;
-			return '{ ' + (A2(
-				$elm$core$String$join,
-				';\n',
-				A2($elm$core$List$map, $author$project$Screept$statementStringify, statements)) + ' }');
-		case 'If':
-			var intValue = statement.a;
-			var success = statement.b;
-			var failure = statement.c;
-			return 'IF ' + ($author$project$Screept$intValueStringify(intValue) + (' THEN ' + ($author$project$Screept$statementStringify(success) + (' ELSE ' + $author$project$Screept$statementStringify(failure)))));
-		case 'Comment':
-			var string = statement.a;
-			return '#' + (string + '\n');
-		default:
-			var string = statement.a;
-			return 'RUN ' + string;
-	}
-};
-var $author$project$DialogGame$encodeDialogAction = function (dialogAction) {
-	switch (dialogAction.$) {
-		case 'GoAction':
-			var dialogId = dialogAction.a;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'go_dialog',
-						$elm$json$Json$Encode$string(dialogId))
-					]));
-		case 'GoBackAction':
-			return $elm$json$Json$Encode$string('go_back');
-		case 'Message':
-			var textValue = dialogAction.a;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'msg',
-						$elm$json$Json$Encode$string(
-							$author$project$Screept$textValueStringify(textValue)))
-					]));
-		case 'Screept':
-			var statement = dialogAction.a;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'screept',
-						$elm$json$Json$Encode$string(
-							$author$project$Screept$statementStringify(statement)))
-					]));
-		case 'ConditionalAction':
-			var intValue = dialogAction.a;
-			var success = dialogAction.b;
-			var failure = dialogAction.c;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'if',
-						$elm$json$Json$Encode$string(
-							$author$project$Screept$intValueStringify(intValue))),
-						_Utils_Tuple2(
-						'then',
-						$author$project$DialogGame$encodeDialogAction(success)),
-						_Utils_Tuple2(
-						'else',
-						$author$project$DialogGame$encodeDialogAction(failure))
-					]));
-		default:
-			var dialogActions = dialogAction.a;
-			return A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogAction, dialogActions);
-	}
-};
-var $author$project$DialogGame$encodeDialogOption = function (_v0) {
-	var text = _v0.text;
-	var condition = _v0.condition;
-	var action = _v0.action;
-	return $elm$json$Json$Encode$object(
-		_Utils_ap(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'text',
-					$elm$json$Json$Encode$string(
-						$author$project$Screept$textValueStringify(text))),
-					_Utils_Tuple2(
-					'action',
-					A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogAction, action))
-				]),
-			function () {
-				if (condition.$ === 'Just') {
-					var a = condition.a;
-					return _List_fromArray(
-						[
-							_Utils_Tuple2(
-							'condition',
-							$elm$json$Json$Encode$string(
-								$author$project$Screept$intValueStringify(a)))
-						]);
-				} else {
-					return _List_Nil;
-				}
-			}()));
-};
-var $author$project$DialogGame$encodeDialog = function (_v0) {
-	var id = _v0.id;
-	var text = _v0.text;
-	var options = _v0.options;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'id',
-				$elm$json$Json$Encode$string(id)),
-				_Utils_Tuple2(
-				'text',
-				$elm$json$Json$Encode$string(
-					$author$project$Screept$textValueStringify(text))),
-				_Utils_Tuple2(
-				'options',
-				A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogOption, options))
-			]));
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$DialogGame$encodeGameDefinition = function (_v0) {
-	var dialogs = _v0.dialogs;
-	var startDialogId = _v0.startDialogId;
-	var counters = _v0.counters;
-	var labels = _v0.labels;
-	var procedures = _v0.procedures;
-	var functions = _v0.functions;
-	var statusLine = _v0.statusLine;
-	return $elm$json$Json$Encode$object(
-		_Utils_ap(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'dialogs',
-					A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialog, dialogs)),
-					_Utils_Tuple2(
-					'startDialogId',
-					$elm$json$Json$Encode$string(startDialogId)),
-					_Utils_Tuple2(
-					'counters',
-					A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$json$Json$Encode$int, counters)),
-					_Utils_Tuple2(
-					'labels',
-					A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$json$Json$Encode$string, labels)),
-					_Utils_Tuple2(
-					'procedures',
-					A3(
-						$elm$json$Json$Encode$dict,
-						$elm$core$Basics$identity,
-						A2($elm$core$Basics$composeR, $author$project$Screept$statementStringify, $elm$json$Json$Encode$string),
-						procedures)),
-					_Utils_Tuple2(
-					'functions',
-					A3(
-						$elm$json$Json$Encode$dict,
-						$elm$core$Basics$identity,
-						A2($elm$core$Basics$composeR, $author$project$Screept$intValueStringify, $elm$json$Json$Encode$string),
-						functions))
-				]),
-			function () {
-				if (statusLine.$ === 'Nothing') {
-					return _List_Nil;
-				} else {
-					var x = statusLine.a;
-					return _List_fromArray(
-						[
-							_Utils_Tuple2(
-							'statusLine',
-							$elm$json$Json$Encode$string(
-								$author$project$Screept$textValueStringify(x)))
-						]);
-				}
-			}()));
-};
-var $author$project$DialogGame$stringifyGameDefinition = function (gd) {
-	return A2(
-		$elm$json$Json$Encode$encode,
-		2,
-		$author$project$DialogGame$encodeGameDefinition(gd));
-};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -10281,21 +9964,54 @@ var $mhoare$elm_stack$Stack$top = function (_v0) {
 	var stack = _v0.a;
 	return $elm$core$List$head(stack);
 };
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $author$project$DialogGame$viewDialogText = F2(
+	function (textValue, gameState) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (par) {
+					return A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(par)
+							]));
+				},
+				A2(
+					$elm$core$String$split,
+					'\n',
+					A2($author$project$Screept$getText, gameState, textValue))));
+	});
+var $author$project$DialogGame$viewMessages = function (msgs) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('messages')
+			]),
+		A2(
+			$elm$core$List$map,
+			function (m) {
+				return A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('message')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(m)
+						]));
+			},
+			msgs));
 };
-var $author$project$ScreeptEditor$ClickRun = {$: 'ClickRun'};
-var $author$project$ScreeptEditor$IntValueEditor = function (a) {
-	return {$: 'IntValueEditor', a: a};
+var $author$project$DialogGame$ClickDialog = function (a) {
+	return {$: 'ClickDialog', a: a};
 };
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -10313,6 +10029,88 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $author$project$DialogGame$viewOption = F2(
+	function (gameState, dialogOption) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Events$onClick(
+					$author$project$DialogGame$ClickDialog(dialogOption.action)),
+					$elm$html$Html$Attributes$class('option')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					A2($author$project$Screept$getText, gameState, dialogOption.text))
+				]));
+	});
+var $author$project$DialogGame$view = function (_v0) {
+	var gameState = _v0.gameState;
+	var statusLine = _v0.statusLine;
+	var dialogs = _v0.dialogs;
+	var dialog = A2(
+		$author$project$DialogGame$getDialog,
+		A2(
+			$elm$core$Maybe$withDefault,
+			'bad',
+			$mhoare$elm_stack$Stack$top(gameState.dialogStack)),
+		dialogs);
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('container')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('dialog')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$core$Maybe$withDefault,
+						$elm$html$Html$text(''),
+						A2(
+							$elm$core$Maybe$map,
+							function (t) {
+								return A2($author$project$DialogGame$viewDialogText, t, gameState);
+							},
+							statusLine)),
+						A2($author$project$DialogGame$viewDialogText, dialog.text, gameState),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						A2(
+							$elm$core$List$map,
+							$author$project$DialogGame$viewOption(gameState),
+							A2(
+								$elm$core$List$filter,
+								function (o) {
+									return A2(
+										$elm$core$Maybe$withDefault,
+										true,
+										A2(
+											$elm$core$Maybe$map,
+											function (check) {
+												return A2($author$project$Screept$isTruthy, check, gameState);
+											},
+											o.condition));
+								},
+								dialog.options)))
+					])),
+				($elm$core$List$length(gameState.messages) > 0) ? $author$project$DialogGame$viewMessages(gameState.messages) : $elm$html$Html$text('')
+			]));
+};
+var $author$project$ScreeptEditor$ClickRun = {$: 'ClickRun'};
+var $author$project$ScreeptEditor$IntValueEditor = function (a) {
+	return {$: 'IntValueEditor', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$ParsedEditable$ParseClick = {$: 'ParseClick'};
 var $author$project$ParsedEditable$TextEdit = function (a) {
 	return {$: 'TextEdit', a: a};
@@ -10386,6 +10184,7 @@ var $author$project$ParsedEditable$problemToString = function (problem) {
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$ParsedEditable$view = function (model) {
 	return A2(
@@ -10478,44 +10277,6 @@ var $author$project$ScreeptEditor$view = function (model) {
 					model.value))
 			]));
 };
-var $elm$core$List$sortBy = _List_sortBy;
-var $elm$core$List$sort = function (xs) {
-	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
-};
-var $author$project$Main$viewDebug = function (gameState) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('status')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'display', 'grid'),
-						A2($elm$html$Html$Attributes$style, 'grid-template-columns', 'repeat(4,1fr)')
-					]),
-				A2(
-					$elm$core$List$map,
-					function (_v0) {
-						var k = _v0.a;
-						var v = _v0.b;
-						return A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(
-									k + (':' + $elm$core$String$fromInt(v)))
-								]));
-					},
-					$elm$core$List$sort(
-						$elm$core$Dict$toList(gameState.counters))))
-			]));
-};
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
 };
@@ -10571,133 +10332,7 @@ var $author$project$DialogGameEditor$viewDialog = function (model) {
 				]));
 	}
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $author$project$Main$viewDialogText = F2(
-	function (textValue, gameState) {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$map,
-				function (par) {
-					return A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(par)
-							]));
-				},
-				A2(
-					$elm$core$String$split,
-					'\n',
-					A2($author$project$Screept$getText, gameState, textValue))));
-	});
-var $author$project$Main$ClickDialog = function (a) {
-	return {$: 'ClickDialog', a: a};
-};
-var $author$project$Main$viewOption = F2(
-	function (gameState, dialogOption) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Events$onClick(
-					$author$project$Main$ClickDialog(dialogOption.action)),
-					$elm$html$Html$Attributes$class('option')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(
-					A2($author$project$Screept$getText, gameState, dialogOption.text))
-				]));
-	});
-var $author$project$Main$viewDialog = F2(
-	function (_v0, dialog) {
-		var gameState = _v0.gameState;
-		var statusLine = _v0.statusLine;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('dialog')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$core$Maybe$withDefault,
-					$elm$html$Html$text(''),
-					A2(
-						$elm$core$Maybe$map,
-						function (t) {
-							return A2($author$project$Main$viewDialogText, t, gameState);
-						},
-						statusLine)),
-					A2($author$project$Main$viewDialogText, dialog.text, gameState),
-					A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					A2(
-						$elm$core$List$map,
-						$author$project$Main$viewOption(gameState),
-						A2(
-							$elm$core$List$filter,
-							function (o) {
-								return A2(
-									$elm$core$Maybe$withDefault,
-									true,
-									A2(
-										$elm$core$Maybe$map,
-										function (check) {
-											return A2($author$project$Screept$isTruthy, check, gameState);
-										},
-										o.condition));
-							},
-							dialog.options)))
-				]));
-	});
-var $author$project$Main$viewMessages = function (msgs) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('messages')
-			]),
-		A2(
-			$elm$core$List$map,
-			function (m) {
-				return A2(
-					$elm$html$Html$p,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('message')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(m)
-						]));
-			},
-			msgs));
-};
 var $author$project$Main$view = function (model) {
-	var dialog = A2(
-		$author$project$DialogGame$getDialog,
-		A2(
-			$elm$core$Maybe$withDefault,
-			'bad',
-			$mhoare$elm_stack$Stack$top(model.gameState.dialogStack)),
-		model.dialogs);
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -10710,30 +10345,14 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$map,
 				$author$project$Main$DialogEditor,
 				$author$project$DialogGameEditor$viewDialog(model.dialogEditor)),
-				A2($author$project$Main$viewDialog, model, dialog),
-				($elm$core$List$length(model.gameState.messages) > 0) ? $author$project$Main$viewMessages(model.gameState.messages) : $elm$html$Html$text(''),
-				model.isDebug ? $author$project$Main$viewDebug(model.gameState) : $elm$html$Html$text(''),
+				A2(
+				$elm$html$Html$map,
+				$author$project$Main$GameDialog,
+				$author$project$DialogGame$view(model.gameDialog)),
 				A2(
 				$elm$html$Html$map,
 				$author$project$Main$ScreeptEditor,
-				$author$project$ScreeptEditor$view(model.screeptEditor)),
-				A2(
-				$elm$html$Html$textarea,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$DialogGame$stringifyGameDefinition(
-							A7(
-								$author$project$DialogGame$GameDefinition,
-								$elm$core$Dict$values(model.dialogs),
-								model.statusLine,
-								$author$project$Games$FabledLands$initialDialogId,
-								model.gameState.counters,
-								model.gameState.labels,
-								model.gameState.procedures,
-								model.gameState.functions)))
-					]))
+				$author$project$ScreeptEditor$view(model.screeptEditor))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

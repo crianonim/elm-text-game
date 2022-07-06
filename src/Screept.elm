@@ -124,6 +124,15 @@ type alias State a =
     }
 
 
+emptyState =
+    { counters = Dict.empty
+    , labels = Dict.empty
+    , procedures = Dict.empty
+    , functions = Dict.empty
+    , rnd = Random.initialSeed 666
+    }
+
+
 getText : State a -> TextValue -> String
 getText gameState text =
     case text of
