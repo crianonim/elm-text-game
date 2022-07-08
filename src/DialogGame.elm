@@ -24,7 +24,10 @@ type alias GameState =
 
 
 type alias Model =
-    { gameState : GameState, statusLine : Maybe Screept.TextValue, dialogs : Dialogs }
+    { gameState : GameState
+    , statusLine : Maybe Screept.TextValue
+    , dialogs : Dialogs
+    }
 
 
 type alias DialogOption =
@@ -52,6 +55,23 @@ type alias GameDefinition =
 init : GameState -> Dialogs -> Maybe Screept.TextValue -> Model
 init gs dialogs statusLine =
     { gameState = gs, statusLine = statusLine, dialogs = dialogs }
+
+
+initSimple : Dialogs -> Model
+initSimple dialogs =
+    init emptyGameState dialogs Nothing
+
+
+emptyGameState : GameState
+emptyGameState =
+    { counters = Dict.empty
+    , labels = Dict.empty
+    , functions = Dict.empty
+    , procedures = Dict.empty
+    , messages = []
+    , rnd = Random.initialSeed 666
+    , dialogStack = Stack.initialise |> Stack.push "start"
+    }
 
 
 type DialogAction
@@ -91,20 +111,20 @@ getDialog dialogId dialogs =
     Dict.get dialogId dialogs |> Maybe.withDefault badDialog
 
 
-executeAction : DialogAction -> GameState -> GameState
+executeAction : DialogAction -> GameState -> ( GameState, Maybe String )
 executeAction dialogActionExecution gameState =
     case dialogActionExecution of
         GoAction dialogId ->
-            { gameState | dialogStack = Stack.push dialogId gameState.dialogStack }
+            ( { gameState | dialogStack = Stack.push dialogId gameState.dialogStack }, Nothing )
 
         GoBackAction ->
-            { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }
+            ( { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }, Nothing )
 
         Message msg ->
-            { gameState | messages = Screept.getText gameState msg :: gameState.messages }
+            ( { gameState | messages = Screept.getText gameState msg :: gameState.messages }, Nothing )
 
         Screept statement ->
-            Screept.runStatement statement gameState
+            ( Screept.runStatement statement gameState, Nothing )
 
         ConditionalAction condition success failure ->
             executeAction
@@ -117,10 +137,10 @@ executeAction dialogActionExecution gameState =
                 gameState
 
         ActionBlock dialogActionExecutions ->
-            List.foldl (\a state -> executeAction a state) gameState dialogActionExecutions
+            List.foldl (\a ( state, _ ) -> executeAction a state) ( gameState, Nothing ) dialogActionExecutions
 
-        Exit string ->
-            gameState
+        Exit code ->
+            ( gameState, Just code )
 
 
 setRndSeed : Random.Seed -> Model -> Model
@@ -273,17 +293,19 @@ decodeGameDefinition =
         (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Maybe String )
 update msg model =
     case msg of
         ClickDialog actions ->
             let
-                gs =
-                    List.foldl executeAction model.gameState actions
+                ( gs, code ) =
+                    List.foldl (\a ( state, _ ) -> executeAction a state) ( model.gameState, Nothing ) actions
             in
-            { model
+            ( { model
                 | gameState = gs
-            }
+              }
+            , code
+            )
 
 
 view : Model -> Html Msg
