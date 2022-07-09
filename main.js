@@ -8233,10 +8233,10 @@ var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialog
 					{
 					action: _List_fromArray(
 						[
-							$author$project$DialogGame$Exit('fabled')
+							$author$project$DialogGame$Exit('load_url')
 						]),
 					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$Screept$S('Load Fabled Lands')
+					text: $author$project$Screept$S('Load from url')
 				},
 					$author$project$DialogGame$goBackOption
 				]),
@@ -8280,7 +8280,8 @@ var $author$project$Main$init = function (_v0) {
 			gameDialog: $author$project$Main$NotLoaded,
 			isDebug: true,
 			mainMenuDialog: $author$project$DialogGame$initSimple($author$project$Main$mainMenuDialogs),
-			screeptEditor: $author$project$ScreeptEditor$init
+			screeptEditor: $author$project$ScreeptEditor$init,
+			urlLoader: $elm$core$Maybe$Nothing
 		},
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
@@ -8635,6 +8636,7 @@ var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) 
 		statusLine: gameDefinition.statusLine
 	};
 };
+var $author$project$Main$ShowUrlLoader = {$: 'ShowUrlLoader'};
 var $author$project$Main$StartGame = {$: 'StartGame'};
 var $author$project$Main$StopGame = {$: 'StopGame'};
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -8675,6 +8677,13 @@ var $author$project$Main$mainMenuActions = F2(
 							$elm$core$Task$perform,
 							$elm$core$Basics$identity,
 							$elm$core$Task$succeed($author$project$Main$StopGame)));
+				case 'load_url':
+					return _Utils_Tuple2(
+						dialModel,
+						A2(
+							$elm$core$Task$perform,
+							$elm$core$Basics$identity,
+							$elm$core$Task$succeed($author$project$Main$ShowUrlLoader)));
 				default:
 					return _Utils_Tuple2(dialModel, $elm$core$Platform$Cmd$none);
 			}
@@ -9280,7 +9289,7 @@ var $author$project$Main$update = F2(
 								}),
 							A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
 				}
-			default:
+			case 'StopGame':
 				var _v10 = model.gameDialog;
 				if (_v10.$ === 'Started') {
 					var gd = _v10.a;
@@ -9292,6 +9301,48 @@ var $author$project$Main$update = F2(
 								gameDialog: $author$project$Main$Loaded(gd)
 							}),
 						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'ShowUrlLoader':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							urlLoader: $elm$core$Maybe$Just('')
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'HideUrlLoader':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{urlLoader: $elm$core$Maybe$Nothing}),
+					$elm$core$Platform$Cmd$none);
+			case 'EditUrlLoader':
+				var v = msg.a;
+				var urlModel = A2(
+					$elm$core$Maybe$map,
+					$elm$core$Basics$always(v),
+					model.urlLoader);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{urlLoader: urlModel}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var _v11 = model.urlLoader;
+				if (_v11.$ === 'Just') {
+					var urlLoader = _v11.a;
+					var _v12 = A2($elm$core$Debug$log, 'URL', urlLoader);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{urlLoader: $elm$core$Maybe$Nothing}),
+						$elm$http$Http$get(
+							{
+								expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
+								url: urlLoader
+							}));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -9495,6 +9546,87 @@ var $author$project$DialogGame$view = function (_v0) {
 				($elm$core$List$length(gameState.messages) > 0) ? $author$project$DialogGame$viewMessages(gameState.messages) : $elm$html$Html$text('')
 			]));
 };
+var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
+var $author$project$Main$EditUrlLoader = function (a) {
+	return {$: 'EditUrlLoader', a: a};
+};
+var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$viewUrlLoader = function (model) {
+	var _v0 = model.urlLoader;
+	if (_v0.$ === 'Just') {
+		var urlLoader = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$value(urlLoader),
+							$elm$html$Html$Events$onInput($author$project$Main$EditUrlLoader)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($author$project$Main$ClickUrlLoader)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Load')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($author$project$Main$HideUrlLoader)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Cancel')
+						]))
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -9526,7 +9658,8 @@ var $author$project$Main$view = function (model) {
 						var m = _v0.a;
 						return $elm$html$Html$text('Loaded game:  ' + (m.title + '.'));
 				}
-			}()
+			}(),
+				$author$project$Main$viewUrlLoader(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

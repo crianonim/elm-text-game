@@ -9,8 +9,8 @@ import DialogGameEditor
 import Dict
 import Games.UnderSeaGame as Game
 import Html exposing (..)
-import Html.Attributes exposing (class, style)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, style, value)
+import Html.Events exposing (onClick, onInput)
 import Http
 import Platform.Cmd exposing (Cmd)
 import Random
@@ -55,16 +55,15 @@ init _ =
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
-                --|> DialogGame.setStatusLine (Just (Screept.Conditional (Screept.parseIntValue "$game_loaded") (Screept.Concat [ Screept.S "Loaded game: ", Screept.Label "game_title" ]) (Screept.S "No game definition loaded.")))
+
+      --|> DialogGame.setStatusLine (Just (Screept.Conditional (Screept.parseIntValue "$game_loaded") (Screept.Concat [ Screept.S "Loaded game: ", Screept.Label "game_title" ]) (Screept.S "No game definition loaded.")))
+      , urlLoader = Nothing
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
-
         , Http.get { url = "/games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
-
-
 
 
 mainMenuDialogs : Dialogs
@@ -82,18 +81,17 @@ mainMenuDialogs =
           , options =
                 [ { text = Screept.S "Load Sandbox", condition = Nothing, action = [ Exit "sandbox" ] }
                 , { text = Screept.S "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
-                               , { text = Screept.S "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
-
+                , { text = Screept.S "Load from url", condition = Nothing, action = [ Exit "load_url" ] }
                 , DialogGame.goBackOption
                 ]
           }
-        , {id="in_game"
-        , text = Screept.Concat [Screept.S "Playing: ", Screept.Label "game_title"]
-        , options = [
-        {text = Screept.S "Restart", condition = Nothing, action=[Exit "start_game"]}
-        ,{text = Screept.S "Stop game", condition = Nothing, action=[GoAction "start",Exit "stop_game"]}
-        ]
-        }
+        , { id = "in_game"
+          , text = Screept.Concat [ Screept.S "Playing: ", Screept.Label "game_title" ]
+          , options =
+                [ { text = Screept.S "Restart", condition = Nothing, action = [ Exit "start_game" ] }
+                , { text = Screept.S "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
+                ]
+          }
         ]
 
 
@@ -115,7 +113,10 @@ mainMenuActions dialModel mcode =
                     ( dialModel, Task.succeed StartGame |> Task.perform identity )
 
                 "stop_game" ->
-                     ( dialModel, Task.succeed StopGame |> Task.perform identity )
+                    ( dialModel, Task.succeed StopGame |> Task.perform identity )
+
+                "load_url" ->
+                    ( dialModel, Task.succeed ShowUrlLoader |> Task.perform identity )
 
                 _ ->
                     ( dialModel, Cmd.none )
@@ -208,19 +209,44 @@ update msg model =
                     ( { model
                         | gameDialog = gameDialog gameDefinition
                       }
-                    ,
-                      Random.generate SeedGenerated Random.independentSeed
+                    , Random.generate SeedGenerated Random.independentSeed
                     )
 
                 Started gameDefinition _ ->
-                    ( { model | gameDialog = gameDialog gameDefinition },                       Random.generate SeedGenerated Random.independentSeed)
+                    ( { model | gameDialog = gameDialog gameDefinition }, Random.generate SeedGenerated Random.independentSeed )
 
         StopGame ->
             case model.gameDialog of
                 Started gd m ->
+                    ( { model | gameDialog = Loaded gd }, Cmd.none )
 
-                 ({model|gameDialog = Loaded gd},Cmd.none)
-                _ -> (model,Cmd.none)
+                _ ->
+                    ( model, Cmd.none )
+
+        ShowUrlLoader ->
+            ( { model | urlLoader = Just "" }, Cmd.none )
+
+        HideUrlLoader ->
+            ( { model | urlLoader = Nothing }, Cmd.none )
+
+        EditUrlLoader v ->
+            let
+                urlModel =
+                    Maybe.map (always v) model.urlLoader
+            in
+            ( { model | urlLoader = urlModel }, Cmd.none )
+
+        ClickUrlLoader ->
+            case model.urlLoader of
+                Just urlLoader ->
+                    let
+                        _ =
+                            Debug.log "URL" urlLoader
+                    in
+                    ( { model | urlLoader = Nothing }, Http.get { url = urlLoader, expect = Http.expectJson GotGameDefinition decodeGameDefinition } )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 type alias Model =
@@ -230,6 +256,7 @@ type alias Model =
     , dialogEditor : DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
+    , urlLoader : Maybe String
     }
 
 
@@ -243,6 +270,10 @@ type Msg
     | MainMenuDialog DialogGame.Msg
     | StartGame
     | StopGame
+    | ShowUrlLoader
+    | HideUrlLoader
+    | EditUrlLoader String
+    | ClickUrlLoader
 
 
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
@@ -295,7 +326,22 @@ view model =
         --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
         --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
+        , viewUrlLoader model
         ]
+
+
+viewUrlLoader : Model -> Html Msg
+viewUrlLoader model =
+    case model.urlLoader of
+        Just urlLoader ->
+            div []
+                [ input [ value urlLoader, onInput EditUrlLoader ] []
+                , button [ onClick ClickUrlLoader ] [ text "Load" ]
+                , button [ onClick HideUrlLoader ] [ text "Cancel" ]
+                ]
+
+        Nothing ->
+            text ""
 
 
 
