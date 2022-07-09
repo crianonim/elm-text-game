@@ -315,13 +315,13 @@ view model =
                 DialogGame.view gameDialogMenu |> Html.map GameDialog
 
             NotLoaded ->
-                text "No game definition loaded."
+                div [ class "dialog" ] [ text "No game definition loaded." ]
 
             Loading ->
                 text "Loading..."
 
             Loaded m ->
-                text <| "Loaded game:  " ++ m.title ++ "."
+                div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
 
         --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
         --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]

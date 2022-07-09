@@ -9651,12 +9651,30 @@ var $author$project$Main$view = function (model) {
 							$author$project$Main$GameDialog,
 							$author$project$DialogGame$view(gameDialogMenu));
 					case 'NotLoaded':
-						return $elm$html$Html$text('No game definition loaded.');
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('dialog')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('No game definition loaded.')
+								]));
 					case 'Loading':
 						return $elm$html$Html$text('Loading...');
 					default:
 						var m = _v0.a;
-						return $elm$html$Html$text('Loaded game:  ' + (m.title + '.'));
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('dialog')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Loaded game:  ' + (m.title + '.'))
+								]));
 				}
 			}(),
 				$author$project$Main$viewUrlLoader(model)
