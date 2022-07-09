@@ -153,6 +153,11 @@ badDialog =
     { id = "bad", text = S "BAD Dialog", options = [] }
 
 
+goBackOption : DialogOption
+goBackOption =
+    { text = S "Go back", condition = Nothing, action = [ GoBackAction ] }
+
+
 runScreept : String -> DialogAction
 runScreept s =
     Screept <| Screept.run s

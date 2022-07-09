@@ -5547,115 +5547,11 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$Main$NotLoaded = {$: 'NotLoaded'};
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Games$UnderSeaGame$counters = $elm$core$Dict$empty;
-var $author$project$DialogGame$GoAction = function (a) {
-	return {$: 'GoAction', a: a};
-};
-var $author$project$Screept$S = function (a) {
-	return {$: 'S', a: a};
-};
-var $author$project$Games$UnderSeaGame$dialogs = _List_fromArray(
-	[
-		{
-		id: 'start',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p6')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Explore the ledge where the Seeker has come to rest')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p5')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Cut loose from the Maray and dive with the Seeker into the canyon in the ocean floor')
-			}
-			]),
-		text: $author$project$Screept$S('\n\n    You are an underwater explorer. You are leaving to explore the deepest oceans. You must find the lost city of Atlantis. This is your most challenging assignment.\n    It is morning and the sun pushes up on the horizon. The sea is calm. You climb into the narrow pilot\'s compartment of the underwater vessel Seeker with your special gear. The crew of the research vessel Maray screws down the hatch clamps. Now begins the plunge into the depths of the ocean. The Seeker crew begins lowering by a strong, but thin cable. Within minutes, you are so deep in the ocean that little light filters down to you. The silence is eerie as the Seeker slips deeper and deeper. You peer out the thick glass porthole and see fish drifting past, sometimes stopping to look at you—an intruder from another world.\n     Now the cable attaching you to Maray is extended almost to its limit. You have come to rest on a ledge near the canyon in the ocean floor that supposedly leads to the lost city of Atlantis.\n    You have a special sea suit that will protect you from the intense pressure of the deep if you choose to walk about on the sea bottom. You can cut loose from the cable if you wish because the\n    Seeker is self-propelled. You are now in another world.\n    ')
-	},
-		{
-		id: 'p5',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p8')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Investigate the bubbles')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p9')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Investigate the grotto with the round entrance')
-			}
-			]),
-		text: $author$project$Screept$S('\n      You radio a status report to the Moray and tell them that you are going to cast off from the line and descend under your own power. Your plan is approved and you cast off your line. Now you are on your own. The Seeker slips noiselessly into the undersea canyon.\n      As you drop into the canyon, you turn on the Seeker\'s powerful searchlight. Straight ahead is a dark wall covered with a strange type of barnacle growth. To the left (port) side you see what appears to be a grotto. The entrance is perfectly\n      round, as if it had been cut by human hands. Lantern fish give off a pale, greenish light. To the right (starboard) side of the Seeker you see bub- bles rising steadily from the floor of the canyon.\n      ')
-	},
-		{
-		id: 'p6',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p10')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Stay hidden close to the Seeker')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p12')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Try to escape in the hope that rescuers will see you')
-			}
-			]),
-		text: $author$project$Screept$S('\n      Your sea suit will protect you from the intense pressures of the deep. It is a tight fit and takes you some time to put it on. Finally you slip from the airlock of the Seeker and stand on the ocean floor. It is a strange and marvelous world where your every move is slowed down. You begin to explore with your special hand-held searchlight. You examine the ledge by the canyon.\n      Suddenly, a school of bright yellow angel fish dart by, almost brushing you. What made them move so fast? Are they being chased?\n      Then you see it. The Seeker is in the grips of a huge sea monster. It is similar to a squid, but it is enormous. The Seeker is just a toy in its long, powerful tentacles. You seek shelter behind a rock formation. You know the spear gun you carry will be useless against this monster. It looks as though it will destroy the Seeker. Fish of all sizes huddle with you in an attempt to escape the monster.\n      ')
-	},
-		{
-		id: 'p8',
-		options: _List_fromArray(
-			[
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p11')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Analyze the bubbles')
-			},
-				{
-				action: _List_fromArray(
-					[
-						$author$project$DialogGame$GoAction('p15')
-					]),
-				condition: $elm$core$Maybe$Nothing,
-				text: $author$project$Screept$S('Take sonar readings')
-			}
-			]),
-		text: $author$project$Screept$S('\n            Carefully, you maneuver the Seeker between the walls of the canyon.\n            On the floor of the canyon, you discover a large round hole out of which flow the large bubbles. The Seeker is equipped with scientific equipment to analyze the bubbles. It also has sonar equipment that can measure the depth of any hole.\n            ')
-	}
-	]);
-var $author$project$Games$UnderSeaGame$functions = $elm$core$Dict$empty;
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -5839,10 +5735,6 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			$elm$random$Random$step,
 			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
 			seed0);
-	});
-var $author$project$DialogGame$init = F3(
-	function (gs, dialogs, statusLine) {
-		return {dialogs: dialogs, gameState: gs, statusLine: statusLine};
 	});
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
 var $author$project$ParsedEditable$init = F2(
@@ -6548,6 +6440,9 @@ var $author$project$Screept$Rnd = F3(
 	function (a, b, c) {
 		return {$: 'Rnd', a: a, b: b, c: c};
 	});
+var $author$project$Screept$S = function (a) {
+	return {$: 'S', a: a};
+};
 var $author$project$Screept$SetCounter = F2(
 	function (a, b) {
 		return {$: 'SetCounter', a: a, b: b};
@@ -7162,6 +7057,8 @@ var $author$project$ScreeptEditor$init = {
 	statementEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$statementParser),
 	value: $elm$core$Maybe$Nothing
 };
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
@@ -7181,11 +7078,26 @@ var $author$project$DialogGame$emptyGameState = {
 	procedures: $elm$core$Dict$empty,
 	rnd: $elm$random$Random$initialSeed(666)
 };
+var $author$project$DialogGame$init = F3(
+	function (gs, dialogs, statusLine) {
+		return {dialogs: dialogs, gameState: gs, statusLine: statusLine};
+	});
 var $author$project$DialogGame$initSimple = function (dialogs) {
 	return A3($author$project$DialogGame$init, $author$project$DialogGame$emptyGameState, dialogs, $elm$core$Maybe$Nothing);
 };
-var $author$project$Games$UnderSeaGame$initialDialogId = 'start';
-var $author$project$Games$UnderSeaGame$labels = $elm$core$Dict$empty;
+var $author$project$DialogGame$Exit = function (a) {
+	return {$: 'Exit', a: a};
+};
+var $author$project$DialogGame$GoAction = function (a) {
+	return {$: 'GoAction', a: a};
+};
+var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
+var $author$project$DialogGame$goBackOption = {
+	action: _List_fromArray(
+		[$author$project$DialogGame$GoBackAction]),
+	condition: $elm$core$Maybe$Nothing,
+	text: $author$project$Screept$S('Go back')
+};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -7316,164 +7228,7 @@ var $author$project$DialogGame$listDialogToDictDialog = function (dialogs) {
 			},
 			dialogs));
 };
-var $author$project$DialogGame$Exit = function (a) {
-	return {$: 'Exit', a: a};
-};
-var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialogToDictDialog(
-	_List_fromArray(
-		[
-			{
-			id: 'start',
-			options: _List_fromArray(
-				[
-					{
-					action: _List_fromArray(
-						[
-							$author$project$DialogGame$Exit('sandbox')
-						]),
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$Screept$S('Load Sandbox')
-				},
-					{
-					action: _List_fromArray(
-						[
-							$author$project$DialogGame$Exit('fabled')
-						]),
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$Screept$S('Load Fabled')
-				}
-				]),
-			text: $author$project$Screept$Concat(
-				_List_fromArray(
-					[
-						$author$project$Screept$S('Game loaded: '),
-						$author$project$Screept$Label('game_loaded')
-					]))
-		}
-		]));
-var $author$project$Games$UnderSeaGame$procedures = $elm$core$Dict$empty;
-var $author$project$Games$UnderSeaGame$statusLine = $author$project$Screept$S('');
-var $author$project$DialogGame$Message = function (a) {
-	return {$: 'Message', a: a};
-};
-var $author$project$Main$yesNoDialogs = $author$project$DialogGame$listDialogToDictDialog(
-	_List_fromArray(
-		[
-			{
-			id: 'start',
-			options: _List_fromArray(
-				[
-					{
-					action: _List_fromArray(
-						[
-							$author$project$DialogGame$Exit('yes')
-						]),
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$Screept$S('Yes')
-				},
-					{
-					action: _List_fromArray(
-						[
-							$author$project$DialogGame$Message(
-							$author$project$Screept$S('you pressed No'))
-						]),
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$Screept$S('No')
-				}
-				]),
-			text: $author$project$Screept$S('Do you want to quit?')
-		}
-		]));
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{
-			dialogEditor: $author$project$DialogGameEditor$init,
-			gameDefinition: $elm$core$Maybe$Nothing,
-			gameDialog: A3(
-				$author$project$DialogGame$init,
-				{
-					counters: $author$project$Games$UnderSeaGame$counters,
-					dialogStack: A2($mhoare$elm_stack$Stack$push, $author$project$Games$UnderSeaGame$initialDialogId, $mhoare$elm_stack$Stack$initialise),
-					functions: $author$project$Games$UnderSeaGame$functions,
-					labels: $author$project$Games$UnderSeaGame$labels,
-					messages: _List_Nil,
-					procedures: $author$project$Games$UnderSeaGame$procedures,
-					rnd: $elm$random$Random$initialSeed(666)
-				},
-				$author$project$DialogGame$listDialogToDictDialog($author$project$Games$UnderSeaGame$dialogs),
-				$elm$core$Maybe$Just($author$project$Games$UnderSeaGame$statusLine)),
-			isDebug: true,
-			mainMenuDialog: $elm$core$Maybe$Just(
-				$author$project$DialogGame$initSimple($author$project$Main$mainMenuDialogs)),
-			screeptEditor: $author$project$ScreeptEditor$init,
-			yesNoDialog: $elm$core$Maybe$Just(
-				$author$project$DialogGame$initSimple($author$project$Main$yesNoDialogs))
-		},
-		$elm$core$Platform$Cmd$batch(
-			_List_fromArray(
-				[
-					A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed)
-				])));
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) {
-	return {
-		dialogs: $author$project$DialogGame$listDialogToDictDialog(gameDefinition.dialogs),
-		gameState: {
-			counters: gameDefinition.counters,
-			dialogStack: A2($mhoare$elm_stack$Stack$push, gameDefinition.startDialogId, $mhoare$elm_stack$Stack$initialise),
-			functions: gameDefinition.functions,
-			labels: gameDefinition.labels,
-			messages: _List_Nil,
-			procedures: gameDefinition.procedures,
-			rnd: $elm$random$Random$initialSeed(666)
-		},
-		statusLine: gameDefinition.statusLine
-	};
-};
 var $elm$core$Debug$log = _Debug_log;
-var $author$project$Main$GotGameDefinition = function (a) {
-	return {$: 'GotGameDefinition', a: a};
-};
-var $author$project$DialogGame$GameDefinition = F7(
-	function (dialogs, statusLine, startDialogId, counters, labels, procedures, functions) {
-		return {counters: counters, dialogs: dialogs, functions: functions, labels: labels, procedures: procedures, startDialogId: startDialogId, statusLine: statusLine};
-	});
-var $author$project$DialogGame$Dialog = F3(
-	function (id, text, options) {
-		return {id: id, options: options, text: text};
-	});
-var $author$project$DialogGame$DialogOption = F3(
-	function (text, condition, action) {
-		return {action: action, condition: condition, text: text};
-	});
-var $author$project$DialogGame$ActionBlock = function (a) {
-	return {$: 'ActionBlock', a: a};
-};
-var $author$project$DialogGame$ConditionalAction = F3(
-	function (a, b, c) {
-		return {$: 'ConditionalAction', a: a, b: b, c: c};
-	});
-var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
-var $author$project$DialogGame$Screept = function (a) {
-	return {$: 'Screept', a: a};
-};
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$lazy = function (thunk) {
-	return A2(
-		$elm$json$Json$Decode$andThen,
-		thunk,
-		$elm$json$Json$Decode$succeed(_Utils_Tuple0));
-};
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
 		return {col: col, problem: problem, row: row};
@@ -7545,6 +7300,490 @@ var $author$project$Screept$parseIntValue = function (intVal) {
 		return $author$project$Screept$Const(0);
 	}
 };
+var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialogToDictDialog(
+	_List_fromArray(
+		[
+			{
+			id: 'start',
+			options: _List_fromArray(
+				[
+					{
+					action: _List_fromArray(
+						[
+							$author$project$DialogGame$GoAction('load_game_definition')
+						]),
+					condition: $elm$core$Maybe$Nothing,
+					text: $author$project$Screept$S('Load Game')
+				},
+					{
+					action: _List_fromArray(
+						[
+							$author$project$DialogGame$Exit('start_game')
+						]),
+					condition: $elm$core$Maybe$Just(
+						$author$project$Screept$parseIntValue('$game_loaded')),
+					text: $author$project$Screept$S('Start Game')
+				}
+				]),
+			text: $author$project$Screept$S('Main Menu')
+		},
+			{
+			id: 'load_game_definition',
+			options: _List_fromArray(
+				[
+					{
+					action: _List_fromArray(
+						[
+							$author$project$DialogGame$Exit('sandbox')
+						]),
+					condition: $elm$core$Maybe$Nothing,
+					text: $author$project$Screept$S('Load Sandbox')
+				},
+					{
+					action: _List_fromArray(
+						[
+							$author$project$DialogGame$Exit('fabled')
+						]),
+					condition: $elm$core$Maybe$Nothing,
+					text: $author$project$Screept$S('Load Fabled')
+				},
+					$author$project$DialogGame$goBackOption
+				]),
+			text: $author$project$Screept$S('Games')
+		}
+		]));
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		{
+			dialogEditor: $author$project$DialogGameEditor$init,
+			gameDefinition: $elm$core$Maybe$Nothing,
+			gameDialog: $author$project$Main$NotLoaded,
+			isDebug: true,
+			mainMenuDialog: $author$project$DialogGame$initSimple($author$project$Main$mainMenuDialogs),
+			screeptEditor: $author$project$ScreeptEditor$init
+		},
+		$elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed)
+				])));
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Main$Loaded = F2(
+	function (a, b) {
+		return {$: 'Loaded', a: a, b: b};
+	});
+var $author$project$Main$Started = F3(
+	function (a, b, c) {
+		return {$: 'Started', a: a, b: b, c: c};
+	});
+var $author$project$Screept$run = function (statement) {
+	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$statementParser, statement);
+	if (_v0.$ === 'Ok') {
+		var value = _v0.a;
+		return value;
+	} else {
+		var error = _v0.a;
+		var _v1 = A2($elm$core$Debug$log, 'Error parsing : ', statement);
+		var _v2 = A2($elm$core$Debug$log, '!', error);
+		return $author$project$Screept$Block(_List_Nil);
+	}
+};
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Screept$binaryOpEval = F3(
+	function (op, x, y) {
+		switch (op.$) {
+			case 'Add':
+				return x + y;
+			case 'Sub':
+				return x - y;
+			case 'Mod':
+				return A2($elm$core$Basics$modBy, y, x);
+			case 'Mul':
+				return x * y;
+			case 'Div':
+				return (x / y) | 0;
+			case 'Gt':
+				return (_Utils_cmp(x, y) > 0) ? 1 : 0;
+			case 'Lt':
+				return (_Utils_cmp(x, y) < 0) ? 1 : 0;
+			case 'Eq':
+				return _Utils_eq(x, y) ? 1 : 0;
+			case 'And':
+				return (!(x * y)) ? 0 : 1;
+			default:
+				return (!(x + y)) ? 0 : 1;
+		}
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $author$project$Screept$unaryOpEval = F2(
+	function (op, x) {
+		return (!x) ? 1 : 0;
+	});
+var $author$project$Screept$getMaybeIntValue = F2(
+	function (gameValue, gameState) {
+		switch (gameValue.$) {
+			case 'Const':
+				var _int = gameValue.a;
+				return $elm$core$Maybe$Just(_int);
+			case 'Counter':
+				var counter = gameValue.a;
+				return A2($elm$core$Dict$get, counter, gameState.counters);
+			case 'Unary':
+				var op = gameValue.a;
+				var mx = gameValue.b;
+				return A2(
+					$elm$core$Maybe$map,
+					$author$project$Screept$unaryOpEval(op),
+					A2($author$project$Screept$getMaybeIntValue, mx, gameState));
+			case 'Binary':
+				var mx = gameValue.a;
+				var op = gameValue.b;
+				var my = gameValue.c;
+				return A3(
+					$elm$core$Maybe$map2,
+					$author$project$Screept$binaryOpEval(op),
+					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
+					A2($author$project$Screept$getMaybeIntValue, my, gameState));
+			default:
+				var func = gameValue.a;
+				return A2(
+					$elm$core$Maybe$andThen,
+					function (x) {
+						return A2($author$project$Screept$getMaybeIntValue, x, gameState);
+					},
+					A2($elm$core$Dict$get, func, gameState.functions));
+		}
+	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Screept$getIntValueWithDefault = F2(
+	function (gameValue, gameState) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
+	});
+var $author$project$Screept$getMaybeLabel = F2(
+	function (label, state) {
+		return A2($elm$core$Dict$get, label, state.labels);
+	});
+var $author$project$Screept$getLabelWithDefault = F2(
+	function (label, state) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2($author$project$Screept$getMaybeLabel, label, state));
+	});
+var $author$project$Screept$isTruthy = F2(
+	function (intValue, state) {
+		return (!A2($author$project$Screept$getIntValueWithDefault, intValue, state)) ? false : true;
+	});
+var $author$project$Screept$getText = F2(
+	function (gameState, text) {
+		getText:
+		while (true) {
+			switch (text.$) {
+				case 'S':
+					var string = text.a;
+					return string;
+				case 'Concat':
+					var specialTexts = text.a;
+					return $elm$core$String$concat(
+						A2(
+							$elm$core$List$map,
+							$author$project$Screept$getText(gameState),
+							specialTexts));
+				case 'Conditional':
+					var gameCheck = text.a;
+					var conditionalText = text.b;
+					var alternativeText = text.c;
+					if (A2($author$project$Screept$isTruthy, gameCheck, gameState)) {
+						var $temp$gameState = gameState,
+							$temp$text = conditionalText;
+						gameState = $temp$gameState;
+						text = $temp$text;
+						continue getText;
+					} else {
+						var $temp$gameState = gameState,
+							$temp$text = alternativeText;
+						gameState = $temp$gameState;
+						text = $temp$text;
+						continue getText;
+					}
+				case 'IntValueText':
+					var gameValue = text.a;
+					return $elm$core$String$fromInt(
+						A2($author$project$Screept$getIntValueWithDefault, gameValue, gameState));
+				default:
+					var label = text.a;
+					return A2($author$project$Screept$getLabelWithDefault, label, gameState);
+			}
+		}
+	});
+var $author$project$Screept$setCounter = F3(
+	function (counter, x, gameState) {
+		return _Utils_update(
+			gameState,
+			{
+				counters: A3($elm$core$Dict$insert, counter, x, gameState.counters)
+			});
+	});
+var $author$project$Screept$setFunction = F3(
+	function (id, fn, state) {
+		return _Utils_update(
+			state,
+			{
+				functions: A3($elm$core$Dict$insert, id, fn, state.functions)
+			});
+	});
+var $author$project$Screept$setLabel = F3(
+	function (counter, x, gameState) {
+		return _Utils_update(
+			gameState,
+			{
+				labels: A3($elm$core$Dict$insert, counter, x, gameState.labels)
+			});
+	});
+var $author$project$Screept$runStatement = F2(
+	function (statement, state) {
+		runStatement:
+		while (true) {
+			switch (statement.$) {
+				case 'SetCounter':
+					var textValue = statement.a;
+					var intValue = statement.b;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						state,
+						A2(
+							$elm$core$Maybe$map,
+							function (v) {
+								return A3(
+									$author$project$Screept$setCounter,
+									A2($author$project$Screept$getText, state, textValue),
+									v,
+									state);
+							},
+							A2($author$project$Screept$getMaybeIntValue, intValue, state)));
+				case 'SetLabel':
+					var label = statement.a;
+					var content = statement.b;
+					return A3(
+						$author$project$Screept$setLabel,
+						A2($author$project$Screept$getText, state, label),
+						A2($author$project$Screept$getText, state, content),
+						state);
+				case 'Rnd':
+					var counter = statement.a;
+					var mx = statement.b;
+					var my = statement.c;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						state,
+						A3(
+							$elm$core$Maybe$map2,
+							F2(
+								function (x, y) {
+									var counterName = A2($author$project$Screept$getText, state, counter);
+									var _v1 = A2(
+										$elm$random$Random$step,
+										A2($elm$random$Random$int, x, y),
+										state.rnd);
+									var result = _v1.a;
+									var newSeed = _v1.b;
+									var newState = _Utils_update(
+										state,
+										{rnd: newSeed});
+									return A3($author$project$Screept$setCounter, counterName, result, newState);
+								}),
+							A2($author$project$Screept$getMaybeIntValue, mx, state),
+							A2($author$project$Screept$getMaybeIntValue, my, state)));
+				case 'Block':
+					var statements = statement.a;
+					return A3(
+						$elm$core$List$foldl,
+						F2(
+							function (s, acc) {
+								return A2($author$project$Screept$runStatement, s, acc);
+							}),
+						state,
+						statements);
+				case 'If':
+					var condition = statement.a;
+					var success = statement.b;
+					var failure = statement.c;
+					var $temp$statement = A2($author$project$Screept$isTruthy, condition, state) ? success : failure,
+						$temp$state = state;
+					statement = $temp$statement;
+					state = $temp$state;
+					continue runStatement;
+				case 'Comment':
+					return state;
+				case 'Procedure':
+					var name = statement.a;
+					var proc = A2(
+						$elm$core$Maybe$withDefault,
+						$author$project$Screept$Block(_List_Nil),
+						A2($elm$core$Dict$get, name, state.procedures));
+					var $temp$statement = proc,
+						$temp$state = state;
+					statement = $temp$statement;
+					state = $temp$state;
+					continue runStatement;
+				default:
+					var name = statement.a;
+					var fn = statement.b;
+					return A3(
+						$author$project$Screept$setFunction,
+						A2($author$project$Screept$getText, state, name),
+						fn,
+						state);
+			}
+		}
+	});
+var $author$project$Screept$exec = F2(
+	function (statement, state) {
+		return A2(
+			$author$project$Screept$runStatement,
+			$author$project$Screept$run(statement),
+			state);
+	});
+var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) {
+	return {
+		dialogs: $author$project$DialogGame$listDialogToDictDialog(gameDefinition.dialogs),
+		gameState: {
+			counters: gameDefinition.counters,
+			dialogStack: A2($mhoare$elm_stack$Stack$push, gameDefinition.startDialogId, $mhoare$elm_stack$Stack$initialise),
+			functions: gameDefinition.functions,
+			labels: gameDefinition.labels,
+			messages: _List_Nil,
+			procedures: gameDefinition.procedures,
+			rnd: $elm$random$Random$initialSeed(666)
+		},
+		statusLine: gameDefinition.statusLine
+	};
+};
+var $author$project$Main$GotGameDefinition = F2(
+	function (a, b) {
+		return {$: 'GotGameDefinition', a: a, b: b};
+	});
+var $author$project$Main$StartGame = {$: 'StartGame'};
+var $author$project$DialogGame$GameDefinition = F7(
+	function (dialogs, statusLine, startDialogId, counters, labels, procedures, functions) {
+		return {counters: counters, dialogs: dialogs, functions: functions, labels: labels, procedures: procedures, startDialogId: startDialogId, statusLine: statusLine};
+	});
+var $author$project$DialogGame$Dialog = F3(
+	function (id, text, options) {
+		return {id: id, options: options, text: text};
+	});
+var $author$project$DialogGame$DialogOption = F3(
+	function (text, condition, action) {
+		return {action: action, condition: condition, text: text};
+	});
+var $author$project$DialogGame$ActionBlock = function (a) {
+	return {$: 'ActionBlock', a: a};
+};
+var $author$project$DialogGame$ConditionalAction = F3(
+	function (a, b, c) {
+		return {$: 'ConditionalAction', a: a, b: b, c: c};
+	});
+var $author$project$DialogGame$Message = function (a) {
+	return {$: 'Message', a: a};
+};
+var $author$project$DialogGame$Screept = function (a) {
+	return {$: 'Screept', a: a};
+};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$lazy = function (thunk) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		thunk,
+		$elm$json$Json$Decode$succeed(_Utils_Tuple0));
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $author$project$Screept$parseStatement = function (statement) {
 	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$statementParser, statement);
 	if (_v0.$ === 'Ok') {
@@ -7738,37 +7977,6 @@ var $elm$core$Maybe$isJust = function (maybe) {
 	}
 };
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
-		}
-	});
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -8387,333 +8595,42 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Screept$binaryOpEval = F3(
-	function (op, x, y) {
-		switch (op.$) {
-			case 'Add':
-				return x + y;
-			case 'Sub':
-				return x - y;
-			case 'Mod':
-				return A2($elm$core$Basics$modBy, y, x);
-			case 'Mul':
-				return x * y;
-			case 'Div':
-				return (x / y) | 0;
-			case 'Gt':
-				return (_Utils_cmp(x, y) > 0) ? 1 : 0;
-			case 'Lt':
-				return (_Utils_cmp(x, y) < 0) ? 1 : 0;
-			case 'Eq':
-				return _Utils_eq(x, y) ? 1 : 0;
-			case 'And':
-				return (!(x * y)) ? 0 : 1;
-			default:
-				return (!(x + y)) ? 0 : 1;
-		}
-	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
-var $author$project$Screept$unaryOpEval = F2(
-	function (op, x) {
-		return (!x) ? 1 : 0;
-	});
-var $author$project$Screept$getMaybeIntValue = F2(
-	function (gameValue, gameState) {
-		switch (gameValue.$) {
-			case 'Const':
-				var _int = gameValue.a;
-				return $elm$core$Maybe$Just(_int);
-			case 'Counter':
-				var counter = gameValue.a;
-				return A2($elm$core$Dict$get, counter, gameState.counters);
-			case 'Unary':
-				var op = gameValue.a;
-				var mx = gameValue.b;
-				return A2(
-					$elm$core$Maybe$map,
-					$author$project$Screept$unaryOpEval(op),
-					A2($author$project$Screept$getMaybeIntValue, mx, gameState));
-			case 'Binary':
-				var mx = gameValue.a;
-				var op = gameValue.b;
-				var my = gameValue.c;
-				return A3(
-					$elm$core$Maybe$map2,
-					$author$project$Screept$binaryOpEval(op),
-					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
-					A2($author$project$Screept$getMaybeIntValue, my, gameState));
-			default:
-				var func = gameValue.a;
-				return A2(
-					$elm$core$Maybe$andThen,
-					function (x) {
-						return A2($author$project$Screept$getMaybeIntValue, x, gameState);
-					},
-					A2($elm$core$Dict$get, func, gameState.functions));
-		}
-	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Screept$getIntValueWithDefault = F2(
-	function (gameValue, gameState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
-	});
-var $author$project$Screept$getMaybeLabel = F2(
-	function (label, state) {
-		return A2($elm$core$Dict$get, label, state.labels);
-	});
-var $author$project$Screept$getLabelWithDefault = F2(
-	function (label, state) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			'',
-			A2($author$project$Screept$getMaybeLabel, label, state));
-	});
-var $author$project$Screept$isTruthy = F2(
-	function (intValue, state) {
-		return (!A2($author$project$Screept$getIntValueWithDefault, intValue, state)) ? false : true;
-	});
-var $author$project$Screept$getText = F2(
-	function (gameState, text) {
-		getText:
-		while (true) {
-			switch (text.$) {
-				case 'S':
-					var string = text.a;
-					return string;
-				case 'Concat':
-					var specialTexts = text.a;
-					return $elm$core$String$concat(
-						A2(
-							$elm$core$List$map,
-							$author$project$Screept$getText(gameState),
-							specialTexts));
-				case 'Conditional':
-					var gameCheck = text.a;
-					var conditionalText = text.b;
-					var alternativeText = text.c;
-					if (A2($author$project$Screept$isTruthy, gameCheck, gameState)) {
-						var $temp$gameState = gameState,
-							$temp$text = conditionalText;
-						gameState = $temp$gameState;
-						text = $temp$text;
-						continue getText;
-					} else {
-						var $temp$gameState = gameState,
-							$temp$text = alternativeText;
-						gameState = $temp$gameState;
-						text = $temp$text;
-						continue getText;
-					}
-				case 'IntValueText':
-					var gameValue = text.a;
-					return $elm$core$String$fromInt(
-						A2($author$project$Screept$getIntValueWithDefault, gameValue, gameState));
-				default:
-					var label = text.a;
-					return A2($author$project$Screept$getLabelWithDefault, label, gameState);
-			}
-		}
-	});
-var $author$project$Screept$setCounter = F3(
-	function (counter, x, gameState) {
-		return _Utils_update(
-			gameState,
-			{
-				counters: A3($elm$core$Dict$insert, counter, x, gameState.counters)
-			});
-	});
-var $author$project$Screept$setFunction = F3(
-	function (id, fn, state) {
-		return _Utils_update(
-			state,
-			{
-				functions: A3($elm$core$Dict$insert, id, fn, state.functions)
-			});
-	});
-var $author$project$Screept$setLabel = F3(
-	function (counter, x, gameState) {
-		return _Utils_update(
-			gameState,
-			{
-				labels: A3($elm$core$Dict$insert, counter, x, gameState.labels)
-			});
-	});
-var $author$project$Screept$runStatement = F2(
-	function (statement, state) {
-		runStatement:
-		while (true) {
-			switch (statement.$) {
-				case 'SetCounter':
-					var textValue = statement.a;
-					var intValue = statement.b;
-					return A2(
-						$elm$core$Maybe$withDefault,
-						state,
-						A2(
-							$elm$core$Maybe$map,
-							function (v) {
-								return A3(
-									$author$project$Screept$setCounter,
-									A2($author$project$Screept$getText, state, textValue),
-									v,
-									state);
-							},
-							A2($author$project$Screept$getMaybeIntValue, intValue, state)));
-				case 'SetLabel':
-					var label = statement.a;
-					var content = statement.b;
-					return A3(
-						$author$project$Screept$setLabel,
-						A2($author$project$Screept$getText, state, label),
-						A2($author$project$Screept$getText, state, content),
-						state);
-				case 'Rnd':
-					var counter = statement.a;
-					var mx = statement.b;
-					var my = statement.c;
-					return A2(
-						$elm$core$Maybe$withDefault,
-						state,
-						A3(
-							$elm$core$Maybe$map2,
-							F2(
-								function (x, y) {
-									var counterName = A2($author$project$Screept$getText, state, counter);
-									var _v1 = A2(
-										$elm$random$Random$step,
-										A2($elm$random$Random$int, x, y),
-										state.rnd);
-									var result = _v1.a;
-									var newSeed = _v1.b;
-									var newState = _Utils_update(
-										state,
-										{rnd: newSeed});
-									return A3($author$project$Screept$setCounter, counterName, result, newState);
-								}),
-							A2($author$project$Screept$getMaybeIntValue, mx, state),
-							A2($author$project$Screept$getMaybeIntValue, my, state)));
-				case 'Block':
-					var statements = statement.a;
-					return A3(
-						$elm$core$List$foldl,
-						F2(
-							function (s, acc) {
-								return A2($author$project$Screept$runStatement, s, acc);
-							}),
-						state,
-						statements);
-				case 'If':
-					var condition = statement.a;
-					var success = statement.b;
-					var failure = statement.c;
-					var $temp$statement = A2($author$project$Screept$isTruthy, condition, state) ? success : failure,
-						$temp$state = state;
-					statement = $temp$statement;
-					state = $temp$state;
-					continue runStatement;
-				case 'Comment':
-					return state;
-				case 'Procedure':
-					var name = statement.a;
-					var proc = A2(
-						$elm$core$Maybe$withDefault,
-						$author$project$Screept$Block(_List_Nil),
-						A2($elm$core$Dict$get, name, state.procedures));
-					var $temp$statement = proc,
-						$temp$state = state;
-					statement = $temp$statement;
-					state = $temp$state;
-					continue runStatement;
-				default:
-					var name = statement.a;
-					var fn = statement.b;
-					return A3(
-						$author$project$Screept$setFunction,
-						A2($author$project$Screept$getText, state, name),
-						fn,
-						state);
-			}
-		}
-	});
 var $author$project$Main$mainMenuActions = F2(
 	function (dialModel, mcode) {
 		if (mcode.$ === 'Nothing') {
 			return _Utils_Tuple2(dialModel, $elm$core$Platform$Cmd$none);
 		} else {
 			var code = mcode.a;
-			var m = _Utils_update(
-				dialModel,
-				{
-					gameState: A2(
-						$author$project$Screept$runStatement,
-						$author$project$Screept$parseStatement('LABEL $game_loaded = \"' + (code + ' \"')),
-						dialModel.gameState)
-				});
 			switch (code) {
 				case 'sandbox':
 					return _Utils_Tuple2(
-						m,
+						dialModel,
 						$elm$http$Http$get(
 							{
-								expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
+								expect: A2(
+									$elm$http$Http$expectJson,
+									$author$project$Main$GotGameDefinition('Sandbox'),
+									$author$project$DialogGame$decodeGameDefinition),
 								url: '/games/testsandbox.json'
 							}));
 				case 'fabled':
 					return _Utils_Tuple2(
-						m,
+						dialModel,
 						$elm$http$Http$get(
 							{
-								expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
+								expect: A2(
+									$elm$http$Http$expectJson,
+									$author$project$Main$GotGameDefinition('Fabled'),
+									$author$project$DialogGame$decodeGameDefinition),
 								url: '/games/fabled.json'
 							}));
+				case 'start_game':
+					return _Utils_Tuple2(
+						dialModel,
+						A2(
+							$elm$core$Task$perform,
+							$elm$core$Basics$identity,
+							$elm$core$Task$succeed($author$project$Main$StartGame)));
 				default:
 					return _Utils_Tuple2(dialModel, $elm$core$Platform$Cmd$none);
 			}
@@ -9196,23 +9113,45 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'GameDialog':
 				var gdm = msg.a;
-				var _v1 = A2($author$project$DialogGame$update, gdm, model.gameDialog);
-				var gdModel = _v1.a;
-				var exitCode = _v1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{gameDialog: gdModel}),
-					$elm$core$Platform$Cmd$none);
+				var _v1 = model.gameDialog;
+				if (_v1.$ === 'Started') {
+					var title = _v1.a;
+					var gamedef = _v1.b;
+					var gameDialogModel = _v1.c;
+					var _v2 = A2($author$project$DialogGame$update, gdm, gameDialogModel);
+					var gdModel = _v2.a;
+					var exitCode = _v2.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								gameDialog: A3($author$project$Main$Started, title, gamedef, gdModel)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'SeedGenerated':
 				var seed = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							gameDialog: A2($author$project$DialogGame$setRndSeed, seed, model.gameDialog)
-						}),
-					$elm$core$Platform$Cmd$none);
+				var _v3 = model.gameDialog;
+				if (_v3.$ === 'Started') {
+					var title = _v3.a;
+					var gamedef = _v3.b;
+					var gameDialogModel = _v3.c;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								gameDialog: A3(
+									$author$project$Main$Started,
+									title,
+									gamedef,
+									A2($author$project$DialogGame$setRndSeed, seed, gameDialogModel))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'ScreeptEditor':
 				var seMsg = msg.a;
 				return _Utils_Tuple2(
@@ -9232,61 +9171,78 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'GotGameDefinition':
-				var result = msg.a;
+				var title = msg.a;
+				var result = msg.b;
 				if (result.$ === 'Err') {
 					var e = result.a;
-					var _v3 = A2($elm$core$Debug$log, 'Error', e);
+					var _v5 = A2($elm$core$Debug$log, 'Error', e);
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
 					var value = result.a;
-					var _v4 = A2($elm$core$Debug$log, 'Success decode', value);
+					var m = model.mainMenuDialog;
+					var menuDialog = _Utils_update(
+						m,
+						{
+							gameState: A2($author$project$Screept$exec, 'SET $game_loaded = 1;', m.gameState)
+						});
+					var _v6 = A2($elm$core$Debug$log, 'Success decode', value);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								gameDialog: $author$project$Main$initGameFromGameDefinition(value)
+								gameDialog: A2($author$project$Main$Loaded, title, value),
+								mainMenuDialog: menuDialog
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'YesNoDialog':
-				var ynmsg = msg.a;
-				var _v5 = model.yesNoDialog;
-				if (_v5.$ === 'Nothing') {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					var yndm = _v5.a;
-					var _v6 = A2($author$project$DialogGame$update, ynmsg, yndm);
-					var yn = _v6.a;
-					var exitCode = _v6.b;
-					var newYND = _Utils_eq(
-						exitCode,
-						$elm$core$Maybe$Just('yes')) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(yn);
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{yesNoDialog: newYND}),
-						$elm$core$Platform$Cmd$none);
-				}
-			default:
+			case 'MainMenuDialog':
 				var menuMsg = msg.a;
-				var _v7 = model.mainMenuDialog;
-				if (_v7.$ === 'Nothing') {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					var mainMenuModel = _v7.a;
-					var _v8 = A2($author$project$DialogGame$update, menuMsg, mainMenuModel);
-					var menuModel = _v8.a;
-					var exitCode = _v8.b;
-					var _v9 = A2($author$project$Main$mainMenuActions, menuModel, exitCode);
-					var newMenuModel = _v9.a;
-					var cmd = _v9.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								mainMenuDialog: $elm$core$Maybe$Just(newMenuModel)
-							}),
-						cmd);
+				var _v7 = A2($author$project$DialogGame$update, menuMsg, model.mainMenuDialog);
+				var menuModel = _v7.a;
+				var exitCode = _v7.b;
+				var _v8 = A2($author$project$Main$mainMenuActions, menuModel, exitCode);
+				var newMenuModel = _v8.a;
+				var cmd = _v8.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{mainMenuDialog: newMenuModel}),
+					cmd);
+			default:
+				var gameDialog = F2(
+					function (title, gameDefinition) {
+						return A3(
+							$author$project$Main$Started,
+							title,
+							gameDefinition,
+							$author$project$Main$initGameFromGameDefinition(gameDefinition));
+					});
+				var _v9 = model.gameDialog;
+				switch (_v9.$) {
+					case 'NotLoaded':
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Loading':
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Loaded':
+						var title = _v9.a;
+						var gameDefinition = _v9.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									gameDialog: A2(gameDialog, title, gameDefinition)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var title = _v9.a;
+						var gameDefinition = _v9.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									gameDialog: A2(gameDialog, title, gameDefinition)
+								}),
+							$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
@@ -9302,9 +9258,6 @@ var $author$project$Main$MainMenuDialog = function (a) {
 var $author$project$Main$ScreeptEditor = function (a) {
 	return {$: 'ScreeptEditor', a: a};
 };
-var $author$project$Main$YesNoDialog = function (a) {
-	return {$: 'YesNoDialog', a: a};
-};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -9315,19 +9268,10 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$htmlCond = F2(
-	function (maybe, viewFn) {
-		if (maybe.$ === 'Nothing') {
-			return $elm$html$Html$text('');
-		} else {
-			var m = maybe.a;
-			return viewFn(m);
-		}
-	});
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -9748,19 +9692,32 @@ var $author$project$Main$view = function (model) {
 				A2(
 				$elm$html$Html$map,
 				$author$project$Main$MainMenuDialog,
-				A2($author$project$Main$htmlCond, model.mainMenuDialog, $author$project$DialogGame$view)),
-				A2(
-				$elm$html$Html$map,
-				$author$project$Main$GameDialog,
-				$author$project$DialogGame$view(model.gameDialog)),
+				$author$project$DialogGame$view(model.mainMenuDialog)),
+				function () {
+				var _v0 = model.gameDialog;
+				switch (_v0.$) {
+					case 'Started':
+						var title = _v0.a;
+						var gameDef = _v0.b;
+						var gameDialogMenu = _v0.c;
+						return A2(
+							$elm$html$Html$map,
+							$author$project$Main$GameDialog,
+							$author$project$DialogGame$view(gameDialogMenu));
+					case 'NotLoaded':
+						return $elm$html$Html$text('');
+					case 'Loading':
+						return $elm$html$Html$text('loading');
+					default:
+						var title = _v0.a;
+						var m = _v0.b;
+						return $elm$html$Html$text('Loaded game ' + title);
+				}
+			}(),
 				A2(
 				$elm$html$Html$map,
 				$author$project$Main$ScreeptEditor,
-				$author$project$ScreeptEditor$view(model.screeptEditor)),
-				A2(
-				$elm$html$Html$map,
-				$author$project$Main$YesNoDialog,
-				A2($author$project$Main$htmlCond, model.yesNoDialog, $author$project$DialogGame$view))
+				$author$project$ScreeptEditor$view(model.screeptEditor))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

@@ -670,3 +670,8 @@ run statement =
                     Debug.log "!" error
             in
             Block []
+
+
+exec : String -> State a -> State a
+exec statement state =
+    runStatement (run statement) state
