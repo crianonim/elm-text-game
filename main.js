@@ -8290,7 +8290,7 @@ var $author$project$Main$init = function (_v0) {
 					$elm$http$Http$get(
 					{
 						expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
-						url: '/games/fabled.json'
+						url: 'games/fabled.json'
 					})
 				])));
 };
@@ -8653,7 +8653,7 @@ var $author$project$Main$mainMenuActions = F2(
 						$elm$http$Http$get(
 							{
 								expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
-								url: '/games/testsandbox.json'
+								url: 'games/testsandbox.json'
 							}));
 				case 'fabled':
 					return _Utils_Tuple2(
@@ -8661,7 +8661,7 @@ var $author$project$Main$mainMenuActions = F2(
 						$elm$http$Http$get(
 							{
 								expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
-								url: '/games/fabled.json'
+								url: 'games/fabled.json'
 							}));
 				case 'start_game':
 					return _Utils_Tuple2(

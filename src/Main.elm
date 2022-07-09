@@ -61,7 +61,7 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
-        , Http.get { url = "/games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
 
@@ -104,10 +104,10 @@ mainMenuActions dialModel mcode =
         Just code ->
             case code of
                 "sandbox" ->
-                    ( dialModel, Http.get { url = "/games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition } )
+                    ( dialModel, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition } )
 
                 "fabled" ->
-                    ( dialModel, Http.get { url = "/games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition } )
+                    ( dialModel, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition } )
 
                 "start_game" ->
                     ( dialModel, Task.succeed StartGame |> Task.perform identity )
