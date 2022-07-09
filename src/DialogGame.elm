@@ -42,7 +42,8 @@ type Msg
 
 
 type alias GameDefinition =
-    { dialogs : List Dialog
+    { title : String
+    , dialogs : List Dialog
     , statusLine : Maybe Screept.TextValue
     , startDialogId : String
     , counters : Dict String Int
@@ -60,6 +61,11 @@ init gs dialogs statusLine =
 initSimple : Dialogs -> Model
 initSimple dialogs =
     init emptyGameState dialogs Nothing
+
+
+setStatusLine : Maybe Screept.TextValue -> Model -> Model
+setStatusLine maybeTextValue model =
+    { model | statusLine = maybeTextValue }
 
 
 emptyGameState : GameState
@@ -288,7 +294,8 @@ decodeDialogs =
 
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map7 GameDefinition
+    Json.map8 GameDefinition
+        (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
