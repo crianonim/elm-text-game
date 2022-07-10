@@ -20,6 +20,7 @@ type alias GameState =
     , procedures : Dict String Screept.Statement
     , functions : Dict String Screept.IntValue
     , rnd : Random.Seed
+    , vars : Dict String Screept.Variable
     }
 
 
@@ -50,6 +51,7 @@ type alias GameDefinition =
     , labels : Dict String String
     , procedures : Dict String Screept.Statement
     , functions : Dict String Screept.IntValue
+    , vars : Dict String Screept.Variable
     }
 
 
@@ -77,6 +79,7 @@ emptyGameState =
     , messages = []
     , rnd = Random.initialSeed 666
     , dialogStack = Stack.initialise |> Stack.push "start"
+    , vars = Dict.empty
     }
 
 
@@ -291,11 +294,17 @@ decodeDialogs : Json.Decoder (List Dialog)
 decodeDialogs =
     Json.list decodeDialog
 
+decodeVariable : Json.Decoder Screept.Variable
+decodeVariable =
+    Json.oneOf [
+     Json.int |> Json.map (\x->Screept.VInt <| Screept.Const x)
+      ,Json.string |> Json.map (\x->Screept.VText <| Screept.S x)
+    ]
 
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map8 GameDefinition
-        (Json.field "name" Json.string)
+    Json.map8 (GameDefinition "Name")
+        --(Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
@@ -303,6 +312,8 @@ decodeGameDefinition =
         (Json.field "labels" <| Json.dict Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
         (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
+        --(Json.field "vars" <| )
+        (Json.field "vars" <| Json.dict decodeVariable )
 
 
 update : Msg -> Model -> ( Model, Maybe String )
@@ -338,6 +349,7 @@ view { gameState, statusLine, dialogs } =
 
           else
             text ""
+        , viewDebug gameState
         ]
 
 
@@ -366,7 +378,8 @@ viewDialogText textValue gameState =
 viewDebug : GameState -> Html a
 viewDebug gameState =
     div [ class "status" ]
-        [ div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.counters |> List.sort |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ String.fromInt v ]))
+        [ text "Debug"
+        , div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.vars |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ Screept.stringifyVariable v ]))
         ]
 
 

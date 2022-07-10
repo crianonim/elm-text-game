@@ -61,7 +61,7 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
-        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
 
@@ -196,7 +196,17 @@ update msg model =
         StartGame ->
             let
                 gameDialog gameDefinition =
-                    Started gameDefinition (initGameFromGameDefinition gameDefinition)
+                    let
+                        m =
+                            initGameFromGameDefinition gameDefinition
+
+                        gameState =
+                            Screept.runStatement Screept.exampleStatement m.gameState
+                        _ = Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
+                        newModel =
+                            { m | gameState = gameState }
+                    in
+                    Started gameDefinition newModel
             in
             case model.gameDialog of
                 NotLoaded ->
@@ -286,6 +296,7 @@ initGameFromGameDefinition gameDefinition =
         , messages = []
         , rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
+        , vars = gameDefinition.vars
         }
     , statusLine = gameDefinition.statusLine
     , dialogs = listDialogToDictDialog gameDefinition.dialogs

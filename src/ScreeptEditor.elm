@@ -288,4 +288,5 @@ gameState =
     , procedures = procedures
     , functions = Dict.empty
     , rnd = Random.initialSeed 666
+    , vars = Dict.empty
     }
