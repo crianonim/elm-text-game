@@ -41,9 +41,7 @@ type TextValue
 
 
 type Statement
-    = SetCounter TextValue IntValue
-    | SetLabel TextValue TextValue
-    | SetFunc VariableName IntValue
+    =  SetFunc VariableName IntValue
     | Rnd VariableName IntValue IntValue
     | Block (List Statement)
     | If IntValue Statement Statement
@@ -69,13 +67,6 @@ runStatement statement state =
             Debug.log "RUN" statement
     in
     case statement of
-        SetCounter textValue intValue ->
-            getMaybeIntValue intValue state
-                |> Maybe.map (\v -> setCounter (getText state textValue) v state)
-                |> Maybe.withDefault state
-
-        SetLabel label content ->
-            setLabel (getText state label) (getText state content) state
 
         Rnd var mx my ->
             Maybe.map2
@@ -144,9 +135,8 @@ runStatement statement state =
 
 type alias State a =
     { a
-        | counters : Dict String Int
-        , labels : Dict String String
-        , procedures : Dict String Statement
+        |
+         procedures : Dict String Statement
         , functions : Dict String IntValue
         , rnd : Random.Seed
         , vars : Dict String Variable
@@ -154,11 +144,10 @@ type alias State a =
 
 
 emptyState =
-    { counters = Dict.empty
-    , labels = Dict.empty
-    , procedures = Dict.empty
+    {  procedures = Dict.empty
     , functions = Dict.empty
     , rnd = Random.initialSeed 666
+    , vars = Dict.empty
     }
 
 
@@ -344,20 +333,6 @@ getMaybeIntFromVariable name state =
         var
 
 
-getMaybeLabel : String -> State a -> Maybe String
-getMaybeLabel label state =
-    Dict.get label state.labels
-
-
-getLabelWithDefault : String -> State a -> String
-getLabelWithDefault label state =
-    getMaybeLabel label state |> Maybe.withDefault ""
-
-
-addCounter : String -> Int -> State a -> State a
-addCounter counter add gameState =
-    { gameState | counters = Dict.update counter (\value -> Maybe.map (\v -> v + add) value) gameState.counters }
-
 
 setVar : VariableName -> Variable -> State a -> State a
 setVar name variable state =
@@ -368,14 +343,6 @@ setVar name variable state =
     { state | vars = Dict.insert varname variable state.vars }
 
 
-setCounter : String -> Int -> State a -> State a
-setCounter counter x gameState =
-    { gameState | counters = Dict.insert counter x gameState.counters }
-
-
-setLabel : String -> String -> State a -> State a
-setLabel counter x gameState =
-    { gameState | labels = Dict.insert counter x gameState.labels }
 
 
 setFunction : String -> IntValue -> State a -> State a
@@ -628,11 +595,6 @@ counterStringify textValue =
 statementStringify : Statement -> String
 statementStringify statement =
     case statement of
-        SetCounter textValue intValue ->
-            "SET " ++ counterStringify textValue ++ " = " ++ intValueStringify intValue
-
-        SetLabel t1 t2 ->
-            "LABEL " ++ counterStringify t1 ++ " = " ++ textValueStringify t2
 
         SetFunc textValue intValue ->
             "DEF_FUNC " ++ stringifyVariableName textValue ++ " = " ++ intValueStringify intValue
@@ -664,23 +626,9 @@ nextWordParser =
 statementParser : Parser Statement
 statementParser =
     Parser.oneOf
-        [ Parser.succeed SetCounter
-            |. Parser.keyword "SET"
-            |. Parser.spaces
-            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
-            |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= intValueParser
-        , Parser.succeed SetLabel
-            |. Parser.keyword "LABEL"
-            |. Parser.spaces
-            |= Parser.oneOf [ textValueParser, counterParser |> Parser.map S ]
-            |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= textValueParser
-        , Parser.succeed SetFunc
+        [
+
+         Parser.succeed SetFunc
             |. Parser.keyword "DEF_FUNC"
             |. Parser.spaces
             |= parseVariableName
