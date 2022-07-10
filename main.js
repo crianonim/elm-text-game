@@ -6409,6 +6409,12 @@ var $author$project$Screept$VText = function (a) {
 	return {$: 'VText', a: a};
 };
 var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Screept$VLit = function (a) {
+	return {$: 'VLit', a: a};
+};
+var $author$project$Screept$VRef = function (a) {
+	return {$: 'VRef', a: a};
+};
 var $author$project$Screept$nextWordParser = $elm$parser$Parser$getChompedString(
 	$elm$parser$Parser$chompWhile(
 		function (c) {
@@ -6416,6 +6422,21 @@ var $author$project$Screept$nextWordParser = $elm$parser$Parser$getChompedString
 				c,
 				_Utils_chr('_'));
 		}));
+var $author$project$Screept$parseVariableName = $elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$ignorer,
+				$elm$parser$Parser$succeed($author$project$Screept$VRef),
+				$elm$parser$Parser$symbol('$')),
+			$author$project$Screept$nextWordParser),
+			A2(
+			$elm$parser$Parser$keeper,
+			$elm$parser$Parser$succeed($author$project$Screept$VLit),
+			$author$project$Screept$nextWordParser)
+		]));
 var $elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _v0) {
 		var parseA = _v0.a;
@@ -6905,15 +6926,7 @@ function $author$project$Screept$cyclic$statementParser() {
 								$elm$parser$Parser$succeed($author$project$Screept$Rnd),
 								$elm$parser$Parser$keyword('RND')),
 							$elm$parser$Parser$spaces),
-						A2(
-							$elm$parser$Parser$ignorer,
-							$elm$parser$Parser$oneOf(
-								_List_fromArray(
-									[
-										$author$project$Screept$textValueParser,
-										A2($elm$parser$Parser$map, $author$project$Screept$S, $author$project$Screept$counterParser)
-									])),
-							$elm$parser$Parser$spaces)),
+						A2($elm$parser$Parser$ignorer, $author$project$Screept$parseVariableName, $elm$parser$Parser$spaces)),
 					A2(
 						$elm$parser$Parser$ignorer,
 						A2(
@@ -7018,7 +7031,7 @@ function $author$project$Screept$cyclic$statementParser() {
 						$elm$parser$Parser$ignorer,
 						A2(
 							$elm$parser$Parser$ignorer,
-							A2($elm$parser$Parser$ignorer, $author$project$Screept$nextWordParser, $elm$parser$Parser$spaces),
+							A2($elm$parser$Parser$ignorer, $author$project$Screept$parseVariableName, $elm$parser$Parser$spaces),
 							$elm$parser$Parser$symbol('=')),
 						$elm$parser$Parser$spaces)),
 				$elm$parser$Parser$oneOf(
@@ -8387,22 +8400,22 @@ var $author$project$Screept$exampleStatement = $author$project$Screept$Block(
 		[
 			A2(
 			$author$project$Screept$SetVariable,
-			'a',
+			$author$project$Screept$VLit('a'),
 			$author$project$Screept$VInt(
 				$author$project$Screept$Const(12))),
 			A2(
 			$author$project$Screept$SetVariable,
-			'b',
+			$author$project$Screept$VLit('b'),
 			$author$project$Screept$VText(
-				$author$project$Screept$S('With Value'))),
+				$author$project$Screept$S('var_name'))),
 			A2(
 			$author$project$Screept$SetVariable,
-			'c',
+			$author$project$Screept$VLit('c'),
 			$author$project$Screept$VText(
 				$author$project$Screept$S(''))),
 			A2(
 			$author$project$Screept$SetVariable,
-			'd',
+			$author$project$Screept$VLit('d'),
 			$author$project$Screept$VInt(
 				$author$project$Screept$Const(0))),
 			A3(
@@ -8410,12 +8423,12 @@ var $author$project$Screept$exampleStatement = $author$project$Screept$Block(
 			$author$project$Screept$IntVariable('a'),
 			A2(
 				$author$project$Screept$SetVariable,
-				'e',
+				$author$project$Screept$VLit('e'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(1))),
 			A2(
 				$author$project$Screept$SetVariable,
-				'e',
+				$author$project$Screept$VLit('e'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(0)))),
 			A3(
@@ -8423,12 +8436,12 @@ var $author$project$Screept$exampleStatement = $author$project$Screept$Block(
 			$author$project$Screept$IntVariable('b'),
 			A2(
 				$author$project$Screept$SetVariable,
-				'f',
+				$author$project$Screept$VLit('f'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(1))),
 			A2(
 				$author$project$Screept$SetVariable,
-				'f',
+				$author$project$Screept$VLit('f'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(0)))),
 			A3(
@@ -8436,12 +8449,12 @@ var $author$project$Screept$exampleStatement = $author$project$Screept$Block(
 			$author$project$Screept$IntVariable('c'),
 			A2(
 				$author$project$Screept$SetVariable,
-				'g',
+				$author$project$Screept$VLit('g'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(1))),
 			A2(
 				$author$project$Screept$SetVariable,
-				'g',
+				$author$project$Screept$VLit('g'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(0)))),
 			A3(
@@ -8449,12 +8462,12 @@ var $author$project$Screept$exampleStatement = $author$project$Screept$Block(
 			$author$project$Screept$IntVariable('d'),
 			A2(
 				$author$project$Screept$SetVariable,
-				'h',
+				$author$project$Screept$VLit('h'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(1))),
 			A2(
 				$author$project$Screept$SetVariable,
-				'h',
+				$author$project$Screept$VLit('h'),
 				$author$project$Screept$VInt(
 					$author$project$Screept$Const(0))))
 		]));
@@ -8608,33 +8621,6 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
-var $author$project$Screept$textValueStringify = function (textValue) {
-	switch (textValue.$) {
-		case 'S':
-			var string = textValue.a;
-			return '\"' + (string + '\"');
-		case 'Concat':
-			var textValues = textValue.a;
-			return '[ ' + (A2(
-				$elm$core$String$join,
-				', ',
-				A2($elm$core$List$map, $author$project$Screept$textValueStringify, textValues)) + ' ]');
-		case 'Conditional':
-			var cond = textValue.a;
-			var success = textValue.b;
-			var failure = textValue.c;
-			return '(' + ($author$project$Screept$intValueStringify(cond) + ('?' + ($author$project$Screept$textValueStringify(success) + (':' + ($author$project$Screept$textValueStringify(failure) + ')')))));
-		case 'IntValueText':
-			var intValue = textValue.a;
-			return 'str(' + ($author$project$Screept$intValueStringify(intValue) + ')');
-		case 'Label':
-			var string = textValue.a;
-			return '#' + string;
-		default:
-			var string = textValue.a;
-			return string;
-	}
-};
 var $author$project$Screept$unaryOpEval = F2(
 	function (op, x) {
 		return (!x) ? 1 : 0;
@@ -8645,6 +8631,22 @@ var $author$project$Screept$getIntValueWithDefault = F2(
 			$elm$core$Maybe$withDefault,
 			0,
 			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
+	});
+var $author$project$Screept$getMaybeIntFromVariable = F2(
+	function (name, state) {
+		var _var = A2($elm$core$Dict$get, name, state.vars);
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (v) {
+				if (v.$ === 'VText') {
+					var t = v.a;
+					return (A2($author$project$Screept$getText, state, t) === '') ? $elm$core$Maybe$Just(0) : $elm$core$Maybe$Just(1);
+				} else {
+					var i = v.a;
+					return A2($author$project$Screept$getMaybeIntValue, i, state);
+				}
+			},
+			_var);
 	});
 var $author$project$Screept$getMaybeIntValue = F2(
 	function (gameValue, gameState) {
@@ -8681,19 +8683,7 @@ var $author$project$Screept$getMaybeIntValue = F2(
 					A2($elm$core$Dict$get, func, gameState.functions));
 			default:
 				var name = gameValue.a;
-				var _var = A2($elm$core$Dict$get, name, gameState.vars);
-				return A2(
-					$elm$core$Maybe$andThen,
-					function (v) {
-						if (v.$ === 'VText') {
-							var t = v.a;
-							return (A2($author$project$Screept$getText, gameState, t) === '') ? $elm$core$Maybe$Just(0) : $elm$core$Maybe$Just(1);
-						} else {
-							var i = v.a;
-							return A2($author$project$Screept$getMaybeIntValue, i, gameState);
-						}
-					},
-					_var);
+				return A2($author$project$Screept$getMaybeIntFromVariable, name, gameState);
 		}
 	});
 var $author$project$Screept$getText = F2(
@@ -8738,21 +8728,38 @@ var $author$project$Screept$getText = F2(
 				default:
 					var name = text.a;
 					return A2(
-						$elm$core$Maybe$withDefault,
-						'',
-						A2(
-							$elm$core$Maybe$map,
-							function (v) {
-								if (v.$ === 'VInt') {
-									var i = v.a;
-									return $author$project$Screept$intValueStringify(i);
-								} else {
-									var t = v.a;
-									return $author$project$Screept$textValueStringify(t);
-								}
-							},
-							A2($elm$core$Dict$get, name, gameState.vars)));
+						$author$project$Screept$getTextValueFromVariable,
+						A2($author$project$Screept$getVariableNameString, name, gameState),
+						gameState);
 			}
+		}
+	});
+var $author$project$Screept$getTextValueFromVariable = F2(
+	function (name, state) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (v) {
+					if (v.$ === 'VInt') {
+						var i = v.a;
+						return $author$project$Screept$intValueStringify(i);
+					} else {
+						var t = v.a;
+						return A2($author$project$Screept$getText, state, t);
+					}
+				},
+				A2($elm$core$Dict$get, name, state.vars)));
+	});
+var $author$project$Screept$getVariableNameString = F2(
+	function (variableName, state) {
+		if (variableName.$ === 'VLit') {
+			var _var = variableName.a;
+			return _var;
+		} else {
+			var _var = variableName.a;
+			return A2($author$project$Screept$getTextValueFromVariable, _var, state);
 		}
 	});
 var $author$project$Screept$isTruthy = F2(
@@ -8781,6 +8788,15 @@ var $author$project$Screept$setLabel = F3(
 			gameState,
 			{
 				labels: A3($elm$core$Dict$insert, counter, x, gameState.labels)
+			});
+	});
+var $author$project$Screept$setVar = F3(
+	function (name, variable, state) {
+		var varname = A2($author$project$Screept$getVariableNameString, name, state);
+		return _Utils_update(
+			state,
+			{
+				vars: A3($elm$core$Dict$insert, varname, variable, state.vars)
 			});
 	});
 var $author$project$Screept$runStatement = F2(
@@ -8814,7 +8830,7 @@ var $author$project$Screept$runStatement = F2(
 						A2($author$project$Screept$getText, state, content),
 						state);
 				case 'Rnd':
-					var counter = statement.a;
+					var _var = statement.a;
 					var mx = statement.b;
 					var my = statement.c;
 					return A2(
@@ -8824,7 +8840,6 @@ var $author$project$Screept$runStatement = F2(
 							$elm$core$Maybe$map2,
 							F2(
 								function (x, y) {
-									var counterName = A2($author$project$Screept$getText, state, counter);
 									var _v2 = A2(
 										$elm$random$Random$step,
 										A2($elm$random$Random$int, x, y),
@@ -8834,7 +8849,12 @@ var $author$project$Screept$runStatement = F2(
 									var newState = _Utils_update(
 										state,
 										{rnd: newSeed});
-									return A3($author$project$Screept$setCounter, counterName, result, newState);
+									return A3(
+										$author$project$Screept$setVar,
+										_var,
+										$author$project$Screept$VInt(
+											$author$project$Screept$Const(result)),
+										newState);
 								}),
 							A2($author$project$Screept$getMaybeIntValue, mx, state),
 							A2($author$project$Screept$getMaybeIntValue, my, state)));
@@ -8894,11 +8914,7 @@ var $author$project$Screept$runStatement = F2(
 									A2($author$project$Screept$getText, state, textValue)));
 						}
 					}();
-					return _Utils_update(
-						state,
-						{
-							vars: A3($elm$core$Dict$insert, name, v, state.vars)
-						});
+					return A3($author$project$Screept$setVar, name, v, state);
 			}
 		}
 	});
@@ -8989,6 +9005,42 @@ var $author$project$DialogGame$setRndSeed = F2(
 					{rnd: seed})
 			});
 	});
+var $author$project$Screept$stringifyVariableName = function (variableName) {
+	if (variableName.$ === 'VLit') {
+		var string = variableName.a;
+		return string;
+	} else {
+		var textValue = variableName.a;
+		return '$' + textValue;
+	}
+};
+var $author$project$Screept$textValueStringify = function (textValue) {
+	switch (textValue.$) {
+		case 'S':
+			var string = textValue.a;
+			return '\"' + (string + '\"');
+		case 'Concat':
+			var textValues = textValue.a;
+			return '[ ' + (A2(
+				$elm$core$String$join,
+				', ',
+				A2($elm$core$List$map, $author$project$Screept$textValueStringify, textValues)) + ' ]');
+		case 'Conditional':
+			var cond = textValue.a;
+			var success = textValue.b;
+			var failure = textValue.c;
+			return '(' + ($author$project$Screept$intValueStringify(cond) + ('?' + ($author$project$Screept$textValueStringify(success) + (':' + ($author$project$Screept$textValueStringify(failure) + ')')))));
+		case 'IntValueText':
+			var intValue = textValue.a;
+			return 'str(' + ($author$project$Screept$intValueStringify(intValue) + ')');
+		case 'Label':
+			var string = textValue.a;
+			return '#' + string;
+		default:
+			var string = textValue.a;
+			return $author$project$Screept$stringifyVariableName(string);
+	}
+};
 var $author$project$Screept$counterStringify = function (textValue) {
 	if (textValue.$ === 'S') {
 		var x = textValue.a;
@@ -9022,10 +9074,10 @@ var $author$project$Screept$statementStringify = function (statement) {
 			var intValue = statement.b;
 			return 'DEF_FUNC ' + ($author$project$Screept$counterStringify(textValue) + (' = ' + $author$project$Screept$intValueStringify(intValue)));
 		case 'Rnd':
-			var textValue = statement.a;
+			var varName = statement.a;
 			var i1 = statement.b;
 			var i2 = statement.c;
-			return 'RND ' + ($author$project$Screept$counterStringify(textValue) + (' ' + ($author$project$Screept$intValueStringify(i1) + (' .. ' + $author$project$Screept$intValueStringify(i2)))));
+			return 'RND ' + ($author$project$Screept$stringifyVariableName(varName) + (' ' + ($author$project$Screept$intValueStringify(i1) + (' .. ' + $author$project$Screept$intValueStringify(i2)))));
 		case 'Block':
 			var statements = statement.a;
 			return '{ ' + (A2(
@@ -9046,7 +9098,7 @@ var $author$project$Screept$statementStringify = function (statement) {
 		default:
 			var name = statement.a;
 			var variable = statement.b;
-			return 'LET ' + (name + (' = ' + $author$project$Screept$stringifyVariable(variable)));
+			return 'LET ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifyVariable(variable)));
 	}
 };
 var $mhoare$elm_stack$Stack$pop = function (_v0) {
@@ -9212,235 +9264,7 @@ var $author$project$ScreeptEditor$exampleLabels = $elm$core$Dict$fromList(
 			_Utils_Tuple2('enemy_marker', ''),
 			_Utils_Tuple2('enemy_name', '')
 		]));
-var $author$project$ScreeptEditor$procedures = $elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2(
-			'test',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('d6_1'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('d6_2'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('2d6'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('d6_1'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('d6_2'))),
-						A3(
-						$author$project$Screept$If,
-						A3(
-							$author$project$Screept$Binary,
-							A3(
-								$author$project$Screept$Binary,
-								$author$project$Screept$Counter('2d6'),
-								$author$project$Screept$Add,
-								$author$project$Screept$Counter('test_score')),
-							$author$project$Screept$Gt,
-							$author$project$Screept$Counter('test_difficulty')),
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('test_success'),
-							$author$project$Screept$Const(1)),
-						A2(
-							$author$project$Screept$SetCounter,
-							$author$project$Screept$S('test_success'),
-							$author$project$Screept$Const(0)))
-					]))),
-			_Utils_Tuple2(
-			'combat_reset',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('fight_won'),
-						$author$project$Screept$Const(0)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('fight_lost'),
-						$author$project$Screept$Const(0)),
-						A2(
-						$author$project$Screept$SetLabel,
-						$author$project$Screept$S('enemy_name'),
-						$author$project$Screept$S(''))
-					]))),
-			_Utils_Tuple2(
-			'combat',
-			$author$project$Screept$Block(
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('rnd_d6_1'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A3(
-						$author$project$Screept$Rnd,
-						$author$project$Screept$S('rnd_d6_2'),
-						$author$project$Screept$Const(1),
-						$author$project$Screept$Const(6)),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('rnd_2d6'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('rnd_d6_1'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('rnd_d6_2'))),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('player_attack'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('rnd_2d6'),
-							$author$project$Screept$Add,
-							$author$project$Screept$Counter('player_combat'))),
-						A2(
-						$author$project$Screept$SetCounter,
-						$author$project$Screept$S('player_damage'),
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('player_attack'),
-							$author$project$Screept$Sub,
-							$author$project$Screept$Counter('enemy_defence'))),
-						A3(
-						$author$project$Screept$If,
-						A3(
-							$author$project$Screept$Binary,
-							$author$project$Screept$Counter('player_damage'),
-							$author$project$Screept$Gt,
-							$author$project$Screept$Const(0)),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_stamina'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_stamina'),
-										$author$project$Screept$Sub,
-										$author$project$Screept$Counter('player_damage')))
-								])),
-						$author$project$Screept$Block(_List_Nil)),
-						A3(
-						$author$project$Screept$If,
-						A2(
-							$author$project$Screept$Unary,
-							$author$project$Screept$Not,
-							$author$project$Screept$Eval('combat_player_success')),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_1'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A3(
-									$author$project$Screept$Rnd,
-									$author$project$Screept$S('rnd_d6_2'),
-									$author$project$Screept$Const(1),
-									$author$project$Screept$Const(6)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('rnd_2d6'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('rnd_d6_1'),
-										$author$project$Screept$Add,
-										$author$project$Screept$Counter('rnd_d6_2'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_attack'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('rnd_2d6'),
-										$author$project$Screept$Add,
-										$author$project$Screept$Counter('enemy_combat'))),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_damage'),
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_attack'),
-										$author$project$Screept$Sub,
-										$author$project$Screept$Counter('player_defence'))),
-									A3(
-									$author$project$Screept$If,
-									A3(
-										$author$project$Screept$Binary,
-										$author$project$Screept$Counter('enemy_damage'),
-										$author$project$Screept$Gt,
-										$author$project$Screept$Const(0)),
-									$author$project$Screept$Block(
-										_List_fromArray(
-											[
-												A2(
-												$author$project$Screept$SetCounter,
-												$author$project$Screept$S('player_stamina'),
-												A3(
-													$author$project$Screept$Binary,
-													$author$project$Screept$Counter('player_stamina'),
-													$author$project$Screept$Sub,
-													$author$project$Screept$Counter('enemy_damage'))),
-												A3(
-												$author$project$Screept$If,
-												A3(
-													$author$project$Screept$Binary,
-													$author$project$Screept$Counter('player_stamina'),
-													$author$project$Screept$Lt,
-													$author$project$Screept$Const(1)),
-												A2(
-													$author$project$Screept$SetCounter,
-													$author$project$Screept$S('fight_lost'),
-													$author$project$Screept$Const(1)),
-												$author$project$Screept$Block(_List_Nil))
-											])),
-									$author$project$Screept$Block(_List_Nil))
-								])),
-						$author$project$Screept$Block(_List_Nil)),
-						A3(
-						$author$project$Screept$If,
-						$author$project$Screept$Eval('combat_player_success'),
-						$author$project$Screept$Block(
-							_List_fromArray(
-								[
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('enemy_damage'),
-									$author$project$Screept$Const(0)),
-									A2(
-									$author$project$Screept$SetCounter,
-									$author$project$Screept$S('fight_won'),
-									$author$project$Screept$Const(1))
-								])),
-						A3(
-							$author$project$Screept$If,
-							$author$project$Screept$Eval('combat_player_failure'),
-							$author$project$Screept$Block(
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Screept$SetCounter,
-										$author$project$Screept$S('fight_lost'),
-										$author$project$Screept$Const(1))
-									])),
-							$author$project$Screept$Block(_List_Nil)))
-					])))
-		]));
+var $author$project$ScreeptEditor$procedures = $elm$core$Dict$fromList(_List_Nil);
 var $author$project$ScreeptEditor$gameState = {
 	counters: $author$project$ScreeptEditor$exampleCounters,
 	dialogStack: $mhoare$elm_stack$Stack$initialise,

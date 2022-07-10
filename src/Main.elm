@@ -202,7 +202,10 @@ update msg model =
 
                         gameState =
                             Screept.runStatement Screept.exampleStatement m.gameState
-                        _ = Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
+
+                        _ =
+                            Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
+
                         newModel =
                             { m | gameState = gameState }
                     in

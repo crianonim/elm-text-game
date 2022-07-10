@@ -294,12 +294,14 @@ decodeDialogs : Json.Decoder (List Dialog)
 decodeDialogs =
     Json.list decodeDialog
 
+
 decodeVariable : Json.Decoder Screept.Variable
 decodeVariable =
-    Json.oneOf [
-     Json.int |> Json.map (\x->Screept.VInt <| Screept.Const x)
-      ,Json.string |> Json.map (\x->Screept.VText <| Screept.S x)
-    ]
+    Json.oneOf
+        [ Json.int |> Json.map (\x -> Screept.VInt <| Screept.Const x)
+        , Json.string |> Json.map (\x -> Screept.VText <| Screept.S x)
+        ]
+
 
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
@@ -313,7 +315,7 @@ decodeGameDefinition =
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
         (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
         --(Json.field "vars" <| )
-        (Json.field "vars" <| Json.dict decodeVariable )
+        (Json.field "vars" <| Json.dict decodeVariable)
 
 
 update : Msg -> Model -> ( Model, Maybe String )
