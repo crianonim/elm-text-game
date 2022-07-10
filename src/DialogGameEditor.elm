@@ -44,7 +44,7 @@ exampleDialog =
     { id = "start"
     , text = Screept.Concat [ Screept.S "You're in a dark room. " ]
     , options =
-        [ { text = Screept.S "Go through the exit", condition = Just (Counter "start_look_around"), action = [ GoAction "second" ] }
+        [ { text = Screept.S "Go through the exit", condition = Just (IntVariable "start_look_around"), action = [ GoAction "second" ] }
 
         --, { text = Screept.S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| Screept.S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
         --, { text = Screept.S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), DialogGame.nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
