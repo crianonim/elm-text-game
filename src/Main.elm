@@ -294,9 +294,7 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        { counters = gameDefinition.counters
-        , labels = gameDefinition.labels
-        , functions = gameDefinition.functions
+        {functions = gameDefinition.functions
         , procedures = gameDefinition.procedures
         , messages = []
         , rnd = Random.initialSeed 666
