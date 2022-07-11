@@ -495,7 +495,7 @@
       "options": []
     }
   ],
-  "startDialogId": "#630",
+  "startDialogId": "#1",
   "procedures": {
     "combat": "{ RND rnd_d6_1 1 .. 6;\nRND rnd_d6_2 1 .. 6;\nINT rnd_twod6 = (rnd_d6_1 + rnd_d6_2);\nINT player_attack = (rnd_twod6 + player_combat);\nINT player_damage = (player_attack - _enemy_defence);\nIF (player_damage > 0) THEN { INT _enemy_stamina = (_enemy_stamina - player_damage) } ELSE {  };\nIF !CALL combat_player_success THEN { RND rnd_d6_1 1 .. 6;\nRND rnd_d6_2 1 .. 6;\nINT rnd_twod6 = (rnd_d6_1 + rnd_d6_2);\nINT _enemy_attack = (rnd_twod6 + _enemy_combat);\nINT _enemy_damage = (_enemy_attack - player_defence);\nIF (_enemy_damage > 0) THEN { INT player_stamina = (player_stamina - _enemy_damage);\nIF (player_stamina < 1) THEN INT fight_lost = 1 ELSE {  } } ELSE {  } } ELSE {  };\nIF CALL combat_player_success THEN { INT _enemy_damage = 0;\nINT fight_won = 1 } ELSE IF CALL combat_player_failure THEN { INT fight_lost = 1 } ELSE {  } }",
     "combat_reset": "{ INT fight_won = 0;\nINT fight_lost = 0;\nTEXT _enemy_name = \"\" }",
@@ -516,7 +516,7 @@
     "player_rank": 3,
     "player_sanctity": 3,
     "player_scouting": 1,
-    "player_stamina": 3,
+    "player_stamina": 9,
     "player_thievery": 4,
     "rnd": 0,
     "test_success": 0,

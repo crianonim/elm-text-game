@@ -8246,7 +8246,7 @@ var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialog
 					[
 						$author$project$Screept$S('Playing: '),
 						$author$project$Screept$TextVariable(
-						$author$project$Screept$VRef('game_title'))
+						$author$project$Screept$VLit('game_title'))
 					]))
 		}
 		]));
