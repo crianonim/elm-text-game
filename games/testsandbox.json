@@ -9,7 +9,7 @@
           "text": "\"...\"",
           "action": [
             {
-              "screept": "RUN turn"
+              "screept": "{ RUN turn; RUN test }"
             }
           ]
         }
@@ -17,21 +17,19 @@
     }
   ],
   "startDialogId": "start",
-  "counters": {
+  "procedures": {
+    "turn": "{ LET turn = (turn + 1);\nLET turns_count = (turns_count - 1);\nLET minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nLET hour = ((turn / turns_per_hour) %% 24);\nLET day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { LET turns_count = 5 } }",
+    "test": "{ RND $b 1 .. 6 }"
+  },
+  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", str($hour), \":\", str($minutes) ]",
+  "vars": {
     "hour": 0,
     "minutes": 0,
     "turn": 1,
     "turns_count": 3,
-    "turns_per_hour": 2
-  },
-  "labels": {
+    "turns_per_hour": 2,
     "enemy_name": "",
     "player_name": "Liana",
     "player_profession": "wayfarer"
-  },
-  "procedures": {
-    "turn": "{ SET $turn = ($turn + 1);\nSET $turns_count = ($turns_count - 1);\nSET $minutes = (($turn %% $turns_per_hour) * (60 / $turns_per_hour));\nSET $hour = (($turn / $turns_per_hour) %% 24);\nSET $day = ($turn / ($turns_per_hour * 24));\nIF ($turns_count > 0) THEN RUN turn ELSE { SET $turns_count = 1 } }"
-  },
-  "functions": {},
-  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", str($hour), \":\", str($minutes) ]"
+  }
 }

@@ -91,9 +91,7 @@
     }
   ],
   "startDialogId": "start",
-  "counters": {},
-  "labels": {},
+  "vars": {},
   "procedures": {},
-  "functions": {},
   "statusLine": "\"\""
 }

@@ -2,12 +2,12 @@ module Main exposing (main)
 
 --import Games.TestSanbox as Game
 --import Games.FabledLands as Game
+--import Games.UnderSeaGame as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
-import Games.UnderSeaGame as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style, value)
 import Html.Events exposing (onClick, onInput)
@@ -61,6 +61,8 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
+
+        --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
@@ -73,7 +75,7 @@ mainMenuDialogs =
           , text = Screept.S "Main Menu"
           , options =
                 [ { text = Screept.S "Load Game", condition = Nothing, action = [ GoAction "load_game_definition" ] }
-                , { text = Screept.S "Start Game", condition = Just (Screept.parseIntValue "$game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
+                , { text = Screept.S "Start Game", condition = Just (Screept.parseIntValue "game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
                 ]
           }
         , { id = "load_game_definition"
@@ -86,7 +88,7 @@ mainMenuDialogs =
                 ]
           }
         , { id = "in_game"
-          , text = Screept.Concat [ Screept.S "Playing: ", Screept.Label "game_title" ]
+          , text = Screept.Concat [ Screept.S "Playing: ", Screept.TextVariable (Screept.VLit "game_title") ]
           , options =
                 [ { text = Screept.S "Restart", condition = Nothing, action = [ Exit "start_game" ] }
                 , { text = Screept.S "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
@@ -179,7 +181,7 @@ update msg model =
                             model.mainMenuDialog
 
                         menuDialog =
-                            { m | gameState = Screept.exec ("{SET $game_loaded = 1; LABEL $game_title = \"" ++ value.title ++ "\" }") m.gameState }
+                            { m | gameState = Screept.exec ("{ INT game_loaded = 1; TEXT game_title = \"" ++ value.title ++ "\" }") m.gameState }
                     in
                     ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }, Cmd.none )
 
@@ -196,7 +198,20 @@ update msg model =
         StartGame ->
             let
                 gameDialog gameDefinition =
-                    Started gameDefinition (initGameFromGameDefinition gameDefinition)
+                    let
+                        m =
+                            initGameFromGameDefinition gameDefinition
+
+                        gameState =
+                            Screept.runStatement Screept.exampleStatement m.gameState
+
+                        _ =
+                            Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
+
+                        newModel =
+                            { m | gameState = gameState }
+                    in
+                    Started gameDefinition newModel
             in
             case model.gameDialog of
                 NotLoaded ->
@@ -279,13 +294,11 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        { counters = gameDefinition.counters
-        , labels = gameDefinition.labels
-        , functions = gameDefinition.functions
-        , procedures = gameDefinition.procedures
+        { procedures = gameDefinition.procedures
         , messages = []
         , rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
+        , vars = gameDefinition.vars
         }
     , statusLine = gameDefinition.statusLine
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
@@ -342,19 +355,3 @@ viewUrlLoader model =
 
         Nothing ->
             text ""
-
-
-
--------
---- UTIL
--------
-
-
-htmlCond : Maybe a -> (a -> Html b) -> Html b
-htmlCond maybe viewFn =
-    case maybe of
-        Nothing ->
-            text ""
-
-        Just m ->
-            viewFn m

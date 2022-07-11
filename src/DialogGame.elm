@@ -6,20 +6,17 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Json.Decode as Json
 import Json.Encode as E
-import Parser
 import Random
 import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
 
 
 type alias GameState =
-    { counters : Dict String Int
-    , labels : Dict String String
-    , dialogStack : Stack DialogId
+    { dialogStack : Stack DialogId
     , messages : List String
     , procedures : Dict String Screept.Statement
-    , functions : Dict String Screept.IntValue
     , rnd : Random.Seed
+    , vars : Dict String Screept.Variable
     }
 
 
@@ -46,10 +43,8 @@ type alias GameDefinition =
     , dialogs : List Dialog
     , statusLine : Maybe Screept.TextValue
     , startDialogId : String
-    , counters : Dict String Int
-    , labels : Dict String String
     , procedures : Dict String Screept.Statement
-    , functions : Dict String Screept.IntValue
+    , vars : Dict String Screept.Variable
     }
 
 
@@ -70,13 +65,11 @@ setStatusLine maybeTextValue model =
 
 emptyGameState : GameState
 emptyGameState =
-    { counters = Dict.empty
-    , labels = Dict.empty
-    , functions = Dict.empty
-    , procedures = Dict.empty
+    { procedures = Dict.empty
     , messages = []
     , rnd = Random.initialSeed 666
     , dialogStack = Stack.initialise |> Stack.push "start"
+    , vars = Dict.empty
     }
 
 
@@ -229,14 +222,11 @@ stringifyGameDefinition gd =
 
 
 encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId, counters, labels, procedures, functions, statusLine } =
+encodeGameDefinition { dialogs, startDialogId, procedures, statusLine } =
     E.object
         ([ ( "dialogs", E.list encodeDialog dialogs )
          , ( "startDialogId", E.string startDialogId )
-         , ( "counters", E.dict identity E.int counters )
-         , ( "labels", E.dict identity E.string labels )
          , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
-         , ( "functions", E.dict identity (Screept.intValueStringify >> E.string) functions )
          ]
             ++ (case statusLine of
                     Nothing ->
@@ -292,17 +282,23 @@ decodeDialogs =
     Json.list decodeDialog
 
 
+decodeVariable : Json.Decoder Screept.Variable
+decodeVariable =
+    Json.oneOf
+        [ Json.int |> Json.map (\x -> Screept.VInt <| Screept.Const x)
+        , Json.string |> Json.map (\x -> Screept.VText <| Screept.S x)
+        ]
+
+
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map8 GameDefinition
+    Json.map6 GameDefinition
         (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
-        (Json.field "counters" <| Json.dict Json.int)
-        (Json.field "labels" <| Json.dict Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
-        (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
+        (Json.field "vars" <| Json.dict decodeVariable)
 
 
 update : Msg -> Model -> ( Model, Maybe String )
@@ -338,6 +334,7 @@ view { gameState, statusLine, dialogs } =
 
           else
             text ""
+        , viewDebug gameState
         ]
 
 
@@ -366,7 +363,8 @@ viewDialogText textValue gameState =
 viewDebug : GameState -> Html a
 viewDebug gameState =
     div [ class "status" ]
-        [ div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.counters |> List.sort |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ String.fromInt v ]))
+        [ text "Debug"
+        , div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.vars |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ Screept.stringifyVariable v ]))
         ]
 
 
