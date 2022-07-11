@@ -2,12 +2,12 @@ module Main exposing (main)
 
 --import Games.TestSanbox as Game
 --import Games.FabledLands as Game
+--import Games.UnderSeaGame as Game
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
---import Games.UnderSeaGame as Game
 import Html exposing (..)
 import Html.Attributes exposing (class, style, value)
 import Html.Events exposing (onClick, onInput)
@@ -61,9 +61,9 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
+
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-
         ]
     )
 
@@ -88,7 +88,7 @@ mainMenuDialogs =
                 ]
           }
         , { id = "in_game"
-          , text = Screept.Concat [ Screept.S "Playing: ", Screept.TextVariable  (Screept.VLit "game_title") ]
+          , text = Screept.Concat [ Screept.S "Playing: ", Screept.TextVariable (Screept.VLit "game_title") ]
           , options =
                 [ { text = Screept.S "Restart", condition = Nothing, action = [ Exit "start_game" ] }
                 , { text = Screept.S "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
@@ -355,5 +355,3 @@ viewUrlLoader model =
 
         Nothing ->
             text ""
-
-

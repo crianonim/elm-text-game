@@ -16,31 +16,31 @@ intValParseAndStringify =
                 Expect.equal (Parser.run intValueParser (String.fromInt x)) (Ok (Const x))
         , test "should parse counter to Counter" <|
             \_ ->
-                Expect.equal (Parser.run intValueParser "$test_counter") (Ok (Counter "test_counter"))
+                Expect.equal (Parser.run intValueParser "test_counter") (Ok (IntVariable (VLit "test_counter")))
         , test "Should parse unary" <|
             \_ ->
-                Expect.equal (Parser.run intValueParser "!$test_counter") (Ok (Unary Not (Counter "test_counter")))
+                Expect.equal (Parser.run intValueParser "!test_counter") (Ok (Unary Not (IntVariable (VLit "test_counter"))))
         , test "Should parse binary" <|
             \_ ->
-                Expect.equal (Parser.run intValueParser "($test_counter > 1)") (Ok <| Binary (Counter "test_counter") Gt (Const 1))
+                Expect.equal (Parser.run intValueParser "(test_counter > 1)") (Ok <| Binary (IntVariable (VLit "test_counter")) Gt (Const 1))
         , test "should parse CALL" <|
             \_ ->
-                Expect.equal (Parser.run intValueParser "CALL test_function") (Ok <| Eval "test_function")
+                Expect.equal (Parser.run intValueParser "CALL test_function") (Ok <| Eval (VLit "test_function"))
         , test "stringify a value" <|
             \_ ->
                 Expect.equal (intValueStringify (Const 5)) "5"
         , test "stringify a counter" <|
             \_ ->
-                Expect.equal (intValueStringify (Counter "test_counter")) "$test_counter"
+                Expect.equal (intValueStringify (IntVariable (VLit "test_counter"))) "test_counter"
         , test "stringify a unary op" <|
             \_ ->
                 Expect.equal (intValueStringify (Unary Not <| Const 1)) "!1"
         , test "stringify a binary op" <|
             \_ ->
-                Expect.equal (intValueStringify (Binary (Counter "test_counter") Eq (Const 1))) "($test_counter == 1)"
+                Expect.equal (intValueStringify (Binary (IntVariable (VLit "test_counter")) Eq (Const 1))) "(test_counter == 1)"
         , test "stringify a call" <|
             \_ ->
-                Expect.equal (intValueStringify (Eval "test")) "CALL test"
+                Expect.equal (intValueStringify (Eval (VLit "test"))) "CALL test"
         , fuzz (fuzzIntVal 10) "round stringify and parse" <|
             \v ->
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
@@ -69,12 +69,9 @@ fuzzStatement : Int -> Fuzzer Statement
 fuzzStatement x =
     if x < 0 then
         Fuzz.oneOf
-            [ Fuzz.map2 SetCounter (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal -1)
-            , Fuzz.map2 SetCounter (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1)
-            , Fuzz.map2 SetLabel (fuzzValidLabel |> Fuzz.map S) (fuzzTextValue 1)
-            , Fuzz.map2 SetFunc (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1)
-            , Fuzz.map3 Rnd (fuzzValidLabel |> Fuzz.map S) (fuzzIntVal 1) (fuzzIntVal 1)
-            , Fuzz.map Procedure fuzzValidLabel
+            [ Fuzz.map2 SetVariable fuzzVariableName (fuzzVariable -1)
+            , Fuzz.map3 Rnd fuzzVariableName (fuzzIntVal 1) (fuzzIntVal 1)
+            , Fuzz.map Procedure fuzzValidProcName
             , Fuzz.map Comment fuzzValidComment
             ]
 
@@ -101,7 +98,7 @@ fuzzTextValue x =
             , Fuzz.list (fuzzTextValue -1) |> Fuzz.map Concat
             , Fuzz.map3 Conditional (fuzzIntVal 2) (fuzzTextValue (x - 1)) (fuzzTextValue (x - 1))
             , Fuzz.map IntValueText (fuzzIntVal 2)
-            , Fuzz.map Label fuzzValidLabel
+            , Fuzz.map TextVariable fuzzVariableName
             ]
 
 
@@ -110,8 +107,22 @@ fuzzValidTextString =
     Fuzz.map (String.filter (\c -> c /= '"')) string
 
 
-fuzzValidLabel : Fuzzer String
-fuzzValidLabel =
+fuzzConst : Fuzzer IntValue
+fuzzConst =
+    Fuzz.map Const int
+
+
+fuzzVariable : Int -> Fuzzer Variable
+fuzzVariable n =
+    Fuzz.oneOf
+        [ fuzzIntVariable n
+        , fuzzTextVariable n
+        , fuzzFuncVariable n
+        ]
+
+
+fuzzValidProcName : Fuzzer String
+fuzzValidProcName =
     Fuzz.map
         (\s ->
             String.filter Chat.isAlphaNum s
@@ -126,25 +137,35 @@ fuzzValidLabel =
         string
 
 
-fuzzConst : Fuzzer IntValue
-fuzzConst =
-    Fuzz.map Const int
+fuzzIntVariable : Int -> Fuzzer Variable
+fuzzIntVariable n =
+    fuzzIntVal n |> Fuzz.map VInt
 
 
-fuzzCounter : Fuzzer IntValue
-fuzzCounter =
-    Fuzz.constant (Counter "test_value")
+fuzzTextVariable : Int -> Fuzzer Variable
+fuzzTextVariable n =
+    fuzzTextValue n |> Fuzz.map VText
+
+
+fuzzFuncVariable : Int -> Fuzzer Variable
+fuzzFuncVariable n =
+    fuzzIntVal n |> Fuzz.map VFunc
+
+
+fuzzVariableName : Fuzzer VariableName
+fuzzVariableName =
+    Fuzz.constant (VLit "test_value")
 
 
 fuzzIntVal : Int -> Fuzzer IntValue
 fuzzIntVal x =
     if x < 0 then
-        Fuzz.oneOf [ fuzzConst, fuzzCounter ]
+        Fuzz.oneOf [ fuzzConst, fuzzVariableName |> Fuzz.map IntVariable ]
 
     else
         Fuzz.oneOf
             [ fuzzConst
-            , fuzzCounter
+            , fuzzVariableName |> Fuzz.map IntVariable
             , Fuzz.map2 Unary fuzzUnaryOp (fuzzIntVal (x - 1))
             , Fuzz.map3 Binary (fuzzIntVal (x - 1)) fuzzBinaryOp (fuzzIntVal (x - 1))
             ]

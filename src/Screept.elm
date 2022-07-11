@@ -12,7 +12,7 @@ type IntValue
     | Unary UnaryOp IntValue
     | Binary IntValue BinaryOp IntValue
     | Eval VariableName
-    | IntVariable String
+    | IntVariable VariableName
 
 
 type UnaryOp
@@ -41,8 +41,7 @@ type TextValue
 
 
 type Statement
-    =  SetFunc VariableName IntValue
-    | Rnd VariableName IntValue IntValue
+    = Rnd VariableName IntValue IntValue
     | Block (List Statement)
     | If IntValue Statement Statement
     | Comment String
@@ -68,7 +67,6 @@ runStatement statement state =
             Debug.log "RUN" statement
     in
     case statement of
-
         Rnd var mx my ->
             Maybe.map2
                 (\x y ->
@@ -114,9 +112,6 @@ runStatement statement state =
             in
             runStatement proc state
 
-        SetFunc name fn ->
-            setVar name (VFunc fn) state
-
         SetVariable name variable ->
             let
                 v =
@@ -128,7 +123,7 @@ runStatement statement state =
                             VText <| S <| getText state textValue
 
                         VFunc intValue ->
-                             VFunc intValue
+                            VFunc intValue
             in
             setVar name v state
 
@@ -139,15 +134,14 @@ runStatement statement state =
 
 type alias State a =
     { a
-        |
-         procedures : Dict String Statement
+        | procedures : Dict String Statement
         , rnd : Random.Seed
         , vars : Dict String Variable
     }
 
 
 emptyState =
-    {  procedures = Dict.empty
+    { procedures = Dict.empty
     , functions = Dict.empty
     , rnd = Random.initialSeed 666
     , vars = Dict.empty
@@ -173,8 +167,6 @@ getText gameState text =
         IntValueText gameValue ->
             getIntValueWithDefault gameValue gameState |> String.fromInt
 
-
-
         TextVariable name ->
             getTextValueFromVariable (getVariableNameString name gameState) gameState
 
@@ -191,9 +183,8 @@ getTextValueFromVariable name state =
                     VText t ->
                         getText state t
 
-
                     VFunc i ->
-                         intValueStringify i
+                        intValueStringify i
             )
         |> Maybe.withDefault ""
 
@@ -290,13 +281,9 @@ stringifyVariableName variableName =
 
 getMaybeIntValue : IntValue -> State a -> Maybe Int
 getMaybeIntValue gameValue gameState =
-
-
     case gameValue of
         Const int ->
             Just int
-
-
 
         Unary op mx ->
             Maybe.map (unaryOpEval op) (getMaybeIntValue mx gameState)
@@ -306,33 +293,32 @@ getMaybeIntValue gameValue gameState =
 
         Eval func ->
             Dict.get (getVariableNameString func gameState) gameState.vars
-                |> Maybe.andThen (\x ->
-                    case x of
-                     VFunc f ->
-                        let
-                            _ =
-                                Debug.log "FUNC" (func,x,getMaybeIntValue f gameState)
-                        in
+                |> Maybe.andThen
+                    (\x ->
+                        case x of
+                            VFunc f ->
+                                let
+                                    _ =
+                                        Debug.log "FUNC" ( func, x, getMaybeIntValue f gameState )
+                                in
+                                getMaybeIntValue f gameState
 
-                        getMaybeIntValue f gameState
+                            VInt intValue ->
+                                Nothing
+
+                            VText textValue ->
+                                Nothing
+                    )
+
+        IntVariable varName ->
+            getMaybeIntFromVariable varName gameState
 
 
-                     VInt intValue ->
-                            Nothing
-
-                     VText textValue ->
-                         Nothing
-                )
-
-        IntVariable name ->
-            getMaybeIntFromVariable name gameState
-
-
-getMaybeIntFromVariable : String -> State a -> Maybe Int
-getMaybeIntFromVariable name state =
+getMaybeIntFromVariable : VariableName -> State a -> Maybe Int
+getMaybeIntFromVariable varName state =
     let
         var =
-            Dict.get name state.vars
+            Dict.get (getVariableNameString varName state) state.vars
     in
     Maybe.andThen
         (\v ->
@@ -347,12 +333,10 @@ getMaybeIntFromVariable name state =
                 VInt i ->
                     getMaybeIntValue i state
 
-
                 VFunc intValue ->
-                   Just  1
+                    Just 1
         )
         var
-
 
 
 setVar : VariableName -> Variable -> State a -> State a
@@ -362,9 +346,6 @@ setVar name variable state =
             getVariableNameString name state
     in
     { state | vars = Dict.insert varname variable state.vars }
-
-
-
 
 
 isTruthy : IntValue -> State a -> Bool
@@ -380,7 +361,6 @@ isTruthy intValue state =
 -----------
 --- Helpers
 -----------
-
 
 
 intWithPotentialMinus : Parser Int
@@ -489,7 +469,7 @@ intValueStringify intValue =
             "CALL " ++ stringifyVariableName string
 
         IntVariable string ->
-            string
+            stringifyVariableName string
 
 
 binaryOpParser : Parser IntValue
@@ -534,6 +514,7 @@ intValueParser =
         , unaryOpParser
         , Parser.succeed Const
             |= intWithPotentialMinus
+
         --, Parser.map Counter
         --    counterParser
         , Parser.succeed Eval
@@ -541,7 +522,7 @@ intValueParser =
             |. Parser.spaces
             |= parseVariableName
         , Parser.succeed IntVariable
-            |= nextWordParser
+            |= parseVariableName
         ]
 
 
@@ -559,8 +540,6 @@ textValueStringify textValue =
 
         IntValueText intValue ->
             "str(" ++ intValueStringify intValue ++ ")"
-
-
 
         TextVariable string ->
             stringifyVariableName string
@@ -596,7 +575,7 @@ textValueParser =
             |. Parser.symbol ")"
         , Parser.succeed TextVariable
             |= parseVariableName
-         ]
+        ]
 
 
 counterStringify : TextValue -> String
@@ -612,10 +591,6 @@ counterStringify textValue =
 statementStringify : Statement -> String
 statementStringify statement =
     case statement of
-
-        SetFunc textValue intValue ->
-            "DEF_FUNC " ++ stringifyVariableName textValue ++ " = " ++ intValueStringify intValue
-
         Rnd varName i1 i2 ->
             "RND " ++ stringifyVariableName varName ++ " " ++ intValueStringify i1 ++ " .. " ++ intValueStringify i2
 
@@ -632,28 +607,29 @@ statementStringify statement =
             "RUN " ++ string
 
         SetVariable name variable ->
-            "LET " ++ stringifyVariableName name ++ " = " ++ stringifyVariable variable
+            case variable of
+                VInt _ ->
+                    "INT " ++ stringifyVariableName name ++ " = " ++ stringifyVariable variable
+
+                VText _ ->
+                    "TEXT " ++ stringifyVariableName name ++ " = " ++ stringifyVariable variable
+
+                VFunc _ ->
+                    "DEF_FUNC " ++ stringifyVariableName name ++ " = " ++ stringifyVariable variable
 
 
 nextWordParser : Parser String
 nextWordParser =
-    Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_') |> Parser.getChompedString
+    Parser.getChompedString <|
+        Parser.succeed ()
+            |. Parser.chompIf (\c -> Char.isAlphaNum c || c == '_')
+            |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
 
 
 statementParser : Parser Statement
 statementParser =
     Parser.oneOf
-        [
-
-         Parser.succeed SetFunc
-            |. Parser.keyword "DEF_FUNC"
-            |. Parser.spaces
-            |= parseVariableName
-            |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= intValueParser
-        , Parser.succeed Rnd
+        [ Parser.succeed Rnd
             |. Parser.keyword "RND"
             |. Parser.spaces
             |= parseVariableName
@@ -698,16 +674,23 @@ statementParser =
             |. Parser.spaces
             |. Parser.symbol "="
             |. Parser.spaces
-            |=  (intValueParser |> Parser.map VInt)
-
-         , Parser.succeed SetVariable
-                    |. Parser.keyword "TEXT"
-                    |. Parser.spaces
-                    |= parseVariableName
-                    |. Parser.spaces
-                    |. Parser.symbol "="
-                    |. Parser.spaces
-                    |=  (textValueParser |> Parser.map VText)
+            |= (intValueParser |> Parser.map VInt)
+        , Parser.succeed SetVariable
+            |. Parser.keyword "TEXT"
+            |. Parser.spaces
+            |= parseVariableName
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= (textValueParser |> Parser.map VText)
+        , Parser.succeed SetVariable
+            |. Parser.keyword "DEF_FUNC"
+            |. Parser.spaces
+            |= parseVariableName
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= (intValueParser |> Parser.map VFunc)
         ]
 
 
@@ -807,10 +790,10 @@ exampleStatement =
         , SetVariable (VLit "b") (VText (S "var_name"))
         , SetVariable (VLit "c") (VText (S ""))
         , SetVariable (VLit "d") (VInt (Const 0))
-        , If (IntVariable "a") (SetVariable (VLit "e") (VInt (Const 1))) (SetVariable (VLit "e") (VInt (Const 0)))
-        , If (IntVariable "b") (SetVariable (VLit "f") (VInt (Const 1))) (SetVariable (VLit "f") (VInt (Const 0)))
-        , If (IntVariable "c") (SetVariable (VLit "g") (VInt (Const 1))) (SetVariable (VLit "g") (VInt (Const 0)))
-        , If (IntVariable "d") (SetVariable (VLit "h") (VInt (Const 1))) (SetVariable (VLit "h") (VInt (Const 0)))
+        , If (IntVariable (VLit "a")) (SetVariable (VLit "e") (VInt (Const 1))) (SetVariable (VLit "e") (VInt (Const 0)))
+        , If (IntVariable (VLit "b")) (SetVariable (VLit "f") (VInt (Const 1))) (SetVariable (VLit "f") (VInt (Const 0)))
+        , If (IntVariable (VLit "c")) (SetVariable (VLit "g") (VInt (Const 1))) (SetVariable (VLit "g") (VInt (Const 0)))
+        , If (IntVariable (VLit "d")) (SetVariable (VLit "h") (VInt (Const 1))) (SetVariable (VLit "h") (VInt (Const 0)))
 
         --, VIf (VInt (Const 12)) (SetVariable "success" (VText (S "YES"))) (SetVariable "success" (VText (S "NO")))
         --, VIf (VText (S "With Value")) (SetVariable "success2" (VText (S "YES"))) (SetVariable "success2" (VText (S "NO")))

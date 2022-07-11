@@ -12,7 +12,7 @@ import Stack exposing (Stack)
 
 
 type alias GameState =
-    {  dialogStack : Stack DialogId
+    { dialogStack : Stack DialogId
     , messages : List String
     , procedures : Dict String Screept.Statement
     , rnd : Random.Seed
@@ -43,7 +43,6 @@ type alias GameDefinition =
     , dialogs : List Dialog
     , statusLine : Maybe Screept.TextValue
     , startDialogId : String
-
     , procedures : Dict String Screept.Statement
     , vars : Dict String Screept.Variable
     }
@@ -66,7 +65,7 @@ setStatusLine maybeTextValue model =
 
 emptyGameState : GameState
 emptyGameState =
-    {   procedures = Dict.empty
+    { procedures = Dict.empty
     , messages = []
     , rnd = Random.initialSeed 666
     , dialogStack = Stack.initialise |> Stack.push "start"
@@ -223,7 +222,7 @@ stringifyGameDefinition gd =
 
 
 encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId,  procedures, statusLine } =
+encodeGameDefinition { dialogs, startDialogId, procedures, statusLine } =
     E.object
         ([ ( "dialogs", E.list encodeDialog dialogs )
          , ( "startDialogId", E.string startDialogId )

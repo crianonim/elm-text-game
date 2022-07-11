@@ -12,6 +12,15 @@
             }
           ]
         }
+        ,
+        {
+          "text": "\"DEBUG: Go to tree\"",
+          "action": [
+            {
+              "go_dialog": "#630"
+            }
+          ]
+        }
       ]
     },
     {
