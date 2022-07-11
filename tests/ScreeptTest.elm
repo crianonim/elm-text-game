@@ -41,7 +41,7 @@ intValParseAndStringify =
         , test "stringify a call" <|
             \_ ->
                 Expect.equal (intValueStringify (Eval (VLit "test"))) "CALL test"
-        , fuzz (fuzzIntVal 10) "round stringify and parse" <|
+        , fuzz (Fuzz.intRange 1 10 |> Fuzz.andThen fuzzIntVal) "round stringify and parse" <|
             \v ->
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
         ]
@@ -50,7 +50,7 @@ intValParseAndStringify =
 textValueParseAndStringify : Test
 textValueParseAndStringify =
     describe "TextValue parsing and stringify"
-        [ fuzz (fuzzTextValue 10) "Round trip" <|
+        [ fuzz (Fuzz.intRange 1 10 |> Fuzz.andThen fuzzTextValue) "Round trip" <|
             \v ->
                 Expect.equal (Screept.textValueStringify v |> Parser.run textValueParser) (Ok v)
         ]
@@ -59,7 +59,7 @@ textValueParseAndStringify =
 statementParseAndStringify : Test
 statementParseAndStringify =
     describe "Statement parsing and stringify"
-        [ fuzz (fuzzStatement 0) "Round trip stringify and parse" <|
+        [ fuzz (Fuzz.intRange 0 1 |> Fuzz.andThen fuzzStatement ) "Round trip stringify and parse" <|
             \v ->
                 Expect.equal (Screept.statementStringify v |> Parser.run statementParser) (Ok v)
         ]
@@ -159,6 +159,7 @@ fuzzVariableName =
 
 fuzzIntVal : Int -> Fuzzer IntValue
 fuzzIntVal x =
+
     if x < 0 then
         Fuzz.oneOf [ fuzzConst, fuzzVariableName |> Fuzz.map IntVariable ]
 
