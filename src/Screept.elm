@@ -11,7 +11,7 @@ type IntValue
     = Const Int
     | Unary UnaryOp IntValue
     | Binary IntValue BinaryOp IntValue
-    | Eval String
+    | Eval VariableName
     | IntVariable String
 
 
@@ -58,6 +58,7 @@ type VariableName
 type Variable
     = VInt IntValue
     | VText TextValue
+    | VFunc IntValue
 
 
 runStatement : Statement -> State a -> State a
@@ -114,7 +115,7 @@ runStatement statement state =
             runStatement proc state
 
         SetFunc name fn ->
-            setFunction (getVariableNameString  name state) fn state
+            setVar name (VFunc fn) state
 
         SetVariable name variable ->
             let
@@ -125,6 +126,9 @@ runStatement statement state =
 
                         VText textValue ->
                             VText <| S <| getText state textValue
+
+                        VFunc intValue ->
+                             VFunc intValue
             in
             setVar name v state
 
@@ -137,7 +141,6 @@ type alias State a =
     { a
         |
          procedures : Dict String Statement
-        , functions : Dict String IntValue
         , rnd : Random.Seed
         , vars : Dict String Variable
     }
@@ -187,6 +190,10 @@ getTextValueFromVariable name state =
 
                     VText t ->
                         getText state t
+
+
+                    VFunc i ->
+                         intValueStringify i
             )
         |> Maybe.withDefault ""
 
@@ -298,14 +305,24 @@ getMaybeIntValue gameValue gameState =
             Maybe.map2 (binaryOpEval op) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
 
         Eval func ->
-            Dict.get func gameState.functions
+            Dict.get (getVariableNameString func gameState) gameState.vars
                 |> Maybe.andThen (\x ->
-                let
-                    _ =
-                        Debug.log "FUNC" (func,x,getMaybeIntValue x gameState)
-                in
+                    case x of
+                     VFunc f ->
+                        let
+                            _ =
+                                Debug.log "FUNC" (func,x,getMaybeIntValue f gameState)
+                        in
 
-                getMaybeIntValue x gameState)
+                        getMaybeIntValue f gameState
+
+
+                     VInt intValue ->
+                            Nothing
+
+                     VText textValue ->
+                         Nothing
+                )
 
         IntVariable name ->
             getMaybeIntFromVariable name gameState
@@ -329,6 +346,10 @@ getMaybeIntFromVariable name state =
 
                 VInt i ->
                     getMaybeIntValue i state
+
+
+                VFunc intValue ->
+                   Just  1
         )
         var
 
@@ -344,10 +365,6 @@ setVar name variable state =
 
 
 
-
-setFunction : String -> IntValue -> State a -> State a
-setFunction id fn state =
-    { state | functions = Dict.insert id fn state.functions }
 
 
 isTruthy : IntValue -> State a -> Bool
@@ -469,7 +486,7 @@ intValueStringify intValue =
                 ++ ")"
 
         Eval string ->
-            "CALL " ++ string
+            "CALL " ++ stringifyVariableName string
 
         IntVariable string ->
             string
@@ -522,7 +539,7 @@ intValueParser =
         , Parser.succeed Eval
             |. Parser.keyword "CALL"
             |. Parser.spaces
-            |= nextWordParser
+            |= parseVariableName
         , Parser.succeed IntVariable
             |= nextWordParser
         ]
@@ -753,6 +770,9 @@ stringifyVariable variable =
 
         VText textValue ->
             textValueStringify textValue
+
+        VFunc intValue ->
+            intValueStringify intValue
 
 
 run : String -> Statement

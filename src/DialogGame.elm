@@ -6,7 +6,6 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Json.Decode as Json
 import Json.Encode as E
-import Parser
 import Random
 import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
@@ -16,7 +15,6 @@ type alias GameState =
     {  dialogStack : Stack DialogId
     , messages : List String
     , procedures : Dict String Screept.Statement
-    , functions : Dict String Screept.IntValue
     , rnd : Random.Seed
     , vars : Dict String Screept.Variable
     }
@@ -47,7 +45,6 @@ type alias GameDefinition =
     , startDialogId : String
 
     , procedures : Dict String Screept.Statement
-    , functions : Dict String Screept.IntValue
     , vars : Dict String Screept.Variable
     }
 
@@ -69,8 +66,7 @@ setStatusLine maybeTextValue model =
 
 emptyGameState : GameState
 emptyGameState =
-    {  functions = Dict.empty
-    , procedures = Dict.empty
+    {   procedures = Dict.empty
     , messages = []
     , rnd = Random.initialSeed 666
     , dialogStack = Stack.initialise |> Stack.push "start"
@@ -227,12 +223,11 @@ stringifyGameDefinition gd =
 
 
 encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId,  procedures, functions, statusLine } =
+encodeGameDefinition { dialogs, startDialogId,  procedures, statusLine } =
     E.object
         ([ ( "dialogs", E.list encodeDialog dialogs )
          , ( "startDialogId", E.string startDialogId )
          , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
-         , ( "functions", E.dict identity (Screept.intValueStringify >> E.string) functions )
          ]
             ++ (case statusLine of
                     Nothing ->
@@ -298,13 +293,12 @@ decodeVariable =
 
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map7 GameDefinition
+    Json.map6 GameDefinition
         (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
-        (Json.field "functions" <| Json.dict (Json.string |> Json.map Screept.parseIntValue))
         (Json.field "vars" <| Json.dict decodeVariable)
 
 

@@ -21,7 +21,6 @@
     "turn": "{ LET turn = (turn + 1);\nLET turns_count = (turns_count - 1);\nLET minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nLET hour = ((turn / turns_per_hour) %% 24);\nLET day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { LET turns_count = 5 } }",
     "test": "{ RND $b 1 .. 6 }"
   },
-  "functions": {},
   "statusLine": "[ \"Turn: \", str($turn), \" Time: \", str($hour), \":\", str($minutes) ]",
   "vars": {
     "hour": 0,
