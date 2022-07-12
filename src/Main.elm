@@ -1,15 +1,10 @@
 module Main exposing (main)
 
---import Games.TestSanbox as Game
---import Games.FabledLands as Game
---import Games.UnderSeaGame as Game
-
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
-import Dict
 import Html exposing (..)
-import Html.Attributes exposing (class, style, value)
+import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Platform.Cmd exposing (Cmd)
@@ -175,7 +170,7 @@ update msg model =
                 Ok value ->
                     let
                         _ =
-                            Debug.log "Success decode" value
+                            Debug.log "Success decode" value.dialogs
 
                         m =
                             model.mainMenuDialog

@@ -59,7 +59,7 @@ textValueParseAndStringify =
 statementParseAndStringify : Test
 statementParseAndStringify =
     describe "Statement parsing and stringify"
-        [ fuzz (Fuzz.intRange 0 1 |> Fuzz.andThen fuzzStatement ) "Round trip stringify and parse" <|
+        [ fuzz (Fuzz.intRange 0 1 |> Fuzz.andThen fuzzStatement) "Round trip stringify and parse" <|
             \v ->
                 Expect.equal (Screept.statementStringify v |> Parser.run statementParser) (Ok v)
         ]
@@ -159,7 +159,6 @@ fuzzVariableName =
 
 fuzzIntVal : Int -> Fuzzer IntValue
 fuzzIntVal x =
-
     if x < 0 then
         Fuzz.oneOf [ fuzzConst, fuzzVariableName |> Fuzz.map IntVariable ]
 
