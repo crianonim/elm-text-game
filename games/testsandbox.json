@@ -3,7 +3,7 @@
   "dialogs": [
     {
       "id": "start",
-      "text": "test_statusLine",
+      "text": "",
       "options": [
         {
           "text": "\"...\"",
@@ -21,7 +21,7 @@
     "turn": "{ INT turn = (turn + 1);\nINT turns_count = (turns_count - 1);\nINT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nINT hour = ((turn / turns_per_hour) %% 24);\nINT day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 } }",
     "test": "{ RND $b 1 .. 6 }"
   },
-  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]",
+  "statusLine": "[ \"XXXTurn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]",
   "vars": {
     "hour": 0,
     "minutes": 0,
@@ -32,6 +32,6 @@
     "player_name": "Liana",
     "player_profession": "wayfarer",
     "test_func": { "func": "(turn + turns_per_hour)"},
-    "test_statusLine": {"func_text":"[ \"Turn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]" }
+    "__statusLine": {"func_text":"[ \"SS Turn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]" }
   }
 }

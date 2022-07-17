@@ -5555,9 +5555,9 @@ var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $author$project$DialogGame$GameDefinition = F6(
-	function (title, dialogs, statusLine, startDialogId, procedures, vars) {
-		return {dialogs: dialogs, procedures: procedures, startDialogId: startDialogId, statusLine: statusLine, title: title, vars: vars};
+var $author$project$DialogGame$GameDefinition = F5(
+	function (title, dialogs, startDialogId, procedures, vars) {
+		return {dialogs: dialogs, procedures: procedures, startDialogId: startDialogId, title: title, vars: vars};
 	});
 var $author$project$DialogGame$Dialog = F3(
 	function (id, text, options) {
@@ -7284,17 +7284,12 @@ var $elm$json$Json$Decode$dict = function (decoder) {
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$keyValuePairs(decoder));
 };
-var $elm$json$Json$Decode$map6 = _Json_map6;
-var $author$project$DialogGame$decodeGameDefinition = A7(
-	$elm$json$Json$Decode$map6,
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$DialogGame$decodeGameDefinition = A6(
+	$elm$json$Json$Decode$map5,
 	$author$project$DialogGame$GameDefinition,
 	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'dialogs', $author$project$DialogGame$decodeDialogs),
-	A2(
-		$elm$json$Json$Decode$field,
-		'statusLine',
-		$elm$json$Json$Decode$maybe(
-			A2($elm$json$Json$Decode$map, $author$project$Screept$parseTextValue, $elm$json$Json$Decode$string))),
 	A2($elm$json$Json$Decode$field, 'startDialogId', $elm$json$Json$Decode$string),
 	A2(
 		$elm$json$Json$Decode$field,
@@ -8184,12 +8179,12 @@ var $author$project$DialogGame$emptyGameState = {
 	rnd: $elm$random$Random$initialSeed(666),
 	vars: $elm$core$Dict$empty
 };
-var $author$project$DialogGame$init = F3(
-	function (gs, dialogs, statusLine) {
-		return {dialogs: dialogs, gameState: gs, statusLine: statusLine};
+var $author$project$DialogGame$init = F2(
+	function (gs, dialogs) {
+		return {dialogs: dialogs, gameState: gs};
 	});
 var $author$project$DialogGame$initSimple = function (dialogs) {
-	return A3($author$project$DialogGame$init, $author$project$DialogGame$emptyGameState, dialogs, $elm$core$Maybe$Nothing);
+	return A2($author$project$DialogGame$init, $author$project$DialogGame$emptyGameState, dialogs);
 };
 var $author$project$DialogGame$Exit = function (a) {
 	return {$: 'Exit', a: a};
@@ -8820,8 +8815,7 @@ var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) 
 			procedures: gameDefinition.procedures,
 			rnd: $elm$random$Random$initialSeed(666),
 			vars: gameDefinition.vars
-		},
-		statusLine: gameDefinition.statusLine
+		}
 	};
 };
 var $author$project$Main$ShowUrlLoader = {$: 'ShowUrlLoader'};
@@ -9438,6 +9432,14 @@ var $author$project$DialogGame$getDialog = F2(
 			$author$project$DialogGame$badDialog,
 			A2($elm$core$Dict$get, dialogId, dialogs));
 	});
+var $author$project$Screept$getMaybeFuncTextValueFromVariable = function (variable) {
+	if (variable.$ === 'VFuncText') {
+		var t = variable.a;
+		return $elm$core$Maybe$Just(t);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -9586,7 +9588,6 @@ var $author$project$DialogGame$viewOption = F2(
 	});
 var $author$project$DialogGame$view = function (_v0) {
 	var gameState = _v0.gameState;
-	var statusLine = _v0.statusLine;
 	var dialogs = _v0.dialogs;
 	var dialog = A2(
 		$author$project$DialogGame$getDialog,
@@ -9619,7 +9620,10 @@ var $author$project$DialogGame$view = function (_v0) {
 							function (t) {
 								return A2($author$project$DialogGame$viewDialogText, t, gameState);
 							},
-							statusLine)),
+							A2(
+								$elm$core$Maybe$andThen,
+								$author$project$Screept$getMaybeFuncTextValueFromVariable,
+								A2($elm$core$Dict$get, '__statusLine', gameState.vars)))),
 						A2($author$project$DialogGame$viewDialogText, dialog.text, gameState),
 						A2(
 						$elm$html$Html$div,

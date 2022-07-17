@@ -511,6 +511,7 @@
     "test": "{ RND d6_1 1 .. 6;\nRND d6_2 1 .. 6;\nINT twod6 = (d6_1 + d6_2);\nIF ((twod6 + test_score) > test_difficulty) THEN INT test_success = 1 ELSE INT test_success = 0 }"
   },
   "vars": {
+    "__statusLine": "\"\"",
     "codeword_apple": 0,
     "codeword_aspen": 0,
     "fought_tree": 0,

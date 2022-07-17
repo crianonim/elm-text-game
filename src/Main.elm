@@ -295,7 +295,6 @@ initGameFromGameDefinition gameDefinition =
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
         , vars = gameDefinition.vars
         }
-    , statusLine = gameDefinition.statusLine
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
 

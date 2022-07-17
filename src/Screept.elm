@@ -138,10 +138,6 @@ runStatement statement state =
             setVar name v state
 
 
-
---{ state | vars = Dict.insert name v state.vars }
-
-
 type alias State a =
     { a
         | procedures : Dict String Statement
@@ -179,8 +175,6 @@ getText gameState text =
 
         TextVariable name ->
             getTextValueFromVariable (getVariableNameString name gameState) gameState
-
-
 
 
 getTextValueFromVariable : String -> State a -> String
@@ -306,7 +300,6 @@ getMaybeIntValue gameValue gameState =
         Binary mx op my ->
             Maybe.map2 (binaryOpEval op) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
 
-
         IntVariable varName ->
             getMaybeIntFromVariable varName gameState
 
@@ -334,7 +327,11 @@ getMaybeIntFromVariable varName state =
                     getMaybeIntValue i state
 
                 VFuncText textValue ->
-                   if (getText state textValue) == "" then Just 0 else Just 1
+                    if getText state textValue == "" then
+                        Just 0
+
+                    else
+                        Just 1
         )
         var
 
@@ -465,8 +462,6 @@ intValueStringify intValue =
                 ++ intValueStringify y
                 ++ ")"
 
-
-
         IntVariable string ->
             stringifyVariableName string
 
@@ -513,9 +508,6 @@ intValueParser =
         , unaryOpParser
         , Parser.succeed Const
             |= intWithPotentialMinus
-
-
-
         , Parser.succeed IntVariable
             |= parseVariableName
         ]
@@ -538,7 +530,6 @@ textValueStringify textValue =
 
         TextVariable string ->
             stringifyVariableName string
-
 
 
 textValueParser : Parser TextValue
@@ -569,10 +560,8 @@ textValueParser =
             |. Parser.symbol "str("
             |= intValueParser
             |. Parser.symbol ")"
-
         , Parser.succeed TextVariable
             |= parseVariableName
-
         ]
 
 
@@ -606,7 +595,7 @@ statementStringify statement =
                     "DEF_FUNC " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
 
                 SVFuncText textValue ->
-                    "DEF_FUNCTEXT " ++ stringifyVariableName name ++ " = " ++  stringifySetVariable variable
+                    "DEF_FUNCTEXT " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
 
 
 nextWordParser : Parser String
@@ -846,3 +835,13 @@ encodeVariable variable =
 
         VFuncText textValue ->
             E.object [ ( "func_text", textValueStringify textValue |> E.string ) ]
+
+
+getMaybeFuncTextValueFromVariable : Variable -> Maybe TextValue
+getMaybeFuncTextValueFromVariable variable =
+    case variable of
+        VFuncText t ->
+            Just t
+
+        _ ->
+            Nothing
