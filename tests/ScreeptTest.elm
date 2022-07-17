@@ -69,7 +69,7 @@ fuzzStatement : Int -> Fuzzer Statement
 fuzzStatement x =
     if x < 0 then
         Fuzz.oneOf
-            [ Fuzz.map2 SetVariable fuzzVariableName (fuzzVariable -1)
+            [ Fuzz.map2 SetVariable fuzzVariableName (fuzzSetVariable -1)
             , Fuzz.map3 Rnd fuzzVariableName (fuzzIntVal 1) (fuzzIntVal 1)
             , Fuzz.map Procedure fuzzValidProcName
             , Fuzz.map Comment fuzzValidComment
@@ -112,12 +112,12 @@ fuzzConst =
     Fuzz.map Const int
 
 
-fuzzVariable : Int -> Fuzzer Variable
-fuzzVariable n =
+fuzzSetVariable : Int -> Fuzzer VariableSetValue
+fuzzSetVariable n =
     Fuzz.oneOf
-        [ fuzzIntVariable n
-        , fuzzTextVariable n
-        , fuzzFuncVariable n
+        [ fuzzIntSetVariable n
+        , fuzzTextSetVariable n
+        , fuzzFuncSetVariable n
         ]
 
 
@@ -137,19 +137,19 @@ fuzzValidProcName =
         string
 
 
-fuzzIntVariable : Int -> Fuzzer Variable
-fuzzIntVariable n =
-    fuzzIntVal n |> Fuzz.map VInt
+fuzzIntSetVariable : Int -> Fuzzer VariableSetValue
+fuzzIntSetVariable n =
+    fuzzIntVal n |> Fuzz.map SVInt
 
 
-fuzzTextVariable : Int -> Fuzzer Variable
-fuzzTextVariable n =
-    fuzzTextValue n |> Fuzz.map VText
+fuzzTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzTextSetVariable n =
+    fuzzTextValue n |> Fuzz.map SVText
 
 
-fuzzFuncVariable : Int -> Fuzzer Variable
-fuzzFuncVariable n =
-    fuzzIntVal n |> Fuzz.map VFunc
+fuzzFuncSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncSetVariable n =
+    fuzzIntVal n |> Fuzz.map SVFunc
 
 
 fuzzVariableName : Fuzzer VariableName

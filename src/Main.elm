@@ -56,9 +56,9 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
+        , Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
 
-        --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
 

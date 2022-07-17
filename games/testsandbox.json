@@ -9,7 +9,7 @@
           "text": "\"...\"",
           "action": [
             {
-              "screept": "{ RUN turn; RUN test }"
+              "screept": "{ RUN turn; RUN test; INT tt2 = CALL test_func }"
             }
           ]
         }
@@ -18,10 +18,10 @@
   ],
   "startDialogId": "start",
   "procedures": {
-    "turn": "{ LET turn = (turn + 1);\nLET turns_count = (turns_count - 1);\nLET minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nLET hour = ((turn / turns_per_hour) %% 24);\nLET day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { LET turns_count = 5 } }",
+    "turn": "{ INT turn = (turn + 1);\nINT turns_count = (turns_count - 1);\nINT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nINT hour = ((turn / turns_per_hour) %% 24);\nINT day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 } }",
     "test": "{ RND $b 1 .. 6 }"
   },
-  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", str($hour), \":\", str($minutes) ]",
+  "statusLine": "[ \"Turn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]",
   "vars": {
     "hour": 0,
     "minutes": 0,
@@ -30,6 +30,7 @@
     "turns_per_hour": 2,
     "enemy_name": "",
     "player_name": "Liana",
-    "player_profession": "wayfarer"
+    "player_profession": "wayfarer",
+    "test_func": { "func": "(turn + turns_per_hour)"}
   }
 }

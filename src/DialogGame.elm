@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Json.Decode as Json
 import Json.Encode as E
+import Parser exposing ((|.), (|=))
 import Random
 import Screept exposing (IntValue(..), State, TextValue(..))
 import Stack exposing (Stack)
@@ -221,12 +222,33 @@ stringifyGameDefinition gd =
     E.encode 2 (encodeGameDefinition gd)
 
 
+encodeState : GameState -> E.Value
+encodeState { dialogStack, messages, procedures, vars } =
+    E.object
+        [ ( "dialogStack", Stack.toList dialogStack |> E.list E.string )
+        , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
+        , ( "vars", E.dict identity Screept.encodeVariable vars )
+        , ( "messages", E.list E.string messages )
+        ]
+
+
+decodeState : Json.Decoder GameState
+decodeState =
+    Json.map5 GameState
+        (Json.succeed Stack.initialise)
+        (Json.field "messages" <| Json.list Json.string)
+        (Json.field "procedures" <| Json.dict (Json.map Screept.run Json.string))
+        (Json.succeed <| Random.initialSeed 666)
+        (Json.field "vars" <| Json.dict Screept.decodeVariable)
+
+
 encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId, procedures, statusLine } =
+encodeGameDefinition { dialogs, startDialogId, procedures, statusLine, vars } =
     E.object
         ([ ( "dialogs", E.list encodeDialog dialogs )
          , ( "startDialogId", E.string startDialogId )
          , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
+         , ( "vars", E.dict identity Screept.encodeVariable vars )
          ]
             ++ (case statusLine of
                     Nothing ->
@@ -282,14 +304,6 @@ decodeDialogs =
     Json.list decodeDialog
 
 
-decodeVariable : Json.Decoder Screept.Variable
-decodeVariable =
-    Json.oneOf
-        [ Json.int |> Json.map (\x -> Screept.VInt <| Screept.Const x)
-        , Json.string |> Json.map (\x -> Screept.VText <| Screept.S x)
-        ]
-
-
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
     Json.map6 GameDefinition
@@ -298,7 +312,7 @@ decodeGameDefinition =
         (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
-        (Json.field "vars" <| Json.dict decodeVariable)
+        (Json.field "vars" <| Json.dict Screept.decodeVariable)
 
 
 update : Msg -> Model -> ( Model, Maybe String )
