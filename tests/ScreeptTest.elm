@@ -23,9 +23,6 @@ intValParseAndStringify =
         , test "Should parse binary" <|
             \_ ->
                 Expect.equal (Parser.run intValueParser "(test_counter > 1)") (Ok <| Binary (IntVariable (VLit "test_counter")) Gt (Const 1))
-        , test "should parse CALL" <|
-            \_ ->
-                Expect.equal (Parser.run intValueParser "CALL test_function") (Ok <| Eval (VLit "test_function"))
         , test "stringify a value" <|
             \_ ->
                 Expect.equal (intValueStringify (Const 5)) "5"
@@ -38,9 +35,6 @@ intValParseAndStringify =
         , test "stringify a binary op" <|
             \_ ->
                 Expect.equal (intValueStringify (Binary (IntVariable (VLit "test_counter")) Eq (Const 1))) "(test_counter == 1)"
-        , test "stringify a call" <|
-            \_ ->
-                Expect.equal (intValueStringify (Eval (VLit "test"))) "CALL test"
         , fuzz (Fuzz.intRange 1 10 |> Fuzz.andThen fuzzIntVal) "round stringify and parse" <|
             \v ->
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
@@ -69,7 +63,7 @@ fuzzStatement : Int -> Fuzzer Statement
 fuzzStatement x =
     if x < 0 then
         Fuzz.oneOf
-            [ Fuzz.map2 SetVariable fuzzVariableName (fuzzVariable -1)
+            [ Fuzz.map2 SetVariable fuzzVariableName (fuzzSetVariable -1)
             , Fuzz.map3 Rnd fuzzVariableName (fuzzIntVal 1) (fuzzIntVal 1)
             , Fuzz.map Procedure fuzzValidProcName
             , Fuzz.map Comment fuzzValidComment
@@ -112,12 +106,13 @@ fuzzConst =
     Fuzz.map Const int
 
 
-fuzzVariable : Int -> Fuzzer Variable
-fuzzVariable n =
+fuzzSetVariable : Int -> Fuzzer VariableSetValue
+fuzzSetVariable n =
     Fuzz.oneOf
-        [ fuzzIntVariable n
-        , fuzzTextVariable n
-        , fuzzFuncVariable n
+        [ fuzzIntSetVariable n
+        , fuzzTextSetVariable n
+        , fuzzFuncSetVariable n
+        , fuzzFuncTextSetVariable n
         ]
 
 
@@ -137,19 +132,24 @@ fuzzValidProcName =
         string
 
 
-fuzzIntVariable : Int -> Fuzzer Variable
-fuzzIntVariable n =
-    fuzzIntVal n |> Fuzz.map VInt
+fuzzIntSetVariable : Int -> Fuzzer VariableSetValue
+fuzzIntSetVariable n =
+    fuzzIntVal n |> Fuzz.map SVInt
 
 
-fuzzTextVariable : Int -> Fuzzer Variable
-fuzzTextVariable n =
-    fuzzTextValue n |> Fuzz.map VText
+fuzzTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzTextSetVariable n =
+    fuzzTextValue n |> Fuzz.map SVText
 
 
-fuzzFuncVariable : Int -> Fuzzer Variable
-fuzzFuncVariable n =
-    fuzzIntVal n |> Fuzz.map VFunc
+fuzzFuncSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncSetVariable n =
+    fuzzIntVal n |> Fuzz.map SVFunc
+
+
+fuzzFuncTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncTextSetVariable n =
+    fuzzTextValue n |> Fuzz.map SVFuncText
 
 
 fuzzVariableName : Fuzzer VariableName

@@ -22,7 +22,6 @@ type alias GameState =
 
 type alias Model =
     { gameState : GameState
-    , statusLine : Maybe Screept.TextValue
     , dialogs : Dialogs
     }
 
@@ -41,26 +40,20 @@ type Msg
 type alias GameDefinition =
     { title : String
     , dialogs : List Dialog
-    , statusLine : Maybe Screept.TextValue
     , startDialogId : String
     , procedures : Dict String Screept.Statement
     , vars : Dict String Screept.Variable
     }
 
 
-init : GameState -> Dialogs -> Maybe Screept.TextValue -> Model
-init gs dialogs statusLine =
-    { gameState = gs, statusLine = statusLine, dialogs = dialogs }
+init : GameState -> Dialogs -> Model
+init gs dialogs =
+    { gameState = gs, dialogs = dialogs }
 
 
 initSimple : Dialogs -> Model
 initSimple dialogs =
-    init emptyGameState dialogs Nothing
-
-
-setStatusLine : Maybe Screept.TextValue -> Model -> Model
-setStatusLine maybeTextValue model =
-    { model | statusLine = maybeTextValue }
+    init emptyGameState dialogs
 
 
 emptyGameState : GameState
@@ -221,21 +214,34 @@ stringifyGameDefinition gd =
     E.encode 2 (encodeGameDefinition gd)
 
 
-encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId, procedures, statusLine } =
+encodeState : GameState -> E.Value
+encodeState { dialogStack, messages, procedures, vars } =
     E.object
-        ([ ( "dialogs", E.list encodeDialog dialogs )
-         , ( "startDialogId", E.string startDialogId )
-         , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
-         ]
-            ++ (case statusLine of
-                    Nothing ->
-                        []
+        [ ( "dialogStack", Stack.toList dialogStack |> E.list E.string )
+        , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
+        , ( "vars", E.dict identity Screept.encodeVariable vars )
+        , ( "messages", E.list E.string messages )
+        ]
 
-                    Just x ->
-                        [ ( "statusLine", Screept.textValueStringify x |> E.string ) ]
-               )
-        )
+
+decodeState : Json.Decoder GameState
+decodeState =
+    Json.map5 GameState
+        (Json.succeed Stack.initialise)
+        (Json.field "messages" <| Json.list Json.string)
+        (Json.field "procedures" <| Json.dict (Json.map Screept.run Json.string))
+        (Json.succeed <| Random.initialSeed 666)
+        (Json.field "vars" <| Json.dict Screept.decodeVariable)
+
+
+encodeGameDefinition : GameDefinition -> E.Value
+encodeGameDefinition { dialogs, startDialogId, procedures, vars } =
+    E.object
+        [ ( "dialogs", E.list encodeDialog dialogs )
+        , ( "startDialogId", E.string startDialogId )
+        , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
+        , ( "vars", E.dict identity Screept.encodeVariable vars )
+        ]
 
 
 decodeAction : Json.Decoder DialogAction
@@ -282,23 +288,14 @@ decodeDialogs =
     Json.list decodeDialog
 
 
-decodeVariable : Json.Decoder Screept.Variable
-decodeVariable =
-    Json.oneOf
-        [ Json.int |> Json.map (\x -> Screept.VInt <| Screept.Const x)
-        , Json.string |> Json.map (\x -> Screept.VText <| Screept.S x)
-        ]
-
-
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map6 GameDefinition
+    Json.map5 GameDefinition
         (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
-        (Json.field "statusLine" (Json.maybe (Json.string |> Json.map Screept.parseTextValue)))
         (Json.field "startDialogId" Json.string)
         (Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
-        (Json.field "vars" <| Json.dict decodeVariable)
+        (Json.field "vars" <| Json.dict Screept.decodeVariable)
 
 
 update : Msg -> Model -> ( Model, Maybe String )
@@ -317,14 +314,14 @@ update msg model =
 
 
 view : Model -> Html Msg
-view { gameState, statusLine, dialogs } =
+view { gameState, dialogs } =
     let
         dialog =
             getDialog (Stack.top gameState.dialogStack |> Maybe.withDefault "bad") dialogs
     in
     div [ class "container" ]
         [ div [ class "dialog" ]
-            [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
+            [ Maybe.map (\t -> viewDialogText t gameState) (Dict.get "__statusLine" gameState.vars |> Maybe.andThen Screept.getMaybeFuncTextValueFromVariable) |> Maybe.withDefault (text "")
             , viewDialogText dialog.text gameState
             , div [] <|
                 List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
@@ -345,9 +342,9 @@ viewMessages msgs =
 
 
 viewDialog : Model -> Dialog -> Html Msg
-viewDialog { gameState, statusLine } dialog =
+viewDialog { gameState } dialog =
     div [ class "dialog" ]
-        [ Maybe.map (\t -> viewDialogText t gameState) statusLine |> Maybe.withDefault (text "")
+        [ Maybe.map (\t -> viewDialogText t gameState) (Dict.get "__statusLine" gameState.vars |> Maybe.andThen Screept.getMaybeFuncTextValueFromVariable) |> Maybe.withDefault (text "")
         , viewDialogText dialog.text gameState
         , div [] <|
             List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
