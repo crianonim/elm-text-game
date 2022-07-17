@@ -5607,9 +5607,6 @@ var $author$project$Screept$Binary = F3(
 	});
 var $author$project$Screept$Div = {$: 'Div'};
 var $author$project$Screept$Eq = {$: 'Eq'};
-var $author$project$Screept$Eval = function (a) {
-	return {$: 'Eval', a: a};
-};
 var $author$project$Screept$Gt = {$: 'Gt'};
 var $author$project$Screept$IntVariable = function (a) {
 	return {$: 'IntVariable', a: a};
@@ -5962,45 +5959,6 @@ var $author$project$Screept$intWithPotentialMinus = $elm$parser$Parser$oneOf(
 			$elm$parser$Parser$int),
 			$elm$parser$Parser$int
 		]));
-var $elm$parser$Parser$ExpectingKeyword = function (a) {
-	return {$: 'ExpectingKeyword', a: a};
-};
-var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
-var $elm$parser$Parser$Advanced$keyword = function (_v0) {
-	var kwd = _v0.a;
-	var expecting = _v0.b;
-	var progress = !$elm$core$String$isEmpty(kwd);
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, kwd, s.offset, s.row, s.col, s.src);
-			var newOffset = _v1.a;
-			var newRow = _v1.b;
-			var newCol = _v1.c;
-			return (_Utils_eq(newOffset, -1) || (0 <= A3(
-				$elm$parser$Parser$Advanced$isSubChar,
-				function (c) {
-					return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
-						c,
-						_Utils_chr('_'));
-				},
-				newOffset,
-				s.src))) ? A2(
-				$elm$parser$Parser$Advanced$Bad,
-				false,
-				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-				$elm$parser$Parser$Advanced$Good,
-				progress,
-				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
-		});
-};
-var $elm$parser$Parser$keyword = function (kwd) {
-	return $elm$parser$Parser$Advanced$keyword(
-		A2(
-			$elm$parser$Parser$Advanced$Token,
-			kwd,
-			$elm$parser$Parser$ExpectingKeyword(kwd)));
-};
 var $elm$parser$Parser$Advanced$lazy = function (thunk) {
 	return $elm$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -6017,6 +5975,7 @@ var $author$project$Screept$VRef = function (a) {
 	return {$: 'VRef', a: a};
 };
 var $elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
+var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var $elm$parser$Parser$Advanced$chompIf = F2(
 	function (isGood, expecting) {
 		return $elm$parser$Parser$Advanced$Parser(
@@ -6169,16 +6128,6 @@ function $author$project$Screept$cyclic$intValueParser() {
 				$elm$parser$Parser$keeper,
 				$elm$parser$Parser$succeed($author$project$Screept$Const),
 				$author$project$Screept$intWithPotentialMinus),
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$succeed($author$project$Screept$Eval),
-						$elm$parser$Parser$keyword('CALL')),
-					$elm$parser$Parser$spaces),
-				$author$project$Screept$parseVariableName),
 				A2(
 				$elm$parser$Parser$keeper,
 				$elm$parser$Parser$succeed($author$project$Screept$IntVariable),
@@ -6393,6 +6342,9 @@ var $author$project$Screept$Rnd = F3(
 var $author$project$Screept$SVFunc = function (a) {
 	return {$: 'SVFunc', a: a};
 };
+var $author$project$Screept$SVFuncText = function (a) {
+	return {$: 'SVFuncText', a: a};
+};
 var $author$project$Screept$SVInt = function (a) {
 	return {$: 'SVInt', a: a};
 };
@@ -6403,6 +6355,44 @@ var $author$project$Screept$SetVariable = F2(
 	function (a, b) {
 		return {$: 'SetVariable', a: a, b: b};
 	});
+var $elm$parser$Parser$ExpectingKeyword = function (a) {
+	return {$: 'ExpectingKeyword', a: a};
+};
+var $elm$parser$Parser$Advanced$keyword = function (_v0) {
+	var kwd = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(kwd);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, kwd, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return (_Utils_eq(newOffset, -1) || (0 <= A3(
+				$elm$parser$Parser$Advanced$isSubChar,
+				function (c) {
+					return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+						c,
+						_Utils_chr('_'));
+				},
+				newOffset,
+				s.src))) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$keyword = function (kwd) {
+	return $elm$parser$Parser$Advanced$keyword(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			kwd,
+			$elm$parser$Parser$ExpectingKeyword(kwd)));
+};
 var $elm$parser$Parser$Advanced$map = F2(
 	function (func, _v0) {
 		var parse = _v0.a;
@@ -6975,7 +6965,26 @@ function $author$project$Screept$cyclic$statementParser() {
 							A2($elm$parser$Parser$ignorer, $author$project$Screept$parseVariableName, $elm$parser$Parser$spaces),
 							$elm$parser$Parser$symbol('=')),
 						$elm$parser$Parser$spaces)),
-				A2($elm$parser$Parser$map, $author$project$Screept$SVFunc, $author$project$Screept$intValueParser))
+				A2($elm$parser$Parser$map, $author$project$Screept$SVFunc, $author$project$Screept$intValueParser)),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$ignorer,
+						A2(
+							$elm$parser$Parser$ignorer,
+							$elm$parser$Parser$succeed($author$project$Screept$SetVariable),
+							$elm$parser$Parser$keyword('DEF_FUNCTEXT')),
+						$elm$parser$Parser$spaces),
+					A2(
+						$elm$parser$Parser$ignorer,
+						A2(
+							$elm$parser$Parser$ignorer,
+							A2($elm$parser$Parser$ignorer, $author$project$Screept$parseVariableName, $elm$parser$Parser$spaces),
+							$elm$parser$Parser$symbol('=')),
+						$elm$parser$Parser$spaces)),
+				A2($elm$parser$Parser$map, $author$project$Screept$SVFuncText, $author$project$Screept$textValueParser))
 			]));
 }
 try {
@@ -7116,6 +7125,9 @@ var $author$project$DialogGame$decodeDialogs = $elm$json$Json$Decode$list($autho
 var $author$project$Screept$VFunc = function (a) {
 	return {$: 'VFunc', a: a};
 };
+var $author$project$Screept$VFuncText = function (a) {
+	return {$: 'VFuncText', a: a};
+};
 var $author$project$Screept$VInt = function (a) {
 	return {$: 'VInt', a: a};
 };
@@ -7136,7 +7148,11 @@ var $author$project$Screept$decodeVariable = $elm$json$Json$Decode$oneOf(
 			A2(
 			$elm$json$Json$Decode$map,
 			A2($elm$core$Basics$composeR, $author$project$Screept$parseIntValue, $author$project$Screept$VFunc),
-			A2($elm$json$Json$Decode$field, 'func', $elm$json$Json$Decode$string))
+			A2($elm$json$Json$Decode$field, 'func', $elm$json$Json$Decode$string)),
+			A2(
+			$elm$json$Json$Decode$map,
+			A2($elm$core$Basics$composeR, $author$project$Screept$parseTextValue, $author$project$Screept$VFuncText),
+			A2($elm$json$Json$Decode$field, 'func_text', $elm$json$Json$Decode$string))
 		]));
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -8446,6 +8462,9 @@ var $author$project$Screept$binaryOpEval = F3(
 				return (!(x + y)) ? 0 : 1;
 		}
 	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
 var $author$project$Screept$binaryOpStringify = function (binaryOp) {
 	switch (binaryOp.$) {
 		case 'Add':
@@ -8498,9 +8517,6 @@ var $author$project$Screept$intValueStringify = function (intValue) {
 			var binaryOp = intValue.b;
 			var y = intValue.c;
 			return '(' + ($author$project$Screept$intValueStringify(x) + (' ' + ($author$project$Screept$binaryOpStringify(binaryOp) + (' ' + ($author$project$Screept$intValueStringify(y) + ')')))));
-		case 'Eval':
-			var string = intValue.a;
-			return 'CALL ' + $author$project$Screept$stringifyVariableName(string);
 		default:
 			var string = intValue.a;
 			return $author$project$Screept$stringifyVariableName(string);
@@ -8515,69 +8531,6 @@ var $elm$core$Maybe$map = F2(
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
-	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Screept$getTextValueFromVariable = F2(
-	function (name, state) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			'',
-			A2(
-				$elm$core$Maybe$map,
-				function (v) {
-					switch (v.$) {
-						case 'VInt':
-							var i = v.a;
-							return $elm$core$String$fromInt(i);
-						case 'VText':
-							var t = v.a;
-							return t;
-						default:
-							var i = v.a;
-							return $author$project$Screept$intValueStringify(i);
-					}
-				},
-				A2($elm$core$Dict$get, name, state.vars)));
-	});
-var $author$project$Screept$getVariableNameString = F2(
-	function (variableName, state) {
-		if (variableName.$ === 'VLit') {
-			var _var = variableName.a;
-			return _var;
-		} else {
-			var _var = variableName.a;
-			return A2($author$project$Screept$getTextValueFromVariable, _var, state);
-		}
-	});
-var $author$project$Screept$getMaybeIntFromVariable = F2(
-	function (varName, state) {
-		var _var = A2(
-			$elm$core$Dict$get,
-			A2($author$project$Screept$getVariableNameString, varName, state),
-			state.vars);
-		return A2(
-			$elm$core$Maybe$andThen,
-			function (v) {
-				switch (v.$) {
-					case 'VText':
-						var t = v.a;
-						return (t === '') ? $elm$core$Maybe$Just(0) : $elm$core$Maybe$Just(1);
-					case 'VInt':
-						var i = v.a;
-						return $elm$core$Maybe$Just(i);
-					default:
-						return $elm$core$Maybe$Just(1);
-				}
-			},
-			_var);
 	});
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
@@ -8597,6 +8550,48 @@ var $elm$core$Maybe$map2 = F3(
 var $author$project$Screept$unaryOpEval = F2(
 	function (op, x) {
 		return (!x) ? 1 : 0;
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Screept$getIntValueWithDefault = F2(
+	function (gameValue, gameState) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
+	});
+var $author$project$Screept$getMaybeIntFromVariable = F2(
+	function (varName, state) {
+		var _var = A2(
+			$elm$core$Dict$get,
+			A2($author$project$Screept$getVariableNameString, varName, state),
+			state.vars);
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (v) {
+				switch (v.$) {
+					case 'VText':
+						var t = v.a;
+						return (t === '') ? $elm$core$Maybe$Just(0) : $elm$core$Maybe$Just(1);
+					case 'VInt':
+						var i = v.a;
+						return $elm$core$Maybe$Just(i);
+					case 'VFunc':
+						var i = v.a;
+						return A2($author$project$Screept$getMaybeIntValue, i, state);
+					default:
+						var textValue = v.a;
+						return (A2($author$project$Screept$getText, state, textValue) === '') ? $elm$core$Maybe$Just(0) : $elm$core$Maybe$Just(1);
+				}
+			},
+			_var);
 	});
 var $author$project$Screept$getMaybeIntValue = F2(
 	function (gameValue, gameState) {
@@ -8620,52 +8615,10 @@ var $author$project$Screept$getMaybeIntValue = F2(
 					$author$project$Screept$binaryOpEval(op),
 					A2($author$project$Screept$getMaybeIntValue, mx, gameState),
 					A2($author$project$Screept$getMaybeIntValue, my, gameState));
-			case 'Eval':
-				var func = gameValue.a;
-				return A2(
-					$elm$core$Maybe$andThen,
-					function (x) {
-						switch (x.$) {
-							case 'VFunc':
-								var f = x.a;
-								var _v2 = A2(
-									$elm$core$Debug$log,
-									'FUNC',
-									_Utils_Tuple3(
-										func,
-										x,
-										A2($author$project$Screept$getMaybeIntValue, f, gameState)));
-								return A2($author$project$Screept$getMaybeIntValue, f, gameState);
-							case 'VInt':
-								var intValue = x.a;
-								return $elm$core$Maybe$Nothing;
-							default:
-								var textValue = x.a;
-								return $elm$core$Maybe$Nothing;
-						}
-					},
-					A2(
-						$elm$core$Dict$get,
-						A2($author$project$Screept$getVariableNameString, func, gameState),
-						gameState.vars));
 			default:
 				var varName = gameValue.a;
 				return A2($author$project$Screept$getMaybeIntFromVariable, varName, gameState);
 		}
-	});
-var $author$project$Screept$getIntValueWithDefault = F2(
-	function (gameValue, gameState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			A2($author$project$Screept$getMaybeIntValue, gameValue, gameState));
-	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$Screept$isTruthy = F2(
-	function (intValue, state) {
-		return (!A2($author$project$Screept$getIntValueWithDefault, intValue, state)) ? false : true;
 	});
 var $author$project$Screept$getText = F2(
 	function (gameState, text) {
@@ -8711,6 +8664,45 @@ var $author$project$Screept$getText = F2(
 						gameState);
 			}
 		}
+	});
+var $author$project$Screept$getTextValueFromVariable = F2(
+	function (name, state) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (v) {
+					switch (v.$) {
+						case 'VInt':
+							var i = v.a;
+							return $elm$core$String$fromInt(i);
+						case 'VText':
+							var t = v.a;
+							return t;
+						case 'VFunc':
+							var i = v.a;
+							return $author$project$Screept$intValueStringify(i);
+						default:
+							var textValue = v.a;
+							return A2($author$project$Screept$getText, state, textValue);
+					}
+				},
+				A2($elm$core$Dict$get, name, state.vars)));
+	});
+var $author$project$Screept$getVariableNameString = F2(
+	function (variableName, state) {
+		if (variableName.$ === 'VLit') {
+			var _var = variableName.a;
+			return _var;
+		} else {
+			var _var = variableName.a;
+			return A2($author$project$Screept$getTextValueFromVariable, _var, state);
+		}
+	});
+var $author$project$Screept$isTruthy = F2(
+	function (intValue, state) {
+		return (!A2($author$project$Screept$getIntValueWithDefault, intValue, state)) ? false : true;
 	});
 var $author$project$Screept$setVar = F3(
 	function (name, variable, state) {
@@ -8800,9 +8792,12 @@ var $author$project$Screept$runStatement = F2(
 								var textValue = variable.a;
 								return $author$project$Screept$VText(
 									A2($author$project$Screept$getText, state, textValue));
-							default:
+							case 'SVFunc':
 								var intValue = variable.a;
 								return $author$project$Screept$VFunc(intValue);
+							default:
+								var textValue = variable.a;
+								return $author$project$Screept$VFuncText(textValue);
 						}
 					}();
 					return A3($author$project$Screept$setVar, name, v, state);
@@ -8925,9 +8920,12 @@ var $author$project$Screept$stringifySetVariable = function (variable) {
 		case 'SVText':
 			var textValue = variable.a;
 			return $author$project$Screept$textValueStringify(textValue);
-		default:
+		case 'SVFunc':
 			var intValue = variable.a;
 			return $author$project$Screept$intValueStringify(intValue);
+		default:
+			var textValue = variable.a;
+			return $author$project$Screept$textValueStringify(textValue);
 	}
 };
 var $author$project$Screept$statementStringify = function (statement) {
@@ -8962,8 +8960,11 @@ var $author$project$Screept$statementStringify = function (statement) {
 					return 'INT ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
 				case 'SVText':
 					return 'TEXT ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
-				default:
+				case 'SVFunc':
 					return 'DEF_FUNC ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
+				default:
+					var textValue = variable.a;
+					return 'DEF_FUNCTEXT ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
 			}
 	}
 };
@@ -9458,9 +9459,12 @@ var $author$project$Screept$stringifyVariable = function (variable) {
 		case 'VText':
 			var textValue = variable.a;
 			return '\"' + (textValue + '\"');
-		default:
+		case 'VFunc':
 			var intValue = variable.a;
 			return $author$project$Screept$intValueStringify(intValue);
+		default:
+			var textValue = variable.a;
+			return $author$project$Screept$textValueStringify(textValue);
 	}
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;

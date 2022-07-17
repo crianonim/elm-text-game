@@ -23,9 +23,6 @@ intValParseAndStringify =
         , test "Should parse binary" <|
             \_ ->
                 Expect.equal (Parser.run intValueParser "(test_counter > 1)") (Ok <| Binary (IntVariable (VLit "test_counter")) Gt (Const 1))
-        , test "should parse CALL" <|
-            \_ ->
-                Expect.equal (Parser.run intValueParser "CALL test_function") (Ok <| Eval (VLit "test_function"))
         , test "stringify a value" <|
             \_ ->
                 Expect.equal (intValueStringify (Const 5)) "5"
@@ -38,9 +35,6 @@ intValParseAndStringify =
         , test "stringify a binary op" <|
             \_ ->
                 Expect.equal (intValueStringify (Binary (IntVariable (VLit "test_counter")) Eq (Const 1))) "(test_counter == 1)"
-        , test "stringify a call" <|
-            \_ ->
-                Expect.equal (intValueStringify (Eval (VLit "test"))) "CALL test"
         , fuzz (Fuzz.intRange 1 10 |> Fuzz.andThen fuzzIntVal) "round stringify and parse" <|
             \v ->
                 Expect.equal (intValueStringify v |> Parser.run intValueParser) (Ok v)
@@ -118,6 +112,7 @@ fuzzSetVariable n =
         [ fuzzIntSetVariable n
         , fuzzTextSetVariable n
         , fuzzFuncSetVariable n
+        , fuzzFuncTextSetVariable n
         ]
 
 
@@ -150,6 +145,11 @@ fuzzTextSetVariable n =
 fuzzFuncSetVariable : Int -> Fuzzer VariableSetValue
 fuzzFuncSetVariable n =
     fuzzIntVal n |> Fuzz.map SVFunc
+
+
+fuzzFuncTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncTextSetVariable n =
+    fuzzTextValue n |> Fuzz.map SVFuncText
 
 
 fuzzVariableName : Fuzzer VariableName

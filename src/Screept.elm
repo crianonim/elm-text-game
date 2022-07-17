@@ -11,7 +11,6 @@ type IntValue
     = Const Int
     | Unary UnaryOp IntValue
     | Binary IntValue BinaryOp IntValue
-    | Eval VariableName
     | IntVariable VariableName
 
 
@@ -58,12 +57,14 @@ type Variable
     = VInt Int
     | VText String
     | VFunc IntValue
+    | VFuncText TextValue
 
 
 type VariableSetValue
     = SVInt IntValue
     | SVText TextValue
     | SVFunc IntValue
+    | SVFuncText TextValue
 
 
 runStatement : Statement -> State a -> State a
@@ -130,6 +131,9 @@ runStatement statement state =
 
                         SVFunc intValue ->
                             VFunc intValue
+
+                        SVFuncText textValue ->
+                            VFuncText textValue
             in
             setVar name v state
 
@@ -177,6 +181,8 @@ getText gameState text =
             getTextValueFromVariable (getVariableNameString name gameState) gameState
 
 
+
+
 getTextValueFromVariable : String -> State a -> String
 getTextValueFromVariable name state =
     Dict.get name state.vars
@@ -191,6 +197,9 @@ getTextValueFromVariable name state =
 
                     VFunc i ->
                         intValueStringify i
+
+                    VFuncText textValue ->
+                        getText state textValue
             )
         |> Maybe.withDefault ""
 
@@ -297,24 +306,6 @@ getMaybeIntValue gameValue gameState =
         Binary mx op my ->
             Maybe.map2 (binaryOpEval op) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
 
-        Eval func ->
-            Dict.get (getVariableNameString func gameState) gameState.vars
-                |> Maybe.andThen
-                    (\x ->
-                        case x of
-                            VFunc f ->
-                                let
-                                    _ =
-                                        Debug.log "FUNC" ( func, x, getMaybeIntValue f gameState )
-                                in
-                                getMaybeIntValue f gameState
-
-                            VInt intValue ->
-                                Nothing
-
-                            VText textValue ->
-                                Nothing
-                    )
 
         IntVariable varName ->
             getMaybeIntFromVariable varName gameState
@@ -339,8 +330,11 @@ getMaybeIntFromVariable varName state =
                 VInt i ->
                     Just i
 
-                VFunc _ ->
-                    Just 1
+                VFunc i ->
+                    getMaybeIntValue i state
+
+                VFuncText textValue ->
+                   if (getText state textValue) == "" then Just 0 else Just 1
         )
         var
 
@@ -471,8 +465,7 @@ intValueStringify intValue =
                 ++ intValueStringify y
                 ++ ")"
 
-        Eval string ->
-            "CALL " ++ stringifyVariableName string
+
 
         IntVariable string ->
             stringifyVariableName string
@@ -521,12 +514,8 @@ intValueParser =
         , Parser.succeed Const
             |= intWithPotentialMinus
 
-        --, Parser.map Counter
-        --    counterParser
-        , Parser.succeed Eval
-            |. Parser.keyword "CALL"
-            |. Parser.spaces
-            |= parseVariableName
+
+
         , Parser.succeed IntVariable
             |= parseVariableName
         ]
@@ -549,6 +538,7 @@ textValueStringify textValue =
 
         TextVariable string ->
             stringifyVariableName string
+
 
 
 textValueParser : Parser TextValue
@@ -579,19 +569,11 @@ textValueParser =
             |. Parser.symbol "str("
             |= intValueParser
             |. Parser.symbol ")"
+
         , Parser.succeed TextVariable
             |= parseVariableName
+
         ]
-
-
-counterStringify : TextValue -> String
-counterStringify textValue =
-    case textValue of
-        S x ->
-            "$" ++ x
-
-        x ->
-            textValueStringify x
 
 
 statementStringify : Statement -> String
@@ -622,6 +604,9 @@ statementStringify statement =
 
                 SVFunc _ ->
                     "DEF_FUNC " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
+
+                SVFuncText textValue ->
+                    "DEF_FUNCTEXT " ++ stringifyVariableName name ++ " = " ++  stringifySetVariable variable
 
 
 nextWordParser : Parser String
@@ -697,6 +682,14 @@ statementParser =
             |. Parser.symbol "="
             |. Parser.spaces
             |= (intValueParser |> Parser.map SVFunc)
+        , Parser.succeed SetVariable
+            |. Parser.keyword "DEF_FUNCTEXT"
+            |. Parser.spaces
+            |= parseVariableName
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= (textValueParser |> Parser.map SVFuncText)
         ]
 
 
@@ -763,6 +756,9 @@ stringifySetVariable variable =
         SVFunc intValue ->
             intValueStringify intValue
 
+        SVFuncText textValue ->
+            textValueStringify textValue
+
 
 stringifyVariable : Variable -> String
 stringifyVariable variable =
@@ -775,6 +771,9 @@ stringifyVariable variable =
 
         VFunc intValue ->
             intValueStringify intValue
+
+        VFuncText textValue ->
+            textValueStringify textValue
 
 
 run : String -> Statement
@@ -829,6 +828,7 @@ decodeVariable =
         [ Json.int |> Json.map VInt
         , Json.string |> Json.map VText
         , Json.field "func" Json.string |> Json.map (parseIntValue >> VFunc)
+        , Json.field "func_text" Json.string |> Json.map (parseTextValue >> VFuncText)
         ]
 
 
@@ -843,3 +843,6 @@ encodeVariable variable =
 
         VFunc f ->
             E.object [ ( "func", intValueStringify f |> E.string ) ]
+
+        VFuncText textValue ->
+            E.object [ ( "func_text", textValueStringify textValue |> E.string ) ]

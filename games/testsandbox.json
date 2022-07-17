@@ -3,13 +3,13 @@
   "dialogs": [
     {
       "id": "start",
-      "text": "[  ]",
+      "text": "test_statusLine",
       "options": [
         {
           "text": "\"...\"",
           "action": [
             {
-              "screept": "{ RUN turn; RUN test; INT tt2 = CALL test_func }"
+              "screept": "{ RUN turn; RUN test; INT tt2 = test_func }"
             }
           ]
         }
@@ -31,6 +31,7 @@
     "enemy_name": "",
     "player_name": "Liana",
     "player_profession": "wayfarer",
-    "test_func": { "func": "(turn + turns_per_hour)"}
+    "test_func": { "func": "(turn + turns_per_hour)"},
+    "test_statusLine": {"func_text":"[ \"Turn: \", str($turn), \" Time: \", hour, \":\", str($minutes) ]" }
   }
 }

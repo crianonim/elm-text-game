@@ -19,7 +19,7 @@ exampleDialog =
     { id = "start"
     , text = Screept.S ""
     , options =
-        [ { text = Screept.S "Option1", condition = Just (Screept.Eval (Screept.VLit "test1")), action = [] }
+        [ { text = Screept.S "Option1", condition = Just (Screept.IntVariable (Screept.VLit "test1")), action = [] }
         ]
     }
 
@@ -47,10 +47,10 @@ codecDialog =
 stateEncoding : Test
 stateEncoding =
     --Test.only <|
-        describe "Encoding and decoding state"
-            [ test "round trip example state" <|
-                \_ -> Expect.equal (DialogGame.encodeState exampleState |> Json.encode 0 |> Json.decodeString DialogGame.decodeState) (Ok exampleState)
-            ]
+    describe "Encoding and decoding state"
+        [ test "round trip example state" <|
+            \_ -> Expect.equal (DialogGame.encodeState exampleState |> Json.encode 0 |> Json.decodeString DialogGame.decodeState) (Ok exampleState)
+        ]
 
 
 exampleState : GameState
