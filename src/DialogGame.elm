@@ -341,6 +341,16 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
+viewDialog : Model -> Dialog -> Html Msg
+viewDialog { gameState } dialog =
+    div [ class "dialog" ]
+        [ Maybe.map (\t -> viewDialogText t gameState) (Dict.get "__statusLine" gameState.vars |> Maybe.andThen Screept.getMaybeFuncTextValueFromVariable) |> Maybe.withDefault (text "")
+        , viewDialogText dialog.text gameState
+        , div [] <|
+            List.map (viewOption gameState) (dialog.options |> List.filter (\o -> o.condition |> Maybe.map (\check -> Screept.isTruthy check gameState) |> Maybe.withDefault True))
+        ]
+
+
 viewDialogText : Screept.TextValue -> GameState -> Html msg
 viewDialogText textValue gameState =
     div []

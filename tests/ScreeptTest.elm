@@ -91,6 +91,7 @@ fuzzTextValue x =
             [ Fuzz.map S fuzzValidTextString
             , Fuzz.list (fuzzTextValue -1) |> Fuzz.map Concat
             , Fuzz.map3 Conditional (fuzzIntVal 2) (fuzzTextValue (x - 1)) (fuzzTextValue (x - 1))
+            , Fuzz.map IntValueText (fuzzIntVal 2)
             , Fuzz.map TextVariable fuzzVariableName
             ]
 

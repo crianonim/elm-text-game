@@ -6707,6 +6707,9 @@ var $author$project$Screept$Conditional = F3(
 		return {$: 'Conditional', a: a, b: b, c: c};
 	});
 var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
+var $author$project$Screept$IntValueText = function (a) {
+	return {$: 'IntValueText', a: a};
+};
 var $author$project$Screept$S = function (a) {
 	return {$: 'S', a: a};
 };
@@ -6776,6 +6779,13 @@ function $author$project$Screept$cyclic$textValueParser() {
 							return $author$project$Screept$cyclic$textValueParser();
 						}),
 					$elm$parser$Parser$symbol(')'))),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed($author$project$Screept$IntValueText),
+					$elm$parser$Parser$symbol('TO_TEXT ')),
+				$author$project$Screept$intValueParser),
 				A2(
 				$elm$parser$Parser$keeper,
 				$elm$parser$Parser$succeed($author$project$Screept$TextVariable),
@@ -8574,6 +8584,10 @@ var $author$project$Screept$getString = F2(
 						text = $temp$text;
 						continue getString;
 					}
+				case 'IntValueText':
+					var gameValue = text.a;
+					return $elm$core$String$fromInt(
+						A2($author$project$Screept$getIntValueWithDefault, state, gameValue));
 				default:
 					var name = text.a;
 					return A2(
@@ -8883,6 +8897,9 @@ var $author$project$Screept$textValueStringify = function (textValue) {
 			var success = textValue.b;
 			var failure = textValue.c;
 			return '(' + ($author$project$Screept$intValueStringify(cond) + ('?' + ($author$project$Screept$textValueStringify(success) + (':' + ($author$project$Screept$textValueStringify(failure) + ')')))));
+		case 'IntValueText':
+			var intValue = textValue.a;
+			return 'TO_TEXT ' + $author$project$Screept$intValueStringify(intValue);
 		default:
 			var string = textValue.a;
 			return $author$project$Screept$stringifyVariableName(string);

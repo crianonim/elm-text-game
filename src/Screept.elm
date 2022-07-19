@@ -35,6 +35,7 @@ type TextValue
     = S String
     | Concat (List TextValue)
     | Conditional IntValue TextValue TextValue
+    | IntValueText IntValue
     | TextVariable VariableName
 
 
@@ -167,6 +168,9 @@ getString state text =
             else
                 getString state alternativeText
 
+        IntValueText gameValue ->
+            getIntValueWithDefault state gameValue |> String.fromInt
+
         TextVariable name ->
             getStringFromVariableNameString (getVariableNameString name state) state
 
@@ -181,8 +185,8 @@ getStringFromVariable v state =
             t
 
         VLazyInt i ->
-            getIntValueWithDefault  state i
-            |> String.fromInt
+            getIntValueWithDefault state i
+                |> String.fromInt
 
         VLazyText textValue ->
             getString state textValue
@@ -195,8 +199,8 @@ getStringFromVariableNameString name state =
         |> Maybe.withDefault ""
 
 
-getIntValueWithDefault : State a -> IntValue ->  Int
-getIntValueWithDefault state intValue  =
+getIntValueWithDefault : State a -> IntValue -> Int
+getIntValueWithDefault state intValue =
     getMaybeIntValue state intValue
         |> Maybe.withDefault 0
 
@@ -343,7 +347,7 @@ setVar name variable state =
 
 isTruthy : IntValue -> State a -> Bool
 isTruthy intValue state =
-    if getIntValueWithDefault state intValue  == 0 then
+    if getIntValueWithDefault state intValue == 0 then
         False
 
     else
@@ -375,6 +379,16 @@ parseVariableName =
         , Parser.succeed VLit
             |= nextWordParser
         ]
+
+
+counterParser : Parser String
+counterParser =
+    Parser.succeed identity
+        |. Parser.symbol "$"
+        |= Parser.getChompedString
+            (Parser.succeed ()
+                |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
+            )
 
 
 unaryOpParser : Parser IntValue
@@ -511,6 +525,9 @@ textValueStringify textValue =
         Conditional cond success failure ->
             "(" ++ intValueStringify cond ++ "?" ++ textValueStringify success ++ ":" ++ textValueStringify failure ++ ")"
 
+        IntValueText intValue ->
+            "TO_TEXT " ++ intValueStringify intValue
+
         TextVariable string ->
             stringifyVariableName string
 
@@ -539,6 +556,9 @@ textValueParser =
             |. Parser.symbol ":"
             |= Parser.lazy (\_ -> textValueParser)
             |. Parser.symbol ")"
+        , Parser.succeed IntValueText
+            |. Parser.symbol "TO_TEXT "
+            |= intValueParser
         , Parser.succeed TextVariable
             |= parseVariableName
         ]

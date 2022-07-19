@@ -29,7 +29,7 @@
           "action": [ "go_back"]
         },
         {
-          "text": "[\"Upgrade to \", farm_level ]",
+          "text": "[\"Upgrade to \", TO_TEXT (farm_level + 1) ]",
           "action": [ "go_back"]
         },
         {
