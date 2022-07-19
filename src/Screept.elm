@@ -44,7 +44,7 @@ type Statement
     | If IntValue Statement Statement
     | Comment String
     | Procedure String
-    | SetVariable VariableName VariableSetValue
+    | SetVariable VariableName VariableExpression
 
 
 type VariableName
@@ -52,18 +52,22 @@ type VariableName
     | VRef String
 
 
+
+-- type of the value stored in Store.vars
+
+
 type Variable
     = VInt Int
     | VText String
-    | VFunc IntValue
-    | VFuncText TextValue
+    | VLazyInt IntValue
+    | VLazyText TextValue
 
 
-type VariableSetValue
+type VariableExpression
     = SVInt IntValue
     | SVText TextValue
-    | SVFunc IntValue
-    | SVFuncText TextValue
+    | SVLazyInt IntValue
+    | SVLazyText TextValue
 
 
 runStatement : Statement -> State a -> State a
@@ -85,8 +89,8 @@ runStatement statement state =
                     in
                     setVar var (VInt result) newState
                 )
-                (getMaybeIntValue mx state)
-                (getMaybeIntValue my state)
+                (getMaybeIntValue state mx)
+                (getMaybeIntValue state my)
                 |> Maybe.withDefault state
 
         Block statements ->
@@ -117,16 +121,16 @@ runStatement statement state =
                 v =
                     case variable of
                         SVInt intValue ->
-                            VInt <| getIntValueWithDefault intValue state
+                            VInt <| getIntValueWithDefault state intValue
 
                         SVText textValue ->
-                            VText <| getText state textValue
+                            VText <| getString state textValue
 
-                        SVFunc intValue ->
-                            VFunc intValue
+                        SVLazyInt intValue ->
+                            VLazyInt intValue
 
-                        SVFuncText textValue ->
-                            VFuncText textValue
+                        SVLazyText textValue ->
+                            VLazyText textValue
             in
             setVar name v state
 
@@ -147,50 +151,54 @@ emptyState =
     }
 
 
-getText : State a -> TextValue -> String
-getText gameState text =
+getString : State a -> TextValue -> String
+getString state text =
     case text of
         S string ->
             string
 
         Concat specialTexts ->
-            List.map (getText gameState) specialTexts |> String.concat
+            List.map (getString state) specialTexts |> String.concat
 
-        Conditional gameCheck conditionalText alternativeText ->
-            if isTruthy gameCheck gameState then
-                getText gameState conditionalText
+        Conditional intValue conditionalText alternativeText ->
+            if isTruthy intValue state then
+                getString state conditionalText
 
             else
-                getText gameState alternativeText
+                getString state alternativeText
 
         TextVariable name ->
-            getTextValueFromVariable (getVariableNameString name gameState) gameState
+            getStringFromVariableNameString (getVariableNameString name state) state
 
 
-getTextValueFromVariable : String -> State a -> String
-getTextValueFromVariable name state =
+getStringFromVariable : Variable -> State a -> String
+getStringFromVariable v state =
+    case v of
+        VInt i ->
+            String.fromInt i
+
+        VText t ->
+            t
+
+        VLazyInt i ->
+            getIntValueWithDefault  state i
+            |> String.fromInt
+
+        VLazyText textValue ->
+            getString state textValue
+
+
+getStringFromVariableNameString : String -> State a -> String
+getStringFromVariableNameString name state =
     Dict.get name state.vars
-        |> Maybe.map
-            (\v ->
-                case v of
-                    VInt i ->
-                        String.fromInt i
-
-                    VText t ->
-                        t
-
-                    VFunc i ->
-                        intValueStringify i
-
-                    VFuncText textValue ->
-                        getText state textValue
-            )
+        |> Maybe.map (\v -> getStringFromVariable v state)
         |> Maybe.withDefault ""
 
 
-getIntValueWithDefault : IntValue -> State a -> Int
-getIntValueWithDefault gameValue gameState =
-    getMaybeIntValue gameValue gameState |> Maybe.withDefault 0
+getIntValueWithDefault : State a -> IntValue ->  Int
+getIntValueWithDefault state intValue  =
+    getMaybeIntValue state intValue
+        |> Maybe.withDefault 0
 
 
 unaryOpEval : UnaryOp -> Int -> Int
@@ -265,7 +273,7 @@ getVariableNameString variableName state =
             var
 
         VRef var ->
-            getTextValueFromVariable var state
+            getStringFromVariableNameString var state
 
 
 stringifyVariableName : VariableName -> String
@@ -278,52 +286,50 @@ stringifyVariableName variableName =
             "$" ++ textValue
 
 
-getMaybeIntValue : IntValue -> State a -> Maybe Int
-getMaybeIntValue gameValue gameState =
-    case gameValue of
+getMaybeIntValue : State a -> IntValue -> Maybe Int
+getMaybeIntValue state intValue =
+    case intValue of
         Const int ->
             Just int
 
         Unary op mx ->
-            Maybe.map (unaryOpEval op) (getMaybeIntValue mx gameState)
+            Maybe.map (unaryOpEval op) (getMaybeIntValue state mx)
 
         Binary mx op my ->
-            Maybe.map2 (binaryOpEval op) (getMaybeIntValue mx gameState) (getMaybeIntValue my gameState)
+            Maybe.map2 (binaryOpEval op) (getMaybeIntValue state mx) (getMaybeIntValue state my)
 
         IntVariable varName ->
-            getMaybeIntFromVariable varName gameState
+            getMaybeIntFromVariableName state varName
 
 
-getMaybeIntFromVariable : VariableName -> State a -> Maybe Int
-getMaybeIntFromVariable varName state =
-    let
-        var =
-            Dict.get (getVariableNameString varName state) state.vars
-    in
-    Maybe.andThen
-        (\v ->
-            case v of
-                VText t ->
-                    if t == "" then
-                        Just 0
+getMaybeIntFromVariable : State a -> Variable -> Maybe Int
+getMaybeIntFromVariable state v =
+    case v of
+        VText t ->
+            if t == "" then
+                Just 0
 
-                    else
-                        Just 1
+            else
+                Just 1
 
-                VInt i ->
-                    Just i
+        VInt i ->
+            Just i
 
-                VFunc i ->
-                    getMaybeIntValue i state
+        VLazyInt i ->
+            getMaybeIntValue state i
 
-                VFuncText textValue ->
-                    if getText state textValue == "" then
-                        Just 0
+        VLazyText textValue ->
+            if getString state textValue == "" then
+                Just 0
 
-                    else
-                        Just 1
-        )
-        var
+            else
+                Just 1
+
+
+getMaybeIntFromVariableName : State a -> VariableName -> Maybe Int
+getMaybeIntFromVariableName state varName =
+    Dict.get (getVariableNameString varName state) state.vars
+        |> Maybe.andThen (getMaybeIntFromVariable state)
 
 
 setVar : VariableName -> Variable -> State a -> State a
@@ -337,7 +343,7 @@ setVar name variable state =
 
 isTruthy : IntValue -> State a -> Bool
 isTruthy intValue state =
-    if getIntValueWithDefault intValue state == 0 then
+    if getIntValueWithDefault state intValue  == 0 then
         False
 
     else
@@ -564,11 +570,11 @@ statementStringify statement =
                 SVText _ ->
                     "TEXT " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
 
-                SVFunc _ ->
-                    "DEF_FUNC " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
+                SVLazyInt _ ->
+                    "INT " ++ stringifyVariableName name ++ " ~= " ++ stringifySetVariable variable
 
-                SVFuncText textValue ->
-                    "DEF_FUNCTEXT " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
+                SVLazyText _ ->
+                    "TEXT " ++ stringifyVariableName name ++ " ~= " ++ stringifySetVariable variable
 
 
 nextWordParser : Parser String
@@ -625,33 +631,31 @@ statementParser =
             |. Parser.spaces
             |= parseVariableName
             |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= (intValueParser |> Parser.map SVInt)
+            |= Parser.oneOf
+                [ Parser.succeed identity
+                    |. Parser.symbol "="
+                    |. Parser.spaces
+                    |= (intValueParser |> Parser.map SVInt)
+                , Parser.succeed identity
+                    |. Parser.symbol "~="
+                    |. Parser.spaces
+                    |= (intValueParser |> Parser.map SVLazyInt)
+                ]
         , Parser.succeed SetVariable
             |. Parser.keyword "TEXT"
             |. Parser.spaces
             |= parseVariableName
             |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= (textValueParser |> Parser.map SVText)
-        , Parser.succeed SetVariable
-            |. Parser.keyword "DEF_FUNC"
-            |. Parser.spaces
-            |= parseVariableName
-            |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= (intValueParser |> Parser.map SVFunc)
-        , Parser.succeed SetVariable
-            |. Parser.keyword "DEF_FUNCTEXT"
-            |. Parser.spaces
-            |= parseVariableName
-            |. Parser.spaces
-            |. Parser.symbol "="
-            |. Parser.spaces
-            |= (textValueParser |> Parser.map SVFuncText)
+            |= Parser.oneOf
+                [ Parser.succeed identity
+                    |. Parser.symbol "="
+                    |. Parser.spaces
+                    |= (textValueParser |> Parser.map SVText)
+                , Parser.succeed identity
+                    |. Parser.symbol "~="
+                    |. Parser.spaces
+                    |= (textValueParser |> Parser.map SVLazyText)
+                ]
         ]
 
 
@@ -706,7 +710,7 @@ parseTextValue string =
             S ""
 
 
-stringifySetVariable : VariableSetValue -> String
+stringifySetVariable : VariableExpression -> String
 stringifySetVariable variable =
     case variable of
         SVInt intValue ->
@@ -715,10 +719,10 @@ stringifySetVariable variable =
         SVText textValue ->
             textValueStringify textValue
 
-        SVFunc intValue ->
+        SVLazyInt intValue ->
             intValueStringify intValue
 
-        SVFuncText textValue ->
+        SVLazyText textValue ->
             textValueStringify textValue
 
 
@@ -731,10 +735,10 @@ stringifyVariable variable =
         VText textValue ->
             "\"" ++ textValue ++ "\""
 
-        VFunc intValue ->
+        VLazyInt intValue ->
             intValueStringify intValue
 
-        VFuncText textValue ->
+        VLazyText textValue ->
             textValueStringify textValue
 
 
@@ -789,8 +793,8 @@ decodeVariable =
     Json.oneOf
         [ Json.int |> Json.map VInt
         , Json.string |> Json.map VText
-        , Json.field "func" Json.string |> Json.map (parseIntValue >> VFunc)
-        , Json.field "func_text" Json.string |> Json.map (parseTextValue >> VFuncText)
+        , Json.field "lazy_int" Json.string |> Json.map (parseIntValue >> VLazyInt)
+        , Json.field "lazy_text" Json.string |> Json.map (parseTextValue >> VLazyText)
         ]
 
 
@@ -803,17 +807,17 @@ encodeVariable variable =
         VText t ->
             E.string t
 
-        VFunc f ->
-            E.object [ ( "func", intValueStringify f |> E.string ) ]
+        VLazyInt f ->
+            E.object [ ( "lazy_int", intValueStringify f |> E.string ) ]
 
-        VFuncText textValue ->
-            E.object [ ( "func_text", textValueStringify textValue |> E.string ) ]
+        VLazyText textValue ->
+            E.object [ ( "lazy_text", textValueStringify textValue |> E.string ) ]
 
 
 getMaybeFuncTextValueFromVariable : Variable -> Maybe TextValue
 getMaybeFuncTextValueFromVariable variable =
     case variable of
-        VFuncText t ->
+        VLazyText t ->
             Just t
 
         _ ->

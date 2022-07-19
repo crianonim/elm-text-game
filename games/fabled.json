@@ -279,7 +279,7 @@
           "text": "\"...\"",
           "action": [
             {
-              "screept": "{ RUN combat_reset;\nINT _enemy_stamina = 10;\nINT _enemy_defence = 7;\nINT _enemy_combat = 3;\nTEXT _enemy_name = \"Tree\";\nINT fought_tree = 1;\nDEF_FUNC combat_player_failure = (player_stamina < 1);\nDEF_FUNC combat_player_success = (_enemy_stamina < 5); }"
+              "screept": "{ RUN combat_reset;\nINT _enemy_stamina = 10;\nINT _enemy_defence = 7;\nINT _enemy_combat = 3;\nTEXT _enemy_name = \"Tree\";\nINT fought_tree = 1;\nINT combat_player_failure = (player_stamina < 1);\nINT combat_player_success = (_enemy_stamina < 5); }"
             },
             {
               "go_dialog": "combat"

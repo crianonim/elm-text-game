@@ -43,7 +43,7 @@ update msg model =
             { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 
         ClickRun ->
-            { model | value = Maybe.andThen (\r -> Screept.getMaybeIntValue r gameState) (Maybe.andThen Result.toMaybe model.intValueEditor.parsed) }
+            { model | value = Maybe.andThen (Screept.getMaybeIntValue gameState) (Maybe.andThen Result.toMaybe model.intValueEditor.parsed) }
 
 
 view : Model -> Html Msg

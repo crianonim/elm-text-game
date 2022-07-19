@@ -113,7 +113,7 @@ executeAction dialogActionExecution gameState =
             ( { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }, Nothing )
 
         Message msg ->
-            ( { gameState | messages = Screept.getText gameState msg :: gameState.messages }, Nothing )
+            ( { gameState | messages = Screept.getString gameState msg :: gameState.messages }, Nothing )
 
         Screept statement ->
             ( Screept.runStatement statement gameState, Nothing )
@@ -344,7 +344,7 @@ viewMessages msgs =
 viewDialogText : Screept.TextValue -> GameState -> Html msg
 viewDialogText textValue gameState =
     div []
-        (Screept.getText gameState textValue |> String.split "\n" |> List.map (\par -> p [] [ text par ]))
+        (Screept.getString gameState textValue |> String.split "\n" |> List.map (\par -> p [] [ text par ]))
 
 
 viewDebug : GameState -> Html a
@@ -357,4 +357,4 @@ viewDebug gameState =
 
 viewOption : GameState -> DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getText gameState dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| Screept.getString gameState dialogOption.text ]

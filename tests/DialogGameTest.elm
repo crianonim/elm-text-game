@@ -59,7 +59,7 @@ exampleState =
         Dict.fromList
             [ ( "i1", Screept.VInt 5 )
             , ( "t1", Screept.VText "Jan" )
-            , ( "f1", Screept.VFunc (Screept.IntVariable (Screept.VLit "i1")) )
+            , ( "f1", Screept.VLazyInt (Screept.IntVariable (Screept.VLit "i1")) )
             ]
     , procedures = Dict.empty
     , rnd = Random.initialSeed 666

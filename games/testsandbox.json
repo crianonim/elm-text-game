@@ -3,8 +3,35 @@
   "dialogs": [
     {
       "id": "start",
-      "text": "",
+      "text": "\"Test sandbox\"",
       "options": [
+        {
+          "text": "\"Farm.\"",
+          "action": [{"go_dialog": "farm"}]
+        },
+        {
+          "text": "\"...\"",
+          "action": [
+            {
+              "screept": "{ RUN turn; RUN test; INT tt2 = test_func }"
+            }
+          ]
+        }
+      ]
+    }
+    ,
+    {
+      "id": "farm",
+      "text": "[\"Farm. Current level \", farm_level, \". To upgrade: \",farm_upgrade_cost]",
+      "options": [
+        {
+          "text": "\"Back\"",
+          "action": [ "go_back"]
+        },
+        {
+          "text": "[\"Upgrade to \", farm_level ]",
+          "action": [ "go_back"]
+        },
         {
           "text": "\"...\"",
           "action": [
@@ -21,17 +48,19 @@
     "turn": "{ INT turn = (turn + 1);\nINT turns_count = (turns_count - 1);\nINT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nINT hour = ((turn / turns_per_hour) %% 24);\nINT day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 } }",
     "test": "{ RND $b 1 .. 6 }"
   },
-  "statusLine": "[ \"XXXTurn: \", turn, \" Time: \", hour, \":\", minutes ]",
   "vars": {
+    "money": 100,
     "hour": 0,
     "minutes": 0,
     "turn": 1,
     "turns_count": 3,
     "turns_per_hour": 2,
-    "enemy_name": "",
+    "_enemy_name": "s",
     "player_name": "Liana",
     "player_profession": "wayfarer",
-    "test_func": { "func": "(turn + turns_per_hour)"},
-    "__statusLine": {"func_text":"[ \"SS Turn: \", turn, \" Time: \", hour, \":\", minutes ]" }
+    "farm_level": 0,
+    "farm_upgrade_cost": {"lazy_int": "((farm_level + 1) * 50)"},
+    "test_func": { "lazy_int": "(turn + turns_per_hour)"},
+    "__statusLine": {"lazy_text":"[ \"SS Turn: \", turn, \" Time: \", hour, \":\", minutes, \", Gold: \", money  ]" }
   }
 }
