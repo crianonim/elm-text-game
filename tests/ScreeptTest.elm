@@ -106,7 +106,7 @@ fuzzConst =
     Fuzz.map Const int
 
 
-fuzzSetVariable : Int -> Fuzzer VariableSetValue
+fuzzSetVariable : Int -> Fuzzer VariableExpression
 fuzzSetVariable n =
     Fuzz.oneOf
         [ fuzzIntSetVariable n
@@ -132,29 +132,32 @@ fuzzValidProcName =
         string
 
 
-fuzzIntSetVariable : Int -> Fuzzer VariableSetValue
+fuzzIntSetVariable : Int -> Fuzzer VariableExpression
 fuzzIntSetVariable n =
     fuzzIntVal n |> Fuzz.map SVInt
 
 
-fuzzTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzTextSetVariable : Int -> Fuzzer VariableExpression
 fuzzTextSetVariable n =
     fuzzTextValue n |> Fuzz.map SVText
 
 
-fuzzFuncSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncSetVariable : Int -> Fuzzer VariableExpression
 fuzzFuncSetVariable n =
-    fuzzIntVal n |> Fuzz.map SVFunc
+    fuzzIntVal n |> Fuzz.map SVLazyInt
 
 
-fuzzFuncTextSetVariable : Int -> Fuzzer VariableSetValue
+fuzzFuncTextSetVariable : Int -> Fuzzer VariableExpression
 fuzzFuncTextSetVariable n =
-    fuzzTextValue n |> Fuzz.map SVFuncText
+    fuzzTextValue n |> Fuzz.map SVLazyText
 
 
 fuzzVariableName : Fuzzer VariableName
 fuzzVariableName =
-    Fuzz.constant (VLit "test_value")
+    Fuzz.oneOf
+        [ Fuzz.constant (VLit "test_value")
+        , Fuzz.constant (VRef "test_value")
+        ]
 
 
 fuzzIntVal : Int -> Fuzzer IntValue
