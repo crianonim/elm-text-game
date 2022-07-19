@@ -195,7 +195,7 @@
       "text": "\"\n    ‘Welcome to the City of the Trees,’ says a passing woman, dressed in the garb of a druid.\n    The city has been built amid the branches of several mighty oaks. Ladders run up and down the trees to houses that perch like nests in the branches. You are not allowed into any houses, but the druids allow you to barter at the market.\n    \"",
       "options": [
         {
-          "text": "[ \"Buy leather armour for 50 shards. Already have (\", str(inv_armor_leather), \")\" ]",
+          "text": "[ \"Buy leather armour for 50 shards. Already have (\", inv_armor_leather, \")\" ]",
           "action": [
             {
               "screept": "{ INT inv_armor_leather = (inv_armor_leather + 1);\nINT money = (money - 50) }"
@@ -204,7 +204,7 @@
           "condition": "(money > 49)"
         },
         {
-          "text": "[ \"Sell leather armour for 45 shards. Already have (\", str(inv_armor_leather), \")\" ]",
+          "text": "[ \"Sell leather armour for 45 shards. Already have (\", inv_armor_leather, \")\" ]",
           "action": [
             {
               "screept": "{ INT inv_armor_leather = (inv_armor_leather - 1);\nINT money = (money + 45) }"
@@ -459,7 +459,7 @@
     },
     {
       "id": "combat",
-      "text": "[ \"Combat. \", \"You are fighting \", _enemy_name, \" .You have \", str(player_stamina), \" stamina. \", \"Your enemy \", str(_enemy_stamina) ]",
+      "text": "[ \"Combat. \", \"You are fighting \", _enemy_name, \" .You have \", player_stamina, \" stamina. \", \"Your enemy \", _enemy_stamina ]",
       "options": [
         {
           "text": "\"Hit enemy\"",
@@ -468,10 +468,10 @@
               "screept": "RUN combat"
             },
             {
-              "msg": "((player_damage > 0)?[ \"You dealt \", str(player_damage), \" damage\" ]:\"\")"
+              "msg": "((player_damage > 0)?[ \"You dealt \", player_damage, \" damage\" ]:\"\")"
             },
             {
-              "msg": "((_enemy_damage > 0)?[ \"You were dealt \", str(_enemy_damage), \" damage\" ]:\"\")"
+              "msg": "((_enemy_damage > 0)?[ \"You were dealt \", _enemy_damage, \" damage\" ]:\"\")"
             }
           ],
           "condition": "(!fight_won && !fight_lost)"

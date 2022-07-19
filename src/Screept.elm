@@ -35,7 +35,6 @@ type TextValue
     = S String
     | Concat (List TextValue)
     | Conditional IntValue TextValue TextValue
-    | IntValueText IntValue
     | TextVariable VariableName
 
 
@@ -101,12 +100,6 @@ runStatement statement state =
                  else
                     failure
                 )
-                --(if testCondition condition state then
-                --    success
-                --
-                -- else
-                --    failure
-                --)
                 state
 
         Comment _ ->
@@ -169,9 +162,6 @@ getText gameState text =
 
             else
                 getText gameState alternativeText
-
-        IntValueText gameValue ->
-            getIntValueWithDefault gameValue gameState |> String.fromInt
 
         TextVariable name ->
             getTextValueFromVariable (getVariableNameString name gameState) gameState
@@ -381,16 +371,6 @@ parseVariableName =
         ]
 
 
-counterParser : Parser String
-counterParser =
-    Parser.succeed identity
-        |. Parser.symbol "$"
-        |= Parser.getChompedString
-            (Parser.succeed ()
-                |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
-            )
-
-
 unaryOpParser : Parser IntValue
 unaryOpParser =
     Parser.oneOf
@@ -525,9 +505,6 @@ textValueStringify textValue =
         Conditional cond success failure ->
             "(" ++ intValueStringify cond ++ "?" ++ textValueStringify success ++ ":" ++ textValueStringify failure ++ ")"
 
-        IntValueText intValue ->
-            "str(" ++ intValueStringify intValue ++ ")"
-
         TextVariable string ->
             stringifyVariableName string
 
@@ -555,10 +532,6 @@ textValueParser =
             |= Parser.lazy (\_ -> textValueParser)
             |. Parser.symbol ":"
             |= Parser.lazy (\_ -> textValueParser)
-            |. Parser.symbol ")"
-        , Parser.succeed IntValueText
-            |. Parser.symbol "str("
-            |= intValueParser
             |. Parser.symbol ")"
         , Parser.succeed TextVariable
             |= parseVariableName
