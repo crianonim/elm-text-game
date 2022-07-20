@@ -156,7 +156,7 @@ fuzzVariableName : Fuzzer VariableName
 fuzzVariableName =
     Fuzz.oneOf
         [ Fuzz.constant (VLit "test_value")
-        , Fuzz.constant (VRef "test_value")
+        , Fuzz.lazy (\_ -> fuzzTextValue 1) |> Fuzz.map VComputed
         ]
 
 

@@ -5605,9 +5605,20 @@ var $author$project$Screept$Binary = F3(
 	function (a, b, c) {
 		return {$: 'Binary', a: a, b: b, c: c};
 	});
+var $author$project$Screept$Concat = function (a) {
+	return {$: 'Concat', a: a};
+};
+var $author$project$Screept$Conditional = F3(
+	function (a, b, c) {
+		return {$: 'Conditional', a: a, b: b, c: c};
+	});
 var $author$project$Screept$Div = {$: 'Div'};
 var $author$project$Screept$Eq = {$: 'Eq'};
+var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
 var $author$project$Screept$Gt = {$: 'Gt'};
+var $author$project$Screept$IntValueText = function (a) {
+	return {$: 'IntValueText', a: a};
+};
 var $author$project$Screept$IntVariable = function (a) {
 	return {$: 'IntVariable', a: a};
 };
@@ -5616,11 +5627,81 @@ var $author$project$Screept$Mod = {$: 'Mod'};
 var $author$project$Screept$Mul = {$: 'Mul'};
 var $author$project$Screept$Not = {$: 'Not'};
 var $author$project$Screept$Or = {$: 'Or'};
+var $author$project$Screept$S = function (a) {
+	return {$: 'S', a: a};
+};
 var $author$project$Screept$Sub = {$: 'Sub'};
+var $author$project$Screept$TextVariable = function (a) {
+	return {$: 'TextVariable', a: a};
+};
 var $author$project$Screept$Unary = F2(
 	function (a, b) {
 		return {$: 'Unary', a: a, b: b};
 	});
+var $author$project$Screept$VComputed = function (a) {
+	return {$: 'VComputed', a: a};
+};
+var $author$project$Screept$VLit = function (a) {
+	return {$: 'VLit', a: a};
+};
+var $elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$parser$Parser$Advanced$Good = F3(
+	function (a, b, c) {
+		return {$: 'Good', a: a, b: b, c: c};
+	});
+var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
+	function (isGood, offset, row, col, s0) {
+		chompWhileHelp:
+		while (true) {
+			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
+			if (_Utils_eq(newOffset, -1)) {
+				return A3(
+					$elm$parser$Parser$Advanced$Good,
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
+			} else {
+				if (_Utils_eq(newOffset, -2)) {
+					var $temp$isGood = isGood,
+						$temp$offset = offset + 1,
+						$temp$row = row + 1,
+						$temp$col = 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				} else {
+					var $temp$isGood = isGood,
+						$temp$offset = newOffset,
+						$temp$row = row,
+						$temp$col = col + 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
+};
+var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
@@ -5629,13 +5710,35 @@ var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
 		return {$: 'Bad', a: a, b: b};
 	});
-var $elm$parser$Parser$Advanced$Good = F3(
-	function (a, b, c) {
-		return {$: 'Good', a: a, b: b, c: c};
+var $elm$parser$Parser$Advanced$mapChompedString = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						A2(
+							func,
+							A3($elm$core$String$slice, s0.offset, s1.offset, s0.src),
+							a),
+						s1);
+				}
+			});
 	});
-var $elm$parser$Parser$Advanced$Parser = function (a) {
-	return {$: 'Parser', a: a};
+var $elm$parser$Parser$Advanced$getChompedString = function (parser) {
+	return A2($elm$parser$Parser$Advanced$mapChompedString, $elm$core$Basics$always, parser);
 };
+var $elm$parser$Parser$getChompedString = $elm$parser$Parser$Advanced$getChompedString;
 var $elm$parser$Parser$Advanced$map2 = F3(
 	function (func, _v0, _v1) {
 		var parseA = _v0.a;
@@ -5683,9 +5786,6 @@ var $elm$parser$Parser$Advanced$bumpOffset = F2(
 	});
 var $elm$parser$Parser$Advanced$chompBase10 = _Parser_chompBase10;
 var $elm$parser$Parser$Advanced$isAsciiCode = _Parser_isAsciiCode;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$parser$Parser$Advanced$consumeExp = F2(
 	function (offset, src) {
 		if (A3($elm$parser$Parser$Advanced$isAsciiCode, 101, offset, src) || A3($elm$parser$Parser$Advanced$isAsciiCode, 69, offset, src)) {
@@ -5968,14 +6068,8 @@ var $elm$parser$Parser$Advanced$lazy = function (thunk) {
 		});
 };
 var $elm$parser$Parser$lazy = $elm$parser$Parser$Advanced$lazy;
-var $author$project$Screept$VLit = function (a) {
-	return {$: 'VLit', a: a};
-};
-var $author$project$Screept$VRef = function (a) {
-	return {$: 'VRef', a: a};
-};
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
-var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var $elm$parser$Parser$Advanced$chompIf = F2(
 	function (isGood, expecting) {
 		return $elm$parser$Parser$Advanced$Parser(
@@ -5998,82 +6092,6 @@ var $elm$parser$Parser$Advanced$chompIf = F2(
 var $elm$parser$Parser$chompIf = function (isGood) {
 	return A2($elm$parser$Parser$Advanced$chompIf, isGood, $elm$parser$Parser$UnexpectedChar);
 };
-var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
-	function (isGood, offset, row, col, s0) {
-		chompWhileHelp:
-		while (true) {
-			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
-			if (_Utils_eq(newOffset, -1)) {
-				return A3(
-					$elm$parser$Parser$Advanced$Good,
-					_Utils_cmp(s0.offset, offset) < 0,
-					_Utils_Tuple0,
-					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
-			} else {
-				if (_Utils_eq(newOffset, -2)) {
-					var $temp$isGood = isGood,
-						$temp$offset = offset + 1,
-						$temp$row = row + 1,
-						$temp$col = 1,
-						$temp$s0 = s0;
-					isGood = $temp$isGood;
-					offset = $temp$offset;
-					row = $temp$row;
-					col = $temp$col;
-					s0 = $temp$s0;
-					continue chompWhileHelp;
-				} else {
-					var $temp$isGood = isGood,
-						$temp$offset = newOffset,
-						$temp$row = row,
-						$temp$col = col + 1,
-						$temp$s0 = s0;
-					isGood = $temp$isGood;
-					offset = $temp$offset;
-					row = $temp$row;
-					col = $temp$col;
-					s0 = $temp$s0;
-					continue chompWhileHelp;
-				}
-			}
-		}
-	});
-var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
-		});
-};
-var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
-var $elm$parser$Parser$Advanced$mapChompedString = F2(
-	function (func, _v0) {
-		var parse = _v0.a;
-		return $elm$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _v1 = parse(s0);
-				if (_v1.$ === 'Bad') {
-					var p = _v1.a;
-					var x = _v1.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p, x);
-				} else {
-					var p = _v1.a;
-					var a = _v1.b;
-					var s1 = _v1.c;
-					return A3(
-						$elm$parser$Parser$Advanced$Good,
-						p,
-						A2(
-							func,
-							A3($elm$core$String$slice, s0.offset, s1.offset, s0.src),
-							a),
-						s1);
-				}
-			});
-	});
-var $elm$parser$Parser$Advanced$getChompedString = function (parser) {
-	return A2($elm$parser$Parser$Advanced$mapChompedString, $elm$core$Basics$always, parser);
-};
-var $elm$parser$Parser$getChompedString = $elm$parser$Parser$Advanced$getChompedString;
 var $author$project$Screept$nextWordParser = $elm$parser$Parser$getChompedString(
 	A2(
 		$elm$parser$Parser$ignorer,
@@ -6092,331 +6110,6 @@ var $author$project$Screept$nextWordParser = $elm$parser$Parser$getChompedString
 					c,
 					_Utils_chr('_'));
 			})));
-var $author$project$Screept$parseVariableName = $elm$parser$Parser$oneOf(
-	_List_fromArray(
-		[
-			A2(
-			$elm$parser$Parser$keeper,
-			A2(
-				$elm$parser$Parser$ignorer,
-				$elm$parser$Parser$succeed($author$project$Screept$VRef),
-				$elm$parser$Parser$symbol('$')),
-			$author$project$Screept$nextWordParser),
-			A2(
-			$elm$parser$Parser$keeper,
-			$elm$parser$Parser$succeed($author$project$Screept$VLit),
-			$author$project$Screept$nextWordParser)
-		]));
-var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
-	function (c) {
-		return _Utils_eq(
-			c,
-			_Utils_chr(' ')) || (_Utils_eq(
-			c,
-			_Utils_chr('\n')) || _Utils_eq(
-			c,
-			_Utils_chr('\r')));
-	});
-var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
-function $author$project$Screept$cyclic$intValueParser() {
-	return $elm$parser$Parser$oneOf(
-		_List_fromArray(
-			[
-				$author$project$Screept$cyclic$binaryOpParser(),
-				$author$project$Screept$cyclic$unaryOpParser(),
-				A2(
-				$elm$parser$Parser$keeper,
-				$elm$parser$Parser$succeed($author$project$Screept$Const),
-				$author$project$Screept$intWithPotentialMinus),
-				A2(
-				$elm$parser$Parser$keeper,
-				$elm$parser$Parser$succeed($author$project$Screept$IntVariable),
-				$author$project$Screept$parseVariableName)
-			]));
-}
-function $author$project$Screept$cyclic$binaryOpParser() {
-	return $elm$parser$Parser$oneOf(
-		_List_fromArray(
-			[
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$keeper,
-					A2(
-						$elm$parser$Parser$keeper,
-						A2(
-							$elm$parser$Parser$ignorer,
-							$elm$parser$Parser$succeed($author$project$Screept$Binary),
-							$elm$parser$Parser$symbol('(')),
-						A2(
-							$elm$parser$Parser$ignorer,
-							$elm$parser$Parser$lazy(
-								function (_v1) {
-									return $author$project$Screept$cyclic$intValueParser();
-								}),
-							$elm$parser$Parser$spaces)),
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$oneOf(
-							_List_fromArray(
-								[
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Add),
-									$elm$parser$Parser$symbol('+')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Sub),
-									$elm$parser$Parser$symbol('-')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Mul),
-									$elm$parser$Parser$symbol('*')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Div),
-									$elm$parser$Parser$symbol('/')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Mod),
-									$elm$parser$Parser$symbol('%%')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Gt),
-									$elm$parser$Parser$symbol('>')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Lt),
-									$elm$parser$Parser$symbol('<')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Eq),
-									$elm$parser$Parser$symbol('==')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$And),
-									$elm$parser$Parser$symbol('&&')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$Screept$Or),
-									$elm$parser$Parser$symbol('||'))
-								])),
-						$elm$parser$Parser$spaces)),
-				A2(
-					$elm$parser$Parser$ignorer,
-					$elm$parser$Parser$lazy(
-						function (_v2) {
-							return $author$project$Screept$cyclic$intValueParser();
-						}),
-					$elm$parser$Parser$symbol(')')))
-			]));
-}
-function $author$project$Screept$cyclic$unaryOpParser() {
-	return $elm$parser$Parser$oneOf(
-		_List_fromArray(
-			[
-				A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$keeper,
-					$elm$parser$Parser$succeed($author$project$Screept$Unary),
-					$elm$parser$Parser$oneOf(
-						_List_fromArray(
-							[
-								A2(
-								$elm$parser$Parser$ignorer,
-								$elm$parser$Parser$succeed($author$project$Screept$Not),
-								$elm$parser$Parser$symbol('!'))
-							]))),
-				$elm$parser$Parser$lazy(
-					function (_v0) {
-						return $author$project$Screept$cyclic$intValueParser();
-					}))
-			]));
-}
-try {
-	var $author$project$Screept$intValueParser = $author$project$Screept$cyclic$intValueParser();
-	$author$project$Screept$cyclic$intValueParser = function () {
-		return $author$project$Screept$intValueParser;
-	};
-	var $author$project$Screept$binaryOpParser = $author$project$Screept$cyclic$binaryOpParser();
-	$author$project$Screept$cyclic$binaryOpParser = function () {
-		return $author$project$Screept$binaryOpParser;
-	};
-	var $author$project$Screept$unaryOpParser = $author$project$Screept$cyclic$unaryOpParser();
-	$author$project$Screept$cyclic$unaryOpParser = function () {
-		return $author$project$Screept$unaryOpParser;
-	};
-} catch ($) {
-	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    intValueParser\n  │     ↓\n  │    binaryOpParser\n  │     ↓\n  │    unaryOpParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
-var $elm$core$Debug$log = _Debug_log;
-var $elm$parser$Parser$DeadEnd = F3(
-	function (row, col, problem) {
-		return {col: col, problem: problem, row: row};
-	});
-var $elm$parser$Parser$problemToDeadEnd = function (p) {
-	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
-};
-var $elm$parser$Parser$Advanced$bagToList = F2(
-	function (bag, list) {
-		bagToList:
-		while (true) {
-			switch (bag.$) {
-				case 'Empty':
-					return list;
-				case 'AddRight':
-					var bag1 = bag.a;
-					var x = bag.b;
-					var $temp$bag = bag1,
-						$temp$list = A2($elm$core$List$cons, x, list);
-					bag = $temp$bag;
-					list = $temp$list;
-					continue bagToList;
-				default:
-					var bag1 = bag.a;
-					var bag2 = bag.b;
-					var $temp$bag = bag1,
-						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
-					bag = $temp$bag;
-					list = $temp$list;
-					continue bagToList;
-			}
-		}
-	});
-var $elm$parser$Parser$Advanced$run = F2(
-	function (_v0, src) {
-		var parse = _v0.a;
-		var _v1 = parse(
-			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
-		if (_v1.$ === 'Good') {
-			var value = _v1.b;
-			return $elm$core$Result$Ok(value);
-		} else {
-			var bag = _v1.b;
-			return $elm$core$Result$Err(
-				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
-		}
-	});
-var $elm$parser$Parser$run = F2(
-	function (parser, source) {
-		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
-		if (_v0.$ === 'Ok') {
-			var a = _v0.a;
-			return $elm$core$Result$Ok(a);
-		} else {
-			var problems = _v0.a;
-			return $elm$core$Result$Err(
-				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
-		}
-	});
-var $author$project$Screept$parseIntValue = function (intVal) {
-	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$intValueParser, intVal);
-	if (_v0.$ === 'Ok') {
-		var value = _v0.a;
-		return value;
-	} else {
-		var error = _v0.a;
-		var _v1 = A2($elm$core$Debug$log, 'Error parsing IntVal: ', intVal);
-		var _v2 = A2($elm$core$Debug$log, '!', error);
-		return $author$project$Screept$Const(0);
-	}
-};
-var $author$project$Screept$Block = function (a) {
-	return {$: 'Block', a: a};
-};
-var $author$project$Screept$Comment = function (a) {
-	return {$: 'Comment', a: a};
-};
-var $author$project$Screept$If = F3(
-	function (a, b, c) {
-		return {$: 'If', a: a, b: b, c: c};
-	});
-var $elm$parser$Parser$Optional = {$: 'Optional'};
-var $author$project$Screept$Procedure = function (a) {
-	return {$: 'Procedure', a: a};
-};
-var $author$project$Screept$Rnd = F3(
-	function (a, b, c) {
-		return {$: 'Rnd', a: a, b: b, c: c};
-	});
-var $author$project$Screept$SVInt = function (a) {
-	return {$: 'SVInt', a: a};
-};
-var $author$project$Screept$SVLazyInt = function (a) {
-	return {$: 'SVLazyInt', a: a};
-};
-var $author$project$Screept$SVLazyText = function (a) {
-	return {$: 'SVLazyText', a: a};
-};
-var $author$project$Screept$SVText = function (a) {
-	return {$: 'SVText', a: a};
-};
-var $author$project$Screept$SetVariable = F2(
-	function (a, b) {
-		return {$: 'SetVariable', a: a, b: b};
-	});
-var $elm$parser$Parser$ExpectingKeyword = function (a) {
-	return {$: 'ExpectingKeyword', a: a};
-};
-var $elm$parser$Parser$Advanced$keyword = function (_v0) {
-	var kwd = _v0.a;
-	var expecting = _v0.b;
-	var progress = !$elm$core$String$isEmpty(kwd);
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, kwd, s.offset, s.row, s.col, s.src);
-			var newOffset = _v1.a;
-			var newRow = _v1.b;
-			var newCol = _v1.c;
-			return (_Utils_eq(newOffset, -1) || (0 <= A3(
-				$elm$parser$Parser$Advanced$isSubChar,
-				function (c) {
-					return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
-						c,
-						_Utils_chr('_'));
-				},
-				newOffset,
-				s.src))) ? A2(
-				$elm$parser$Parser$Advanced$Bad,
-				false,
-				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-				$elm$parser$Parser$Advanced$Good,
-				progress,
-				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
-		});
-};
-var $elm$parser$Parser$keyword = function (kwd) {
-	return $elm$parser$Parser$Advanced$keyword(
-		A2(
-			$elm$parser$Parser$Advanced$Token,
-			kwd,
-			$elm$parser$Parser$ExpectingKeyword(kwd)));
-};
-var $elm$parser$Parser$Advanced$map = F2(
-	function (func, _v0) {
-		var parse = _v0.a;
-		return $elm$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _v1 = parse(s0);
-				if (_v1.$ === 'Good') {
-					var p = _v1.a;
-					var a = _v1.b;
-					var s1 = _v1.c;
-					return A3(
-						$elm$parser$Parser$Advanced$Good,
-						p,
-						func(a),
-						s1);
-				} else {
-					var p = _v1.a;
-					var x = _v1.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p, x);
-				}
-			});
-	});
-var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _v0) {
 		var parseA = _v0.a;
@@ -6485,6 +6178,28 @@ var $elm$parser$Parser$Advanced$loop = F2(
 		return $elm$parser$Parser$Advanced$Parser(
 			function (s) {
 				return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
+	});
+var $elm$parser$Parser$Advanced$map = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
 			});
 	});
 var $elm$parser$Parser$Advanced$Done = function (a) {
@@ -6699,23 +6414,17 @@ var $elm$parser$Parser$sequence = function (i) {
 			trailing: $elm$parser$Parser$toAdvancedTrailing(i.trailing)
 		});
 };
-var $author$project$Screept$Concat = function (a) {
-	return {$: 'Concat', a: a};
-};
-var $author$project$Screept$Conditional = F3(
-	function (a, b, c) {
-		return {$: 'Conditional', a: a, b: b, c: c};
+var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
+	function (c) {
+		return _Utils_eq(
+			c,
+			_Utils_chr(' ')) || (_Utils_eq(
+			c,
+			_Utils_chr('\n')) || _Utils_eq(
+			c,
+			_Utils_chr('\r')));
 	});
-var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
-var $author$project$Screept$IntValueText = function (a) {
-	return {$: 'IntValueText', a: a};
-};
-var $author$project$Screept$S = function (a) {
-	return {$: 'S', a: a};
-};
-var $author$project$Screept$TextVariable = function (a) {
-	return {$: 'TextVariable', a: a};
-};
+var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
 function $author$project$Screept$cyclic$textValueParser() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -6743,7 +6452,7 @@ function $author$project$Screept$cyclic$textValueParser() {
 					{
 						end: ']',
 						item: $elm$parser$Parser$lazy(
-							function (_v0) {
+							function (_v4) {
 								return $author$project$Screept$cyclic$textValueParser();
 							}),
 						separator: ',',
@@ -6763,19 +6472,19 @@ function $author$project$Screept$cyclic$textValueParser() {
 							$elm$parser$Parser$symbol('(')),
 						A2(
 							$elm$parser$Parser$ignorer,
-							$author$project$Screept$intValueParser,
+							$author$project$Screept$cyclic$intValueParser(),
 							$elm$parser$Parser$symbol('?'))),
 					A2(
 						$elm$parser$Parser$ignorer,
 						$elm$parser$Parser$lazy(
-							function (_v1) {
+							function (_v5) {
 								return $author$project$Screept$cyclic$textValueParser();
 							}),
 						$elm$parser$Parser$symbol(':'))),
 				A2(
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$lazy(
-						function (_v2) {
+						function (_v6) {
 							return $author$project$Screept$cyclic$textValueParser();
 						}),
 					$elm$parser$Parser$symbol(')'))),
@@ -6785,11 +6494,147 @@ function $author$project$Screept$cyclic$textValueParser() {
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$succeed($author$project$Screept$IntValueText),
 					$elm$parser$Parser$symbol('TO_TEXT ')),
-				$author$project$Screept$intValueParser),
+				$author$project$Screept$cyclic$intValueParser()),
 				A2(
 				$elm$parser$Parser$keeper,
 				$elm$parser$Parser$succeed($author$project$Screept$TextVariable),
-				$author$project$Screept$parseVariableName)
+				$author$project$Screept$cyclic$parseVariableName())
+			]));
+}
+function $author$project$Screept$cyclic$intValueParser() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				$author$project$Screept$cyclic$binaryOpParser(),
+				$author$project$Screept$cyclic$unaryOpParser(),
+				A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed($author$project$Screept$Const),
+				$author$project$Screept$intWithPotentialMinus),
+				A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed($author$project$Screept$IntVariable),
+				$author$project$Screept$cyclic$parseVariableName())
+			]));
+}
+function $author$project$Screept$cyclic$binaryOpParser() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$ignorer,
+							$elm$parser$Parser$succeed($author$project$Screept$Binary),
+							$elm$parser$Parser$symbol('(')),
+						A2(
+							$elm$parser$Parser$ignorer,
+							$elm$parser$Parser$lazy(
+								function (_v2) {
+									return $author$project$Screept$cyclic$intValueParser();
+								}),
+							$elm$parser$Parser$spaces)),
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$oneOf(
+							_List_fromArray(
+								[
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Add),
+									$elm$parser$Parser$symbol('+')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Sub),
+									$elm$parser$Parser$symbol('-')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Mul),
+									$elm$parser$Parser$symbol('*')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Div),
+									$elm$parser$Parser$symbol('/')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Mod),
+									$elm$parser$Parser$symbol('%%')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Gt),
+									$elm$parser$Parser$symbol('>')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Lt),
+									$elm$parser$Parser$symbol('<')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Eq),
+									$elm$parser$Parser$symbol('==')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$And),
+									$elm$parser$Parser$symbol('&&')),
+									A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$Screept$Or),
+									$elm$parser$Parser$symbol('||'))
+								])),
+						$elm$parser$Parser$spaces)),
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$lazy(
+						function (_v3) {
+							return $author$project$Screept$cyclic$intValueParser();
+						}),
+					$elm$parser$Parser$symbol(')')))
+			]));
+}
+function $author$project$Screept$cyclic$parseVariableName() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed($author$project$Screept$VComputed),
+					$elm$parser$Parser$symbol('#')),
+				$elm$parser$Parser$lazy(
+					function (_v1) {
+						return $author$project$Screept$cyclic$textValueParser();
+					})),
+				A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed($author$project$Screept$VLit),
+				$author$project$Screept$nextWordParser)
+			]));
+}
+function $author$project$Screept$cyclic$unaryOpParser() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$keeper,
+					$elm$parser$Parser$succeed($author$project$Screept$Unary),
+					$elm$parser$Parser$oneOf(
+						_List_fromArray(
+							[
+								A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed($author$project$Screept$Not),
+								$elm$parser$Parser$symbol('!'))
+							]))),
+				$elm$parser$Parser$lazy(
+					function (_v0) {
+						return $author$project$Screept$cyclic$intValueParser();
+					}))
 			]));
 }
 try {
@@ -6797,8 +6642,169 @@ try {
 	$author$project$Screept$cyclic$textValueParser = function () {
 		return $author$project$Screept$textValueParser;
 	};
+	var $author$project$Screept$intValueParser = $author$project$Screept$cyclic$intValueParser();
+	$author$project$Screept$cyclic$intValueParser = function () {
+		return $author$project$Screept$intValueParser;
+	};
+	var $author$project$Screept$binaryOpParser = $author$project$Screept$cyclic$binaryOpParser();
+	$author$project$Screept$cyclic$binaryOpParser = function () {
+		return $author$project$Screept$binaryOpParser;
+	};
+	var $author$project$Screept$parseVariableName = $author$project$Screept$cyclic$parseVariableName();
+	$author$project$Screept$cyclic$parseVariableName = function () {
+		return $author$project$Screept$parseVariableName;
+	};
+	var $author$project$Screept$unaryOpParser = $author$project$Screept$cyclic$unaryOpParser();
+	$author$project$Screept$cyclic$unaryOpParser = function () {
+		return $author$project$Screept$unaryOpParser;
+	};
 } catch ($) {
-	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    textValueParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `Screept` are causing infinite recursion:\n\n  ┌─────┐\n  │    textValueParser\n  │     ↓\n  │    intValueParser\n  │     ↓\n  │    binaryOpParser\n  │     ↓\n  │    parseVariableName\n  │     ↓\n  │    unaryOpParser\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $elm$core$Debug$log = _Debug_log;
+var $elm$parser$Parser$DeadEnd = F3(
+	function (row, col, problem) {
+		return {col: col, problem: problem, row: row};
+	});
+var $elm$parser$Parser$problemToDeadEnd = function (p) {
+	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
+};
+var $elm$parser$Parser$Advanced$bagToList = F2(
+	function (bag, list) {
+		bagToList:
+		while (true) {
+			switch (bag.$) {
+				case 'Empty':
+					return list;
+				case 'AddRight':
+					var bag1 = bag.a;
+					var x = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$core$List$cons, x, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+				default:
+					var bag1 = bag.a;
+					var bag2 = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$run = F2(
+	function (_v0, src) {
+		var parse = _v0.a;
+		var _v1 = parse(
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_v1.$ === 'Good') {
+			var value = _v1.b;
+			return $elm$core$Result$Ok(value);
+		} else {
+			var bag = _v1.b;
+			return $elm$core$Result$Err(
+				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
+		}
+	});
+var $elm$parser$Parser$run = F2(
+	function (parser, source) {
+		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
+		if (_v0.$ === 'Ok') {
+			var a = _v0.a;
+			return $elm$core$Result$Ok(a);
+		} else {
+			var problems = _v0.a;
+			return $elm$core$Result$Err(
+				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
+		}
+	});
+var $author$project$Screept$parseIntValue = function (intVal) {
+	var _v0 = A2($elm$parser$Parser$run, $author$project$Screept$intValueParser, intVal);
+	if (_v0.$ === 'Ok') {
+		var value = _v0.a;
+		return value;
+	} else {
+		var error = _v0.a;
+		var _v1 = A2($elm$core$Debug$log, 'Error parsing IntVal: ', intVal);
+		var _v2 = A2($elm$core$Debug$log, '!', error);
+		return $author$project$Screept$Const(0);
+	}
+};
+var $author$project$Screept$Block = function (a) {
+	return {$: 'Block', a: a};
+};
+var $author$project$Screept$Comment = function (a) {
+	return {$: 'Comment', a: a};
+};
+var $author$project$Screept$If = F3(
+	function (a, b, c) {
+		return {$: 'If', a: a, b: b, c: c};
+	});
+var $elm$parser$Parser$Optional = {$: 'Optional'};
+var $author$project$Screept$Procedure = function (a) {
+	return {$: 'Procedure', a: a};
+};
+var $author$project$Screept$Rnd = F3(
+	function (a, b, c) {
+		return {$: 'Rnd', a: a, b: b, c: c};
+	});
+var $author$project$Screept$SVInt = function (a) {
+	return {$: 'SVInt', a: a};
+};
+var $author$project$Screept$SVLazyInt = function (a) {
+	return {$: 'SVLazyInt', a: a};
+};
+var $author$project$Screept$SVLazyText = function (a) {
+	return {$: 'SVLazyText', a: a};
+};
+var $author$project$Screept$SVText = function (a) {
+	return {$: 'SVText', a: a};
+};
+var $author$project$Screept$SetVariable = F2(
+	function (a, b) {
+		return {$: 'SetVariable', a: a, b: b};
+	});
+var $elm$parser$Parser$ExpectingKeyword = function (a) {
+	return {$: 'ExpectingKeyword', a: a};
+};
+var $elm$parser$Parser$Advanced$keyword = function (_v0) {
+	var kwd = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(kwd);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, kwd, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return (_Utils_eq(newOffset, -1) || (0 <= A3(
+				$elm$parser$Parser$Advanced$isSubChar,
+				function (c) {
+					return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+						c,
+						_Utils_chr('_'));
+				},
+				newOffset,
+				s.src))) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$keyword = function (kwd) {
+	return $elm$parser$Parser$Advanced$keyword(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			kwd,
+			$elm$parser$Parser$ExpectingKeyword(kwd)));
+};
+var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
 function $author$project$Screept$cyclic$statementParser() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -8633,8 +8639,8 @@ var $author$project$Screept$getVariableNameString = F2(
 			var _var = variableName.a;
 			return _var;
 		} else {
-			var _var = variableName.a;
-			return A2($author$project$Screept$getStringFromVariableNameString, _var, state);
+			var textValue = variableName.a;
+			return A2($author$project$Screept$getString, state, textValue);
 		}
 	});
 var $author$project$Screept$isTruthy = F2(
@@ -8848,15 +8854,6 @@ var $author$project$Screept$binaryOpStringify = function (binaryOp) {
 			return '||';
 	}
 };
-var $author$project$Screept$stringifyVariableName = function (variableName) {
-	if (variableName.$ === 'VLit') {
-		var string = variableName.a;
-		return string;
-	} else {
-		var textValue = variableName.a;
-		return '$' + textValue;
-	}
-};
 var $author$project$Screept$unaryOpStringify = function (unaryOp) {
 	return '!';
 };
@@ -8879,6 +8876,15 @@ var $author$project$Screept$intValueStringify = function (intValue) {
 		default:
 			var string = intValue.a;
 			return $author$project$Screept$stringifyVariableName(string);
+	}
+};
+var $author$project$Screept$stringifyVariableName = function (variableName) {
+	if (variableName.$ === 'VLit') {
+		var string = variableName.a;
+		return string;
+	} else {
+		var textValue = variableName.a;
+		return '#' + $author$project$Screept$textValueStringify(textValue);
 	}
 };
 var $author$project$Screept$textValueStringify = function (textValue) {

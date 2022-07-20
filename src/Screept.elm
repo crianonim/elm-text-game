@@ -50,7 +50,7 @@ type Statement
 
 type VariableName
     = VLit String
-    | VRef String
+    | VComputed TextValue
 
 
 
@@ -276,8 +276,8 @@ getVariableNameString variableName state =
         VLit var ->
             var
 
-        VRef var ->
-            getStringFromVariableNameString var state
+        VComputed textValue ->
+            getString state textValue
 
 
 stringifyVariableName : VariableName -> String
@@ -286,8 +286,8 @@ stringifyVariableName variableName =
         VLit string ->
             string
 
-        VRef textValue ->
-            "$" ++ textValue
+        VComputed textValue ->
+            "#" ++ textValueStringify textValue
 
 
 getMaybeIntValue : State a -> IntValue -> Maybe Int
@@ -373,22 +373,12 @@ intWithPotentialMinus =
 parseVariableName : Parser VariableName
 parseVariableName =
     Parser.oneOf
-        [ Parser.succeed VRef
-            |. Parser.symbol "$"
-            |= nextWordParser
+        [ Parser.succeed VComputed
+            |. Parser.symbol "#"
+            |= Parser.lazy (\_ -> textValueParser)
         , Parser.succeed VLit
             |= nextWordParser
         ]
-
-
-counterParser : Parser String
-counterParser =
-    Parser.succeed identity
-        |. Parser.symbol "$"
-        |= Parser.getChompedString
-            (Parser.succeed ()
-                |. Parser.chompWhile (\c -> Char.isAlphaNum c || c == '_')
-            )
 
 
 unaryOpParser : Parser IntValue
