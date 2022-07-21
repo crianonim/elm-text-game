@@ -510,7 +510,7 @@ textValueStringify textValue =
             "\"" ++ string ++ "\""
 
         Concat textValues ->
-            "[ " ++ String.join ", " (List.map textValueStringify textValues) ++ " ]"
+            "[" ++ String.join ", " (List.map textValueStringify textValues) ++ "]"
 
         Conditional cond success failure ->
             "(" ++ intValueStringify cond ++ "?" ++ textValueStringify success ++ ":" ++ textValueStringify failure ++ ")"
@@ -832,3 +832,46 @@ getMaybeFuncTextValueFromVariable variable =
 
         _ ->
             Nothing
+
+
+statementPrettyStringify : Int -> Statement -> String
+statementPrettyStringify i statement =
+    let
+        ident id =
+            String.repeat id " "
+    in
+    ident i
+        ++ (case statement of
+                Rnd varName i1 i2 ->
+                    "RND " ++ stringifyVariableName varName ++ " " ++ intValueStringify i1 ++ " .. " ++ intValueStringify i2
+
+                Block statements ->
+                    if List.isEmpty statements then
+                        "{}"
+
+                    else
+                        "{\n" ++ String.join ";\n" (List.map (statementPrettyStringify (i + 1)) statements) ++ "\n" ++ ident i ++ " }"
+
+                If intValue success failure ->
+                    "IF " ++ intValueStringify intValue ++ " THEN\n" ++ statementPrettyStringify (i + 1) success ++ "\n" ++ ident i ++ "ELSE " ++ statementPrettyStringify (i + 1) failure
+
+                Comment string ->
+                    "#" ++ string ++ "\n"
+
+                Procedure string ->
+                    "RUN " ++ string
+
+                SetVariable name variable ->
+                    case variable of
+                        SVInt _ ->
+                            "INT " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
+
+                        SVText _ ->
+                            "TEXT " ++ stringifyVariableName name ++ " = " ++ stringifySetVariable variable
+
+                        SVLazyInt _ ->
+                            "INT " ++ stringifyVariableName name ++ " ~= " ++ stringifySetVariable variable
+
+                        SVLazyText _ ->
+                            "TEXT " ++ stringifyVariableName name ++ " ~= " ++ stringifySetVariable variable
+           )

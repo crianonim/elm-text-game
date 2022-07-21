@@ -27,8 +27,11 @@ type Msg
 
 init : Model
 init =
-    { statementEditor = ParsedEditable.init "" Screept.statementParser
-    , intValueEditor = ParsedEditable.init "" Screept.intValueParser
+    { statementEditor =
+        ParsedEditable.init
+            "{ INT turn = (turn + 1); INT turns_count = (turns_count - 1); INT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour)); INT hour = ((turn / turns_per_hour) %% 24); INT day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 }; IF minutes THEN {  } ELSE {  } }"
+            Screept.statementParser
+    , intValueEditor = ParsedEditable.init "!(#[(farm_level?\"has level\":\"no level\"),\"_\",book,[\"jan\"]] + 1)" Screept.intValueParser
     , value = Nothing
     }
 
@@ -49,55 +52,163 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ ParsedEditable.view model.intValueEditor |> Html.map IntValueEditor
+        [ --ParsedEditable.view model.intValueEditor |> Html.map IntValueEditor
+          ParsedEditable.view model.statementEditor |> Html.map StatementEditor
         , button [ onClick ClickRun ] [ text "RUN" ]
         , Maybe.map (\x -> text (String.fromInt x)) model.value |> Maybe.withDefault (text "not run")
+        , case model.statementEditor.parsed of
+            Just (Ok v) ->
+                div []
+                    [ pre [] [ text (statementPrettyStringify 0 v) ]
+                    , pre [] [ text <| (String.replace "\n" " " <| String.replace "\"" "\\\"" <| statementStringify v) ]
+                    ]
+
+            _ ->
+                text ""
+
+        --, case model.intValueEditor.parsed of
+        --    Just (Ok v) ->
+        --        div [] [ viewIntValue v
+        --         , pre [] [text<| (String.replace "\"" "\\\"" <| intValueStringify v) ]]
+        --
+        --    _ ->
+        --        text ""
         ]
 
 
+viewIntValue : IntValue -> Html msg
+viewIntValue intValue =
+    span [ class "screept-editor-intvalue" ]
+        [ case intValue of
+            Const int ->
+                span [ class "screept-editor-intconst" ] [ text <| String.fromInt int ]
 
---
---viewStatement : Statement -> Html msg
---viewStatement statement =
---    case statement of
---        SetCounter textValue intValue ->
---            pre [] [ text "SET ", viewTextValue textValue, text " = ", viewIntValue intValue ]
---
---        SetLabel label value ->
---            pre [] [ text "LABEL ", viewTextValue label, text " = ", viewTextValue value ]
---
---        Rnd textValue min max ->
---            pre [] [ text "RND ", viewTextValue textValue, text " ", viewIntValue min, text " .. ", viewIntValue max ]
---
---        Block statements ->
---            pre [] ([ pre [] [ text "{" ] ] ++ List.map viewStatement statements ++ [ pre [] [ text "}" ] ])
---
---        If condition success failure ->
---            div []
---                [ span [] [ text "IF ", viewIntValue condition ]
---                , div [ class "screept_condition" ] [ viewStatement success ]
---                , if failure == None then
---                    text ""
---
---                  else
---                    div [] [ text "ELSE ", div [ class "screept_condition" ] [ viewStatement failure ] ]
---                ]
---
---        None ->
---            text "Nop"
---
---        Comment string ->
---            text ("#" ++ string)
---
---        Procedure procedureCall ->
---            -- TODO
---            text "procedurecall"
---
---        SetFunc textValue intValue ->
---            -- TODO
---            text "procedurecall"
---
---
+            Unary unaryOp v ->
+                viewUnary unaryOp v
+
+            Binary v1 binaryOp v2 ->
+                viewBinary v1 binaryOp v2
+
+            IntVariable variableName ->
+                span [ class "screept-editor-variable" ] [ viewVariableName variableName ]
+        ]
+
+
+viewVariableName : VariableName -> Html msg
+viewVariableName variableName =
+    case variableName of
+        VLit string ->
+            span [ class "screept-editor-variable-literal" ] [ text string ]
+
+        VComputed textValue ->
+            span [] [ span [ class "screept-editor-variable-computed" ] [ text "#" ], viewTextValue textValue ]
+
+
+viewUnary : UnaryOp -> IntValue -> Html msg
+viewUnary unaryOp intValue =
+    span []
+        [ span [ class "screept-editor-unaryop" ]
+            [ text <| unaryOpStringify unaryOp
+            ]
+        , viewIntValue intValue
+        ]
+
+
+viewBinary : IntValue -> BinaryOp -> IntValue -> Html msg
+viewBinary v1 binaryOp v2 =
+    span []
+        [ text "("
+        , viewIntValue v1
+        , text " "
+        , viewBinaryOp binaryOp
+        , text " "
+        , viewIntValue v2
+        , text ")"
+        ]
+
+
+viewBinaryOp : BinaryOp -> Html msg
+viewBinaryOp binaryOp =
+    span [] [ text <| binaryOpStringify binaryOp ]
+
+
+viewTextValue : TextValue -> Html msg
+viewTextValue textValue =
+    span [ class "screept-editor-textvalue" ]
+        [ case textValue of
+            S string ->
+                span [ class "screept-editor-text-string" ] [ text <| textValueStringify textValue ]
+
+            Concat textValues ->
+                span []
+                    ([ text "[" ]
+                        ++ (List.map viewTextValue textValues |> List.intersperse (text ", "))
+                        ++ [ text "]"
+                           ]
+                    )
+
+            Conditional intValue v1 v2 ->
+                span []
+                    [ text "("
+                    , viewIntValue intValue
+                    , text "?"
+                    , viewTextValue v1
+                    , text ":"
+                    , viewTextValue v2
+                    , text ")"
+                    ]
+
+            IntValueText intValue ->
+                span [] [ viewIntValue intValue ]
+
+            TextVariable variableName ->
+                span [] [ viewVariableName variableName ]
+        ]
+
+
+viewStatement : Int -> Statement -> Html msg
+viewStatement ident statement =
+    div
+        [ style "padding-left" (String.fromInt ident ++ "em")
+        , class "screept-editor-statement"
+        ]
+        (case statement of
+            Rnd variableName v1 v2 ->
+                [ text <| statementStringify statement ]
+
+            Block statements ->
+                [ text "{"
+                , if List.isEmpty statements then
+                    text ""
+
+                  else
+                    div [] <|
+                        List.map (viewStatement (ident + 1)) statements
+                , text "}"
+                ]
+
+            If intValue s1 s2 ->
+                [ text "IF "
+                , viewIntValue intValue
+                , text " THEN "
+                , viewStatement (ident + 1) s1
+                , text " ELSE "
+                , viewStatement (ident + 1) s2
+                , text ";"
+                ]
+
+            Comment string ->
+                [ text <| statementStringify statement ]
+
+            Procedure string ->
+                [ text <| statementStringify statement ]
+
+            SetVariable variableName variableExpression ->
+                [ text <| statementStringify statement, text ";" ]
+        )
+
+
+
 --viewTextValue : TextValue -> Html msg
 --viewTextValue textValue =
 --    case textValue of
@@ -117,17 +228,6 @@ view model =
 --            text <| "#" ++ string
 --
 --
---viewIntValue : IntValue -> Html msg
---viewIntValue intValue =
---    case intValue of
---        Const int ->
---            text <| String.fromInt int
---
---        Counter string ->
---            text <| "$" ++ string
---
---        _ ->
---            text "TODO"
 --
 --- TODO
 --Addition x y ->
