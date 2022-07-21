@@ -329,8 +329,8 @@ view model =
 
             Loaded m ->
                 div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
+        , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
 
-        --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
         --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         , viewUrlLoader model

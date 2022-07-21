@@ -21,7 +21,7 @@ type Msg
 init : String -> Parser.Parser a -> Model a
 init text parser =
     { text = text
-    , parsed = Nothing
+    , parsed = Just <| Parser.run parser text
     , parser = parser
     }
 

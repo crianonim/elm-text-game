@@ -8154,11 +8154,16 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
 var $author$project$ParsedEditable$init = F2(
 	function (text, parser) {
-		return {parsed: $elm$core$Maybe$Nothing, parser: parser, text: text};
+		return {
+			parsed: $elm$core$Maybe$Just(
+				A2($elm$parser$Parser$run, parser, text)),
+			parser: parser,
+			text: text
+		};
 	});
 var $author$project$ScreeptEditor$init = {
-	intValueEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$intValueParser),
-	statementEditor: A2($author$project$ParsedEditable$init, '', $author$project$Screept$statementParser),
+	intValueEditor: A2($author$project$ParsedEditable$init, '!(#[(farm_level?\"has level\":\"no level\"),\"_\",book,[\"jan\"]] + 1)', $author$project$Screept$intValueParser),
+	statementEditor: A2($author$project$ParsedEditable$init, '{ INT turn = (turn + 1); INT turns_count = (turns_count - 1); INT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour)); INT hour = ((turn / turns_per_hour) %% 24); INT day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 }; IF minutes THEN {  } ELSE {  } }', $author$project$Screept$statementParser),
 	value: $elm$core$Maybe$Nothing
 };
 var $mhoare$elm_stack$Stack$Stack = function (a) {
@@ -8894,10 +8899,10 @@ var $author$project$Screept$textValueStringify = function (textValue) {
 			return '\"' + (string + '\"');
 		case 'Concat':
 			var textValues = textValue.a;
-			return '[ ' + (A2(
+			return '[' + (A2(
 				$elm$core$String$join,
 				', ',
-				A2($elm$core$List$map, $author$project$Screept$textValueStringify, textValues)) + ' ]');
+				A2($elm$core$List$map, $author$project$Screept$textValueStringify, textValues)) + ']');
 		case 'Conditional':
 			var cond = textValue.a;
 			var success = textValue.b;
@@ -9397,6 +9402,9 @@ var $author$project$Main$GameDialog = function (a) {
 var $author$project$Main$MainMenuDialog = function (a) {
 	return {$: 'MainMenuDialog', a: a};
 };
+var $author$project$Main$ScreeptEditor = function (a) {
+	return {$: 'ScreeptEditor', a: a};
+};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -9652,13 +9660,93 @@ var $author$project$DialogGame$view = function (_v0) {
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
 };
-var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
-var $author$project$Main$EditUrlLoader = function (a) {
-	return {$: 'EditUrlLoader', a: a};
+var $author$project$ScreeptEditor$ClickRun = {$: 'ClickRun'};
+var $author$project$ScreeptEditor$StatementEditor = function (a) {
+	return {$: 'StatementEditor', a: a};
 };
-var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var $elm$core$String$repeatHelp = F3(
+	function (n, chunk, result) {
+		return (n <= 0) ? result : A3(
+			$elm$core$String$repeatHelp,
+			n >> 1,
+			_Utils_ap(chunk, chunk),
+			(!(n & 1)) ? result : _Utils_ap(result, chunk));
+	});
+var $elm$core$String$repeat = F2(
+	function (n, chunk) {
+		return A3($elm$core$String$repeatHelp, n, chunk, '');
+	});
+var $author$project$Screept$statementPrettyStringify = F2(
+	function (i, statement) {
+		var ident = function (id) {
+			return A2($elm$core$String$repeat, id, ' ');
+		};
+		return _Utils_ap(
+			ident(i),
+			function () {
+				switch (statement.$) {
+					case 'Rnd':
+						var varName = statement.a;
+						var i1 = statement.b;
+						var i2 = statement.c;
+						return 'RND ' + ($author$project$Screept$stringifyVariableName(varName) + (' ' + ($author$project$Screept$intValueStringify(i1) + (' .. ' + $author$project$Screept$intValueStringify(i2)))));
+					case 'Block':
+						var statements = statement.a;
+						return $elm$core$List$isEmpty(statements) ? '{}' : ('{\n' + (A2(
+							$elm$core$String$join,
+							';\n',
+							A2(
+								$elm$core$List$map,
+								$author$project$Screept$statementPrettyStringify(i + 1),
+								statements)) + ('\n' + (ident(i) + ' }'))));
+					case 'If':
+						var intValue = statement.a;
+						var success = statement.b;
+						var failure = statement.c;
+						return 'IF ' + ($author$project$Screept$intValueStringify(intValue) + (' THEN\n' + (A2($author$project$Screept$statementPrettyStringify, i + 1, success) + ('\n' + (ident(i) + ('ELSE ' + A2($author$project$Screept$statementPrettyStringify, i + 1, failure)))))));
+					case 'Comment':
+						var string = statement.a;
+						return '#' + (string + '\n');
+					case 'Procedure':
+						var string = statement.a;
+						return 'RUN ' + string;
+					default:
+						var name = statement.a;
+						var variable = statement.b;
+						switch (variable.$) {
+							case 'SVInt':
+								return 'INT ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
+							case 'SVText':
+								return 'TEXT ' + ($author$project$Screept$stringifyVariableName(name) + (' = ' + $author$project$Screept$stringifySetVariable(variable)));
+							case 'SVLazyInt':
+								return 'INT ' + ($author$project$Screept$stringifyVariableName(name) + (' ~= ' + $author$project$Screept$stringifySetVariable(variable)));
+							default:
+								return 'TEXT ' + ($author$project$Screept$stringifyVariableName(name) + (' ~= ' + $author$project$Screept$stringifySetVariable(variable)));
+						}
+				}
+			}());
+	});
+var $author$project$ParsedEditable$ParseClick = {$: 'ParseClick'};
+var $author$project$ParsedEditable$TextEdit = function (a) {
+	return {$: 'TextEdit', a: a};
+};
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -9690,7 +9778,179 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
+var $author$project$ParsedEditable$problemToString = function (problem) {
+	switch (problem.$) {
+		case 'Expecting':
+			var string = problem.a;
+			return 'Expecting ' + string;
+		case 'ExpectingInt':
+			return 'Expecting Int ';
+		case 'ExpectingHex':
+			return 'ExpectingHex';
+		case 'ExpectingOctal':
+			return 'ExpectingOctal';
+		case 'ExpectingBinary':
+			return 'ExpectingBinary';
+		case 'ExpectingFloat':
+			return 'ExpectingFloat';
+		case 'ExpectingNumber':
+			return 'ExpectingNumber';
+		case 'ExpectingVariable':
+			return 'ExpectingVariable';
+		case 'ExpectingSymbol':
+			var string = problem.a;
+			return 'ExpectingSymbol ' + string;
+		case 'ExpectingKeyword':
+			var string = problem.a;
+			return 'ExpectingKeyword ' + string;
+		case 'ExpectingEnd':
+			return 'ExpectingEnd';
+		case 'UnexpectedChar':
+			return 'UnexpectedChar';
+		case 'Problem':
+			var string = problem.a;
+			return 'Problem ' + string;
+		default:
+			return 'BadRepeat';
+	}
+};
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$ParsedEditable$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$ParsedEditable$ParseClick)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Parse')
+					])),
+				A2(
+				$elm$html$Html$textarea,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$value(model.text),
+						$elm$html$Html$Events$onInput($author$project$ParsedEditable$TextEdit),
+						A2($elm$html$Html$Attributes$style, 'width', '100%'),
+						A2($elm$html$Html$Attributes$style, 'height', '10em'),
+						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace')
+					]),
+				_List_Nil),
+				function () {
+				var _v0 = model.parsed;
+				if (_v0.$ === 'Nothing') {
+					return $elm$html$Html$text('');
+				} else {
+					var a = _v0.a;
+					if (a.$ === 'Ok') {
+						return $elm$html$Html$text('Parsed ok');
+					} else {
+						var errors = a.a;
+						var viewProblem = function (_v2) {
+							var row = _v2.row;
+							var col = _v2.col;
+							var problem = _v2.problem;
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										'row: ' + ($elm$core$String$fromInt(row) + (', col: ' + ($elm$core$String$fromInt(col) + (', problem: ' + $author$project$ParsedEditable$problemToString(problem))))))
+									]));
+						};
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							A2($elm$core$List$map, viewProblem, errors));
+					}
+				}
+			}()
+			]));
+};
+var $author$project$ScreeptEditor$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$map,
+				$author$project$ScreeptEditor$StatementEditor,
+				$author$project$ParsedEditable$view(model.statementEditor)),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$ScreeptEditor$ClickRun)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('RUN')
+					])),
+				A2(
+				$elm$core$Maybe$withDefault,
+				$elm$html$Html$text('not run'),
+				A2(
+					$elm$core$Maybe$map,
+					function (x) {
+						return $elm$html$Html$text(
+							$elm$core$String$fromInt(x));
+					},
+					model.value)),
+				function () {
+				var _v0 = model.statementEditor.parsed;
+				if ((_v0.$ === 'Just') && (_v0.a.$ === 'Ok')) {
+					var v = _v0.a.a;
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$pre,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										A2($author$project$Screept$statementPrettyStringify, 0, v))
+									])),
+								A2(
+								$elm$html$Html$pre,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										A3(
+											$elm$core$String$replace,
+											'\n',
+											' ',
+											A3(
+												$elm$core$String$replace,
+												'\"',
+												'\\\"',
+												$author$project$Screept$statementStringify(v))))
+									]))
+							]));
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}()
+			]));
+};
+var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
+var $author$project$Main$EditUrlLoader = function (a) {
+	return {$: 'EditUrlLoader', a: a};
+};
+var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$viewUrlLoader = function (model) {
 	var _v0 = model.urlLoader;
 	if (_v0.$ === 'Just') {
@@ -9783,6 +10043,10 @@ var $author$project$Main$view = function (model) {
 								]));
 				}
 			}(),
+				A2(
+				$elm$html$Html$map,
+				$author$project$Main$ScreeptEditor,
+				$author$project$ScreeptEditor$view(model.screeptEditor)),
 				$author$project$Main$viewUrlLoader(model)
 			]));
 };
