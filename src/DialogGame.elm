@@ -383,14 +383,11 @@ viewMessages msgs =
         List.map (\m -> p [ class "message" ] [ text m ]) msgs
 
 
-
-
 viewDialogText : Expression -> GameState -> Html msg
 viewDialogText expr gameState =
     let
         s =
             ScreeptV2.evaluateExpressionToString gameState.screeptState expr
-
     in
     div []
         (String.split "\n" s |> List.map (\par -> p [] [ text par ]))
@@ -406,4 +403,4 @@ viewDebug gameState =
 
 viewOption : GameState -> DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptState  dialogOption.text  ]
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptState dialogOption.text ]

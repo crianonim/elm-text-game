@@ -1,6 +1,7 @@
 module ScreeptV2Test exposing (..)
 
 import Char
+import Dict
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer)
 import Json.Decode as Json
@@ -41,8 +42,21 @@ fuzzExpression =
         , ( 20, Fuzz.map Literal fuzzValue )
         , ( 1, Fuzz.map2 UnaryExpression fuzzUnaryOp (Fuzz.lazy (\_ -> fuzzExpression)) )
         , ( 1, Fuzz.map3 BinaryExpression (Fuzz.lazy (\_ -> fuzzExpression)) fuzzBinaryOp (Fuzz.lazy (\_ -> fuzzExpression)) )
-        , ( 4, Fuzz.map2 FunctionCall fuzzIdentifier (Fuzz.listOfLengthBetween 0 5 (Fuzz.lazy (\_ -> fuzzExpression))) )
+        , ( 4, Fuzz.map2 FunctionCall fuzzIdentifier fuzzArgs )
+        , ( 3, Fuzz.map2 StandardLibrary fuzzStandardLibrary fuzzArgs )
         ]
+
+
+fuzzArgs : Fuzzer (List Expression)
+fuzzArgs =
+    Fuzz.listOfLengthBetween 0 5 (Fuzz.lazy (\_ -> fuzzExpression))
+
+
+fuzzStandardLibrary : Fuzzer String
+fuzzStandardLibrary =
+    Dict.keys standardLibrary
+        |> List.map Fuzz.constant
+        |> Fuzz.oneOf
 
 
 fuzzValue : Fuzzer Value

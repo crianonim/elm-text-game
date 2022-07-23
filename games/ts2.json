@@ -48,6 +48,6 @@
     "farm_plot_stage_2": 0,
     "farm_upgrade_cost": {"func": "((farm_level + 1) + 50)"},
     "test_func": { "func": "(turn + turns_per_hour)"},
-    "__statusLine": {"func":"turn" }
+    "__statusLine": {"func":"(\"Turn \" + turn)" }
   }
 }

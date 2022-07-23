@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Json.Decode as Json
 import Json.Encode as E
 import Parser exposing ((|.), (|=), Parser)
-import Result.Extra as Result
+import Result.Extra
 import Set
 
 
@@ -24,6 +24,7 @@ type Expression
     | UnaryExpression UnaryOp Expression
     | BinaryExpression Expression BinaryOp Expression
     | FunctionCall Identifier (List Expression)
+    | StandardLibrary String (List Expression)
 
 
 type Statement
@@ -65,7 +66,14 @@ type Value
 
 reservedWords : List String
 reservedWords =
-    [ "if", "then", "else", "rnd" ]
+    [ "if", "then", "else", "rnd" ] ++ Dict.keys standardLibrary
+
+
+standardLibrary : Dict String (List Value -> Result ScreeptError Value)
+standardLibrary =
+    Dict.fromList
+        [ ( "CONCAT", \args -> List.map getStringFromValue args |> String.join "" |> Text |> Ok )
+        ]
 
 
 parserIdentifier : Parser Identifier
@@ -135,18 +143,38 @@ parserExpression =
                 (\v ->
                     Parser.oneOf
                         [ Parser.succeed (FunctionCall v)
-                            |= Parser.sequence
-                                { start = "("
-                                , end = ")"
-                                , item = Parser.lazy (\_ -> parserExpression)
-                                , spaces = Parser.spaces
-                                , separator = ","
-                                , trailing = Parser.Forbidden
-                                }
+                            |= parserArguments
                         , Parser.succeed <| Variable v
                         ]
                 )
+        , Parser.succeed StandardLibrary
+            |= parserStandardLibrary
+            |= parserArguments
         ]
+
+
+parserArguments : Parser (List Expression)
+parserArguments =
+    Parser.sequence
+        { start = "("
+        , end = ")"
+        , item = Parser.lazy (\_ -> parserExpression)
+        , spaces = Parser.spaces
+        , separator = ","
+        , trailing = Parser.Forbidden
+        }
+
+
+parserStandardFunction : String -> Parser String
+parserStandardFunction string =
+    Parser.keyword string |> Parser.andThen (\_ -> Parser.succeed string)
+
+
+parserStandardLibrary : Parser String
+parserStandardLibrary =
+    Dict.keys standardLibrary
+        |> List.map parserStandardFunction
+        |> Parser.oneOf
 
 
 parserStatement : Parser Statement
@@ -231,6 +259,9 @@ stringifyExpression expression =
 
         FunctionCall identifier expressions ->
             stringifyIdentifier identifier ++ "(" ++ String.join "," (List.map stringifyExpression expressions) ++ ")"
+
+        StandardLibrary string expressions ->
+            string ++ "(" ++ String.join "," (List.map stringifyExpression expressions) ++ ")"
 
 
 stringifyUnaryOperator : UnaryOp -> String
@@ -325,12 +356,12 @@ parserToDecoder parser =
 
 decodeExpression : Json.Decoder Expression
 decodeExpression =
-    parserToDecoder parserExpression
+    parserToDecoder (parserExpression |. Parser.end)
 
 
 decodeStatement : Json.Decoder Statement
 decodeStatement =
-    parserToDecoder parserStatement
+    parserToDecoder (parserStatement |. Parser.end)
 
 
 evaluateExpression : State -> Expression -> Result ScreeptError Value
@@ -375,6 +406,17 @@ evaluateExpression state expression =
 
                             _ ->
                                 Err TypeError
+                    )
+
+        StandardLibrary func expressions ->
+            expressions
+                |> List.map (evaluateExpression state)
+                |> Result.Extra.combine
+                |> Result.andThen
+                    (\args ->
+                        Dict.get func standardLibrary
+                            |> Maybe.map (\f -> f args)
+                            |> Maybe.withDefault (Err Undefined)
                     )
 
 
@@ -451,8 +493,8 @@ evaluateBinaryExpression state e1 binaryOp e2 =
                                         ( Text t1, Text t2 ) ->
                                             Ok <| Text <| t1 ++ t2
 
-                                        _ ->
-                                            Err TypeError
+                                        ( v1, v2 ) ->
+                                            Ok <| Text <| getStringFromValue v1 ++ getStringFromValue v2
 
                                 Sub ->
                                     case ( expr1, expr2 ) of
@@ -517,7 +559,7 @@ executeStatement statement ( state, output ) =
 
 executeStringStatement : String -> State -> ( State, List String )
 executeStringStatement statementString state =
-    case Parser.run parserStatement statementString of
+    case Parser.run (parserStatement |. Parser.end) statementString of
         Ok statement ->
             executeStatement statement ( state, [] )
                 |> Result.withDefault ( state, [] )
@@ -567,11 +609,14 @@ resolveExpressionToString state expression =
         |> Result.map getStringFromValue
         |> Result.withDefault ""
 
+
 evaluateExpressionToString : State -> Expression -> String
-evaluateExpressionToString state expr=
+evaluateExpressionToString state expr =
     evaluateExpression state expr
-   |> Result.map getStringFromValue
-   |> Result.withDefault ""
+        |> Result.map getStringFromValue
+        |> Result.withDefault ""
+
+
 
 -- helper
 -- example
@@ -586,7 +631,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),${t2}(a,3,4)) }"
+    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1() }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
@@ -595,7 +640,7 @@ exampleStatement =
     Block
         [ Print <| Literal <| Text "Janek"
         , Bind (LiteralIdentifier "test2") (BinaryExpression (Variable (LiteralIdentifier "int1")) Add (Literal (Number 3)))
-        , Print <| Variable (LiteralIdentifier "int1")
+        , Print <| StandardLibrary "CONCAT" [ Literal <| Text "Janek", Literal <| Text "Dznanek", Literal <| Text "Janek" ]
         , If (Variable (LiteralIdentifier "int1")) (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No")
         , Print <| FunctionCall (LiteralIdentifier "add2") [ Literal <| Number 5, Literal <| Number 6 ]
         ]
@@ -615,6 +660,7 @@ exampleScreeptState =
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
             , ( "t2", Text "add2" )
+            , ("f1", Func <| Literal <| Text "Wokred")
             , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
     }

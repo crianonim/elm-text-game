@@ -239,9 +239,6 @@ update msg model =
                     let
                         m =
                             initGameFromGameDefinition gameDefinition
-
-
-
                     in
                     Started gameDefinition m
             in
@@ -327,12 +324,12 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        {
-        --procedures = gameDefinition.procedures
-         messages = []
+        { --procedures = gameDefinition.procedures
+          messages = []
+
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptState = {vars = gameDefinition.vars}
+        , screeptState = { vars = gameDefinition.vars }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
@@ -367,7 +364,6 @@ view model =
                 text "Loading..."
 
             Loaded m ->
-
                 div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
 
         --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
