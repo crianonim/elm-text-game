@@ -5548,6 +5548,13 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $author$project$ScreeptV2$Bind = F2(
+	function (a, b) {
+		return {$: 'Bind', a: a, b: b};
+	});
+var $author$project$ScreeptV2$Block = function (a) {
+	return {$: 'Block', a: a};
+};
 var $author$project$ScreeptV2$Number = function (a) {
 	return {$: 'Number', a: a};
 };
@@ -5565,6 +5572,20 @@ var $elm$core$Result$andThen = F2(
 			return $elm$core$Result$Err(msg);
 		}
 	});
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$ScreeptV2$isTruthy = function (value) {
+	switch (value.$) {
+		case 'Number':
+			var n = value.a;
+			return !(!n);
+		case 'Text':
+			var t = value.a;
+			return t !== '';
+		default:
+			return true;
+	}
+};
 var $elm$core$Result$map = F2(
 	function (func, ra) {
 		if (ra.$ === 'Ok') {
@@ -5579,6 +5600,10 @@ var $elm$core$Result$map = F2(
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
 var $author$project$ScreeptV2$Undefined = {$: 'Undefined'};
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
@@ -5641,116 +5666,12 @@ var $author$project$ScreeptV2$resolveVariable = F2(
 				$elm$core$Result$Ok,
 				A2($elm$core$Dict$get, _var, state.vars)));
 	});
-var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
-	function (state, e1, binaryOp, e2) {
-		return A2(
-			$elm$core$Result$andThen,
-			function (expr1) {
-				return A2(
-					$elm$core$Result$andThen,
-					function (expr2) {
-						if (binaryOp.$ === 'Add') {
-							var _v5 = _Utils_Tuple2(expr1, expr2);
-							_v5$2:
-							while (true) {
-								if (_v5.a.$ === 'Number') {
-									if (_v5.b.$ === 'Number') {
-										var n1 = _v5.a.a;
-										var n2 = _v5.b.a;
-										return $elm$core$Result$Ok(
-											$author$project$ScreeptV2$Number(n1 + n2));
-									} else {
-										break _v5$2;
-									}
-								} else {
-									if (_v5.b.$ === 'Text') {
-										var t1 = _v5.a.a;
-										var t2 = _v5.b.a;
-										return $elm$core$Result$Ok(
-											$author$project$ScreeptV2$Text(
-												_Utils_ap(t1, t2)));
-									} else {
-										break _v5$2;
-									}
-								}
-							}
-							return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
-						} else {
-							var _v6 = _Utils_Tuple2(expr1, expr2);
-							if ((_v6.a.$ === 'Number') && (_v6.b.$ === 'Number')) {
-								var n1 = _v6.a.a;
-								var n2 = _v6.b.a;
-								return $elm$core$Result$Ok(
-									$author$project$ScreeptV2$Number(n1 - n2));
-							} else {
-								return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
-							}
-						}
-					},
-					A2($author$project$ScreeptV2$evaluateExpression, state, e2));
-			},
-			A2($author$project$ScreeptV2$evaluateExpression, state, e1));
-	});
-var $author$project$ScreeptV2$evaluateExpression = F2(
-	function (state, expression) {
-		switch (expression.$) {
-			case 'Literal':
-				var valueType = expression.a;
-				return $elm$core$Result$Ok(valueType);
-			case 'Variable':
-				var _var = expression.a;
-				return A2($author$project$ScreeptV2$resolveVariable, state, _var);
-			case 'UnaryExpression':
-				var unaryOp = expression.a;
-				var e = expression.b;
-				return A3($author$project$ScreeptV2$evaluateUnaryExpression, state, unaryOp, e);
-			default:
-				var e1 = expression.a;
-				var binaryOp = expression.b;
-				var e2 = expression.c;
-				return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
-		}
-	});
-var $author$project$ScreeptV2$evaluateUnaryExpression = F3(
-	function (state, unaryOp, expression) {
-		var expr = A2($author$project$ScreeptV2$evaluateExpression, state, expression);
-		if (unaryOp.$ === 'Not') {
-			return A2(
-				$elm$core$Result$map,
-				function (value) {
-					if (value.$ === 'Number') {
-						var n = value.a;
-						return $author$project$ScreeptV2$Number(
-							(!n) ? 1 : 0);
-					} else {
-						var t = value.a;
-						return $author$project$ScreeptV2$Number(
-							($elm$core$String$length(t) > 0) ? 1 : 0);
-					}
-				},
-				expr);
-		} else {
-			return A2(
-				$elm$core$Result$andThen,
-				function (v) {
-					if (v.$ === 'Number') {
-						var n = v.a;
-						return $elm$core$Result$Ok(
-							$author$project$ScreeptV2$Number(-n));
-					} else {
-						return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
-					}
-				},
-				expr);
-		}
-	});
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
 		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
@@ -5854,56 +5775,162 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $author$project$ScreeptV2$exampleScreeptState = {
-	vars: $elm$core$Dict$fromList(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'int1',
-				$author$project$ScreeptV2$Number(-12)),
-				_Utils_Tuple2(
-				'float1',
-				$author$project$ScreeptV2$Number(3.14)),
-				_Utils_Tuple2(
-				'zero',
-				$author$project$ScreeptV2$Number(0)),
-				_Utils_Tuple2(
-				't1',
-				$author$project$ScreeptV2$Text('Jan')),
-				_Utils_Tuple2(
-				't2',
-				$author$project$ScreeptV2$Text(''))
-			]))
-};
-var $elm$core$String$fromFloat = _String_fromNumber;
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$ScreeptV2$isTruthy = function (value) {
-	if (value.$ === 'Number') {
-		var n = value.a;
-		return !(!n);
-	} else {
-		var t = value.a;
-		return t !== '';
-	}
-};
 var $author$project$ScreeptV2$setVariable = F3(
 	function (varName, v, state) {
 		var vars = A3($elm$core$Dict$insert, varName, v, state.vars);
 		return _Utils_update(
 			state,
 			{vars: vars});
+	});
+var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
+	function (state, e1, binaryOp, e2) {
+		return A2(
+			$elm$core$Result$andThen,
+			function (expr1) {
+				return A2(
+					$elm$core$Result$andThen,
+					function (expr2) {
+						if (binaryOp.$ === 'Add') {
+							var _v11 = _Utils_Tuple2(expr1, expr2);
+							_v11$2:
+							while (true) {
+								switch (_v11.a.$) {
+									case 'Number':
+										if (_v11.b.$ === 'Number') {
+											var n1 = _v11.a.a;
+											var n2 = _v11.b.a;
+											return $elm$core$Result$Ok(
+												$author$project$ScreeptV2$Number(n1 + n2));
+										} else {
+											break _v11$2;
+										}
+									case 'Text':
+										if (_v11.b.$ === 'Text') {
+											var t1 = _v11.a.a;
+											var t2 = _v11.b.a;
+											return $elm$core$Result$Ok(
+												$author$project$ScreeptV2$Text(
+													_Utils_ap(t1, t2)));
+										} else {
+											break _v11$2;
+										}
+									default:
+										break _v11$2;
+								}
+							}
+							return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+						} else {
+							var _v12 = _Utils_Tuple2(expr1, expr2);
+							if ((_v12.a.$ === 'Number') && (_v12.b.$ === 'Number')) {
+								var n1 = _v12.a.a;
+								var n2 = _v12.b.a;
+								return $elm$core$Result$Ok(
+									$author$project$ScreeptV2$Number(n1 - n2));
+							} else {
+								return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+							}
+						}
+					},
+					A2($author$project$ScreeptV2$evaluateExpression, state, e2));
+			},
+			A2($author$project$ScreeptV2$evaluateExpression, state, e1));
+	});
+var $author$project$ScreeptV2$evaluateExpression = F2(
+	function (state, expression) {
+		switch (expression.$) {
+			case 'Literal':
+				var valueType = expression.a;
+				return $elm$core$Result$Ok(valueType);
+			case 'Variable':
+				var _var = expression.a;
+				return A2($author$project$ScreeptV2$resolveVariable, state, _var);
+			case 'UnaryExpression':
+				var unaryOp = expression.a;
+				var e = expression.b;
+				return A3($author$project$ScreeptV2$evaluateUnaryExpression, state, unaryOp, e);
+			case 'BinaryExpression':
+				var e1 = expression.a;
+				var binaryOp = expression.b;
+				var e2 = expression.c;
+				return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
+			default:
+				var identifier = expression.a;
+				var expressions = expression.b;
+				return A2(
+					$elm$core$Result$andThen,
+					function (_var) {
+						if (_var.$ === 'Func') {
+							var expr = _var.a;
+							var runTimeState = function () {
+								var varName = function (i) {
+									return '__' + $elm$core$String$fromInt(i + 1);
+								};
+								var bindings = $author$project$ScreeptV2$Block(
+									A2(
+										$elm$core$List$map,
+										function (_v9) {
+											var i = _v9.a;
+											var e = _v9.b;
+											return A2(
+												$author$project$ScreeptV2$Bind,
+												varName(i),
+												e);
+										},
+										A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, expressions)));
+								return A2(
+									$author$project$ScreeptV2$executeStatement,
+									bindings,
+									_Utils_Tuple2(state, _List_Nil));
+							}();
+							return A2(
+								$elm$core$Result$andThen,
+								function (_v8) {
+									var boundState = _v8.a;
+									return A2($author$project$ScreeptV2$evaluateExpression, boundState, expr);
+								},
+								runTimeState);
+						} else {
+							return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+						}
+					},
+					A2($author$project$ScreeptV2$resolveVariable, state, identifier));
+		}
+	});
+var $author$project$ScreeptV2$evaluateUnaryExpression = F3(
+	function (state, unaryOp, expression) {
+		var expr = A2($author$project$ScreeptV2$evaluateExpression, state, expression);
+		if (unaryOp.$ === 'Not') {
+			return A2(
+				$elm$core$Result$map,
+				function (value) {
+					switch (value.$) {
+						case 'Number':
+							var n = value.a;
+							return $author$project$ScreeptV2$Number(
+								(!n) ? 1 : 0);
+						case 'Text':
+							var t = value.a;
+							return $author$project$ScreeptV2$Number(
+								($elm$core$String$length(t) > 0) ? 1 : 0);
+						default:
+							return $author$project$ScreeptV2$Number(0);
+					}
+				},
+				expr);
+		} else {
+			return A2(
+				$elm$core$Result$andThen,
+				function (v) {
+					if (v.$ === 'Number') {
+						var n = v.a;
+						return $elm$core$Result$Ok(
+							$author$project$ScreeptV2$Number(-n));
+					} else {
+						return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+					}
+				},
+				expr);
+		}
 	});
 var $author$project$ScreeptV2$executeStatement = F2(
 	function (statement, _v0) {
@@ -5941,12 +5968,15 @@ var $author$project$ScreeptV2$executeStatement = F2(
 					$elm$core$Result$map,
 					function (v) {
 						var o = function () {
-							if (v.$ === 'Text') {
-								var t = v.a;
-								return t;
-							} else {
-								var _float = v.a;
-								return $elm$core$String$fromFloat(_float);
+							switch (v.$) {
+								case 'Text':
+									var t = v.a;
+									return t;
+								case 'Number':
+									var _float = v.a;
+									return $elm$core$String$fromFloat(_float);
+								default:
+									return '<FUNC>';
 							}
 						}();
 						return _Utils_Tuple2(
@@ -5972,6 +6002,59 @@ var $author$project$ScreeptV2$executeStatement = F2(
 					A2($author$project$ScreeptV2$evaluateExpression, state, expression));
 		}
 	});
+var $author$project$ScreeptV2$Add = {$: 'Add'};
+var $author$project$ScreeptV2$BinaryExpression = F3(
+	function (a, b, c) {
+		return {$: 'BinaryExpression', a: a, b: b, c: c};
+	});
+var $author$project$ScreeptV2$Func = function (a) {
+	return {$: 'Func', a: a};
+};
+var $author$project$ScreeptV2$Variable = function (a) {
+	return {$: 'Variable', a: a};
+};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $author$project$ScreeptV2$exampleScreeptState = {
+	vars: $elm$core$Dict$fromList(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'int1',
+				$author$project$ScreeptV2$Number(-12)),
+				_Utils_Tuple2(
+				'float1',
+				$author$project$ScreeptV2$Number(3.14)),
+				_Utils_Tuple2(
+				'zero',
+				$author$project$ScreeptV2$Number(0)),
+				_Utils_Tuple2(
+				't1',
+				$author$project$ScreeptV2$Text('Jan')),
+				_Utils_Tuple2(
+				't2',
+				$author$project$ScreeptV2$Text('')),
+				_Utils_Tuple2(
+				'add2',
+				$author$project$ScreeptV2$Func(
+					A3(
+						$author$project$ScreeptV2$BinaryExpression,
+						$author$project$ScreeptV2$Variable('__1'),
+						$author$project$ScreeptV2$Add,
+						$author$project$ScreeptV2$Variable('__2'))))
+			]))
+};
 var $author$project$Main$GotGameDefinition = function (a) {
 	return {$: 'GotGameDefinition', a: a};
 };
@@ -8601,10 +8684,9 @@ var $elm$parser$Parser$Advanced$end = function (x) {
 		});
 };
 var $elm$parser$Parser$end = $elm$parser$Parser$Advanced$end($elm$parser$Parser$ExpectingEnd);
-var $author$project$ScreeptV2$Add = {$: 'Add'};
-var $author$project$ScreeptV2$BinaryExpression = F3(
-	function (a, b, c) {
-		return {$: 'BinaryExpression', a: a, b: b, c: c};
+var $author$project$ScreeptV2$FunctionCall = F2(
+	function (a, b) {
+		return {$: 'FunctionCall', a: a, b: b};
 	});
 var $author$project$ScreeptV2$Literal = function (a) {
 	return {$: 'Literal', a: a};
@@ -8616,9 +8698,7 @@ var $author$project$ScreeptV2$UnaryExpression = F2(
 	function (a, b) {
 		return {$: 'UnaryExpression', a: a, b: b};
 	});
-var $author$project$ScreeptV2$Variable = function (a) {
-	return {$: 'Variable', a: a};
-};
+var $elm$parser$Parser$andThen = $elm$parser$Parser$Advanced$andThen;
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
@@ -8831,7 +8911,33 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 						}),
 					$elm$parser$Parser$symbol(')'))),
 				A2($elm$parser$Parser$map, $author$project$ScreeptV2$Literal, $author$project$ScreeptV2$parserLiteral),
-				A2($elm$parser$Parser$map, $author$project$ScreeptV2$Variable, $author$project$ScreeptV2$parserIdentifier)
+				A2(
+				$elm$parser$Parser$andThen,
+				function (v) {
+					return $elm$parser$Parser$oneOf(
+						_List_fromArray(
+							[
+								A2(
+								$elm$parser$Parser$keeper,
+								$elm$parser$Parser$succeed(
+									$author$project$ScreeptV2$FunctionCall(v)),
+								$elm$parser$Parser$sequence(
+									{
+										end: ')',
+										item: $elm$parser$Parser$lazy(
+											function (_v3) {
+												return $author$project$ScreeptV2$cyclic$parserExpression();
+											}),
+										separator: ',',
+										spaces: $elm$parser$Parser$spaces,
+										start: '(',
+										trailing: $elm$parser$Parser$Forbidden
+									})),
+								$elm$parser$Parser$succeed(
+								$author$project$ScreeptV2$Variable(v))
+							]));
+				},
+				$author$project$ScreeptV2$parserIdentifier)
 			]));
 }
 try {
@@ -8845,13 +8951,6 @@ var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),
 	'(int1 + 3)');
-var $author$project$ScreeptV2$Bind = F2(
-	function (a, b) {
-		return {$: 'Bind', a: a, b: b};
-	});
-var $author$project$ScreeptV2$Block = function (a) {
-	return {$: 'Block', a: a};
-};
 var $author$project$ScreeptV2$If = F3(
 	function (a, b, c) {
 		return {$: 'If', a: a, b: b, c: c};
@@ -8950,7 +9049,7 @@ try {
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
-	'{ PRINT zero; a = 12; IF a THEN PRINT \"Y\" ELSE PRINT a }');
+	'{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),add2(3,3,4)) }');
 var $author$project$ScreeptV2$exampleStatement = $author$project$ScreeptV2$Block(
 	_List_fromArray(
 		[
@@ -8976,7 +9075,18 @@ var $author$project$ScreeptV2$exampleStatement = $author$project$ScreeptV2$Block
 					$author$project$ScreeptV2$Text('Yes'))),
 			$author$project$ScreeptV2$Print(
 				$author$project$ScreeptV2$Literal(
-					$author$project$ScreeptV2$Text('No'))))
+					$author$project$ScreeptV2$Text('No')))),
+			$author$project$ScreeptV2$Print(
+			A2(
+				$author$project$ScreeptV2$FunctionCall,
+				'add2',
+				_List_fromArray(
+					[
+						$author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Number(5)),
+						$author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Number(6))
+					])))
 		]));
 var $author$project$ScreeptV2$runExample = A2(
 	$author$project$ScreeptV2$executeStatement,

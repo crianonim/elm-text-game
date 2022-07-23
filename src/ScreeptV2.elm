@@ -2,6 +2,7 @@ module ScreeptV2 exposing (..)
 
 import Dict exposing (Dict)
 import Parser exposing ((|.), (|=), Parser)
+import Result.Extra as Result
 import Set
 
 
@@ -17,25 +18,38 @@ type BinaryOp
 
 type Expression
     = Literal Value
-    | Variable String
+    | Variable Identifier
     | UnaryExpression UnaryOp Expression
     | BinaryExpression Expression BinaryOp Expression
+    | FunctionCall Identifier (List Expression)
+
+
+type Statement
+    = Bind Identifier Expression
+    | Block (List Statement)
+    | If Expression Statement Statement
+    | Print Expression
 
 
 
 --| FunctionCall
 
 
+type alias Identifier =
+    String
+
+
 type Value
     = Number Float
     | Text String
+    | Func Expression
 
 
 
 --| Function
 
 
-parserIdentifier : Parser String
+parserIdentifier : Parser Identifier
 parserIdentifier =
     Parser.variable
         { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_'
@@ -80,7 +94,22 @@ parserExpression =
             |= Parser.lazy (\_ -> parserExpression)
             |. Parser.symbol ")"
         , Parser.map Literal parserLiteral
-        , Parser.map Variable parserIdentifier
+        , parserIdentifier
+            |> Parser.andThen
+                (\v ->
+                    Parser.oneOf
+                        [ Parser.succeed (FunctionCall v)
+                            |= Parser.sequence
+                                { start = "("
+                                , end = ")"
+                                , item = Parser.lazy (\_ -> parserExpression)
+                                , spaces = Parser.spaces
+                                , separator = ","
+                                , trailing = Parser.Forbidden
+                                }
+                        , Parser.succeed <| Variable v
+                        ]
+                )
         ]
 
 
@@ -148,6 +177,33 @@ evaluateExpression state expression =
         BinaryExpression e1 binaryOp e2 ->
             evaluateBinaryExpression state e1 binaryOp e2
 
+        FunctionCall identifier expressions ->
+            resolveVariable state identifier
+                |> Result.andThen
+                    (\var ->
+                        case var of
+                            Func expr ->
+                                let
+                                    runTimeState : Result ScreeptError ( State, List String )
+                                    runTimeState =
+                                        let
+                                            varName i =
+                                                "__" ++ String.fromInt (i + 1)
+
+                                            bindings : Statement
+                                            bindings =
+                                                Block (List.map (\( i, e ) -> Bind (varName i) e) (List.indexedMap Tuple.pair expressions))
+                                        in
+                                        executeStatement bindings ( state, [] )
+                                in
+                                runTimeState
+                                    |> Result.andThen
+                                        (\( boundState, _ ) -> evaluateExpression boundState expr)
+
+                            _ ->
+                                Err TypeError
+                    )
+
 
 evaluateUnaryExpression : State -> UnaryOp -> Expression -> Result ScreeptError Value
 evaluateUnaryExpression state unaryOp expression =
@@ -175,6 +231,9 @@ evaluateUnaryExpression state unaryOp expression =
 
                                 else
                                     0
+
+                        Func _ ->
+                            Number <| 0
                 )
                 expr
 
@@ -229,13 +288,6 @@ resolveVariable state var =
         |> Maybe.withDefault (Err Undefined)
 
 
-type Statement
-    = Bind String Expression
-    | Block (List Statement)
-    | If Expression Statement Statement
-    | Print Expression
-
-
 executeStatement : Statement -> ( State, List String ) -> Result ScreeptError ( State, List String )
 executeStatement statement ( state, output ) =
     case statement of
@@ -258,6 +310,9 @@ executeStatement statement ( state, output ) =
 
                                     Number float ->
                                         String.fromFloat float
+
+                                    Func _ ->
+                                        "<FUNC>"
                         in
                         ( state, output ++ [ o ] )
                     )
@@ -295,8 +350,12 @@ isTruthy value =
         Text t ->
             t /= ""
 
+        Func _ ->
+            True
 
 
+
+-- helper
 -- example
 
 
@@ -309,13 +368,19 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT zero; a = 12; IF a THEN PRINT \"Y\" ELSE PRINT a }"
+    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),add2(3,3,4)) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
 exampleStatement : Statement
 exampleStatement =
-    Block [ Print <| Literal <| Text "Janek", Bind "test2" (BinaryExpression (Variable "int1") Add (Literal (Number 3))), Print <| Variable "int1", If (Variable "int1") (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No") ]
+    Block
+        [ Print <| Literal <| Text "Janek"
+        , Bind "test2" (BinaryExpression (Variable "int1") Add (Literal (Number 3)))
+        , Print <| Variable "int1"
+        , If (Variable "int1") (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No")
+        , Print <| FunctionCall "add2" [ Literal <| Number 5, Literal <| Number 6 ]
+        ]
 
 
 runExample : Result ScreeptError ( State, List String )
@@ -332,5 +397,6 @@ exampleScreeptState =
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
             , ( "t2", Text "" )
+            , ( "add2", Func (BinaryExpression (Variable "__1") Add (Variable "__2")) )
             ]
     }
