@@ -1,17 +1,18 @@
 module Main exposing (main)
 
+--import DialogGameEditor
+--import ScreeptEditor
+--import Screept
+
 import Browser
 import DialogGame exposing (..)
-import DialogGameEditor
 import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Platform.Cmd exposing (Cmd)
 import Random
-import Screept
-import ScreeptEditor
-import ScreeptV2
+import ScreeptV2 exposing (BinaryOp(..), Expression(..), Identifier(..), Value(..))
 import Stack exposing (Stack)
 import Task
 
@@ -78,8 +79,9 @@ init _ =
       --    (listDialogToDictDialog Game.dialogs)
       --    (Just Game.statusLine)
       , isDebug = True
-      , screeptEditor = ScreeptEditor.init
-      , dialogEditor = DialogGameEditor.init
+
+      --, screeptEditor = ScreeptEditor.init
+      --, dialogEditor = DialogGameEditor.init
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
@@ -89,7 +91,7 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
-        , Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
 
         --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
@@ -100,26 +102,26 @@ mainMenuDialogs : Dialogs
 mainMenuDialogs =
     DialogGame.listDialogToDictDialog
         [ { id = "start"
-          , text = Screept.S "Main Menu"
+          , text = Literal <| Text "Main Menu"
           , options =
-                [ { text = Screept.S "Load Game", condition = Nothing, action = [ GoAction "load_game_definition" ] }
-                , { text = Screept.S "Start Game", condition = Just (Screept.parseIntValue "game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
+                [ { text = Literal <| Text "Load Game", condition = Nothing, action = [ GoAction "load_game_definition" ] }
+                , { text = Literal <| Text "Start Game", condition = Just (Variable <| LiteralIdentifier "game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
                 ]
           }
         , { id = "load_game_definition"
-          , text = Screept.S "Load game definition"
+          , text = Literal <| Text "Load game definition"
           , options =
-                [ { text = Screept.S "Load Sandbox", condition = Nothing, action = [ Exit "sandbox" ] }
-                , { text = Screept.S "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
-                , { text = Screept.S "Load from url", condition = Nothing, action = [ Exit "load_url" ] }
+                [ { text = Literal <| Text "Load Sandbox", condition = Nothing, action = [ Exit "sandbox" ] }
+                , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
+                , { text = Literal <| Text "Load from url", condition = Nothing, action = [ Exit "load_url" ] }
                 , DialogGame.goBackOption
                 ]
           }
         , { id = "in_game"
-          , text = Screept.Concat [ Screept.S "Playing: ", Screept.TextVariable (Screept.VLit "game_title") ]
+          , text = BinaryExpression (Literal <| Text "Playing: ") Add (Variable <| LiteralIdentifier "game_title")
           , options =
-                [ { text = Screept.S "Restart", condition = Nothing, action = [ Exit "start_game" ] }
-                , { text = Screept.S "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
+                [ { text = Literal <| Text "Restart", condition = Nothing, action = [ Exit "start_game" ] }
+                , { text = Literal <| Text "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
                 ]
           }
         ]
@@ -185,12 +187,11 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ScreeptEditor seMsg ->
-            ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
-
-        DialogEditor deMsg ->
-            ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
-
+        --ScreeptEditor seMsg ->
+        --    ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
+        --
+        --DialogEditor deMsg ->
+        --    ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
         GotGameDefinition result ->
             case result of
                 Err e ->
@@ -208,8 +209,17 @@ update msg model =
                         m =
                             model.mainMenuDialog
 
+                        ( newScreeptState, _ ) =
+                            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptState
+
+                        gameState =
+                            m.gameState
+
+                        newGameState =
+                            { gameState | screeptState = newScreeptState }
+
                         menuDialog =
-                            { m | gameState = Screept.exec ("{ INT game_loaded = 1; TEXT game_title = \"" ++ value.title ++ "\" }") m.gameState }
+                            { m | gameState = newGameState }
                     in
                     ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }, Cmd.none )
 
@@ -230,16 +240,10 @@ update msg model =
                         m =
                             initGameFromGameDefinition gameDefinition
 
-                        gameState =
-                            Screept.runStatement Screept.exampleStatement m.gameState
 
-                        _ =
-                            Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
 
-                        newModel =
-                            { m | gameState = gameState }
                     in
-                    Started gameDefinition newModel
+                    Started gameDefinition m
             in
             case model.gameDialog of
                 NotLoaded ->
@@ -295,8 +299,9 @@ update msg model =
 type alias Model =
     { gameDialog : GameStatus
     , isDebug : Bool
-    , screeptEditor : ScreeptEditor.Model
-    , dialogEditor : DialogGameEditor.Model
+
+    --, screeptEditor : ScreeptEditor.Model
+    --, dialogEditor : DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
     , urlLoader : Maybe String
@@ -307,8 +312,8 @@ type Msg
     = None
     | GameDialog DialogGame.Msg
     | SeedGenerated Random.Seed
-    | ScreeptEditor ScreeptEditor.Msg
-    | DialogEditor DialogGameEditor.Msg
+      --| ScreeptEditor ScreeptEditor.Msg
+      --| DialogEditor DialogGameEditor.Msg
     | GotGameDefinition (Result Http.Error GameDefinition)
     | MainMenuDialog DialogGame.Msg
     | StartGame
@@ -322,11 +327,12 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        { procedures = gameDefinition.procedures
-        , messages = []
-        , rnd = Random.initialSeed 666
+        {
+        --procedures = gameDefinition.procedures
+         messages = []
+        --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , vars = gameDefinition.vars
+        , screeptState = {vars = gameDefinition.vars}
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
@@ -351,7 +357,7 @@ view model =
         [ --DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
           DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
-            Started gameDef gameDialogMenu ->
+            Started _ gameDialogMenu ->
                 DialogGame.view gameDialogMenu |> Html.map GameDialog
 
             NotLoaded ->
@@ -361,9 +367,10 @@ view model =
                 text "Loading..."
 
             Loaded m ->
-                div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
-        , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
 
+                div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
+
+        --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
         --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         , viewUrlLoader model

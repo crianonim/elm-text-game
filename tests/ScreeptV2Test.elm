@@ -25,13 +25,13 @@ testStatement =
             \v -> Expect.equal (stringifyStatement v |> Parser.run parserStatement) (Ok v)
         ]
 
+
 testValueCoded : Test
 testValueCoded =
-
-     describe "Round trip Value encode and decode"
-            [ fuzz fuzzValue "round trip codec" <|
-                \v -> Expect.equal (E.encode 0 (encodeValue v) |> Json.decodeString decodeValue )   (Ok v)
-            ]
+    describe "Round trip Value encode and decode"
+        [ fuzz fuzzValue "round trip codec" <|
+            \v -> Expect.equal (E.encode 0 (encodeValue v) |> Json.decodeString decodeValue) (Ok v)
+        ]
 
 
 fuzzExpression : Fuzzer Expression

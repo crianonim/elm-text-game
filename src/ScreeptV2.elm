@@ -308,6 +308,31 @@ decodeValue =
         ]
 
 
+parserToDecoder : Parser value -> Json.Decoder value
+parserToDecoder parser =
+    let
+        parseResultToDecoder : Result error value -> Json.Decoder value
+        parseResultToDecoder v =
+            case v of
+                Err _ ->
+                    Json.fail "fail to decode expression"
+
+                Ok expr ->
+                    Json.succeed expr
+    in
+    Json.string |> Json.andThen (Parser.run parser >> parseResultToDecoder)
+
+
+decodeExpression : Json.Decoder Expression
+decodeExpression =
+    parserToDecoder parserExpression
+
+
+decodeStatement : Json.Decoder Statement
+decodeStatement =
+    parserToDecoder parserStatement
+
+
 evaluateExpression : State -> Expression -> Result ScreeptError Value
 evaluateExpression state expression =
     case expression of
@@ -490,6 +515,17 @@ executeStatement statement ( state, output ) =
                     )
 
 
+executeStringStatement : String -> State -> ( State, List String )
+executeStringStatement statementString state =
+    case Parser.run parserStatement statementString of
+        Ok statement ->
+            executeStatement statement ( state, [] )
+                |> Result.withDefault ( state, [] )
+
+        Err _ ->
+            ( state, [] )
+
+
 setVariable : String -> Value -> State -> State
 setVariable varName v state =
     let
@@ -512,6 +548,30 @@ isTruthy value =
             True
 
 
+getStringFromValue : Value -> String
+getStringFromValue value =
+    case value of
+        Number float ->
+            String.fromFloat float
+
+        Text string ->
+            string
+
+        Func expression ->
+            stringifyExpression expression
+
+
+resolveExpressionToString : State -> Expression -> String
+resolveExpressionToString state expression =
+    evaluateExpression state expression
+        |> Result.map getStringFromValue
+        |> Result.withDefault ""
+
+evaluateExpressionToString : State -> Expression -> String
+evaluateExpressionToString state expr=
+    evaluateExpression state expr
+   |> Result.map getStringFromValue
+   |> Result.withDefault ""
 
 -- helper
 -- example
@@ -526,7 +586,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),${_}(a,3,4)) }"
+    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),${t2}(a,3,4)) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
@@ -554,7 +614,7 @@ exampleScreeptState =
             , ( "float1", Number 3.14 )
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
-            , ( "t2", Text "" )
+            , ( "t2", Text "add2" )
             , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
     }
