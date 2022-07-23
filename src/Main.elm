@@ -11,16 +11,49 @@ import Platform.Cmd exposing (Cmd)
 import Random
 import Screept
 import ScreeptEditor
+import ScreeptV2
 import Stack exposing (Stack)
 import Task
 
 
 main : Program () Model Msg
 main =
-    --let
-    --    _ =
-    --        Debug.log "MAN" (List.map stringifyGameDefinition Game.dialogs)
-    --in
+    let
+        _ =
+            Debug.log "Stat Exec "
+                (ScreeptV2.parseStatementExample
+                    |> (\e ->
+                            case e of
+                                Err _ ->
+                                    Err ScreeptV2.UnimplementedYet
+
+                                Ok v ->
+                                    ScreeptV2.executeStatement v ( ScreeptV2.exampleScreeptState, [] )
+                       )
+                )
+
+        _ =
+            Debug.log "STAT" ScreeptV2.runExample
+
+        _ =
+            Debug.log "Statement Parse" ScreeptV2.parseStatementExample
+
+        _ =
+            Debug.log "S2 Parse" ScreeptV2.newScreeptParseExample
+
+        _ =
+            Debug.log "S2 Eval "
+                (ScreeptV2.newScreeptParseExample
+                    |> (\e ->
+                            case e of
+                                Err _ ->
+                                    Err ScreeptV2.UnimplementedYet
+
+                                Ok v ->
+                                    ScreeptV2.evaluateExpression ScreeptV2.exampleScreeptState v
+                       )
+                )
+    in
     Browser.element
         { init = init
         , update = update

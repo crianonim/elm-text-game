@@ -1,0 +1,336 @@
+module ScreeptV2 exposing (..)
+
+import Dict exposing (Dict)
+import Parser exposing ((|.), (|=), Parser)
+import Set
+
+
+type UnaryOp
+    = Not
+    | Negate
+
+
+type BinaryOp
+    = Add
+    | Sub
+
+
+type Expression
+    = Literal Value
+    | Variable String
+    | UnaryExpression UnaryOp Expression
+    | BinaryExpression Expression BinaryOp Expression
+
+
+
+--| FunctionCall
+
+
+type Value
+    = Number Float
+    | Text String
+
+
+
+--| Function
+
+
+parserIdentifier : Parser String
+parserIdentifier =
+    Parser.variable
+        { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_'
+        , inner = \c -> Char.isAlphaNum c || c == '_'
+        , reserved = Set.fromList [ "if", "then", "else", "rnd" ]
+        }
+
+
+parserLiteral : Parser Value
+parserLiteral =
+    Parser.oneOf
+        [ Parser.float |> Parser.map Number
+        , Parser.succeed Text
+            |. Parser.symbol "\""
+            |= (Parser.chompWhile (\c -> c /= '"') |> Parser.getChompedString)
+            |. Parser.symbol "\""
+        ]
+
+
+parserExpression : Parser Expression
+parserExpression =
+    Parser.oneOf
+        [ Parser.succeed UnaryExpression
+            |= Parser.oneOf
+                [ Parser.succeed Not
+                    |. Parser.symbol "!"
+                , Parser.succeed Negate
+                    |. Parser.symbol "-"
+                ]
+            |= Parser.lazy (\_ -> parserExpression)
+        , Parser.succeed BinaryExpression
+            |. Parser.symbol "("
+            |= Parser.lazy (\_ -> parserExpression)
+            |. Parser.spaces
+            |= Parser.oneOf
+                [ Parser.succeed Add
+                    |. Parser.symbol "+"
+                , Parser.succeed Sub
+                    |. Parser.symbol "-"
+                ]
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> parserExpression)
+            |. Parser.symbol ")"
+        , Parser.map Literal parserLiteral
+        , Parser.map Variable parserIdentifier
+        ]
+
+
+parserStatement : Parser Statement
+parserStatement =
+    Parser.oneOf
+        [ Parser.succeed Bind
+            |= parserIdentifier
+            |. Parser.spaces
+            |. Parser.symbol "="
+            |. Parser.spaces
+            |= parserExpression
+        , Parser.map Block
+            (Parser.sequence
+                { start = "{"
+                , separator = ";"
+                , end = "}"
+                , item = Parser.lazy (\_ -> parserStatement)
+                , spaces = Parser.spaces
+                , trailing = Parser.Optional
+                }
+            )
+        , Parser.succeed Print
+            |. Parser.keyword "PRINT"
+            |. Parser.spaces
+            |= parserExpression
+        , Parser.succeed If
+            |. Parser.keyword "IF"
+            |. Parser.spaces
+            |= parserExpression
+            |. Parser.spaces
+            |. Parser.keyword "THEN"
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> parserStatement)
+            |. Parser.spaces
+            |. Parser.keyword "ELSE"
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> parserStatement)
+        ]
+
+
+type alias State =
+    { vars : Dict String Value
+    }
+
+
+type ScreeptError
+    = TypeError
+    | Undefined
+    | UnimplementedYet
+
+
+evaluateExpression : State -> Expression -> Result ScreeptError Value
+evaluateExpression state expression =
+    case expression of
+        Literal valueType ->
+            Ok valueType
+
+        Variable var ->
+            resolveVariable state var
+
+        UnaryExpression unaryOp e ->
+            evaluateUnaryExpression state unaryOp e
+
+        BinaryExpression e1 binaryOp e2 ->
+            evaluateBinaryExpression state e1 binaryOp e2
+
+
+evaluateUnaryExpression : State -> UnaryOp -> Expression -> Result ScreeptError Value
+evaluateUnaryExpression state unaryOp expression =
+    let
+        expr =
+            evaluateExpression state expression
+    in
+    case unaryOp of
+        Not ->
+            Result.map
+                (\value ->
+                    case value of
+                        Number n ->
+                            Number <|
+                                if n == 0 then
+                                    1
+
+                                else
+                                    0
+
+                        Text t ->
+                            Number <|
+                                if String.length t > 0 then
+                                    1
+
+                                else
+                                    0
+                )
+                expr
+
+        Negate ->
+            Result.andThen
+                (\v ->
+                    case v of
+                        Number n ->
+                            Ok <| Number -n
+
+                        _ ->
+                            Err TypeError
+                )
+                expr
+
+
+evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
+evaluateBinaryExpression state e1 binaryOp e2 =
+    evaluateExpression state e1
+        |> Result.andThen
+            (\expr1 ->
+                evaluateExpression state e2
+                    |> Result.andThen
+                        (\expr2 ->
+                            case binaryOp of
+                                Add ->
+                                    case ( expr1, expr2 ) of
+                                        ( Number n1, Number n2 ) ->
+                                            Ok <| Number <| n1 + n2
+
+                                        ( Text t1, Text t2 ) ->
+                                            Ok <| Text <| t1 ++ t2
+
+                                        _ ->
+                                            Err TypeError
+
+                                Sub ->
+                                    case ( expr1, expr2 ) of
+                                        ( Number n1, Number n2 ) ->
+                                            Ok <| Number <| n1 - n2
+
+                                        _ ->
+                                            Err TypeError
+                        )
+            )
+
+
+resolveVariable : State -> String -> Result ScreeptError Value
+resolveVariable state var =
+    Dict.get var state.vars
+        |> Maybe.map Ok
+        |> Maybe.withDefault (Err Undefined)
+
+
+type Statement
+    = Bind String Expression
+    | Block (List Statement)
+    | If Expression Statement Statement
+    | Print Expression
+
+
+executeStatement : Statement -> ( State, List String ) -> Result ScreeptError ( State, List String )
+executeStatement statement ( state, output ) =
+    case statement of
+        Bind varName expression ->
+            evaluateExpression state expression
+                |> Result.map (\v -> ( setVariable varName v state, output ))
+
+        Block statements ->
+            List.foldl (\s acc -> Result.andThen (executeStatement s) acc) (Ok ( state, output )) statements
+
+        Print expression ->
+            evaluateExpression state expression
+                |> Result.map
+                    (\v ->
+                        let
+                            o =
+                                case v of
+                                    Text t ->
+                                        t
+
+                                    Number float ->
+                                        String.fromFloat float
+                        in
+                        ( state, output ++ [ o ] )
+                    )
+
+        If expression success failure ->
+            evaluateExpression state expression
+                |> Result.andThen
+                    (\v ->
+                        executeStatement
+                            (if isTruthy v then
+                                success
+
+                             else
+                                failure
+                            )
+                            ( state, output )
+                    )
+
+
+setVariable : String -> Value -> State -> State
+setVariable varName v state =
+    let
+        vars =
+            Dict.insert varName v state.vars
+    in
+    { state | vars = vars }
+
+
+isTruthy : Value -> Bool
+isTruthy value =
+    case value of
+        Number n ->
+            n /= 0
+
+        Text t ->
+            t /= ""
+
+
+
+-- example
+
+
+newScreeptParseExample : Result (List Parser.DeadEnd) Expression
+newScreeptParseExample =
+    --"(!((\"Jan\"+t1)+t2)+5)"
+    "(int1 + 3)"
+        |> Parser.run (parserExpression |. Parser.end)
+
+
+parseStatementExample : Result (List Parser.DeadEnd) Statement
+parseStatementExample =
+    "{ PRINT zero; a = 12; IF a THEN PRINT \"Y\" ELSE PRINT a }"
+        |> Parser.run (parserStatement |. Parser.end)
+
+
+exampleStatement : Statement
+exampleStatement =
+    Block [ Print <| Literal <| Text "Janek", Bind "test2" (BinaryExpression (Variable "int1") Add (Literal (Number 3))), Print <| Variable "int1", If (Variable "int1") (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No") ]
+
+
+runExample : Result ScreeptError ( State, List String )
+runExample =
+    executeStatement exampleStatement ( exampleScreeptState, [] )
+
+
+exampleScreeptState : State
+exampleScreeptState =
+    { vars =
+        Dict.fromList
+            [ ( "int1", Number -12 )
+            , ( "float1", Number 3.14 )
+            , ( "zero", Number 0 )
+            , ( "t1", Text "Jan" )
+            , ( "t2", Text "" )
+            ]
+    }
