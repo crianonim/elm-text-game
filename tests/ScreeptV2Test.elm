@@ -8,13 +8,20 @@ import ScreeptV2 exposing (..)
 import Test exposing (..)
 
 
-expressions : Test
-expressions =
-    Test.only <|
-        describe "Round trip expressions stringify and parse"
-            [ fuzz fuzzExpression "round trip" <|
-                \v -> Expect.equal (stringifyExpression v |> Parser.run parserExpression) (Ok v)
-            ]
+testExpression : Test
+testExpression =
+    describe "Round trip Expression stringify and parse"
+        [ fuzz fuzzExpression "round trip" <|
+            \v -> Expect.equal (stringifyExpression v |> Parser.run parserExpression) (Ok v)
+        ]
+
+
+testStatement : Test
+testStatement =
+    describe "Round trip Statement stringify and parse"
+        [ fuzz fuzzStatement "round trip" <|
+            \v -> Expect.equal (stringifyStatement v |> Parser.run parserStatement) (Ok v)
+        ]
 
 
 fuzzExpression : Fuzzer Expression
@@ -31,8 +38,8 @@ fuzzExpression =
 fuzzValue : Fuzzer Value
 fuzzValue =
     Fuzz.frequency
-        [ ( 10, Fuzz.map Number Fuzz.float )
-        , ( 3, Fuzz.map Text Fuzz.string )
+        [ ( 10, Fuzz.map Number <| Fuzz.floatRange -1000 1000 )
+        , ( 3, Fuzz.map Text (Fuzz.string |> Fuzz.map (\s -> String.filter (\c -> c /= '"') s)) )
         , ( 1, Fuzz.map Func (Fuzz.lazy (\_ -> fuzzExpression)) )
         ]
 
@@ -41,7 +48,8 @@ fuzzIdentifier : Fuzzer Identifier
 fuzzIdentifier =
     Fuzz.oneOf
         [ Fuzz.constant '_'
-        , Fuzz.intRange 97 122 |> Fuzz.map Char.fromCode
+        , Fuzz.intRange 97 122
+            |> Fuzz.map Char.fromCode
             |> Fuzz.map
                 (\c ->
                     if c == 'e' then
@@ -56,7 +64,18 @@ fuzzIdentifier =
 
 fuzzAlphaNumString : Fuzzer String
 fuzzAlphaNumString =
-    Fuzz.asciiString |> Fuzz.map (\s -> String.filter (\c -> c /= 'e' && Char.isAlphaNum c) s)
+    Fuzz.asciiString
+        |> Fuzz.map
+            (\s ->
+                String.filter (\c -> c /= 'e' && Char.isAlphaNum c) s
+                    |> (\st ->
+                            if List.member st ScreeptV2.reservedWords then
+                                "_reserved"
+
+                            else
+                                st
+                       )
+            )
 
 
 fuzzUnaryOp : Fuzzer UnaryOp
@@ -72,4 +91,14 @@ fuzzBinaryOp =
     Fuzz.oneOf
         [ Fuzz.constant Add
         , Fuzz.constant Sub
+        ]
+
+
+fuzzStatement : Fuzzer Statement
+fuzzStatement =
+    Fuzz.frequency
+        [ ( 3, Fuzz.map2 Bind fuzzIdentifier fuzzExpression )
+        , ( 1, Fuzz.map Block <| Fuzz.listOfLengthBetween 0 5 (Fuzz.lazy (\_ -> fuzzStatement)) )
+        , ( 1, Fuzz.map3 If fuzzExpression (Fuzz.lazy (\_ -> fuzzStatement)) (Fuzz.lazy (\_ -> fuzzStatement)) )
+        , ( 2, Fuzz.map Print fuzzExpression )
         ]

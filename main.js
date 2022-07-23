@@ -8699,6 +8699,21 @@ var $author$project$ScreeptV2$UnaryExpression = F2(
 		return {$: 'UnaryExpression', a: a, b: b};
 	});
 var $elm$parser$Parser$andThen = $elm$parser$Parser$Advanced$andThen;
+var $elm$parser$Parser$ExpectingFloat = {$: 'ExpectingFloat'};
+var $elm$parser$Parser$Advanced$float = F2(
+	function (expecting, invalid) {
+		return $elm$parser$Parser$Advanced$number(
+			{
+				binary: $elm$core$Result$Err(invalid),
+				expecting: expecting,
+				_float: $elm$core$Result$Ok($elm$core$Basics$identity),
+				hex: $elm$core$Result$Err(invalid),
+				_int: $elm$core$Result$Ok($elm$core$Basics$toFloat),
+				invalid: invalid,
+				octal: $elm$core$Result$Err(invalid)
+			});
+	});
+var $elm$parser$Parser$float = A2($elm$parser$Parser$Advanced$float, $elm$parser$Parser$ExpectingFloat, $elm$parser$Parser$ExpectingFloat);
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
@@ -8712,6 +8727,8 @@ var $elm$core$Set$insert = F2(
 var $elm$core$Set$fromList = function (list) {
 	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
 };
+var $author$project$ScreeptV2$reservedWords = _List_fromArray(
+	['if', 'then', 'else', 'rnd']);
 var $elm$parser$Parser$ExpectingVariable = {$: 'ExpectingVariable'};
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
@@ -8801,51 +8818,13 @@ var $author$project$ScreeptV2$parserIdentifier = $elm$parser$Parser$variable(
 				c,
 				_Utils_chr('_'));
 		},
-		reserved: $elm$core$Set$fromList(
-			_List_fromArray(
-				['if', 'then', 'else', 'rnd'])),
+		reserved: $elm$core$Set$fromList($author$project$ScreeptV2$reservedWords),
 		start: function (c) {
 			return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || _Utils_eq(
 				c,
 				_Utils_chr('_'));
 		}
 	});
-var $elm$parser$Parser$ExpectingFloat = {$: 'ExpectingFloat'};
-var $elm$parser$Parser$Advanced$float = F2(
-	function (expecting, invalid) {
-		return $elm$parser$Parser$Advanced$number(
-			{
-				binary: $elm$core$Result$Err(invalid),
-				expecting: expecting,
-				_float: $elm$core$Result$Ok($elm$core$Basics$identity),
-				hex: $elm$core$Result$Err(invalid),
-				_int: $elm$core$Result$Ok($elm$core$Basics$toFloat),
-				invalid: invalid,
-				octal: $elm$core$Result$Err(invalid)
-			});
-	});
-var $elm$parser$Parser$float = A2($elm$parser$Parser$Advanced$float, $elm$parser$Parser$ExpectingFloat, $elm$parser$Parser$ExpectingFloat);
-var $author$project$ScreeptV2$parserLiteral = $elm$parser$Parser$oneOf(
-	_List_fromArray(
-		[
-			A2($elm$parser$Parser$map, $author$project$ScreeptV2$Number, $elm$parser$Parser$float),
-			A2(
-			$elm$parser$Parser$keeper,
-			A2(
-				$elm$parser$Parser$ignorer,
-				$elm$parser$Parser$succeed($author$project$ScreeptV2$Text),
-				$elm$parser$Parser$symbol('\"')),
-			A2(
-				$elm$parser$Parser$ignorer,
-				$elm$parser$Parser$getChompedString(
-					$elm$parser$Parser$chompWhile(
-						function (c) {
-							return !_Utils_eq(
-								c,
-								_Utils_chr('\"'));
-						})),
-				$elm$parser$Parser$symbol('\"')))
-		]));
 function $author$project$ScreeptV2$cyclic$parserExpression() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -8865,10 +8844,10 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 								A2(
 								$elm$parser$Parser$ignorer,
 								$elm$parser$Parser$succeed($author$project$ScreeptV2$Negate),
-								$elm$parser$Parser$symbol('-'))
+								$elm$parser$Parser$symbol('- '))
 							]))),
 				$elm$parser$Parser$lazy(
-					function (_v0) {
+					function (_v1) {
 						return $author$project$ScreeptV2$cyclic$parserExpression();
 					})),
 				A2(
@@ -8884,7 +8863,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 						A2(
 							$elm$parser$Parser$ignorer,
 							$elm$parser$Parser$lazy(
-								function (_v1) {
+								function (_v2) {
 									return $author$project$ScreeptV2$cyclic$parserExpression();
 								}),
 							$elm$parser$Parser$spaces)),
@@ -8906,11 +8885,14 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 				A2(
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$lazy(
-						function (_v2) {
+						function (_v3) {
 							return $author$project$ScreeptV2$cyclic$parserExpression();
 						}),
 					$elm$parser$Parser$symbol(')'))),
-				A2($elm$parser$Parser$map, $author$project$ScreeptV2$Literal, $author$project$ScreeptV2$parserLiteral),
+				A2(
+				$elm$parser$Parser$map,
+				$author$project$ScreeptV2$Literal,
+				$author$project$ScreeptV2$cyclic$parserLiteral()),
 				A2(
 				$elm$parser$Parser$andThen,
 				function (v) {
@@ -8925,7 +8907,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 									{
 										end: ')',
 										item: $elm$parser$Parser$lazy(
-											function (_v3) {
+											function (_v4) {
 												return $author$project$ScreeptV2$cyclic$parserExpression();
 											}),
 										separator: ',',
@@ -8940,13 +8922,67 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 				$author$project$ScreeptV2$parserIdentifier)
 			]));
 }
+function $author$project$ScreeptV2$cyclic$parserLiteral() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$parser$Parser$map,
+				$author$project$ScreeptV2$Number,
+				$elm$parser$Parser$oneOf(
+					_List_fromArray(
+						[
+							A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed($elm$core$Basics$negate),
+								$elm$parser$Parser$symbol('-')),
+							$elm$parser$Parser$float),
+							$elm$parser$Parser$float
+						]))),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed($author$project$ScreeptV2$Text),
+					$elm$parser$Parser$symbol('\"')),
+				A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$getChompedString(
+						$elm$parser$Parser$chompWhile(
+							function (c) {
+								return !_Utils_eq(
+									c,
+									_Utils_chr('\"'));
+							})),
+					$elm$parser$Parser$symbol('\"'))),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$ignorer,
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$succeed($author$project$ScreeptV2$Func),
+						$elm$parser$Parser$keyword('FUNC')),
+					$elm$parser$Parser$spaces),
+				$elm$parser$Parser$lazy(
+					function (_v0) {
+						return $author$project$ScreeptV2$cyclic$parserExpression();
+					}))
+			]));
+}
 try {
 	var $author$project$ScreeptV2$parserExpression = $author$project$ScreeptV2$cyclic$parserExpression();
 	$author$project$ScreeptV2$cyclic$parserExpression = function () {
 		return $author$project$ScreeptV2$parserExpression;
 	};
+	var $author$project$ScreeptV2$parserLiteral = $author$project$ScreeptV2$cyclic$parserLiteral();
+	$author$project$ScreeptV2$cyclic$parserLiteral = function () {
+		return $author$project$ScreeptV2$parserLiteral;
+	};
 } catch ($) {
-	throw 'Some top-level definitions from `ScreeptV2` are causing infinite recursion:\n\n  ┌─────┐\n  │    parserExpression\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `ScreeptV2` are causing infinite recursion:\n\n  ┌─────┐\n  │    parserExpression\n  │     ↓\n  │    parserLiteral\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),

@@ -60,23 +60,38 @@ type Value
 --| Function
 
 
+reservedWords : List String
+reservedWords =
+    [ "if", "then", "else", "rnd" ]
+
+
 parserIdentifier : Parser Identifier
 parserIdentifier =
     Parser.variable
         { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_'
         , inner = \c -> Char.isAlphaNum c || c == '_'
-        , reserved = Set.fromList [ "if", "then", "else", "rnd" ]
+        , reserved = Set.fromList reservedWords
         }
 
 
 parserLiteral : Parser Value
 parserLiteral =
     Parser.oneOf
-        [ Parser.float |> Parser.map Number
+        [ Parser.oneOf
+            [ Parser.succeed negate
+                |. Parser.symbol "-"
+                |= Parser.float
+            , Parser.float
+            ]
+            |> Parser.map Number
         , Parser.succeed Text
             |. Parser.symbol "\""
             |= (Parser.chompWhile (\c -> c /= '"') |> Parser.getChompedString)
             |. Parser.symbol "\""
+        , Parser.succeed Func
+            |. Parser.keyword "FUNC"
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> parserExpression)
         ]
 
 
@@ -88,7 +103,7 @@ parserExpression =
                 [ Parser.succeed Not
                     |. Parser.symbol "!"
                 , Parser.succeed Negate
-                    |. Parser.symbol "-"
+                    |. Parser.symbol "- "
                 ]
             |= Parser.lazy (\_ -> parserExpression)
         , Parser.succeed BinaryExpression
@@ -177,7 +192,7 @@ stringifyLiteral value =
             "\"" ++ string ++ "\""
 
         Func expression ->
-            stringifyExpression expression
+            "FUNC " ++ stringifyExpression expression
 
 
 stringifyExpression : Expression -> String
@@ -210,7 +225,7 @@ stringifyUnaryOperator unaryOp =
             "!"
 
         Negate ->
-            "-"
+            "- "
 
 
 stringifyBinaryOperator : BinaryOp -> String
@@ -221,6 +236,29 @@ stringifyBinaryOperator binaryOp =
 
         Sub ->
             "-"
+
+
+stringifyStatement : Statement -> String
+stringifyStatement statement =
+    case statement of
+        Bind identifier expression ->
+            stringifyIdentifier identifier ++ " = " ++ stringifyExpression expression
+
+        Block statements ->
+            "{"
+                ++ (List.map stringifyStatement statements |> String.join " ; ")
+                ++ "}"
+
+        If expression success failure ->
+            "IF "
+                ++ stringifyExpression expression
+                ++ " THEN "
+                ++ stringifyStatement success
+                ++ " ELSE "
+                ++ stringifyStatement failure
+
+        Print expression ->
+            "PRINT " ++ stringifyExpression expression
 
 
 evaluateExpression : State -> Expression -> Result ScreeptError Value
