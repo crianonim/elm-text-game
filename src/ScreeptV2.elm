@@ -406,7 +406,7 @@ resolveIdentifierToString state identifier =
 
         ComputedIdentifier expression ->
             evaluateExpression state expression
-                |> Result.map stringifyValue
+                |> Result.map getStringFromValue
 
 
 evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
