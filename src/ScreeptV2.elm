@@ -31,6 +31,17 @@ type Statement
     | Print Expression
 
 
+type alias State =
+    { vars : Dict String Value
+    }
+
+
+type ScreeptError
+    = TypeError
+    | Undefined
+    | UnimplementedYet
+
+
 
 --| FunctionCall
 
@@ -151,15 +162,65 @@ parserStatement =
         ]
 
 
-type alias State =
-    { vars : Dict String Value
-    }
+stringifyIdentifier : Identifier -> String
+stringifyIdentifier identifier =
+    identifier
 
 
-type ScreeptError
-    = TypeError
-    | Undefined
-    | UnimplementedYet
+stringifyLiteral : Value -> String
+stringifyLiteral value =
+    case value of
+        Number float ->
+            String.fromFloat float
+
+        Text string ->
+            "\"" ++ string ++ "\""
+
+        Func expression ->
+            stringifyExpression expression
+
+
+stringifyExpression : Expression -> String
+stringifyExpression expression =
+    case expression of
+        Literal value ->
+            stringifyLiteral value
+
+        Variable identifier ->
+            stringifyIdentifier identifier
+
+        UnaryExpression unaryOp expr ->
+            stringifyUnaryOperator unaryOp ++ stringifyExpression expr
+
+        BinaryExpression expr1 binaryOp expr2 ->
+            "("
+                ++ stringifyExpression expr1
+                ++ stringifyBinaryOperator binaryOp
+                ++ stringifyExpression expr2
+                ++ ")"
+
+        FunctionCall identifier expressions ->
+            stringifyIdentifier identifier ++ "(" ++ String.join "," (List.map stringifyExpression expressions) ++ ")"
+
+
+stringifyUnaryOperator : UnaryOp -> String
+stringifyUnaryOperator unaryOp =
+    case unaryOp of
+        Not ->
+            "!"
+
+        Negate ->
+            "-"
+
+
+stringifyBinaryOperator : BinaryOp -> String
+stringifyBinaryOperator binaryOp =
+    case binaryOp of
+        Add ->
+            "+"
+
+        Sub ->
+            "-"
 
 
 evaluateExpression : State -> Expression -> Result ScreeptError Value
@@ -368,7 +429,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),add2(3,3,4)) }"
+    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),add2(a,3,4)) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
