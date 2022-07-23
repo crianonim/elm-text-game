@@ -3,6 +3,8 @@ module ScreeptV2Test exposing (..)
 import Char
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer)
+import Json.Decode as Json
+import Json.Encode as E
 import Parser
 import ScreeptV2 exposing (..)
 import Test exposing (..)
@@ -22,6 +24,14 @@ testStatement =
         [ fuzz fuzzStatement "round trip" <|
             \v -> Expect.equal (stringifyStatement v |> Parser.run parserStatement) (Ok v)
         ]
+
+testValueCoded : Test
+testValueCoded =
+
+     describe "Round trip Value encode and decode"
+            [ fuzz fuzzValue "round trip codec" <|
+                \v -> Expect.equal (E.encode 0 (encodeValue v) |> Json.decodeString decodeValue )   (Ok v)
+            ]
 
 
 fuzzExpression : Fuzzer Expression

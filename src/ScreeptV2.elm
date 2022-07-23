@@ -1,6 +1,8 @@
 module ScreeptV2 exposing (..)
 
 import Dict exposing (Dict)
+import Json.Decode as Json
+import Json.Encode as E
 import Parser exposing ((|.), (|=), Parser)
 import Result.Extra as Result
 import Set
@@ -82,8 +84,8 @@ parserIdentifier =
         ]
 
 
-parserLiteral : Parser Value
-parserLiteral =
+parserValue : Parser Value
+parserValue =
     Parser.oneOf
         [ Parser.oneOf
             [ Parser.succeed negate
@@ -127,7 +129,7 @@ parserExpression =
             |. Parser.spaces
             |= Parser.lazy (\_ -> parserExpression)
             |. Parser.symbol ")"
-        , Parser.map Literal parserLiteral
+        , Parser.map Literal parserValue
         , parserIdentifier
             |> Parser.andThen
                 (\v ->
@@ -272,6 +274,38 @@ stringifyStatement statement =
 
         Print expression ->
             "PRINT " ++ stringifyExpression expression
+
+
+encodeValue : Value -> E.Value
+encodeValue value =
+    case value of
+        Number float ->
+            E.float float
+
+        Text string ->
+            E.string string
+
+        Func expression ->
+            E.object [ ( "func", E.string <| stringifyExpression expression ) ]
+
+
+decodeValue : Json.Decoder Value
+decodeValue =
+    let
+        stringToValueParser : String -> Json.Decoder Value
+        stringToValueParser s =
+            case Parser.run parserExpression s of
+                Ok expr ->
+                    Json.succeed (Func expr)
+
+                Err e ->
+                    Json.fail ("error decoding Func '" ++ s ++ "'.")
+    in
+    Json.oneOf
+        [ Json.map Number Json.float
+        , Json.map Text Json.string
+        , Json.field "func" Json.string |> Json.andThen stringToValueParser
+        ]
 
 
 evaluateExpression : State -> Expression -> Result ScreeptError Value

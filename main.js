@@ -8989,7 +8989,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 				A2(
 				$elm$parser$Parser$map,
 				$author$project$ScreeptV2$Literal,
-				$author$project$ScreeptV2$cyclic$parserLiteral()),
+				$author$project$ScreeptV2$cyclic$parserValue()),
 				A2(
 				$elm$parser$Parser$andThen,
 				function (v) {
@@ -9057,7 +9057,7 @@ function $author$project$ScreeptV2$cyclic$parserIdentifier() {
 					$elm$parser$Parser$symbol('}')))
 			]));
 }
-function $author$project$ScreeptV2$cyclic$parserLiteral() {
+function $author$project$ScreeptV2$cyclic$parserValue() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
 			[
@@ -9116,12 +9116,12 @@ try {
 	$author$project$ScreeptV2$cyclic$parserIdentifier = function () {
 		return $author$project$ScreeptV2$parserIdentifier;
 	};
-	var $author$project$ScreeptV2$parserLiteral = $author$project$ScreeptV2$cyclic$parserLiteral();
-	$author$project$ScreeptV2$cyclic$parserLiteral = function () {
-		return $author$project$ScreeptV2$parserLiteral;
+	var $author$project$ScreeptV2$parserValue = $author$project$ScreeptV2$cyclic$parserValue();
+	$author$project$ScreeptV2$cyclic$parserValue = function () {
+		return $author$project$ScreeptV2$parserValue;
 	};
 } catch ($) {
-	throw 'Some top-level definitions from `ScreeptV2` are causing infinite recursion:\n\n  ┌─────┐\n  │    parserExpression\n  │     ↓\n  │    parserIdentifier\n  │     ↓\n  │    parserLiteral\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+	throw 'Some top-level definitions from `ScreeptV2` are causing infinite recursion:\n\n  ┌─────┐\n  │    parserExpression\n  │     ↓\n  │    parserIdentifier\n  │     ↓\n  │    parserValue\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),
