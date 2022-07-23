@@ -47,19 +47,24 @@ fuzzValue =
 fuzzIdentifier : Fuzzer Identifier
 fuzzIdentifier =
     Fuzz.oneOf
-        [ Fuzz.constant '_'
-        , Fuzz.intRange 97 122
-            |> Fuzz.map Char.fromCode
-            |> Fuzz.map
-                (\c ->
-                    if c == 'e' then
-                        'f'
+        [ Fuzz.map LiteralIdentifier
+            (Fuzz.oneOf
+                [ Fuzz.constant '_'
+                , Fuzz.intRange 97 122
+                    |> Fuzz.map Char.fromCode
+                    |> Fuzz.map
+                        (\c ->
+                            if c == 'e' then
+                                'f'
 
-                    else
-                        c
-                )
+                            else
+                                c
+                        )
+                ]
+                |> Fuzz.andThen (\first -> Fuzz.map (\s -> String.fromChar first ++ s) fuzzAlphaNumString)
+            )
+        , Fuzz.map ComputedIdentifier (Fuzz.lazy (\_ -> fuzzExpression))
         ]
-        |> Fuzz.andThen (\first -> Fuzz.map (\s -> String.fromChar first ++ s) fuzzAlphaNumString)
 
 
 fuzzAlphaNumString : Fuzzer String

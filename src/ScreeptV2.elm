@@ -31,6 +31,11 @@ type Statement
     | Print Expression
 
 
+type Identifier
+    = LiteralIdentifier String
+    | ComputedIdentifier Expression
+
+
 type alias State =
     { vars : Dict String Value
     }
@@ -44,10 +49,6 @@ type ScreeptError
 
 
 --| FunctionCall
-
-
-type alias Identifier =
-    String
 
 
 type Value
@@ -67,11 +68,18 @@ reservedWords =
 
 parserIdentifier : Parser Identifier
 parserIdentifier =
-    Parser.variable
-        { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_'
-        , inner = \c -> Char.isAlphaNum c || c == '_'
-        , reserved = Set.fromList reservedWords
-        }
+    Parser.oneOf
+        [ Parser.map LiteralIdentifier <|
+            Parser.variable
+                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
+                , inner = \c -> Char.isAlphaNum c || c == '_'
+                , reserved = Set.fromList reservedWords
+                }
+        , Parser.succeed ComputedIdentifier
+            |. Parser.symbol "${"
+            |= Parser.lazy (\_ -> parserExpression)
+            |. Parser.symbol "}"
+        ]
 
 
 parserLiteral : Parser Value
@@ -179,11 +187,16 @@ parserStatement =
 
 stringifyIdentifier : Identifier -> String
 stringifyIdentifier identifier =
-    identifier
+    case identifier of
+        LiteralIdentifier string ->
+            string
+
+        ComputedIdentifier expression ->
+            "${" ++ stringifyExpression expression ++ "}"
 
 
-stringifyLiteral : Value -> String
-stringifyLiteral value =
+stringifyValue : Value -> String
+stringifyValue value =
     case value of
         Number float ->
             String.fromFloat float
@@ -199,7 +212,7 @@ stringifyExpression : Expression -> String
 stringifyExpression expression =
     case expression of
         Literal value ->
-            stringifyLiteral value
+            stringifyValue value
 
         Variable identifier ->
             stringifyIdentifier identifier
@@ -268,7 +281,8 @@ evaluateExpression state expression =
             Ok valueType
 
         Variable var ->
-            resolveVariable state var
+            resolveIdentifierToString state var
+                |> Result.andThen (resolveVariable state)
 
         UnaryExpression unaryOp e ->
             evaluateUnaryExpression state unaryOp e
@@ -277,7 +291,8 @@ evaluateExpression state expression =
             evaluateBinaryExpression state e1 binaryOp e2
 
         FunctionCall identifier expressions ->
-            resolveVariable state identifier
+            resolveIdentifierToString state identifier
+                |> Result.andThen (resolveVariable state)
                 |> Result.andThen
                     (\var ->
                         case var of
@@ -287,7 +302,7 @@ evaluateExpression state expression =
                                     runTimeState =
                                         let
                                             varName i =
-                                                "__" ++ String.fromInt (i + 1)
+                                                LiteralIdentifier <| "__" ++ String.fromInt (i + 1)
 
                                             bindings : Statement
                                             bindings =
@@ -349,6 +364,17 @@ evaluateUnaryExpression state unaryOp expression =
                 expr
 
 
+resolveIdentifierToString : State -> Identifier -> Result ScreeptError String
+resolveIdentifierToString state identifier =
+    case identifier of
+        LiteralIdentifier string ->
+            Ok string
+
+        ComputedIdentifier expression ->
+            evaluateExpression state expression
+                |> Result.map stringifyValue
+
+
 evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
 evaluateBinaryExpression state e1 binaryOp e2 =
     evaluateExpression state e1
@@ -390,9 +416,8 @@ resolveVariable state var =
 executeStatement : Statement -> ( State, List String ) -> Result ScreeptError ( State, List String )
 executeStatement statement ( state, output ) =
     case statement of
-        Bind varName expression ->
-            evaluateExpression state expression
-                |> Result.map (\v -> ( setVariable varName v state, output ))
+        Bind ident expression ->
+            Result.map2 (\v id -> ( setVariable id v state, output )) (evaluateExpression state expression) (resolveIdentifierToString state ident)
 
         Block statements ->
             List.foldl (\s acc -> Result.andThen (executeStatement s) acc) (Ok ( state, output )) statements
@@ -467,7 +492,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),add2(a,3,4)) }"
+    "{ PRINT zero; a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT add2((a+1),${_}(a,3,4)) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
@@ -475,10 +500,10 @@ exampleStatement : Statement
 exampleStatement =
     Block
         [ Print <| Literal <| Text "Janek"
-        , Bind "test2" (BinaryExpression (Variable "int1") Add (Literal (Number 3)))
-        , Print <| Variable "int1"
-        , If (Variable "int1") (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No")
-        , Print <| FunctionCall "add2" [ Literal <| Number 5, Literal <| Number 6 ]
+        , Bind (LiteralIdentifier "test2") (BinaryExpression (Variable (LiteralIdentifier "int1")) Add (Literal (Number 3)))
+        , Print <| Variable (LiteralIdentifier "int1")
+        , If (Variable (LiteralIdentifier "int1")) (Print <| Literal <| Text "Yes") (Print <| Literal <| Text "No")
+        , Print <| FunctionCall (LiteralIdentifier "add2") [ Literal <| Number 5, Literal <| Number 6 ]
         ]
 
 
@@ -496,6 +521,6 @@ exampleScreeptState =
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
             , ( "t2", Text "" )
-            , ( "add2", Func (BinaryExpression (Variable "__1") Add (Variable "__2")) )
+            , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
     }
