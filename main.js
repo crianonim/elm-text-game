@@ -5631,10 +5631,27 @@ var $elm$core$Dict$get = F2(
 		}
 	});
 var $author$project$ScreeptV2$stringifyBinaryOperator = function (binaryOp) {
-	if (binaryOp.$ === 'Add') {
-		return '+';
-	} else {
-		return '-';
+	switch (binaryOp.$) {
+		case 'Add':
+			return '+';
+		case 'Sub':
+			return '-';
+		case 'Mul':
+			return '*';
+		case 'Div':
+			return '/';
+		case 'Mod':
+			return '%%';
+		case 'Gt':
+			return '>';
+		case 'Lt':
+			return '<';
+		case 'Eq':
+			return '==';
+		case 'And':
+			return '&&';
+		default:
+			return '||';
 	}
 };
 var $author$project$ScreeptV2$stringifyUnaryOperator = function (unaryOp) {
@@ -5748,6 +5765,7 @@ var $elm$core$Result$map = F2(
 			return $elm$core$Result$Err(e);
 		}
 	});
+var $elm$core$Basics$modBy = _Basics_modBy;
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
@@ -5774,6 +5792,7 @@ var $author$project$ScreeptV2$resolveVariable = F2(
 				$elm$core$Result$Ok,
 				A2($elm$core$Dict$get, _var, state.vars)));
 	});
+var $elm$core$Basics$round = _Basics_round;
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5919,57 +5938,119 @@ var $author$project$ScreeptV2$standardLibrary = $elm$core$Dict$fromList(
 		]));
 var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 	function (state, e1, binaryOp, e2) {
+		var floatOperation = F3(
+			function (fn, expression1, expression2) {
+				var _v13 = _Utils_Tuple2(expression1, expression2);
+				if ((_v13.a.$ === 'Number') && (_v13.b.$ === 'Number')) {
+					var n1 = _v13.a.a;
+					var n2 = _v13.b.a;
+					return $elm$core$Result$Ok(
+						$author$project$ScreeptV2$Number(
+							A2(fn, n1, n2)));
+				} else {
+					return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+				}
+			});
 		return A2(
 			$elm$core$Result$andThen,
 			function (expr1) {
 				return A2(
 					$elm$core$Result$andThen,
 					function (expr2) {
-						if (binaryOp.$ === 'Add') {
-							var _v12 = _Utils_Tuple2(expr1, expr2);
-							_v12$2:
-							while (true) {
-								switch (_v12.a.$) {
-									case 'Number':
-										if (_v12.b.$ === 'Number') {
-											var n1 = _v12.a.a;
-											var n2 = _v12.b.a;
-											return $elm$core$Result$Ok(
-												$author$project$ScreeptV2$Number(n1 + n2));
-										} else {
+						switch (binaryOp.$) {
+							case 'Add':
+								var _v12 = _Utils_Tuple2(expr1, expr2);
+								_v12$2:
+								while (true) {
+									switch (_v12.a.$) {
+										case 'Number':
+											if (_v12.b.$ === 'Number') {
+												var n1 = _v12.a.a;
+												var n2 = _v12.b.a;
+												return $elm$core$Result$Ok(
+													$author$project$ScreeptV2$Number(n1 + n2));
+											} else {
+												break _v12$2;
+											}
+										case 'Text':
+											if (_v12.b.$ === 'Text') {
+												var t1 = _v12.a.a;
+												var t2 = _v12.b.a;
+												return $elm$core$Result$Ok(
+													$author$project$ScreeptV2$Text(
+														_Utils_ap(t1, t2)));
+											} else {
+												break _v12$2;
+											}
+										default:
 											break _v12$2;
-										}
-									case 'Text':
-										if (_v12.b.$ === 'Text') {
-											var t1 = _v12.a.a;
-											var t2 = _v12.b.a;
-											return $elm$core$Result$Ok(
-												$author$project$ScreeptV2$Text(
-													_Utils_ap(t1, t2)));
-										} else {
-											break _v12$2;
-										}
-									default:
-										break _v12$2;
+									}
 								}
-							}
-							var v1 = _v12.a;
-							var v2 = _v12.b;
-							return $elm$core$Result$Ok(
-								$author$project$ScreeptV2$Text(
-									_Utils_ap(
-										$author$project$ScreeptV2$getStringFromValue(v1),
-										$author$project$ScreeptV2$getStringFromValue(v2))));
-						} else {
-							var _v13 = _Utils_Tuple2(expr1, expr2);
-							if ((_v13.a.$ === 'Number') && (_v13.b.$ === 'Number')) {
-								var n1 = _v13.a.a;
-								var n2 = _v13.b.a;
+								var v1 = _v12.a;
+								var v2 = _v12.b;
 								return $elm$core$Result$Ok(
-									$author$project$ScreeptV2$Number(n1 - n2));
-							} else {
-								return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
-							}
+									$author$project$ScreeptV2$Text(
+										_Utils_ap(
+											$author$project$ScreeptV2$getStringFromValue(v1),
+											$author$project$ScreeptV2$getStringFromValue(v2))));
+							case 'Sub':
+								return A3(floatOperation, $elm$core$Basics$sub, expr1, expr2);
+							case 'Mul':
+								return A3(floatOperation, $elm$core$Basics$mul, expr1, expr2);
+							case 'Div':
+								return A3(floatOperation, $elm$core$Basics$fdiv, expr1, expr2);
+							case 'Mod':
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return A2(
+												$elm$core$Basics$modBy,
+												$elm$core$Basics$round(y),
+												$elm$core$Basics$round(x));
+										}),
+									expr1,
+									expr2);
+							case 'Gt':
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return (_Utils_cmp(x, y) > 0) ? 1 : 0;
+										}),
+									expr1,
+									expr2);
+							case 'Lt':
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return (_Utils_cmp(x, y) < 0) ? 1 : 0;
+										}),
+									expr1,
+									expr2);
+							case 'Eq':
+								return $elm$core$Result$Ok(
+									$author$project$ScreeptV2$Number(
+										_Utils_eq(expr1, expr2) ? 1 : 0));
+							case 'And':
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return (!(x * y)) ? 0 : 1;
+										}),
+									expr1,
+									expr2);
+							default:
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return (!(x + y)) ? 0 : 1;
+										}),
+									expr1,
+									expr2);
 						}
 					},
 					A2($author$project$ScreeptV2$evaluateExpression, state, e2));
@@ -6348,7 +6429,6 @@ var $author$project$ScreeptV2$StandardLibrary = F2(
 	function (a, b) {
 		return {$: 'StandardLibrary', a: a, b: b};
 	});
-var $author$project$ScreeptV2$Sub = {$: 'Sub'};
 var $author$project$ScreeptV2$UnaryExpression = F2(
 	function (a, b) {
 		return {$: 'UnaryExpression', a: a, b: b};
@@ -6760,6 +6840,15 @@ var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
 		});
 };
 var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
+var $author$project$ScreeptV2$And = {$: 'And'};
+var $author$project$ScreeptV2$Div = {$: 'Div'};
+var $author$project$ScreeptV2$Eq = {$: 'Eq'};
+var $author$project$ScreeptV2$Gt = {$: 'Gt'};
+var $author$project$ScreeptV2$Lt = {$: 'Lt'};
+var $author$project$ScreeptV2$Mod = {$: 'Mod'};
+var $author$project$ScreeptV2$Mul = {$: 'Mul'};
+var $author$project$ScreeptV2$Or = {$: 'Or'};
+var $author$project$ScreeptV2$Sub = {$: 'Sub'};
 var $elm$parser$Parser$Advanced$succeed = function (a) {
 	return $elm$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -6767,6 +6856,81 @@ var $elm$parser$Parser$Advanced$succeed = function (a) {
 		});
 };
 var $elm$parser$Parser$succeed = $elm$parser$Parser$Advanced$succeed;
+var $elm$parser$Parser$ExpectingSymbol = function (a) {
+	return {$: 'ExpectingSymbol', a: a};
+};
+var $elm$parser$Parser$Advanced$token = function (_v0) {
+	var str = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(str);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$Advanced$symbol = $elm$parser$Parser$Advanced$token;
+var $elm$parser$Parser$symbol = function (str) {
+	return $elm$parser$Parser$Advanced$symbol(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			str,
+			$elm$parser$Parser$ExpectingSymbol(str)));
+};
+var $author$project$ScreeptV2$parserBinaryOp = $elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Add),
+			$elm$parser$Parser$symbol('+')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Sub),
+			$elm$parser$Parser$symbol('-')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Mul),
+			$elm$parser$Parser$symbol('*')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Div),
+			$elm$parser$Parser$symbol('/')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Mod),
+			$elm$parser$Parser$symbol('%%')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Gt),
+			$elm$parser$Parser$symbol('>')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Lt),
+			$elm$parser$Parser$symbol('<')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Eq),
+			$elm$parser$Parser$symbol('==')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$And),
+			$elm$parser$Parser$symbol('&&')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$Or),
+			$elm$parser$Parser$symbol('||'))
+		]));
 var $author$project$ScreeptV2$parserStandardFunction = function (string) {
 	return A2(
 		$elm$parser$Parser$andThen,
@@ -6988,26 +7152,6 @@ var $elm$parser$Parser$Advanced$sequenceEnd = F5(
 					ender)
 				]));
 	});
-var $elm$parser$Parser$Advanced$token = function (_v0) {
-	var str = _v0.a;
-	var expecting = _v0.b;
-	var progress = !$elm$core$String$isEmpty(str);
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
-			var newOffset = _v1.a;
-			var newRow = _v1.b;
-			var newCol = _v1.c;
-			return _Utils_eq(newOffset, -1) ? A2(
-				$elm$parser$Parser$Advanced$Bad,
-				false,
-				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-				$elm$parser$Parser$Advanced$Good,
-				progress,
-				_Utils_Tuple0,
-				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
-		});
-};
 var $elm$parser$Parser$Advanced$sequence = function (i) {
 	return A2(
 		$elm$parser$Parser$Advanced$skip,
@@ -7067,17 +7211,6 @@ var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
 			_Utils_chr('\r')));
 	});
 var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
-var $elm$parser$Parser$ExpectingSymbol = function (a) {
-	return {$: 'ExpectingSymbol', a: a};
-};
-var $elm$parser$Parser$Advanced$symbol = $elm$parser$Parser$Advanced$token;
-var $elm$parser$Parser$symbol = function (str) {
-	return $elm$parser$Parser$Advanced$symbol(
-		A2(
-			$elm$parser$Parser$Advanced$Token,
-			str,
-			$elm$parser$Parser$ExpectingSymbol(str)));
-};
 var $elm$parser$Parser$ExpectingVariable = {$: 'ExpectingVariable'};
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
@@ -7202,21 +7335,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 									return $author$project$ScreeptV2$cyclic$parserExpression();
 								}),
 							$elm$parser$Parser$spaces)),
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$oneOf(
-							_List_fromArray(
-								[
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$ScreeptV2$Add),
-									$elm$parser$Parser$symbol('+')),
-									A2(
-									$elm$parser$Parser$ignorer,
-									$elm$parser$Parser$succeed($author$project$ScreeptV2$Sub),
-									$elm$parser$Parser$symbol('-'))
-								])),
-						$elm$parser$Parser$spaces)),
+					A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserBinaryOp, $elm$parser$Parser$spaces)),
 				A2(
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$lazy(
@@ -8707,7 +8826,7 @@ var $author$project$ScreeptV2$newScreeptParseExample = A2(
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
-	'{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1() }');
+	'{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (10 %% 3) }');
 var $author$project$ScreeptV2$exampleStatement = $author$project$ScreeptV2$Block(
 	_List_fromArray(
 		[

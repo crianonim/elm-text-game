@@ -16,6 +16,14 @@ type UnaryOp
 type BinaryOp
     = Add
     | Sub
+    | Mul
+    | Div
+    | Mod
+    | Gt
+    | Lt
+    | Eq
+    | And
+    | Or
 
 
 type Expression
@@ -128,12 +136,7 @@ parserExpression =
             |. Parser.symbol "("
             |= Parser.lazy (\_ -> parserExpression)
             |. Parser.spaces
-            |= Parser.oneOf
-                [ Parser.succeed Add
-                    |. Parser.symbol "+"
-                , Parser.succeed Sub
-                    |. Parser.symbol "-"
-                ]
+            |= parserBinaryOp
             |. Parser.spaces
             |= Parser.lazy (\_ -> parserExpression)
             |. Parser.symbol ")"
@@ -150,6 +153,32 @@ parserExpression =
         , Parser.succeed StandardLibrary
             |= parserStandardLibrary
             |= parserArguments
+        ]
+
+
+parserBinaryOp : Parser BinaryOp
+parserBinaryOp =
+    Parser.oneOf
+        [ Parser.succeed Add
+            |. Parser.symbol "+"
+        , Parser.succeed Sub
+            |. Parser.symbol "-"
+        , Parser.succeed Mul
+            |. Parser.symbol "*"
+        , Parser.succeed Div
+            |. Parser.symbol "/"
+        , Parser.succeed Mod
+            |. Parser.symbol "%%"
+        , Parser.succeed Gt
+            |. Parser.symbol ">"
+        , Parser.succeed Lt
+            |. Parser.symbol "<"
+        , Parser.succeed Eq
+            |. Parser.symbol "=="
+        , Parser.succeed And
+            |. Parser.symbol "&&"
+        , Parser.succeed Or
+            |. Parser.symbol "||"
         ]
 
 
@@ -282,6 +311,30 @@ stringifyBinaryOperator binaryOp =
 
         Sub ->
             "-"
+
+        Mul ->
+            "*"
+
+        Div ->
+            "/"
+
+        Mod ->
+            "%%"
+
+        Gt ->
+            ">"
+
+        Lt ->
+            "<"
+
+        Eq ->
+            "=="
+
+        And ->
+            "&&"
+
+        Or ->
+            "||"
 
 
 stringifyStatement : Statement -> String
@@ -478,6 +531,16 @@ resolveIdentifierToString state identifier =
 
 evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
 evaluateBinaryExpression state e1 binaryOp e2 =
+    let
+        floatOperation : (Float -> Float -> Float) -> Value -> Value -> Result ScreeptError Value
+        floatOperation fn expression1 expression2 =
+            case ( expression1, expression2 ) of
+                ( Number n1, Number n2 ) ->
+                    Ok <| Number <| fn n1 n2
+
+                _ ->
+                    Err TypeError
+    in
     evaluateExpression state e1
         |> Result.andThen
             (\expr1 ->
@@ -497,12 +560,74 @@ evaluateBinaryExpression state e1 binaryOp e2 =
                                             Ok <| Text <| getStringFromValue v1 ++ getStringFromValue v2
 
                                 Sub ->
-                                    case ( expr1, expr2 ) of
-                                        ( Number n1, Number n2 ) ->
-                                            Ok <| Number <| n1 - n2
+                                    floatOperation (-) expr1 expr2
 
-                                        _ ->
-                                            Err TypeError
+                                Mul ->
+                                    floatOperation (*) expr1 expr2
+
+                                Div ->
+                                    floatOperation (/) expr1 expr2
+
+                                Mod ->
+                                    floatOperation (\x y -> modBy (round y) (round x) |> toFloat) expr1 expr2
+
+                                Gt ->
+                                    floatOperation
+                                        (\x y ->
+                                            if x > y then
+                                                1
+
+                                            else
+                                                0
+                                        )
+                                        expr1
+                                        expr2
+
+                                Lt ->
+                                    floatOperation
+                                        (\x y ->
+                                            if x < y then
+                                                1
+
+                                            else
+                                                0
+                                        )
+                                        expr1
+                                        expr2
+
+                                Eq ->
+                                    Ok <|
+                                        Number
+                                            (if expr1 == expr2 then
+                                                1
+
+                                             else
+                                                0
+                                            )
+
+                                And ->
+                                    floatOperation
+                                        (\x y ->
+                                            if x * y == 0 then
+                                                0
+
+                                            else
+                                                1
+                                        )
+                                        expr1
+                                        expr2
+
+                                Or ->
+                                    floatOperation
+                                        (\x y ->
+                                            if x + y == 0 then
+                                                0
+
+                                            else
+                                                1
+                                        )
+                                        expr1
+                                        expr2
                         )
             )
 
@@ -631,7 +756,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1() }"
+    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (10 %% 3) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
@@ -660,7 +785,7 @@ exampleScreeptState =
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
             , ( "t2", Text "add2" )
-            , ("f1", Func <| Literal <| Text "Wokred")
+            , ( "f1", Func <| Literal <| Text "Wokred" )
             , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
     }
