@@ -17,7 +17,7 @@ type alias GameState =
     { dialogStack : Stack DialogId
     , messages : List String
 
-    --, procedures : Dict String Screept.Statement
+    --, procedures : Dict String Statement
     --, rnd : Random.Seed
     --, vars : Dict String Screept.Variable
     , screeptState : ScreeptV2.State
@@ -45,9 +45,8 @@ type alias GameDefinition =
     { title : String
     , dialogs : List Dialog
     , startDialogId : String
-
-    --, procedures : Dict String Screept.Statement
-    , vars : Dict String ScreeptV2.Value
+    , procedures : Dict String Statement
+    , vars : Dict String Value
     }
 
 
@@ -63,14 +62,12 @@ initSimple dialogs =
 
 emptyGameState : GameState
 emptyGameState =
-    { --procedures = Dict.empty
+    { --
       messages = []
-
-    --, rnd = Random.initialSeed 666
     , dialogStack = Stack.initialise |> Stack.push "start"
 
     --, vars = Dict.empty
-    , screeptState = { vars = Dict.empty }
+    , screeptState = { vars = Dict.empty, procedures = Dict.empty, rnd = Random.initialSeed 666 }
     }
 
 
@@ -249,21 +246,18 @@ goBackOption =
 --        , ( "vars", E.dict identity Screept.encodeVariable vars )
 --        , ( "messages", E.list E.string messages )
 --        ]
-
-
-decodeState : Json.Decoder GameState
-decodeState =
-    Json.map3 GameState
-        (Json.succeed Stack.initialise)
-        (Json.field "messages" <| Json.list Json.string)
-        --(Json.field "procedures" <| Json.dict (Json.map Screept.run Json.string))
-        --(Json.succeed <| Random.initialSeed 666)
-        (Json.map ScreeptV2.State
-            (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
-        )
-
-
-
+--
+--decodeState : Json.Decoder GameState
+--decodeState =
+--    Json.map3 GameState
+--        (Json.succeed Stack.initialise)
+--        (Json.field "messages" <| Json.list Json.string)
+--        --(Json.succeed <| Random.initialSeed 666)
+--        (Json.map3 ScreeptV2.State
+--            (Json.field "procedures" <| Json.dict ScreeptV2.decodeStatement)
+--            (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
+--
+--        )
 --
 --encodeGameDefinition : GameDefinition -> E.Value
 --encodeGameDefinition { dialogs, startDialogId,  vars } =
@@ -321,11 +315,11 @@ decodeDialogs =
 
 decodeGameDefinition : Json.Decoder GameDefinition
 decodeGameDefinition =
-    Json.map4 GameDefinition
+    Json.map5 GameDefinition
         (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "startDialogId" Json.string)
-        --(Json.field "procedures" <| Json.dict (Json.string |> Json.map Screept.parseStatement))
+        (Json.field "procedures" <| Json.dict ScreeptV2.decodeStatement)
         (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
 
 

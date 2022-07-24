@@ -4373,6 +4373,43 @@ function _Browser_load(url)
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 
 // STRINGS
 
@@ -4676,43 +4713,6 @@ function _Http_track(router, xhr, tracker)
 		}))));
 	});
 }
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
 
 
 function _Time_now(millisToPosix)
@@ -5737,6 +5737,61 @@ var $author$project$ScreeptV2$getStringFromValue = function (value) {
 			return $author$project$ScreeptV2$stringifyExpression(expression);
 	}
 };
+var $elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$random$Random$next = function (_v0) {
+	var state0 = _v0.a;
+	var incr = _v0.b;
+	return A2($elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm$random$Random$peel = function (_v0) {
+	var state = _v0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var $elm$random$Random$int = F2(
+	function (a, b) {
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+				var lo = _v0.a;
+				var hi = _v0.b;
+				var range = (hi - lo) + 1;
+				if (!((range - 1) & range)) {
+					return _Utils_Tuple2(
+						(((range - 1) & $elm$random$Random$peel(seed0)) >>> 0) + lo,
+						$elm$random$Random$next(seed0));
+				} else {
+					var threshhold = (((-range) >>> 0) % range) >>> 0;
+					var accountForBias = function (seed) {
+						accountForBias:
+						while (true) {
+							var x = $elm$random$Random$peel(seed);
+							var seedN = $elm$random$Random$next(seed);
+							if (_Utils_cmp(x, threshhold) < 0) {
+								var $temp$seed = seedN;
+								seed = $temp$seed;
+								continue accountForBias;
+							} else {
+								return _Utils_Tuple2((x % range) + lo, seedN);
+							}
+						}
+					};
+					return accountForBias(seed0);
+				}
+			});
+	});
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$ScreeptV2$isTruthy = function (value) {
 	switch (value.$) {
@@ -5750,6 +5805,7 @@ var $author$project$ScreeptV2$isTruthy = function (value) {
 			return true;
 	}
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5795,9 +5851,6 @@ var $elm$core$Result$map3 = F4(
 		}
 	});
 var $elm$core$Basics$modBy = _Basics_modBy;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
@@ -5965,14 +6018,19 @@ var $author$project$ScreeptV2$standardLibrary = $elm$core$Dict$fromList(
 							A2($elm$core$List$map, $author$project$ScreeptV2$getStringFromValue, args))));
 			})
 		]));
+var $elm$random$Random$step = F2(
+	function (_v0, seed) {
+		var generator = _v0.a;
+		return generator(seed);
+	});
 var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 	function (state, e1, binaryOp, e2) {
 		var floatOperation = F3(
 			function (fn, expression1, expression2) {
-				var _v13 = _Utils_Tuple2(expression1, expression2);
-				if ((_v13.a.$ === 'Number') && (_v13.b.$ === 'Number')) {
-					var n1 = _v13.a.a;
-					var n2 = _v13.b.a;
+				var _v16 = _Utils_Tuple2(expression1, expression2);
+				if ((_v16.a.$ === 'Number') && (_v16.b.$ === 'Number')) {
+					var n1 = _v16.a.a;
+					var n2 = _v16.b.a;
 					return $elm$core$Result$Ok(
 						$author$project$ScreeptV2$Number(
 							A2(fn, n1, n2)));
@@ -5988,35 +6046,35 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 					function (expr2) {
 						switch (binaryOp.$) {
 							case 'Add':
-								var _v12 = _Utils_Tuple2(expr1, expr2);
-								_v12$2:
+								var _v15 = _Utils_Tuple2(expr1, expr2);
+								_v15$2:
 								while (true) {
-									switch (_v12.a.$) {
+									switch (_v15.a.$) {
 										case 'Number':
-											if (_v12.b.$ === 'Number') {
-												var n1 = _v12.a.a;
-												var n2 = _v12.b.a;
+											if (_v15.b.$ === 'Number') {
+												var n1 = _v15.a.a;
+												var n2 = _v15.b.a;
 												return $elm$core$Result$Ok(
 													$author$project$ScreeptV2$Number(n1 + n2));
 											} else {
-												break _v12$2;
+												break _v15$2;
 											}
 										case 'Text':
-											if (_v12.b.$ === 'Text') {
-												var t1 = _v12.a.a;
-												var t2 = _v12.b.a;
+											if (_v15.b.$ === 'Text') {
+												var t1 = _v15.a.a;
+												var t2 = _v15.b.a;
 												return $elm$core$Result$Ok(
 													$author$project$ScreeptV2$Text(
 														_Utils_ap(t1, t2)));
 											} else {
-												break _v12$2;
+												break _v15$2;
 											}
 										default:
-											break _v12$2;
+											break _v15$2;
 									}
 								}
-								var v1 = _v12.a;
-								var v2 = _v12.b;
+								var v1 = _v15.a;
+								var v2 = _v15.b;
 								return $elm$core$Result$Ok(
 									$author$project$ScreeptV2$Text(
 										_Utils_ap(
@@ -6129,9 +6187,9 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 								var bindings = $author$project$ScreeptV2$Block(
 									A2(
 										$elm$core$List$map,
-										function (_v10) {
-											var i = _v10.a;
-											var e = _v10.b;
+										function (_v13) {
+											var i = _v13.a;
+											var e = _v13.b;
 											return A2(
 												$author$project$ScreeptV2$Bind,
 												varName(i),
@@ -6145,8 +6203,8 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 							}();
 							return A2(
 								$elm$core$Result$andThen,
-								function (_v9) {
-									var boundState = _v9.a;
+								function (_v12) {
+									var boundState = _v12.a;
 									return A2($author$project$ScreeptV2$evaluateExpression, boundState, expr);
 								},
 								runTimeState);
@@ -6286,7 +6344,7 @@ var $author$project$ScreeptV2$executeStatement = F2(
 									[o])));
 					},
 					A2($author$project$ScreeptV2$evaluateExpression, state, expression));
-			default:
+			case 'If':
 				var expression = statement.a;
 				var success = statement.b;
 				var failure = statement.c;
@@ -6299,6 +6357,67 @@ var $author$project$ScreeptV2$executeStatement = F2(
 							_Utils_Tuple2(state, output));
 					},
 					A2($author$project$ScreeptV2$evaluateExpression, state, expression));
+			case 'RunProc':
+				var procName = statement.a;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					$elm$core$Result$Err($author$project$ScreeptV2$Undefined),
+					A2(
+						$elm$core$Maybe$map,
+						function (proc) {
+							var _v4 = A2($elm$core$Debug$log, 'EXECUTING ', proc);
+							return A2(
+								$author$project$ScreeptV2$executeStatement,
+								proc,
+								_Utils_Tuple2(state, output));
+						},
+						A2($elm$core$Dict$get, procName, state.procedures)));
+			default:
+				var identifier = statement.a;
+				var from = statement.b;
+				var to = statement.c;
+				return A2(
+					$elm$core$Result$andThen,
+					function (id) {
+						return A2(
+							$elm$core$Result$andThen,
+							function (f) {
+								return A2(
+									$elm$core$Result$andThen,
+									function (t) {
+										var _v5 = _Utils_Tuple2(f, t);
+										if ((_v5.a.$ === 'Number') && (_v5.b.$ === 'Number')) {
+											var x = _v5.a.a;
+											var y = _v5.b.a;
+											var _v6 = A2(
+												$elm$random$Random$step,
+												A2(
+													$elm$random$Random$int,
+													$elm$core$Basics$round(x),
+													$elm$core$Basics$round(y)),
+												state.rnd);
+											var result = _v6.a;
+											var newSeed = _v6.b;
+											var newState = _Utils_update(
+												state,
+												{rnd: newSeed});
+											return $elm$core$Result$Ok(
+												_Utils_Tuple2(
+													A3(
+														$author$project$ScreeptV2$setVariable,
+														id,
+														$author$project$ScreeptV2$Number(result),
+														newState),
+													output));
+										} else {
+											return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+										}
+									},
+									A2($author$project$ScreeptV2$evaluateExpression, state, to));
+							},
+							A2($author$project$ScreeptV2$evaluateExpression, state, from));
+					},
+					A2($author$project$ScreeptV2$resolveIdentifierToString, state, identifier));
 		}
 	});
 var $author$project$ScreeptV2$resolveIdentifierToString = F2(
@@ -6328,7 +6447,18 @@ var $author$project$ScreeptV2$Literal = function (a) {
 var $author$project$ScreeptV2$Variable = function (a) {
 	return {$: 'Variable', a: a};
 };
+var $elm$random$Random$initialSeed = function (x) {
+	var _v0 = $elm$random$Random$next(
+		A2($elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _v0.a;
+	var incr = _v0.b;
+	var state2 = (state1 + x) >>> 0;
+	return $elm$random$Random$next(
+		A2($elm$random$Random$Seed, state2, incr));
+};
 var $author$project$ScreeptV2$exampleScreeptState = {
+	procedures: $elm$core$Dict$empty,
+	rnd: $elm$random$Random$initialSeed(1),
 	vars: $elm$core$Dict$fromList(
 		_List_fromArray(
 			[
@@ -6372,9 +6502,9 @@ var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $author$project$DialogGame$GameDefinition = F4(
-	function (title, dialogs, startDialogId, vars) {
-		return {dialogs: dialogs, startDialogId: startDialogId, title: title, vars: vars};
+var $author$project$DialogGame$GameDefinition = F5(
+	function (title, dialogs, startDialogId, procedures, vars) {
+		return {dialogs: dialogs, procedures: procedures, startDialogId: startDialogId, title: title, vars: vars};
 	});
 var $author$project$DialogGame$Dialog = F3(
 	function (id, text, options) {
@@ -7012,10 +7142,7 @@ var $author$project$ScreeptV2$parserStandardLibrary = $elm$parser$Parser$oneOf(
 		$elm$core$List$map,
 		$author$project$ScreeptV2$parserStandardFunction,
 		$elm$core$Dict$keys($author$project$ScreeptV2$standardLibrary)));
-var $author$project$ScreeptV2$reservedWords = _Utils_ap(
-	_List_fromArray(
-		['if', 'then', 'else', 'rnd']),
-	$elm$core$Dict$keys($author$project$ScreeptV2$standardLibrary));
+var $author$project$ScreeptV2$reservedWords = _List_Nil;
 var $elm$parser$Parser$Advanced$loopHelp = F4(
 	function (p, state, callback, s0) {
 		loopHelp:
@@ -7734,6 +7861,13 @@ var $elm$parser$Parser$Optional = {$: 'Optional'};
 var $author$project$ScreeptV2$Print = function (a) {
 	return {$: 'Print', a: a};
 };
+var $author$project$ScreeptV2$Rnd = F3(
+	function (a, b, c) {
+		return {$: 'Rnd', a: a, b: b, c: c};
+	});
+var $author$project$ScreeptV2$RunProc = function (a) {
+	return {$: 'RunProc', a: a};
+};
 function $author$project$ScreeptV2$cyclic$parserStatement() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -7812,7 +7946,48 @@ function $author$project$ScreeptV2$cyclic$parserStatement() {
 				$elm$parser$Parser$lazy(
 					function (_v2) {
 						return $author$project$ScreeptV2$cyclic$parserStatement();
-					}))
+					})),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$ignorer,
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$succeed($author$project$ScreeptV2$RunProc),
+						$elm$parser$Parser$keyword('RUN')),
+					$elm$parser$Parser$spaces),
+				$elm$parser$Parser$variable(
+					{
+						inner: function (c) {
+							return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+								c,
+								_Utils_chr('_'));
+						},
+						reserved: $elm$core$Set$fromList($author$project$ScreeptV2$reservedWords),
+						start: function (c) {
+							return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || (_Utils_eq(
+								c,
+								_Utils_chr('_')) && (!_Utils_eq(
+								c,
+								_Utils_chr('e'))));
+						}
+					})),
+				A2(
+				$elm$parser$Parser$keeper,
+				A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$ignorer,
+							A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$succeed($author$project$ScreeptV2$Rnd),
+								$elm$parser$Parser$keyword('RND')),
+							$elm$parser$Parser$spaces),
+						A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserIdentifier, $elm$parser$Parser$spaces)),
+					A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$spaces)),
+				$author$project$ScreeptV2$parserExpression)
 			]));
 }
 try {
@@ -7950,13 +8125,17 @@ var $elm$json$Json$Decode$dict = function (decoder) {
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$keyValuePairs(decoder));
 };
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$DialogGame$decodeGameDefinition = A5(
-	$elm$json$Json$Decode$map4,
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$DialogGame$decodeGameDefinition = A6(
+	$elm$json$Json$Decode$map5,
 	$author$project$DialogGame$GameDefinition,
 	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'dialogs', $author$project$DialogGame$decodeDialogs),
 	A2($elm$json$Json$Decode$field, 'startDialogId', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'procedures',
+		$elm$json$Json$Decode$dict($author$project$ScreeptV2$decodeStatement)),
 	A2(
 		$elm$json$Json$Decode$field,
 		'vars',
@@ -8431,25 +8610,6 @@ var $elm$http$Http$expectJson = F2(
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
-var $elm$random$Random$Seed = F2(
-	function (a, b) {
-		return {$: 'Seed', a: a, b: b};
-	});
-var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var $elm$random$Random$next = function (_v0) {
-	var state0 = _v0.a;
-	var incr = _v0.b;
-	return A2($elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
-};
-var $elm$random$Random$initialSeed = function (x) {
-	var _v0 = $elm$random$Random$next(
-		A2($elm$random$Random$Seed, 0, 1013904223));
-	var state1 = _v0.a;
-	var incr = _v0.b;
-	var state2 = (state1 + x) >>> 0;
-	return $elm$random$Random$next(
-		A2($elm$random$Random$Seed, state2, incr));
-};
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -8478,11 +8638,6 @@ var $elm$random$Random$init = A2(
 				$elm$time$Time$posixToMillis(time)));
 	},
 	$elm$time$Time$now);
-var $elm$random$Random$step = F2(
-	function (_v0, seed) {
-		var generator = _v0.a;
-		return generator(seed);
-	});
 var $elm$random$Random$onEffects = F3(
 	function (router, commands, seed) {
 		if (!commands.b) {
@@ -8505,9 +8660,6 @@ var $elm$random$Random$onSelfMsg = F3(
 	function (_v0, _v1, seed) {
 		return $elm$core$Task$succeed(seed);
 	});
-var $elm$random$Random$Generator = function (a) {
-	return {$: 'Generator', a: a};
-};
 var $elm$random$Random$map = F2(
 	function (func, _v0) {
 		var genA = _v0.a;
@@ -8708,45 +8860,6 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Bitwise$xor = _Bitwise_xor;
-var $elm$random$Random$peel = function (_v0) {
-	var state = _v0.a;
-	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
-	return ((word >>> 22) ^ word) >>> 0;
-};
-var $elm$random$Random$int = F2(
-	function (a, b) {
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var _v0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
-				var lo = _v0.a;
-				var hi = _v0.b;
-				var range = (hi - lo) + 1;
-				if (!((range - 1) & range)) {
-					return _Utils_Tuple2(
-						(((range - 1) & $elm$random$Random$peel(seed0)) >>> 0) + lo,
-						$elm$random$Random$next(seed0));
-				} else {
-					var threshhold = (((-range) >>> 0) % range) >>> 0;
-					var accountForBias = function (seed) {
-						accountForBias:
-						while (true) {
-							var x = $elm$random$Random$peel(seed);
-							var seedN = $elm$random$Random$next(seed);
-							if (_Utils_cmp(x, threshhold) < 0) {
-								var $temp$seed = seedN;
-								seed = $temp$seed;
-								continue accountForBias;
-							} else {
-								return _Utils_Tuple2((x % range) + lo, seedN);
-							}
-						}
-					};
-					return accountForBias(seed0);
-				}
-			});
-	});
 var $elm$random$Random$map3 = F4(
 	function (func, _v0, _v1, _v2) {
 		var genA = _v0.a;
@@ -8795,7 +8908,11 @@ var $mhoare$elm_stack$Stack$push = F2(
 var $author$project$DialogGame$emptyGameState = {
 	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
 	messages: _List_Nil,
-	screeptState: {vars: $elm$core$Dict$empty}
+	screeptState: {
+		procedures: $elm$core$Dict$empty,
+		rnd: $elm$random$Random$initialSeed(666),
+		vars: $elm$core$Dict$empty
+	}
 };
 var $author$project$DialogGame$init = F2(
 	function (gs, dialogs) {
@@ -8944,7 +9061,6 @@ var $author$project$Main$init = function (_v0) {
 					})
 				])));
 };
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),
@@ -8952,7 +9068,7 @@ var $author$project$ScreeptV2$newScreeptParseExample = A2(
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
-	'{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:2) }');
+	'{ RND b 100 101; PRINT CONCAT(add2,t1,t2); if = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:b) }');
 var $author$project$ScreeptV2$exampleStatement = $author$project$ScreeptV2$Block(
 	_List_fromArray(
 		[
@@ -9054,7 +9170,11 @@ var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) 
 		gameState: {
 			dialogStack: A2($mhoare$elm_stack$Stack$push, gameDefinition.startDialogId, $mhoare$elm_stack$Stack$initialise),
 			messages: _List_Nil,
-			screeptState: {vars: gameDefinition.vars}
+			screeptState: {
+				procedures: gameDefinition.procedures,
+				rnd: $elm$random$Random$initialSeed(666),
+				vars: gameDefinition.vars
+			}
 		}
 	};
 };

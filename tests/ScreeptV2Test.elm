@@ -69,25 +69,29 @@ fuzzValue =
         ]
 
 
+fuzzLiteralIdentifier : Fuzzer String
+fuzzLiteralIdentifier =
+    Fuzz.oneOf
+        [ Fuzz.constant '_'
+        , Fuzz.intRange 97 122
+            |> Fuzz.map Char.fromCode
+            |> Fuzz.map
+                (\c ->
+                    if c == 'e' then
+                        'f'
+
+                    else
+                        c
+                )
+        ]
+        |> Fuzz.andThen (\first -> Fuzz.map (\s -> String.fromChar first ++ s) fuzzAlphaNumString)
+
+
 fuzzIdentifier : Fuzzer Identifier
 fuzzIdentifier =
     Fuzz.oneOf
         [ Fuzz.map LiteralIdentifier
-            (Fuzz.oneOf
-                [ Fuzz.constant '_'
-                , Fuzz.intRange 97 122
-                    |> Fuzz.map Char.fromCode
-                    |> Fuzz.map
-                        (\c ->
-                            if c == 'e' then
-                                'f'
-
-                            else
-                                c
-                        )
-                ]
-                |> Fuzz.andThen (\first -> Fuzz.map (\s -> String.fromChar first ++ s) fuzzAlphaNumString)
-            )
+            fuzzLiteralIdentifier
         , Fuzz.map ComputedIdentifier (Fuzz.lazy (\_ -> fuzzExpression))
         ]
 
@@ -134,4 +138,6 @@ fuzzStatement =
         , ( 1, Fuzz.map Block <| Fuzz.listOfLengthBetween 0 5 (Fuzz.lazy (\_ -> fuzzStatement)) )
         , ( 1, Fuzz.map3 If fuzzExpression (Fuzz.lazy (\_ -> fuzzStatement)) (Fuzz.lazy (\_ -> fuzzStatement)) )
         , ( 2, Fuzz.map Print fuzzExpression )
+        , ( 1, Fuzz.map RunProc fuzzLiteralIdentifier )
+        , ( 1, Fuzz.map3 Rnd fuzzIdentifier fuzzExpression fuzzExpression )
         ]

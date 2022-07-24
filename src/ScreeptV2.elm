@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Json.Decode as Json
 import Json.Encode as E
 import Parser exposing ((|.), (|=), Parser)
+import Random
 import Result.Extra
 import Set
 
@@ -45,6 +46,8 @@ type Statement
     | Block (List Statement)
     | If Expression Statement Statement
     | Print Expression
+    | RunProc String
+    | Rnd Identifier Expression Expression
 
 
 type Identifier
@@ -53,7 +56,9 @@ type Identifier
 
 
 type alias State =
-    { vars : Dict String Value
+    { procedures : Dict String Statement
+    , vars : Dict String Value
+    , rnd : Random.Seed
     }
 
 
@@ -79,7 +84,11 @@ type Value
 
 reservedWords : List String
 reservedWords =
-    [ "if", "then", "else", "rnd" ] ++ Dict.keys standardLibrary
+    []
+
+
+
+--[  "if", "then", "else", "rnd" ] ++ Dict.keys standardLibrary
 
 
 standardLibrary : Dict String (List Value -> Result ScreeptError Value)
@@ -265,6 +274,22 @@ parserStatement =
             |. Parser.keyword "ELSE"
             |. Parser.spaces
             |= Parser.lazy (\_ -> parserStatement)
+        , Parser.succeed RunProc
+            |. Parser.keyword "RUN"
+            |. Parser.spaces
+            |= Parser.variable
+                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
+                , inner = \c -> Char.isAlphaNum c || c == '_'
+                , reserved = Set.fromList reservedWords
+                }
+        , Parser.succeed Rnd
+            |. Parser.keyword "RND"
+            |. Parser.spaces
+            |= parserIdentifier
+            |. Parser.spaces
+            |= parserExpression
+            |. Parser.spaces
+            |= parserExpression
         ]
 
 
@@ -397,6 +422,12 @@ stringifyStatement statement =
 
         Print expression ->
             "PRINT " ++ stringifyExpression expression
+
+        RunProc string ->
+            "RUN " ++ string
+
+        Rnd identifier from to ->
+            "RND " ++ stringifyIdentifier identifier ++ " " ++ stringifyExpression from ++ " " ++ stringifyExpression to
 
 
 encodeValue : Value -> E.Value
@@ -738,6 +769,45 @@ executeStatement statement ( state, output ) =
                             ( state, output )
                     )
 
+        RunProc procName ->
+            Dict.get procName state.procedures
+                |> Maybe.map
+                    (\proc ->
+                        let
+                            _ =
+                                Debug.log "EXECUTING " proc
+                        in
+                        executeStatement proc ( state, output )
+                    )
+                |> Maybe.withDefault (Err Undefined)
+
+        Rnd identifier from to ->
+            resolveIdentifierToString state identifier
+                |> Result.andThen
+                    (\id ->
+                        evaluateExpression state from
+                            |> Result.andThen
+                                (\f ->
+                                    evaluateExpression state to
+                                        |> Result.andThen
+                                            (\t ->
+                                                case ( f, t ) of
+                                                    ( Number x, Number y ) ->
+                                                        let
+                                                            ( result, newSeed ) =
+                                                                Random.step (Random.int (round x) (round y)) state.rnd
+
+                                                            newState =
+                                                                { state | rnd = newSeed }
+                                                        in
+                                                        Ok ( setVariable id (Number <| toFloat result) newState, output )
+
+                                                    _ ->
+                                                        Err TypeError
+                                            )
+                                )
+                    )
+
 
 executeStringStatement : String -> State -> ( State, List String )
 executeStringStatement statementString state =
@@ -813,7 +883,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:2) }"
+    "{ RND b 100 101; PRINT CONCAT(add2,t1,t2); if = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:b) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 
@@ -835,7 +905,8 @@ runExample =
 
 exampleScreeptState : State
 exampleScreeptState =
-    { vars =
+    { procedures = Dict.empty
+    , vars =
         Dict.fromList
             [ ( "int1", Number -12 )
             , ( "float1", Number 3.14 )
@@ -845,4 +916,5 @@ exampleScreeptState =
             , ( "f1", Func <| Literal <| Text "Wokred" )
             , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
+    , rnd = Random.initialSeed 1
     }

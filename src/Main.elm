@@ -324,12 +324,12 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        { --procedures = gameDefinition.procedures
+        { --
           messages = []
 
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptState = { vars = gameDefinition.vars }
+        , screeptState = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
