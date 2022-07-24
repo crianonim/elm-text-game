@@ -5680,6 +5680,12 @@ var $author$project$ScreeptV2$stringifyExpression = function (expression) {
 			var binaryOp = expression.b;
 			var expr2 = expression.c;
 			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + ($author$project$ScreeptV2$stringifyBinaryOperator(binaryOp) + ($author$project$ScreeptV2$stringifyExpression(expr2) + ')')));
+		case 'TertiaryExpression':
+			var expr1 = expression.a;
+			var tertiaryOp = expression.b;
+			var expr2 = expression.c;
+			var expr3 = expression.d;
+			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + ('?' + ($author$project$ScreeptV2$stringifyExpression(expr2) + (':' + ($author$project$ScreeptV2$stringifyExpression(expr3) + ')')))));
 		case 'FunctionCall':
 			var identifier = expression.a;
 			var expressions = expression.b;
@@ -5763,6 +5769,29 @@ var $elm$core$Result$map = F2(
 		} else {
 			var e = ra.a;
 			return $elm$core$Result$Err(e);
+		}
+	});
+var $elm$core$Result$map3 = F4(
+	function (func, ra, rb, rc) {
+		if (ra.$ === 'Err') {
+			var x = ra.a;
+			return $elm$core$Result$Err(x);
+		} else {
+			var a = ra.a;
+			if (rb.$ === 'Err') {
+				var x = rb.a;
+				return $elm$core$Result$Err(x);
+			} else {
+				var b = rb.a;
+				if (rc.$ === 'Err') {
+					var x = rc.a;
+					return $elm$core$Result$Err(x);
+				} else {
+					var c = rc.a;
+					return $elm$core$Result$Ok(
+						A3(func, a, b, c));
+				}
+			}
 		}
 	});
 var $elm$core$Basics$modBy = _Basics_modBy;
@@ -6078,6 +6107,12 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 				var binaryOp = expression.b;
 				var e2 = expression.c;
 				return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
+			case 'TertiaryExpression':
+				var e1 = expression.a;
+				var tertiaryOp = expression.b;
+				var e2 = expression.c;
+				var e3 = expression.d;
+				return A5($author$project$ScreeptV2$evaluateTertiaryExpression, state, tertiaryOp, e1, e2, e3);
 			case 'FunctionCall':
 				var identifier = expression.a;
 				var expressions = expression.b;
@@ -6145,6 +6180,18 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 							$author$project$ScreeptV2$evaluateExpression(state),
 							expressions)));
 		}
+	});
+var $author$project$ScreeptV2$evaluateTertiaryExpression = F5(
+	function (state, tertiaryOp, e1, e2, e3) {
+		return A4(
+			$elm$core$Result$map3,
+			F3(
+				function (cond, succ, fail) {
+					return $author$project$ScreeptV2$isTruthy(cond) ? succ : fail;
+				}),
+			A2($author$project$ScreeptV2$evaluateExpression, state, e1),
+			A2($author$project$ScreeptV2$evaluateExpression, state, e2),
+			A2($author$project$ScreeptV2$evaluateExpression, state, e3));
 	});
 var $author$project$ScreeptV2$evaluateUnaryExpression = F3(
 	function (state, unaryOp, expression) {
@@ -6418,6 +6465,7 @@ var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
 var $author$project$ScreeptV2$ComputedIdentifier = function (a) {
 	return {$: 'ComputedIdentifier', a: a};
 };
+var $author$project$ScreeptV2$Conditional = {$: 'Conditional'};
 var $elm$parser$Parser$Forbidden = {$: 'Forbidden'};
 var $author$project$ScreeptV2$FunctionCall = F2(
 	function (a, b) {
@@ -6428,6 +6476,10 @@ var $author$project$ScreeptV2$Not = {$: 'Not'};
 var $author$project$ScreeptV2$StandardLibrary = F2(
 	function (a, b) {
 		return {$: 'StandardLibrary', a: a, b: b};
+	});
+var $author$project$ScreeptV2$TertiaryExpression = F4(
+	function (a, b, c, d) {
+		return {$: 'TertiaryExpression', a: a, b: b, c: c, d: d};
 	});
 var $author$project$ScreeptV2$UnaryExpression = F2(
 	function (a, b) {
@@ -6464,6 +6516,22 @@ var $elm$parser$Parser$Advanced$andThen = F2(
 			});
 	});
 var $elm$parser$Parser$andThen = $elm$parser$Parser$Advanced$andThen;
+var $elm$parser$Parser$Advanced$backtrackable = function (_v0) {
+	var parse = _v0.a;
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s0) {
+			var _v1 = parse(s0);
+			if (_v1.$ === 'Bad') {
+				var x = _v1.b;
+				return A2($elm$parser$Parser$Advanced$Bad, false, x);
+			} else {
+				var a = _v1.b;
+				var s1 = _v1.c;
+				return A3($elm$parser$Parser$Advanced$Good, false, a, s1);
+			}
+		});
+};
+var $elm$parser$Parser$backtrackable = $elm$parser$Parser$Advanced$backtrackable;
 var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
 	function (isGood, offset, row, col, s0) {
@@ -7318,6 +7386,64 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 					function (_v3) {
 						return $author$project$ScreeptV2$cyclic$parserExpression();
 					})),
+				$elm$parser$Parser$backtrackable(
+				A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$keeper,
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($author$project$ScreeptV2$TertiaryExpression),
+									$elm$parser$Parser$symbol('(')),
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$lazy(
+										function (_v4) {
+											return $author$project$ScreeptV2$cyclic$parserExpression();
+										}),
+									$elm$parser$Parser$spaces)),
+							A2(
+								$elm$parser$Parser$ignorer,
+								$elm$parser$Parser$oneOf(
+									_List_fromArray(
+										[
+											A2(
+											$elm$parser$Parser$ignorer,
+											$elm$parser$Parser$succeed($author$project$ScreeptV2$Conditional),
+											$elm$parser$Parser$symbol('?'))
+										])),
+								$elm$parser$Parser$spaces)),
+						A2(
+							$elm$parser$Parser$ignorer,
+							A2(
+								$elm$parser$Parser$ignorer,
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$lazy(
+										function (_v5) {
+											return $author$project$ScreeptV2$cyclic$parserExpression();
+										}),
+									$elm$parser$Parser$spaces),
+								$elm$parser$Parser$oneOf(
+									_List_fromArray(
+										[
+											$elm$parser$Parser$symbol(':')
+										]))),
+							$elm$parser$Parser$spaces)),
+					A2(
+						$elm$parser$Parser$ignorer,
+						A2(
+							$elm$parser$Parser$ignorer,
+							$elm$parser$Parser$lazy(
+								function (_v6) {
+									return $author$project$ScreeptV2$cyclic$parserExpression();
+								}),
+							$elm$parser$Parser$spaces),
+						$elm$parser$Parser$symbol(')')))),
 				A2(
 				$elm$parser$Parser$keeper,
 				A2(
@@ -7331,7 +7457,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 						A2(
 							$elm$parser$Parser$ignorer,
 							$elm$parser$Parser$lazy(
-								function (_v4) {
+								function (_v7) {
 									return $author$project$ScreeptV2$cyclic$parserExpression();
 								}),
 							$elm$parser$Parser$spaces)),
@@ -7339,7 +7465,7 @@ function $author$project$ScreeptV2$cyclic$parserExpression() {
 				A2(
 					$elm$parser$Parser$ignorer,
 					$elm$parser$Parser$lazy(
-						function (_v5) {
+						function (_v8) {
 							return $author$project$ScreeptV2$cyclic$parserExpression();
 						}),
 					$elm$parser$Parser$symbol(')'))),
@@ -8826,7 +8952,7 @@ var $author$project$ScreeptV2$newScreeptParseExample = A2(
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
-	'{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (10 %% 3) }');
+	'{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:2) }');
 var $author$project$ScreeptV2$exampleStatement = $author$project$ScreeptV2$Block(
 	_List_fromArray(
 		[

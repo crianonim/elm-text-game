@@ -26,11 +26,16 @@ type BinaryOp
     | Or
 
 
+type TertiaryOp
+    = Conditional
+
+
 type Expression
     = Literal Value
     | Variable Identifier
     | UnaryExpression UnaryOp Expression
     | BinaryExpression Expression BinaryOp Expression
+    | TertiaryExpression Expression TertiaryOp Expression Expression
     | FunctionCall Identifier (List Expression)
     | StandardLibrary String (List Expression)
 
@@ -132,6 +137,25 @@ parserExpression =
                     |. Parser.symbol "- "
                 ]
             |= Parser.lazy (\_ -> parserExpression)
+        , Parser.backtrackable <|
+            Parser.succeed TertiaryExpression
+                |. Parser.symbol "("
+                |= Parser.lazy (\_ -> parserExpression)
+                |. Parser.spaces
+                |= Parser.oneOf
+                    [ Parser.succeed Conditional
+                        |. Parser.symbol "?"
+                    ]
+                |. Parser.spaces
+                |= Parser.lazy (\_ -> parserExpression)
+                |. Parser.spaces
+                |. Parser.oneOf
+                    [ Parser.symbol ":"
+                    ]
+                |. Parser.spaces
+                |= Parser.lazy (\_ -> parserExpression)
+                |. Parser.spaces
+                |. Parser.symbol ")"
         , Parser.succeed BinaryExpression
             |. Parser.symbol "("
             |= Parser.lazy (\_ -> parserExpression)
@@ -286,6 +310,21 @@ stringifyExpression expression =
                 ++ stringifyExpression expr2
                 ++ ")"
 
+        TertiaryExpression expr1 tertiaryOp expr2 expr3 ->
+            "("
+                ++ stringifyExpression expr1
+                ++ (case tertiaryOp of
+                        Conditional ->
+                            "?"
+                   )
+                ++ stringifyExpression expr2
+                ++ (case tertiaryOp of
+                        Conditional ->
+                            ":"
+                   )
+                ++ stringifyExpression expr3
+                ++ ")"
+
         FunctionCall identifier expressions ->
             stringifyIdentifier identifier ++ "(" ++ String.join "," (List.map stringifyExpression expressions) ++ ")"
 
@@ -433,6 +472,9 @@ evaluateExpression state expression =
         BinaryExpression e1 binaryOp e2 ->
             evaluateBinaryExpression state e1 binaryOp e2
 
+        TertiaryExpression e1 tertiaryOp e2 e3 ->
+            evaluateTertiaryExpression state tertiaryOp e1 e2 e3
+
         FunctionCall identifier expressions ->
             resolveIdentifierToString state identifier
                 |> Result.andThen (resolveVariable state)
@@ -527,6 +569,21 @@ resolveIdentifierToString state identifier =
         ComputedIdentifier expression ->
             evaluateExpression state expression
                 |> Result.map getStringFromValue
+
+
+evaluateTertiaryExpression : State -> TertiaryOp -> Expression -> Expression -> Expression -> Result ScreeptError Value
+evaluateTertiaryExpression state tertiaryOp e1 e2 e3 =
+    Result.map3
+        (\cond succ fail ->
+            if isTruthy cond then
+                succ
+
+            else
+                fail
+        )
+        (evaluateExpression state e1)
+        (evaluateExpression state e2)
+        (evaluateExpression state e3)
 
 
 evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
@@ -756,7 +813,7 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (10 %% 3) }"
+    "{ PRINT CONCAT(add2,t1,t2); a = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:2) }"
         |> Parser.run (parserStatement |. Parser.end)
 
 

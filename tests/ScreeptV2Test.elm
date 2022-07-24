@@ -42,6 +42,7 @@ fuzzExpression =
         , ( 20, Fuzz.map Literal fuzzValue )
         , ( 1, Fuzz.map2 UnaryExpression fuzzUnaryOp (Fuzz.lazy (\_ -> fuzzExpression)) )
         , ( 1, Fuzz.map3 BinaryExpression (Fuzz.lazy (\_ -> fuzzExpression)) fuzzBinaryOp (Fuzz.lazy (\_ -> fuzzExpression)) )
+        , ( 1, Fuzz.map4 TertiaryExpression (Fuzz.lazy (\_ -> fuzzExpression)) fuzzTertiaryOp (Fuzz.lazy (\_ -> fuzzExpression)) (Fuzz.lazy (\_ -> fuzzExpression)) )
         , ( 4, Fuzz.map2 FunctionCall fuzzIdentifier fuzzArgs )
         , ( 3, Fuzz.map2 StandardLibrary fuzzStandardLibrary fuzzArgs )
         ]
@@ -117,9 +118,13 @@ fuzzUnaryOp =
 
 fuzzBinaryOp : Fuzzer BinaryOp
 fuzzBinaryOp =
-     Fuzz.oneOf <|
-            List.map Fuzz.constant [ Add, Sub, Mul, Div, Mod, Gt, Lt, Eq, And, Or ]
+    Fuzz.oneOf <|
+        List.map Fuzz.constant [ Add, Sub, Mul, Div, Mod, Gt, Lt, Eq, And, Or ]
 
+
+fuzzTertiaryOp : Fuzzer TertiaryOp
+fuzzTertiaryOp =
+    Fuzz.constant Conditional
 
 
 fuzzStatement : Fuzzer Statement
