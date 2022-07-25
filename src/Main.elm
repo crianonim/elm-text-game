@@ -1,7 +1,6 @@
 module Main exposing (main)
 
 --import DialogGameEditor
---import ScreeptEditor
 --import Screept
 
 import Browser
@@ -12,6 +11,7 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Platform.Cmd exposing (Cmd)
 import Random
+import ScreeptEditor
 import ScreeptV2 exposing (BinaryOp(..), Expression(..), Identifier(..), Value(..))
 import Stack exposing (Stack)
 import Task
@@ -79,8 +79,8 @@ init _ =
       --    (listDialogToDictDialog Game.dialogs)
       --    (Just Game.statusLine)
       , isDebug = True
+      , screeptEditor = ScreeptEditor.init
 
-      --, screeptEditor = ScreeptEditor.init
       --, dialogEditor = DialogGameEditor.init
       , gameDefinition = Nothing
       , mainMenuDialog =
@@ -91,9 +91,9 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
+
         --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-
         , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
@@ -188,9 +188,9 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        --ScreeptEditor seMsg ->
-        --    ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
-        --
+        ScreeptEditor seMsg ->
+            ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
+
         --DialogEditor deMsg ->
         --    ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
         GotGameDefinition result ->
@@ -297,8 +297,8 @@ update msg model =
 type alias Model =
     { gameDialog : GameStatus
     , isDebug : Bool
+    , screeptEditor : ScreeptEditor.Model
 
-    --, screeptEditor : ScreeptEditor.Model
     --, dialogEditor : DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
@@ -310,7 +310,7 @@ type Msg
     = None
     | GameDialog DialogGame.Msg
     | SeedGenerated Random.Seed
-      --| ScreeptEditor ScreeptEditor.Msg
+    | ScreeptEditor ScreeptEditor.Msg
       --| DialogEditor DialogGameEditor.Msg
     | GotGameDefinition (Result Http.Error GameDefinition)
     | MainMenuDialog DialogGame.Msg
@@ -366,8 +366,8 @@ view model =
 
             Loaded m ->
                 div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
+        , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
 
-        --, ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
         --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
         --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         , viewUrlLoader model

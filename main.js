@@ -5681,13 +5681,13 @@ var $author$project$ScreeptV2$stringifyExpression = function (expression) {
 			var expr1 = expression.a;
 			var binaryOp = expression.b;
 			var expr2 = expression.c;
-			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + ($author$project$ScreeptV2$stringifyBinaryOperator(binaryOp) + ($author$project$ScreeptV2$stringifyExpression(expr2) + ')')));
+			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + (' ' + ($author$project$ScreeptV2$stringifyBinaryOperator(binaryOp) + (' ' + ($author$project$ScreeptV2$stringifyExpression(expr2) + ')')))));
 		case 'TertiaryExpression':
 			var expr1 = expression.a;
 			var tertiaryOp = expression.b;
 			var expr2 = expression.c;
 			var expr3 = expression.d;
-			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + ('?' + ($author$project$ScreeptV2$stringifyExpression(expr2) + (':' + ($author$project$ScreeptV2$stringifyExpression(expr3) + ')')))));
+			return '(' + ($author$project$ScreeptV2$stringifyExpression(expr1) + (' ? ' + ($author$project$ScreeptV2$stringifyExpression(expr2) + (' : ' + ($author$project$ScreeptV2$stringifyExpression(expr3) + ')')))));
 		case 'FunctionCall':
 			var identifier = expression.a;
 			var expressions = expression.b;
@@ -6029,10 +6029,10 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 	function (state, e1, binaryOp, e2) {
 		var floatOperation = F3(
 			function (fn, expression1, expression2) {
-				var _v16 = _Utils_Tuple2(expression1, expression2);
-				if ((_v16.a.$ === 'Number') && (_v16.b.$ === 'Number')) {
-					var n1 = _v16.a.a;
-					var n2 = _v16.b.a;
+				var _v17 = _Utils_Tuple2(expression1, expression2);
+				if ((_v17.a.$ === 'Number') && (_v17.b.$ === 'Number')) {
+					var n1 = _v17.a.a;
+					var n2 = _v17.b.a;
 					return $elm$core$Result$Ok(
 						$author$project$ScreeptV2$Number(
 							A2(fn, n1, n2)));
@@ -6048,35 +6048,35 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 					function (expr2) {
 						switch (binaryOp.$) {
 							case 'Add':
-								var _v15 = _Utils_Tuple2(expr1, expr2);
-								_v15$2:
+								var _v16 = _Utils_Tuple2(expr1, expr2);
+								_v16$2:
 								while (true) {
-									switch (_v15.a.$) {
+									switch (_v16.a.$) {
 										case 'Number':
-											if (_v15.b.$ === 'Number') {
-												var n1 = _v15.a.a;
-												var n2 = _v15.b.a;
+											if (_v16.b.$ === 'Number') {
+												var n1 = _v16.a.a;
+												var n2 = _v16.b.a;
 												return $elm$core$Result$Ok(
 													$author$project$ScreeptV2$Number(n1 + n2));
 											} else {
-												break _v15$2;
+												break _v16$2;
 											}
 										case 'Text':
-											if (_v15.b.$ === 'Text') {
-												var t1 = _v15.a.a;
-												var t2 = _v15.b.a;
+											if (_v16.b.$ === 'Text') {
+												var t1 = _v16.a.a;
+												var t2 = _v16.b.a;
 												return $elm$core$Result$Ok(
 													$author$project$ScreeptV2$Text(
 														_Utils_ap(t1, t2)));
 											} else {
-												break _v15$2;
+												break _v16$2;
 											}
 										default:
-											break _v15$2;
+											break _v16$2;
 									}
 								}
-								var v1 = _v15.a;
-								var v2 = _v15.b;
+								var v1 = _v16.a;
+								var v2 = _v16.b;
 								return $elm$core$Result$Ok(
 									$author$project$ScreeptV2$Text(
 										_Utils_ap(
@@ -6157,98 +6157,105 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 	});
 var $author$project$ScreeptV2$evaluateExpression = F2(
 	function (state, expression) {
-		switch (expression.$) {
-			case 'Literal':
-				var valueType = expression.a;
-				return $elm$core$Result$Ok(valueType);
-			case 'Variable':
-				var _var = expression.a;
-				return A2(
-					$elm$core$Result$andThen,
-					$author$project$ScreeptV2$resolveVariable(state),
-					A2($author$project$ScreeptV2$resolveIdentifierToString, state, _var));
-			case 'UnaryExpression':
-				var unaryOp = expression.a;
-				var e = expression.b;
-				return A3($author$project$ScreeptV2$evaluateUnaryExpression, state, unaryOp, e);
-			case 'BinaryExpression':
-				var e1 = expression.a;
-				var binaryOp = expression.b;
-				var e2 = expression.c;
-				return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
-			case 'TertiaryExpression':
-				var e1 = expression.a;
-				var tertiaryOp = expression.b;
-				var e2 = expression.c;
-				var e3 = expression.d;
-				return A5($author$project$ScreeptV2$evaluateTertiaryExpression, state, tertiaryOp, e1, e2, e3);
-			case 'FunctionCall':
-				var identifier = expression.a;
-				var expressions = expression.b;
-				return A2(
-					$elm$core$Result$andThen,
-					function (_var) {
-						if (_var.$ === 'Func') {
-							var expr = _var.a;
-							var runTimeState = function () {
-								var varName = function (i) {
-									return $author$project$ScreeptV2$LiteralIdentifier(
-										'__' + $elm$core$String$fromInt(i + 1));
-								};
-								var bindings = $author$project$ScreeptV2$Block(
-									A2(
-										$elm$core$List$map,
-										function (_v13) {
-											var i = _v13.a;
-											var e = _v13.b;
-											return A2(
-												$author$project$ScreeptV2$Bind,
-												varName(i),
-												e);
-										},
-										A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, expressions)));
-								return A2(
-									$author$project$ScreeptV2$executeStatement,
-									bindings,
-									_Utils_Tuple2(state, _List_Nil));
-							}();
-							return A2(
-								$elm$core$Result$andThen,
-								function (_v12) {
-									var boundState = _v12.a;
-									return A2($author$project$ScreeptV2$evaluateExpression, boundState, expr);
-								},
-								runTimeState);
-						} else {
-							return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
-						}
-					},
-					A2(
+		var result = function () {
+			switch (expression.$) {
+				case 'Literal':
+					var valueType = expression.a;
+					return $elm$core$Result$Ok(valueType);
+				case 'Variable':
+					var _var = expression.a;
+					return A2(
 						$elm$core$Result$andThen,
 						$author$project$ScreeptV2$resolveVariable(state),
-						A2($author$project$ScreeptV2$resolveIdentifierToString, state, identifier)));
-			default:
-				var func = expression.a;
-				var expressions = expression.b;
-				return A2(
-					$elm$core$Result$andThen,
-					function (args) {
-						return A2(
-							$elm$core$Maybe$withDefault,
-							$elm$core$Result$Err($author$project$ScreeptV2$Undefined),
-							A2(
-								$elm$core$Maybe$map,
-								function (f) {
-									return f(args);
-								},
-								A2($elm$core$Dict$get, func, $author$project$ScreeptV2$standardLibrary)));
-					},
-					$elm_community$result_extra$Result$Extra$combine(
+						A2($author$project$ScreeptV2$resolveIdentifierToString, state, _var));
+				case 'UnaryExpression':
+					var unaryOp = expression.a;
+					var e = expression.b;
+					return A3($author$project$ScreeptV2$evaluateUnaryExpression, state, unaryOp, e);
+				case 'BinaryExpression':
+					var e1 = expression.a;
+					var binaryOp = expression.b;
+					var e2 = expression.c;
+					return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
+				case 'TertiaryExpression':
+					var e1 = expression.a;
+					var tertiaryOp = expression.b;
+					var e2 = expression.c;
+					var e3 = expression.d;
+					return A5($author$project$ScreeptV2$evaluateTertiaryExpression, state, tertiaryOp, e1, e2, e3);
+				case 'FunctionCall':
+					var identifier = expression.a;
+					var expressions = expression.b;
+					return A2(
+						$elm$core$Result$andThen,
+						function (_var) {
+							if (_var.$ === 'Func') {
+								var expr = _var.a;
+								var runTimeState = function () {
+									var varName = function (i) {
+										return $author$project$ScreeptV2$LiteralIdentifier(
+											'__' + $elm$core$String$fromInt(i + 1));
+									};
+									var bindings = $author$project$ScreeptV2$Block(
+										A2(
+											$elm$core$List$map,
+											function (_v14) {
+												var i = _v14.a;
+												var e = _v14.b;
+												return A2(
+													$author$project$ScreeptV2$Bind,
+													varName(i),
+													e);
+											},
+											A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, expressions)));
+									return A2(
+										$author$project$ScreeptV2$executeStatement,
+										bindings,
+										_Utils_Tuple2(state, _List_Nil));
+								}();
+								return A2(
+									$elm$core$Result$andThen,
+									function (_v13) {
+										var boundState = _v13.a;
+										return A2($author$project$ScreeptV2$evaluateExpression, boundState, expr);
+									},
+									runTimeState);
+							} else {
+								return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
+							}
+						},
 						A2(
-							$elm$core$List$map,
-							$author$project$ScreeptV2$evaluateExpression(state),
-							expressions)));
-		}
+							$elm$core$Result$andThen,
+							$author$project$ScreeptV2$resolveVariable(state),
+							A2($author$project$ScreeptV2$resolveIdentifierToString, state, identifier)));
+				default:
+					var func = expression.a;
+					var expressions = expression.b;
+					return A2(
+						$elm$core$Result$andThen,
+						function (args) {
+							return A2(
+								$elm$core$Maybe$withDefault,
+								$elm$core$Result$Err($author$project$ScreeptV2$Undefined),
+								A2(
+									$elm$core$Maybe$map,
+									function (f) {
+										return f(args);
+									},
+									A2($elm$core$Dict$get, func, $author$project$ScreeptV2$standardLibrary)));
+						},
+						$elm_community$result_extra$Result$Extra$combine(
+							A2(
+								$elm$core$List$map,
+								$author$project$ScreeptV2$evaluateExpression(state),
+								expressions)));
+			}
+		}();
+		var _v10 = A2(
+			$elm$core$Debug$log,
+			'EVAL EXPRESSION',
+			_Utils_Tuple2(result, expression));
+		return result;
 	});
 var $author$project$ScreeptV2$evaluateTertiaryExpression = F5(
 	function (state, tertiaryOp, e1, e2, e3) {
@@ -8960,6 +8967,89 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
 			seed0);
 	});
+var $author$project$ParsedEditable$init = F3(
+	function (text, parser, formatter) {
+		return {
+			formatter: formatter,
+			parsed: A2($elm$parser$Parser$run, parser, text),
+			parser: parser,
+			text: text
+		};
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var $elm$core$String$repeatHelp = F3(
+	function (n, chunk, result) {
+		return (n <= 0) ? result : A3(
+			$elm$core$String$repeatHelp,
+			n >> 1,
+			_Utils_ap(chunk, chunk),
+			(!(n & 1)) ? result : _Utils_ap(result, chunk));
+	});
+var $elm$core$String$repeat = F2(
+	function (n, chunk) {
+		return A3($elm$core$String$repeatHelp, n, chunk, '');
+	});
+var $author$project$ScreeptV2$stringifyPrettyStatement = F2(
+	function (i, statement) {
+		var ident = function (id) {
+			return A2($elm$core$String$repeat, id, ' ');
+		};
+		return _Utils_ap(
+			ident(i),
+			function () {
+				switch (statement.$) {
+					case 'Bind':
+						var identifier = statement.a;
+						var expression = statement.b;
+						return $author$project$ScreeptV2$stringifyIdentifier(identifier) + (' = ' + $author$project$ScreeptV2$stringifyExpression(expression));
+					case 'Block':
+						var statements = statement.a;
+						return $elm$core$List$isEmpty(statements) ? '{}' : ('{\n' + (A2(
+							$elm$core$String$join,
+							';\n',
+							A2(
+								$elm$core$List$map,
+								$author$project$ScreeptV2$stringifyPrettyStatement(i + 1),
+								statements)) + ('\n' + (ident(i) + '}'))));
+					case 'If':
+						var expression = statement.a;
+						var success = statement.b;
+						var failure = statement.c;
+						return 'IF ' + ($author$project$ScreeptV2$stringifyExpression(expression) + (' THEN\n' + (A2($author$project$ScreeptV2$stringifyPrettyStatement, i + 1, success) + ('\n' + (ident(i) + ('ELSE ' + A2($author$project$ScreeptV2$stringifyPrettyStatement, i + 1, failure)))))));
+					case 'Print':
+						var expression = statement.a;
+						return 'PRINT ' + $author$project$ScreeptV2$stringifyExpression(expression);
+					case 'RunProc':
+						var string = statement.a;
+						return 'RUN ' + string;
+					case 'Rnd':
+						var identifier = statement.a;
+						var from = statement.b;
+						var to = statement.c;
+						return 'RND ' + ($author$project$ScreeptV2$stringifyIdentifier(identifier) + (' ' + ($author$project$ScreeptV2$stringifyExpression(from) + (' ' + $author$project$ScreeptV2$stringifyExpression(to)))));
+					default:
+						var string = statement.a;
+						var procedure = statement.b;
+						return 'PROC ' + (string + (' ' + A2($author$project$ScreeptV2$stringifyPrettyStatement, i + 1, procedure)));
+				}
+			}());
+	});
+var $author$project$ScreeptEditor$init = {
+	intValueEditor: A3($author$project$ParsedEditable$init, '!(#[(farm_level?\"has level\":\"no level\"),\"_\",book,[\"jan\"]] + 1)', $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression),
+	statementEditor: A3(
+		$author$project$ParsedEditable$init,
+		'{ turn = (turn + 1);  turns_count = (turns_count - 1);  minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));  hour = ((turn / turns_per_hour) %% 24);  day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 }; IF (minutes?1:0) THEN {  } ELSE {  }; PROC sub { RND d6 1 6 } }',
+		$author$project$ScreeptV2$parserStatement,
+		$author$project$ScreeptV2$stringifyPrettyStatement(0)),
+	value: $elm$core$Maybe$Nothing
+};
 var $mhoare$elm_stack$Stack$Stack = function (a) {
 	return {$: 'Stack', a: a};
 };
@@ -9113,6 +9203,7 @@ var $author$project$Main$init = function (_v0) {
 			gameDialog: $author$project$Main$NotLoaded,
 			isDebug: true,
 			mainMenuDialog: $author$project$DialogGame$initSimple($author$project$Main$mainMenuDialogs),
+			screeptEditor: $author$project$ScreeptEditor$init,
 			urlLoader: $elm$core$Maybe$Nothing
 		},
 		$elm$core$Platform$Cmd$batch(
@@ -9129,7 +9220,7 @@ var $author$project$Main$init = function (_v0) {
 var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),
-	'CONCAT(\n\"You are on plot \",farm_plot,(${CONCAT(\"farm_plot_tilled_\",farm_plot)}\n?\", tilled\":\", not tilled\"))');
+	'CONCAT(\n"You are on plot ",farm_plot,(${CONCAT("farm_plot_tilled_",farm_plot)}\n?", tilled":", not tilled"))');
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
@@ -9386,6 +9477,8 @@ var $author$project$DialogGame$executeAction = F2(
 							var s = _v2.a;
 							return s;
 						} else {
+							var e = _v1.a;
+							var _v3 = A2($elm$core$Debug$log, 'SCREEPT_STATEMENT_ERROR', e);
 							return gameState.screeptState;
 						}
 					}();
@@ -9415,8 +9508,8 @@ var $author$project$DialogGame$executeAction = F2(
 					return A3(
 						$elm$core$List$foldl,
 						F2(
-							function (a, _v3) {
-								var state = _v3.a;
+							function (a, _v4) {
+								var state = _v4.a;
 								return A2($author$project$DialogGame$executeAction, a, state);
 							}),
 						_Utils_Tuple2(gameState, $elm$core$Maybe$Nothing),
@@ -9448,6 +9541,49 @@ var $author$project$DialogGame$update = F2(
 				model,
 				{gameState: gs}),
 			code);
+	});
+var $author$project$ParsedEditable$update = F2(
+	function (msg, model) {
+		if (msg.$ === 'FormatClick') {
+			var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
+			var text = function () {
+				if (parsed.$ === 'Ok') {
+					var t = parsed.a;
+					return model.formatter(t);
+				} else {
+					return model.text;
+				}
+			}();
+			return _Utils_update(
+				model,
+				{parsed: parsed, text: text});
+		} else {
+			var v = msg.a;
+			return _Utils_update(
+				model,
+				{
+					parsed: A2($elm$parser$Parser$run, model.parser, v),
+					text: v
+				});
+		}
+	});
+var $author$project$ScreeptEditor$update = F2(
+	function (msg, model) {
+		if (msg.$ === 'StatementEditor') {
+			var m = msg.a;
+			return _Utils_update(
+				model,
+				{
+					statementEditor: A2($author$project$ParsedEditable$update, m, model.statementEditor)
+				});
+		} else {
+			var m = msg.a;
+			return _Utils_update(
+				model,
+				{
+					intValueEditor: A2($author$project$ParsedEditable$update, m, model.intValueEditor)
+				});
+		}
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -9492,6 +9628,15 @@ var $author$project$Main$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
+			case 'ScreeptEditor':
+				var seMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							screeptEditor: A2($author$project$ScreeptEditor$update, seMsg, model.screeptEditor)
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'GotGameDefinition':
 				var result = msg.a;
 				if (result.$ === 'Err') {
@@ -9627,6 +9772,9 @@ var $author$project$Main$GameDialog = function (a) {
 };
 var $author$project$Main$MainMenuDialog = function (a) {
 	return {$: 'MainMenuDialog', a: a};
+};
+var $author$project$Main$ScreeptEditor = function (a) {
+	return {$: 'ScreeptEditor', a: a};
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -9830,13 +9978,13 @@ var $author$project$DialogGame$view = function (_v0) {
 					]),
 				_List_fromArray(
 					[
-						A2(
+						A2($elm$core$Dict$member, '__statusLine', gameState.screeptState.vars) ? A2(
 						$author$project$DialogGame$viewDialogText,
 						A2(
 							$author$project$ScreeptV2$FunctionCall,
 							$author$project$ScreeptV2$LiteralIdentifier('__statusLine'),
 							_List_Nil),
-						gameState),
+						gameState) : $elm$html$Html$text(''),
 						A2($author$project$DialogGame$viewDialogText, dialog.text, gameState),
 						function () {
 						var isVisible = function (mCondition) {
@@ -9874,13 +10022,25 @@ var $author$project$DialogGame$view = function (_v0) {
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
 };
-var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
-var $author$project$Main$EditUrlLoader = function (a) {
-	return {$: 'EditUrlLoader', a: a};
+var $author$project$ScreeptEditor$StatementEditor = function (a) {
+	return {$: 'StatementEditor', a: a};
 };
-var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
+var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $author$project$ScreeptV2$stringifyStatement = function (statement) {
+	return A2($author$project$ScreeptV2$stringifyPrettyStatement, 0, statement);
+};
+var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
+var $author$project$ParsedEditable$TextEdit = function (a) {
+	return {$: 'TextEdit', a: a};
+};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -9912,7 +10072,154 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
+var $author$project$ParsedEditable$problemToString = function (problem) {
+	switch (problem.$) {
+		case 'Expecting':
+			var string = problem.a;
+			return 'Expecting ' + string;
+		case 'ExpectingInt':
+			return 'Expecting Int ';
+		case 'ExpectingHex':
+			return 'ExpectingHex';
+		case 'ExpectingOctal':
+			return 'ExpectingOctal';
+		case 'ExpectingBinary':
+			return 'ExpectingBinary';
+		case 'ExpectingFloat':
+			return 'ExpectingFloat';
+		case 'ExpectingNumber':
+			return 'ExpectingNumber';
+		case 'ExpectingVariable':
+			return 'ExpectingVariable';
+		case 'ExpectingSymbol':
+			var string = problem.a;
+			return 'ExpectingSymbol ' + string;
+		case 'ExpectingKeyword':
+			var string = problem.a;
+			return 'ExpectingKeyword ' + string;
+		case 'ExpectingEnd':
+			return 'ExpectingEnd';
+		case 'UnexpectedChar':
+			return 'UnexpectedChar';
+		case 'Problem':
+			var string = problem.a;
+			return 'Problem ' + string;
+		default:
+			return 'BadRepeat';
+	}
+};
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$ParsedEditable$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$textarea,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$value(model.text),
+						$elm$html$Html$Events$onInput($author$project$ParsedEditable$TextEdit),
+						A2($elm$html$Html$Attributes$style, 'width', '100%'),
+						A2($elm$html$Html$Attributes$style, 'height', '10em'),
+						A2($elm$html$Html$Attributes$style, 'font-family', 'monospace')
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$ParsedEditable$FormatClick)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Format')
+					])),
+				function () {
+				var _v0 = model.parsed;
+				if (_v0.$ === 'Ok') {
+					return $elm$html$Html$text('Parsed ok');
+				} else {
+					var errors = _v0.a;
+					var viewProblem = function (_v1) {
+						var row = _v1.row;
+						var col = _v1.col;
+						var problem = _v1.problem;
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(
+									'row: ' + ($elm$core$String$fromInt(row) + (', col: ' + ($elm$core$String$fromInt(col) + (', problem: ' + $author$project$ParsedEditable$problemToString(problem))))))
+								]));
+					};
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						A2($elm$core$List$map, viewProblem, errors));
+				}
+			}()
+			]));
+};
+var $author$project$ScreeptEditor$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$map,
+				$author$project$ScreeptEditor$StatementEditor,
+				$author$project$ParsedEditable$view(model.statementEditor)),
+				function () {
+				var _v0 = model.statementEditor.parsed;
+				if (_v0.$ === 'Ok') {
+					var v = _v0.a;
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$pre,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										A2($author$project$ScreeptV2$stringifyPrettyStatement, 0, v))
+									])),
+								A2(
+								$elm$html$Html$pre,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										A3(
+											$elm$core$String$replace,
+											'\n',
+											' ',
+											A3(
+												$elm$core$String$replace,
+												'\"',
+												'\\\"',
+												$author$project$ScreeptV2$stringifyStatement(v))))
+									]))
+							]));
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}()
+			]));
+};
+var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
+var $author$project$Main$EditUrlLoader = function (a) {
+	return {$: 'EditUrlLoader', a: a};
+};
+var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$viewUrlLoader = function (model) {
 	var _v0 = model.urlLoader;
 	if (_v0.$ === 'Just') {
@@ -10004,6 +10311,10 @@ var $author$project$Main$view = function (model) {
 								]));
 				}
 			}(),
+				A2(
+				$elm$html$Html$map,
+				$author$project$Main$ScreeptEditor,
+				$author$project$ScreeptEditor$view(model.screeptEditor)),
 				$author$project$Main$viewUrlLoader(model)
 			]));
 };

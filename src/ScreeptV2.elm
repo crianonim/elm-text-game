@@ -345,7 +345,9 @@ stringifyExpression expression =
         BinaryExpression expr1 binaryOp expr2 ->
             "("
                 ++ stringifyExpression expr1
+                ++ " "
                 ++ stringifyBinaryOperator binaryOp
+                ++ " "
                 ++ stringifyExpression expr2
                 ++ ")"
 
@@ -354,12 +356,12 @@ stringifyExpression expression =
                 ++ stringifyExpression expr1
                 ++ (case tertiaryOp of
                         Conditional ->
-                            "?"
+                            " ? "
                    )
                 ++ stringifyExpression expr2
                 ++ (case tertiaryOp of
                         Conditional ->
-                            ":"
+                            " : "
                    )
                 ++ stringifyExpression expr3
                 ++ ")"
@@ -420,34 +422,42 @@ stringifyBinaryOperator binaryOp =
 
 stringifyStatement : Statement -> String
 stringifyStatement statement =
-    case statement of
-        Bind identifier expression ->
-            stringifyIdentifier identifier ++ " = " ++ stringifyExpression expression
+    stringifyPrettyStatement 0 statement
 
-        Block statements ->
-            "{"
-                ++ (List.map stringifyStatement statements |> String.join " ; ")
-                ++ "}"
 
-        If expression success failure ->
-            "IF "
-                ++ stringifyExpression expression
-                ++ " THEN "
-                ++ stringifyStatement success
-                ++ " ELSE "
-                ++ stringifyStatement failure
+stringifyPrettyStatement : Int -> Statement -> String
+stringifyPrettyStatement i statement =
+    let
+        ident id =
+            String.repeat id " "
+    in
+    ident i
+        ++ (case statement of
+                Bind identifier expression ->
+                    stringifyIdentifier identifier ++ " = " ++ stringifyExpression expression
 
-        Print expression ->
-            "PRINT " ++ stringifyExpression expression
+                Block statements ->
+                    if List.isEmpty statements then
+                        "{}"
 
-        RunProc string ->
-            "RUN " ++ string
+                    else
+                        "{\n" ++ String.join ";\n" (List.map (stringifyPrettyStatement (i + 1)) statements) ++ "\n" ++ ident i ++ "}"
 
-        Rnd identifier from to ->
-            "RND " ++ stringifyIdentifier identifier ++ " " ++ stringifyExpression from ++ " " ++ stringifyExpression to
+                If expression success failure ->
+                    "IF " ++ stringifyExpression expression ++ " THEN\n" ++ stringifyPrettyStatement (i + 1) success ++ "\n" ++ ident i ++ "ELSE " ++ stringifyPrettyStatement (i + 1) failure
 
-        Proc string procedure ->
-            "PROC " ++ string ++ " " ++ stringifyStatement procedure
+                Print expression ->
+                    "PRINT " ++ stringifyExpression expression
+
+                RunProc string ->
+                    "RUN " ++ string
+
+                Rnd identifier from to ->
+                    "RND " ++ stringifyIdentifier identifier ++ " " ++ stringifyExpression from ++ " " ++ stringifyExpression to
+
+                Proc string procedure ->
+                    "PROC " ++ string ++ " " ++ stringifyPrettyStatement (i + 1) procedure
+           )
 
 
 encodeValue : Value -> E.Value
@@ -509,61 +519,68 @@ decodeStatement =
 
 evaluateExpression : State -> Expression -> Result ScreeptError Value
 evaluateExpression state expression =
-    case expression of
-        Literal valueType ->
-            Ok valueType
+    let
+        result =
+            case expression of
+                Literal valueType ->
+                    Ok valueType
 
-        Variable var ->
-            resolveIdentifierToString state var
-                |> Result.andThen (resolveVariable state)
+                Variable var ->
+                    resolveIdentifierToString state var
+                        |> Result.andThen (resolveVariable state)
 
-        UnaryExpression unaryOp e ->
-            evaluateUnaryExpression state unaryOp e
+                UnaryExpression unaryOp e ->
+                    evaluateUnaryExpression state unaryOp e
 
-        BinaryExpression e1 binaryOp e2 ->
-            evaluateBinaryExpression state e1 binaryOp e2
+                BinaryExpression e1 binaryOp e2 ->
+                    evaluateBinaryExpression state e1 binaryOp e2
 
-        TertiaryExpression e1 tertiaryOp e2 e3 ->
-            evaluateTertiaryExpression state tertiaryOp e1 e2 e3
+                TertiaryExpression e1 tertiaryOp e2 e3 ->
+                    evaluateTertiaryExpression state tertiaryOp e1 e2 e3
 
-        FunctionCall identifier expressions ->
-            resolveIdentifierToString state identifier
-                |> Result.andThen (resolveVariable state)
-                |> Result.andThen
-                    (\var ->
-                        case var of
-                            Func expr ->
-                                let
-                                    runTimeState : Result ScreeptError ( State, List String )
-                                    runTimeState =
+                FunctionCall identifier expressions ->
+                    resolveIdentifierToString state identifier
+                        |> Result.andThen (resolveVariable state)
+                        |> Result.andThen
+                            (\var ->
+                                case var of
+                                    Func expr ->
                                         let
-                                            varName i =
-                                                LiteralIdentifier <| "__" ++ String.fromInt (i + 1)
+                                            runTimeState : Result ScreeptError ( State, List String )
+                                            runTimeState =
+                                                let
+                                                    varName i =
+                                                        LiteralIdentifier <| "__" ++ String.fromInt (i + 1)
 
-                                            bindings : Statement
-                                            bindings =
-                                                Block (List.map (\( i, e ) -> Bind (varName i) e) (List.indexedMap Tuple.pair expressions))
+                                                    bindings : Statement
+                                                    bindings =
+                                                        Block (List.map (\( i, e ) -> Bind (varName i) e) (List.indexedMap Tuple.pair expressions))
+                                                in
+                                                executeStatement bindings ( state, [] )
                                         in
-                                        executeStatement bindings ( state, [] )
-                                in
-                                runTimeState
-                                    |> Result.andThen
-                                        (\( boundState, _ ) -> evaluateExpression boundState expr)
+                                        runTimeState
+                                            |> Result.andThen
+                                                (\( boundState, _ ) -> evaluateExpression boundState expr)
 
-                            _ ->
-                                Err TypeError
-                    )
+                                    _ ->
+                                        Err TypeError
+                            )
 
-        StandardLibrary func expressions ->
-            expressions
-                |> List.map (evaluateExpression state)
-                |> Result.Extra.combine
-                |> Result.andThen
-                    (\args ->
-                        Dict.get func standardLibrary
-                            |> Maybe.map (\f -> f args)
-                            |> Maybe.withDefault (Err Undefined)
-                    )
+                StandardLibrary func expressions ->
+                    expressions
+                        |> List.map (evaluateExpression state)
+                        |> Result.Extra.combine
+                        |> Result.andThen
+                            (\args ->
+                                Dict.get func standardLibrary
+                                    |> Maybe.map (\f -> f args)
+                                    |> Maybe.withDefault (Err Undefined)
+                            )
+
+        _ =
+            Debug.log "EVAL EXPRESSION" ( result, expression )
+    in
+    result
 
 
 evaluateUnaryExpression : State -> UnaryOp -> Expression -> Result ScreeptError Value
@@ -901,9 +918,10 @@ evaluateExpressionToString state expr =
 
 
 newScreeptParseExample : Result (List Parser.DeadEnd) Expression
-newScreeptParseExample ="""CONCAT(
-\"You are on plot \",farm_plot,(${CONCAT(\"farm_plot_tilled_\",farm_plot)}
-?\", tilled\":\", not tilled\"))"""
+newScreeptParseExample =
+    """CONCAT(
+"You are on plot ",farm_plot,(${CONCAT("farm_plot_tilled_",farm_plot)}
+?", tilled":", not tilled"))"""
         |> Parser.run (parserExpression |. Parser.end)
 
 

@@ -511,10 +511,11 @@
     "test": "{ RND d6_1 1  6;\nRND d6_2 1  6;\ntwod6 = (d6_1 + d6_2);\nIF ((twod6 + test_score) > test_difficulty) THEN test_success = 1 ELSE test_success = 0 }"
   },
   "vars": {
-    "__statusLine": "\"\"",
+    "__statusLine": { "func":"\"\"" },
     "codeword_apple": 0,
     "codeword_aspen": 0,
     "fought_tree": 0,
+    "fight_won": 0,
     "inv_armor_leather": 1,
     "inv_weapon": 1,
     "money": 126,
@@ -534,6 +535,5 @@
     "player_name": "Liana",
     "player_profession": "wayfarer"
 
-  },
-  "statusLine": "\"\""
+  }
 }

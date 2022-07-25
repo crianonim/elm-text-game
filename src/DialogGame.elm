@@ -128,7 +128,11 @@ executeAction dialogActionExecution gameState =
                         Ok ( s, _ ) ->
                             s
 
-                        Err _ ->
+                        Err e ->
+                            let
+                                _ =
+                                    Debug.log "SCREEPT_STATEMENT_ERROR" e
+                            in
                             gameState.screeptState
             in
             ( { gameState
@@ -162,13 +166,11 @@ executeAction dialogActionExecution gameState =
 
 setRndSeed : Random.Seed -> Model -> Model
 setRndSeed seed ({ gameState } as model) =
-
- let
-     screeptState = gameState.screeptState
- in
-
-
-  { model | gameState = { gameState | screeptState  = {screeptState | rnd =seed } }}
+    let
+        screeptState =
+            gameState.screeptState
+    in
+    { model | gameState = { gameState | screeptState = { screeptState | rnd = seed } } }
 
 
 badDialog : Dialog
@@ -348,7 +350,11 @@ view { gameState, dialogs } =
     in
     div [ class "container" ]
         [ div [ class "dialog" ]
-            [ viewDialogText (FunctionCall (LiteralIdentifier "__statusLine") []) gameState
+            [ if Dict.member "__statusLine" gameState.screeptState.vars then
+                viewDialogText (FunctionCall (LiteralIdentifier "__statusLine") []) gameState
+
+              else
+                text ""
             , viewDialogText dialog.text gameState
             , let
                 isVisible mCondition =
