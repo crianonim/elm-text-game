@@ -48,6 +48,7 @@ type Statement
     | Print Expression
     | RunProc String
     | Rnd Identifier Expression Expression
+    | Proc String Statement
 
 
 type Identifier
@@ -290,6 +291,16 @@ parserStatement =
             |= parserExpression
             |. Parser.spaces
             |= parserExpression
+        , Parser.succeed Proc
+            |. Parser.keyword "PROC"
+            |. Parser.spaces
+            |= Parser.variable
+                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
+                , inner = \c -> Char.isAlphaNum c || c == '_'
+                , reserved = Set.fromList reservedWords
+                }
+            |. Parser.spaces
+            |= Parser.lazy (\_ -> parserStatement)
         ]
 
 
@@ -428,6 +439,9 @@ stringifyStatement statement =
 
         Rnd identifier from to ->
             "RND " ++ stringifyIdentifier identifier ++ " " ++ stringifyExpression from ++ " " ++ stringifyExpression to
+
+        Proc string procedure ->
+            "PROC " ++ string ++ " " ++ stringifyStatement procedure
 
 
 encodeValue : Value -> E.Value
@@ -808,6 +822,9 @@ executeStatement statement ( state, output ) =
                                 )
                     )
 
+        Proc string procedure ->
+            Ok ( { state | procedures = Dict.insert string procedure state.procedures }, output )
+
 
 executeStringStatement : String -> State -> ( State, List String )
 executeStringStatement statementString state =
@@ -883,7 +900,20 @@ newScreeptParseExample =
 
 parseStatementExample : Result (List Parser.DeadEnd) Statement
 parseStatementExample =
-    "{ RND b 100 101; PRINT CONCAT(add2,t1,t2); if = 12; IF 0 THEN PRINT \"Y\" ELSE PRINT f1(); PRINT (\"\"?3:b) }"
+    """{ RND b 100 101;
+PRINT CONCAT(add2,t1,t2);
+if = 12; IF 0 THEN PRINT "Y" ELSE PRINT f1();
+fff = FUNC (__1 * __2);
+bbb = fff( 12, 5);
+PROC turn { turn = (turn + 1);
+          turns_count = (turns_count - 1);
+          minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));
+          hour = ((turn / turns_per_hour) %% 24);
+          day = (turn / (turns_per_hour * 24));
+          IF (turns_count > 0) THEN RUN turn ELSE {turns_count = 5} };
+RUN turn;
+PRINT bbb;
+PRINT (""?3:b) }"""
         |> Parser.run (parserStatement |. Parser.end)
 
 

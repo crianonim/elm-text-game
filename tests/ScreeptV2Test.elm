@@ -140,4 +140,5 @@ fuzzStatement =
         , ( 2, Fuzz.map Print fuzzExpression )
         , ( 1, Fuzz.map RunProc fuzzLiteralIdentifier )
         , ( 1, Fuzz.map3 Rnd fuzzIdentifier fuzzExpression fuzzExpression )
+        , ( 1, Fuzz.map2 Proc fuzzLiteralIdentifier (Fuzz.lazy (\_ -> fuzzStatement)) )
         ]
