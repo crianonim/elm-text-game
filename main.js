@@ -6503,7 +6503,7 @@ var $author$project$ScreeptV2$exampleScreeptState = {
 				'f1',
 				$author$project$ScreeptV2$Func(
 					$author$project$ScreeptV2$Literal(
-						$author$project$ScreeptV2$Text('Wokred')))),
+						$author$project$ScreeptV2$Text('Worked')))),
 				_Utils_Tuple2(
 				'add2',
 				$author$project$ScreeptV2$Func(
@@ -9122,14 +9122,14 @@ var $author$project$Main$init = function (_v0) {
 					$elm$http$Http$get(
 					{
 						expect: A2($elm$http$Http$expectJson, $author$project$Main$GotGameDefinition, $author$project$DialogGame$decodeGameDefinition),
-						url: 'games/ts2.json'
+						url: 'games/fabled.json'
 					})
 				])));
 };
 var $author$project$ScreeptV2$newScreeptParseExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserExpression, $elm$parser$Parser$end),
-	'(int1 + 3)');
+	'CONCAT(\n\"You are on plot \",farm_plot,(${CONCAT(\"farm_plot_tilled_\",farm_plot)}\n?\", tilled\":\", not tilled\"))');
 var $author$project$ScreeptV2$parseStatementExample = A2(
 	$elm$parser$Parser$run,
 	A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
@@ -9299,7 +9299,18 @@ var $author$project$Main$mainMenuActions = F2(
 var $author$project$DialogGame$setRndSeed = F2(
 	function (seed, model) {
 		var gameState = model.gameState;
-		return model;
+		var screeptState = gameState.screeptState;
+		return _Utils_update(
+			model,
+			{
+				gameState: _Utils_update(
+					gameState,
+					{
+						screeptState: _Utils_update(
+							screeptState,
+							{rnd: seed})
+					})
+			});
 	});
 var $mhoare$elm_stack$Stack$pop = function (_v0) {
 	var stack = _v0.a;

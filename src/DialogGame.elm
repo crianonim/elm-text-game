@@ -162,11 +162,13 @@ executeAction dialogActionExecution gameState =
 
 setRndSeed : Random.Seed -> Model -> Model
 setRndSeed seed ({ gameState } as model) =
-    model
+
+ let
+     screeptState = gameState.screeptState
+ in
 
 
-
---{ model | gameState = { gameState | rnd = seed } }
+  { model | gameState = { gameState | screeptState  = {screeptState | rnd =seed } }}
 
 
 badDialog : Dialog

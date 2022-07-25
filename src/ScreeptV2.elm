@@ -200,11 +200,10 @@ parserBinaryOp =
             |. Parser.symbol "-"
         , Parser.succeed Mul
             |. Parser.symbol "*"
-         , Parser.succeed DivInt
-                    |. Parser.symbol "//"
+        , Parser.succeed DivInt
+            |. Parser.symbol "//"
         , Parser.succeed Div
             |. Parser.symbol "/"
-
         , Parser.succeed Mod
             |. Parser.symbol "%%"
         , Parser.succeed Gt
@@ -902,9 +901,9 @@ evaluateExpressionToString state expr =
 
 
 newScreeptParseExample : Result (List Parser.DeadEnd) Expression
-newScreeptParseExample =
-    --"(!((\"Jan\"+t1)+t2)+5)"
-    "(int1 + 3)"
+newScreeptParseExample ="""CONCAT(
+\"You are on plot \",farm_plot,(${CONCAT(\"farm_plot_tilled_\",farm_plot)}
+?\", tilled\":\", not tilled\"))"""
         |> Parser.run (parserExpression |. Parser.end)
 
 
@@ -953,7 +952,7 @@ exampleScreeptState =
             , ( "zero", Number 0 )
             , ( "t1", Text "Jan" )
             , ( "t2", Text "add2" )
-            , ( "f1", Func <| Literal <| Text "Wokred" )
+            , ( "f1", Func <| Literal <| Text "Worked" )
             , ( "add2", Func (BinaryExpression (Variable <| LiteralIdentifier "__1") Add (Variable (LiteralIdentifier "__2"))) )
             ]
     , rnd = Random.initialSeed 1
