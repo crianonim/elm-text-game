@@ -19,6 +19,7 @@ type BinaryOp
     | Sub
     | Mul
     | Div
+    | DivInt
     | Mod
     | Gt
     | Lt
@@ -199,8 +200,11 @@ parserBinaryOp =
             |. Parser.symbol "-"
         , Parser.succeed Mul
             |. Parser.symbol "*"
+         , Parser.succeed DivInt
+                    |. Parser.symbol "//"
         , Parser.succeed Div
             |. Parser.symbol "/"
+
         , Parser.succeed Mod
             |. Parser.symbol "%%"
         , Parser.succeed Gt
@@ -392,6 +396,9 @@ stringifyBinaryOperator binaryOp =
 
         Div ->
             "/"
+
+        DivInt ->
+            "//"
 
         Mod ->
             "%%"
@@ -669,6 +676,9 @@ evaluateBinaryExpression state e1 binaryOp e2 =
 
                                 Div ->
                                     floatOperation (/) expr1 expr2
+
+                                DivInt ->
+                                    floatOperation (\x y -> toFloat (floor (x / y))) expr1 expr2
 
                                 Mod ->
                                     floatOperation (\x y -> modBy (round y) (round x) |> toFloat) expr1 expr2

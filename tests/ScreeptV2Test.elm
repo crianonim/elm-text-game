@@ -123,7 +123,7 @@ fuzzUnaryOp =
 fuzzBinaryOp : Fuzzer BinaryOp
 fuzzBinaryOp =
     Fuzz.oneOf <|
-        List.map Fuzz.constant [ Add, Sub, Mul, Div, Mod, Gt, Lt, Eq, And, Or ]
+        List.map Fuzz.constant [ Add, Sub, Mul, Div, DivInt, Mod, Gt, Lt, Eq, And, Or ]
 
 
 fuzzTertiaryOp : Fuzzer TertiaryOp

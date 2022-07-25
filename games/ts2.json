@@ -24,7 +24,7 @@
   ],
   "startDialogId": "start",
   "procedures": {
-    "turn": "{ turn = (turn + 1);\nturns_count = (turns_count - 1);\nminutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nhour = ((turn / turns_per_hour) %% 24);\nday = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE {turns_count = 5} }",
+    "turn": "{ turn = (turn + 1);\nturns_count = (turns_count - 1);\nminutes = ((turn %% turns_per_hour) * (60 // turns_per_hour));\nhour = ((turn // turns_per_hour) %% 24);\nday = (turn // (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE {turns_count = 5} }",
     "farm_upgrade" : "{ money = (money - farm_upgrade_cost()); farm_level = (farm_level + 1) }",
     "farm_till": "{ turn_count = 10; RUN turn; ${CONCAT(\"farm_plot_tilled_\",farm_plot)} = 1 }"
   },

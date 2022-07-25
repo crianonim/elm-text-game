@@ -5640,6 +5640,8 @@ var $author$project$ScreeptV2$stringifyBinaryOperator = function (binaryOp) {
 			return '*';
 		case 'Div':
 			return '/';
+		case 'DivInt':
+			return '//';
 		case 'Mod':
 			return '%%';
 		case 'Gt':
@@ -6086,6 +6088,15 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 								return A3(floatOperation, $elm$core$Basics$mul, expr1, expr2);
 							case 'Div':
 								return A3(floatOperation, $elm$core$Basics$fdiv, expr1, expr2);
+							case 'DivInt':
+								return A3(
+									floatOperation,
+									F2(
+										function (x, y) {
+											return $elm$core$Basics$floor(x / y);
+										}),
+									expr1,
+									expr2);
 							case 'Mod':
 								return A3(
 									floatOperation,
@@ -7051,6 +7062,7 @@ var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
 var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
 var $author$project$ScreeptV2$And = {$: 'And'};
 var $author$project$ScreeptV2$Div = {$: 'Div'};
+var $author$project$ScreeptV2$DivInt = {$: 'DivInt'};
 var $author$project$ScreeptV2$Eq = {$: 'Eq'};
 var $author$project$ScreeptV2$Gt = {$: 'Gt'};
 var $author$project$ScreeptV2$Lt = {$: 'Lt'};
@@ -7111,6 +7123,10 @@ var $author$project$ScreeptV2$parserBinaryOp = $elm$parser$Parser$oneOf(
 			$elm$parser$Parser$ignorer,
 			$elm$parser$Parser$succeed($author$project$ScreeptV2$Mul),
 			$elm$parser$Parser$symbol('*')),
+			A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$ScreeptV2$DivInt),
+			$elm$parser$Parser$symbol('//')),
 			A2(
 			$elm$parser$Parser$ignorer,
 			$elm$parser$Parser$succeed($author$project$ScreeptV2$Div),
