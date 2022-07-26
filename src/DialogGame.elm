@@ -29,7 +29,7 @@ type alias Model =
 type alias DialogOption =
     { text : ScreeptV2.Expression
     , condition : Maybe ScreeptV2.Expression
-    , action : List DialogAction
+    , actions : List DialogAction
     }
 
 
@@ -58,10 +58,8 @@ initSimple dialogs =
 
 emptyGameState : GameState
 emptyGameState =
-    {
-      messages = []
+    { messages = []
     , dialogStack = Stack.initialise |> Stack.push "start"
-
     , screeptEnv = { vars = Dict.empty, procedures = Dict.empty, rnd = Random.initialSeed 666 }
     }
 
@@ -175,7 +173,7 @@ badDialog =
 
 goBackOption : DialogOption
 goBackOption =
-    { text = Literal <| Text "Go back", condition = Nothing, action = [ GoBackAction ] }
+    { text = Literal <| Text "Go back", condition = Nothing, actions = [ GoBackAction ] }
 
 
 
@@ -400,4 +398,4 @@ viewDebug gameState =
 
 viewOption : GameState -> DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptEnv dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.actions, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptEnv dialogOption.text ]

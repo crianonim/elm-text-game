@@ -70,12 +70,10 @@ type ScreeptError
     | UnimplementedYet
 
 
-
 type Value
     = Number Float
     | Text String
     | Func Expression
-
 
 
 standardLibrary : Dict String (List Value -> Result ScreeptError Value)
@@ -96,13 +94,14 @@ parserIdentifier =
             |. Parser.symbol "}"
         ]
 
+
 parserLiteralIdentifier : Parser String
 parserLiteralIdentifier =
     Parser.variable
-                    { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
-                    , inner = \c -> Char.isAlphaNum c || c == '_'
-                    , reserved = Set.empty
-                    }
+        { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
+        , inner = \c -> Char.isAlphaNum c || c == '_'
+        , reserved = Set.empty
+        }
 
 
 parserValue : Parser Value

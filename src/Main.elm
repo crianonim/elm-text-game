@@ -1,10 +1,8 @@
 module Main exposing (main)
 
---import DialogGameEditor
---import Screept
-
 import Browser
 import DialogGame exposing (..)
+import DialogGameEditor
 import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
@@ -80,8 +78,7 @@ init _ =
       --    (Just Game.statusLine)
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
-
-      --, dialogEditor = DialogGameEditor.init
+      , dialogEditor = DialogGameEditor.init
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
@@ -105,24 +102,24 @@ mainMenuDialogs =
         [ { id = "start"
           , text = Literal <| Text "Main Menu"
           , options =
-                [ { text = Literal <| Text "Load Game", condition = Nothing, action = [ GoAction "load_game_definition" ] }
-                , { text = Literal <| Text "Start Game", condition = Just (Variable <| LiteralIdentifier "game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
+                [ { text = Literal <| Text "Load Game", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
+                , { text = Literal <| Text "Start Game", condition = Just (Variable <| LiteralIdentifier "game_loaded"), actions = [ GoAction "in_game", Exit "start_game" ] }
                 ]
           }
         , { id = "load_game_definition"
           , text = Literal <| Text "Load game definition"
           , options =
-                [ { text = Literal <| Text "Load Sandbox", condition = Nothing, action = [ Exit "sandbox" ] }
-                , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
-                , { text = Literal <| Text "Load from url", condition = Nothing, action = [ Exit "load_url" ] }
+                [ { text = Literal <| Text "Load Sandbox", condition = Nothing, actions = [ Exit "sandbox" ] }
+                , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, actions = [ Exit "fabled" ] }
+                , { text = Literal <| Text "Load from url", condition = Nothing, actions = [ Exit "load_url" ] }
                 , DialogGame.goBackOption
                 ]
           }
         , { id = "in_game"
           , text = BinaryExpression (Literal <| Text "Playing: ") Add (Variable <| LiteralIdentifier "game_title")
           , options =
-                [ { text = Literal <| Text "Restart", condition = Nothing, action = [ Exit "start_game" ] }
-                , { text = Literal <| Text "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
+                [ { text = Literal <| Text "Restart", condition = Nothing, actions = [ Exit "start_game" ] }
+                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "stop_game" ] }
                 ]
           }
         ]
@@ -191,8 +188,9 @@ update msg model =
         ScreeptEditor seMsg ->
             ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
 
-        --DialogEditor deMsg ->
-        --    ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
+        DialogEditor deMsg ->
+            ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
+
         GotGameDefinition result ->
             case result of
                 Err e ->
@@ -298,8 +296,7 @@ type alias Model =
     { gameDialog : GameStatus
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
-
-    --, dialogEditor : DialogGameEditor.Model
+    , dialogEditor : DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
     , urlLoader : Maybe String
@@ -311,7 +308,7 @@ type Msg
     | GameDialog DialogGame.Msg
     | SeedGenerated Random.Seed
     | ScreeptEditor ScreeptEditor.Msg
-      --| DialogEditor DialogGameEditor.Msg
+    | DialogEditor DialogGameEditor.Msg
     | GotGameDefinition (Result Http.Error GameDefinition)
     | MainMenuDialog DialogGame.Msg
     | StartGame
@@ -352,8 +349,8 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ --DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
-          DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
+        [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
+        , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
             Started _ gameDialogMenu ->
                 DialogGame.view gameDialogMenu |> Html.map GameDialog

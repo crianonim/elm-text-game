@@ -100,16 +100,7 @@ fuzzAlphaNumString : Fuzzer String
 fuzzAlphaNumString =
     Fuzz.asciiString
         |> Fuzz.map
-            (\s ->
-                String.filter (\c -> c /= 'e' && Char.isAlphaNum c) s
-                    |> (\st ->
-                            if List.member st ScreeptV2.reservedWords then
-                                "_reserved"
-
-                            else
-                                st
-                       )
-            )
+            (String.filter (\c -> c /= 'e' && Char.isAlphaNum c))
 
 
 fuzzUnaryOp : Fuzzer UnaryOp
