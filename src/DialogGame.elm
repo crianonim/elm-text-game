@@ -16,11 +16,7 @@ import Stack exposing (Stack)
 type alias GameState =
     { dialogStack : Stack DialogId
     , messages : List String
-
-    --, procedures : Dict String Statement
-    --, rnd : Random.Seed
-    --, vars : Dict String Screept.Variable
-    , screeptState : ScreeptV2.State
+    , screeptEnv : ScreeptV2.Environment
     }
 
 
@@ -62,12 +58,11 @@ initSimple dialogs =
 
 emptyGameState : GameState
 emptyGameState =
-    { --
+    {
       messages = []
     , dialogStack = Stack.initialise |> Stack.push "start"
 
-    --, vars = Dict.empty
-    , screeptState = { vars = Dict.empty, procedures = Dict.empty, rnd = Random.initialSeed 666 }
+    , screeptEnv = { vars = Dict.empty, procedures = Dict.empty, rnd = Random.initialSeed 666 }
     }
 
 
@@ -118,12 +113,12 @@ executeAction dialogActionExecution gameState =
             ( { gameState | dialogStack = Tuple.second (Stack.pop gameState.dialogStack) }, Nothing )
 
         Message msg ->
-            ( { gameState | messages = ScreeptV2.resolveExpressionToString gameState.screeptState msg :: gameState.messages }, Nothing )
+            ( { gameState | messages = ScreeptV2.resolveExpressionToString gameState.screeptEnv msg :: gameState.messages }, Nothing )
 
         Screept statement ->
             let
-                newScreeptState =
-                    case ScreeptV2.executeStatement statement ( gameState.screeptState, [] ) of
+                newScreeptEnv =
+                    case ScreeptV2.executeStatement statement ( gameState.screeptEnv, [] ) of
                         -- TODO: rejecting the output
                         Ok ( s, _ ) ->
                             s
@@ -133,10 +128,10 @@ executeAction dialogActionExecution gameState =
                                 _ =
                                     Debug.log "SCREEPT_STATEMENT_ERROR" e
                             in
-                            gameState.screeptState
+                            gameState.screeptEnv
             in
             ( { gameState
-                | screeptState = newScreeptState
+                | screeptEnv = newScreeptEnv
               }
             , Nothing
             )
@@ -144,7 +139,7 @@ executeAction dialogActionExecution gameState =
         ConditionalAction condition success failure ->
             let
                 isConditionMet =
-                    ScreeptV2.evaluateExpression gameState.screeptState condition
+                    ScreeptV2.evaluateExpression gameState.screeptEnv condition
                         |> Result.map ScreeptV2.isTruthy
                         |> Result.withDefault False
             in
@@ -167,10 +162,10 @@ executeAction dialogActionExecution gameState =
 setRndSeed : Random.Seed -> Model -> Model
 setRndSeed seed ({ gameState } as model) =
     let
-        screeptState =
-            gameState.screeptState
+        screeptEnv =
+            gameState.screeptEnv
     in
-    { model | gameState = { gameState | screeptState = { screeptState | rnd = seed } } }
+    { model | gameState = { gameState | screeptEnv = { screeptEnv | rnd = seed } } }
 
 
 badDialog : Dialog
@@ -350,7 +345,7 @@ view { gameState, dialogs } =
     in
     div [ class "container" ]
         [ div [ class "dialog" ]
-            [ if Dict.member "__statusLine" gameState.screeptState.vars then
+            [ if Dict.member "__statusLine" gameState.screeptEnv.vars then
                 viewDialogText (FunctionCall (LiteralIdentifier "__statusLine") []) gameState
 
               else
@@ -361,7 +356,7 @@ view { gameState, dialogs } =
                     mCondition
                         |> Maybe.map
                             (\condition ->
-                                ScreeptV2.evaluateExpression gameState.screeptState condition
+                                ScreeptV2.evaluateExpression gameState.screeptEnv condition
                                     |> Result.map ScreeptV2.isTruthy
                                     |> Result.withDefault False
                             )
@@ -389,7 +384,7 @@ viewDialogText : Expression -> GameState -> Html msg
 viewDialogText expr gameState =
     let
         s =
-            ScreeptV2.evaluateExpressionToString gameState.screeptState expr
+            ScreeptV2.evaluateExpressionToString gameState.screeptEnv expr
     in
     div []
         (String.split "\n" s |> List.map (\par -> p [] [ text par ]))
@@ -399,10 +394,10 @@ viewDebug : GameState -> Html a
 viewDebug gameState =
     div [ class "status" ]
         [ text "Debug"
-        , div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.screeptState.vars |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ ScreeptV2.stringifyValue v ]))
+        , div [ style "display" "grid", style "grid-template-columns" "repeat(4,1fr)" ] (Dict.toList gameState.screeptEnv.vars |> List.map (\( k, v ) -> div [] [ text <| k ++ ":" ++ ScreeptV2.stringifyValue v ]))
         ]
 
 
 viewOption : GameState -> DialogOption -> Html Msg
 viewOption gameState dialogOption =
-    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptState dialogOption.text ]
+    div [ onClick <| ClickDialog dialogOption.action, class "option" ] [ text <| ScreeptV2.evaluateExpressionToString gameState.screeptEnv dialogOption.text ]

@@ -57,7 +57,7 @@ type Identifier
     | ComputedIdentifier Expression
 
 
-type alias State =
+type alias Environment =
     { procedures : Dict String Statement
     , vars : Dict String Value
     , rnd : Random.Seed
@@ -71,26 +71,11 @@ type ScreeptError
 
 
 
---| FunctionCall
-
-
 type Value
     = Number Float
     | Text String
     | Func Expression
 
-
-
---| Function
-
-
-reservedWords : List String
-reservedWords =
-    []
-
-
-
---[  "if", "then", "else", "rnd" ] ++ Dict.keys standardLibrary
 
 
 standardLibrary : Dict String (List Value -> Result ScreeptError Value)
@@ -104,16 +89,20 @@ parserIdentifier : Parser Identifier
 parserIdentifier =
     Parser.oneOf
         [ Parser.map LiteralIdentifier <|
-            Parser.variable
-                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
-                , inner = \c -> Char.isAlphaNum c || c == '_'
-                , reserved = Set.fromList reservedWords
-                }
+            parserLiteralIdentifier
         , Parser.succeed ComputedIdentifier
             |. Parser.symbol "${"
             |= Parser.lazy (\_ -> parserExpression)
             |. Parser.symbol "}"
         ]
+
+parserLiteralIdentifier : Parser String
+parserLiteralIdentifier =
+    Parser.variable
+                    { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
+                    , inner = \c -> Char.isAlphaNum c || c == '_'
+                    , reserved = Set.empty
+                    }
 
 
 parserValue : Parser Value
@@ -281,11 +270,7 @@ parserStatement =
         , Parser.succeed RunProc
             |. Parser.keyword "RUN"
             |. Parser.spaces
-            |= Parser.variable
-                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
-                , inner = \c -> Char.isAlphaNum c || c == '_'
-                , reserved = Set.fromList reservedWords
-                }
+            |= parserLiteralIdentifier
         , Parser.succeed Rnd
             |. Parser.keyword "RND"
             |. Parser.spaces
@@ -297,11 +282,7 @@ parserStatement =
         , Parser.succeed Proc
             |. Parser.keyword "PROC"
             |. Parser.spaces
-            |= Parser.variable
-                { start = \c -> Char.isAlphaNum c && Char.isLower c || c == '_' && c /= 'e'
-                , inner = \c -> Char.isAlphaNum c || c == '_'
-                , reserved = Set.fromList reservedWords
-                }
+            |= parserLiteralIdentifier
             |. Parser.spaces
             |= Parser.lazy (\_ -> parserStatement)
         ]
@@ -517,8 +498,8 @@ decodeStatement =
     parserToDecoder (parserStatement |. Parser.end)
 
 
-evaluateExpression : State -> Expression -> Result ScreeptError Value
-evaluateExpression state expression =
+evaluateExpression : Environment -> Expression -> Result ScreeptError Value
+evaluateExpression env expression =
     let
         result =
             case expression of
@@ -526,27 +507,27 @@ evaluateExpression state expression =
                     Ok valueType
 
                 Variable var ->
-                    resolveIdentifierToString state var
-                        |> Result.andThen (resolveVariable state)
+                    resolveIdentifierToString env var
+                        |> Result.andThen (resolveVariable env)
 
                 UnaryExpression unaryOp e ->
-                    evaluateUnaryExpression state unaryOp e
+                    evaluateUnaryExpression env unaryOp e
 
                 BinaryExpression e1 binaryOp e2 ->
-                    evaluateBinaryExpression state e1 binaryOp e2
+                    evaluateBinaryExpression env e1 binaryOp e2
 
                 TertiaryExpression e1 tertiaryOp e2 e3 ->
-                    evaluateTertiaryExpression state tertiaryOp e1 e2 e3
+                    evaluateTertiaryExpression env tertiaryOp e1 e2 e3
 
                 FunctionCall identifier expressions ->
-                    resolveIdentifierToString state identifier
-                        |> Result.andThen (resolveVariable state)
+                    resolveIdentifierToString env identifier
+                        |> Result.andThen (resolveVariable env)
                         |> Result.andThen
                             (\var ->
                                 case var of
                                     Func expr ->
                                         let
-                                            runTimeState : Result ScreeptError ( State, List String )
+                                            runTimeState : Result ScreeptError ( Environment, List String )
                                             runTimeState =
                                                 let
                                                     varName i =
@@ -556,7 +537,7 @@ evaluateExpression state expression =
                                                     bindings =
                                                         Block (List.map (\( i, e ) -> Bind (varName i) e) (List.indexedMap Tuple.pair expressions))
                                                 in
-                                                executeStatement bindings ( state, [] )
+                                                executeStatement bindings ( env, [] )
                                         in
                                         runTimeState
                                             |> Result.andThen
@@ -568,7 +549,7 @@ evaluateExpression state expression =
 
                 StandardLibrary func expressions ->
                     expressions
-                        |> List.map (evaluateExpression state)
+                        |> List.map (evaluateExpression env)
                         |> Result.Extra.combine
                         |> Result.andThen
                             (\args ->
@@ -583,11 +564,11 @@ evaluateExpression state expression =
     result
 
 
-evaluateUnaryExpression : State -> UnaryOp -> Expression -> Result ScreeptError Value
-evaluateUnaryExpression state unaryOp expression =
+evaluateUnaryExpression : Environment -> UnaryOp -> Expression -> Result ScreeptError Value
+evaluateUnaryExpression env unaryOp expression =
     let
         expr =
-            evaluateExpression state expression
+            evaluateExpression env expression
     in
     case unaryOp of
         Not ->
@@ -628,19 +609,19 @@ evaluateUnaryExpression state unaryOp expression =
                 expr
 
 
-resolveIdentifierToString : State -> Identifier -> Result ScreeptError String
-resolveIdentifierToString state identifier =
+resolveIdentifierToString : Environment -> Identifier -> Result ScreeptError String
+resolveIdentifierToString env identifier =
     case identifier of
         LiteralIdentifier string ->
             Ok string
 
         ComputedIdentifier expression ->
-            evaluateExpression state expression
+            evaluateExpression env expression
                 |> Result.map getStringFromValue
 
 
-evaluateTertiaryExpression : State -> TertiaryOp -> Expression -> Expression -> Expression -> Result ScreeptError Value
-evaluateTertiaryExpression state tertiaryOp e1 e2 e3 =
+evaluateTertiaryExpression : Environment -> TertiaryOp -> Expression -> Expression -> Expression -> Result ScreeptError Value
+evaluateTertiaryExpression env tertiaryOp e1 e2 e3 =
     Result.map3
         (\cond succ fail ->
             if isTruthy cond then
@@ -649,13 +630,13 @@ evaluateTertiaryExpression state tertiaryOp e1 e2 e3 =
             else
                 fail
         )
-        (evaluateExpression state e1)
-        (evaluateExpression state e2)
-        (evaluateExpression state e3)
+        (evaluateExpression env e1)
+        (evaluateExpression env e2)
+        (evaluateExpression env e3)
 
 
-evaluateBinaryExpression : State -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
-evaluateBinaryExpression state e1 binaryOp e2 =
+evaluateBinaryExpression : Environment -> Expression -> BinaryOp -> Expression -> Result ScreeptError Value
+evaluateBinaryExpression env e1 binaryOp e2 =
     let
         floatOperation : (Float -> Float -> Float) -> Value -> Value -> Result ScreeptError Value
         floatOperation fn expression1 expression2 =
@@ -666,10 +647,10 @@ evaluateBinaryExpression state e1 binaryOp e2 =
                 _ ->
                     Err TypeError
     in
-    evaluateExpression state e1
+    evaluateExpression env e1
         |> Result.andThen
             (\expr1 ->
-                evaluateExpression state e2
+                evaluateExpression env e2
                     |> Result.andThen
                         (\expr2 ->
                             case binaryOp of
@@ -760,24 +741,24 @@ evaluateBinaryExpression state e1 binaryOp e2 =
             )
 
 
-resolveVariable : State -> String -> Result ScreeptError Value
-resolveVariable state var =
-    Dict.get var state.vars
+resolveVariable : Environment -> String -> Result ScreeptError Value
+resolveVariable env var =
+    Dict.get var env.vars
         |> Maybe.map Ok
         |> Maybe.withDefault (Err Undefined)
 
 
-executeStatement : Statement -> ( State, List String ) -> Result ScreeptError ( State, List String )
-executeStatement statement ( state, output ) =
+executeStatement : Statement -> ( Environment, List String ) -> Result ScreeptError ( Environment, List String )
+executeStatement statement ( env, output ) =
     case statement of
         Bind ident expression ->
-            Result.map2 (\v id -> ( setVariable id v state, output )) (evaluateExpression state expression) (resolveIdentifierToString state ident)
+            Result.map2 (\v id -> ( setVariable id v env, output )) (evaluateExpression env expression) (resolveIdentifierToString env ident)
 
         Block statements ->
-            List.foldl (\s acc -> Result.andThen (executeStatement s) acc) (Ok ( state, output )) statements
+            List.foldl (\s acc -> Result.andThen (executeStatement s) acc) (Ok ( env, output )) statements
 
         Print expression ->
-            evaluateExpression state expression
+            evaluateExpression env expression
                 |> Result.map
                     (\v ->
                         let
@@ -792,11 +773,11 @@ executeStatement statement ( state, output ) =
                                     Func _ ->
                                         "<FUNC>"
                         in
-                        ( state, output ++ [ o ] )
+                        ( env, output ++ [ o ] )
                     )
 
         If expression success failure ->
-            evaluateExpression state expression
+            evaluateExpression env expression
                 |> Result.andThen
                     (\v ->
                         executeStatement
@@ -806,39 +787,39 @@ executeStatement statement ( state, output ) =
                              else
                                 failure
                             )
-                            ( state, output )
+                            ( env, output )
                     )
 
         RunProc procName ->
-            Dict.get procName state.procedures
+            Dict.get procName env.procedures
                 |> Maybe.map
                     (\proc ->
                         let
                             _ =
                                 Debug.log "EXECUTING " proc
                         in
-                        executeStatement proc ( state, output )
+                        executeStatement proc ( env, output )
                     )
                 |> Maybe.withDefault (Err Undefined)
 
         Rnd identifier from to ->
-            resolveIdentifierToString state identifier
+            resolveIdentifierToString env identifier
                 |> Result.andThen
                     (\id ->
-                        evaluateExpression state from
+                        evaluateExpression env from
                             |> Result.andThen
                                 (\f ->
-                                    evaluateExpression state to
+                                    evaluateExpression env to
                                         |> Result.andThen
                                             (\t ->
                                                 case ( f, t ) of
                                                     ( Number x, Number y ) ->
                                                         let
                                                             ( result, newSeed ) =
-                                                                Random.step (Random.int (round x) (round y)) state.rnd
+                                                                Random.step (Random.int (round x) (round y)) env.rnd
 
                                                             newState =
-                                                                { state | rnd = newSeed }
+                                                                { env | rnd = newSeed }
                                                         in
                                                         Ok ( setVariable id (Number <| toFloat result) newState, output )
 
@@ -849,27 +830,27 @@ executeStatement statement ( state, output ) =
                     )
 
         Proc string procedure ->
-            Ok ( { state | procedures = Dict.insert string procedure state.procedures }, output )
+            Ok ( { env | procedures = Dict.insert string procedure env.procedures }, output )
 
 
-executeStringStatement : String -> State -> ( State, List String )
-executeStringStatement statementString state =
+executeStringStatement : String -> Environment -> ( Environment, List String )
+executeStringStatement statementString var =
     case Parser.run (parserStatement |. Parser.end) statementString of
         Ok statement ->
-            executeStatement statement ( state, [] )
-                |> Result.withDefault ( state, [] )
+            executeStatement statement ( var, [] )
+                |> Result.withDefault ( var, [] )
 
         Err _ ->
-            ( state, [] )
+            ( var, [] )
 
 
-setVariable : String -> Value -> State -> State
-setVariable varName v state =
+setVariable : String -> Value -> Environment -> Environment
+setVariable varName v env =
     let
         vars =
-            Dict.insert varName v state.vars
+            Dict.insert varName v env.vars
     in
-    { state | vars = vars }
+    { env | vars = vars }
 
 
 isTruthy : Value -> Bool
@@ -898,23 +879,18 @@ getStringFromValue value =
             stringifyExpression expression
 
 
-resolveExpressionToString : State -> Expression -> String
-resolveExpressionToString state expression =
-    evaluateExpression state expression
+resolveExpressionToString : Environment -> Expression -> String
+resolveExpressionToString env expression =
+    evaluateExpression env expression
         |> Result.map getStringFromValue
         |> Result.withDefault ""
 
 
-evaluateExpressionToString : State -> Expression -> String
-evaluateExpressionToString state expr =
-    evaluateExpression state expr
+evaluateExpressionToString : Environment -> Expression -> String
+evaluateExpressionToString env expr =
+    evaluateExpression env expr
         |> Result.map getStringFromValue
         |> Result.withDefault ""
-
-
-
--- helper
--- example
 
 
 newScreeptParseExample : Result (List Parser.DeadEnd) Expression
@@ -955,12 +931,12 @@ exampleStatement =
         ]
 
 
-runExample : Result ScreeptError ( State, List String )
+runExample : Result ScreeptError ( Environment, List String )
 runExample =
     executeStatement exampleStatement ( exampleScreeptState, [] )
 
 
-exampleScreeptState : State
+exampleScreeptState : Environment
 exampleScreeptState =
     { procedures = Dict.empty
     , vars =

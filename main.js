@@ -5976,21 +5976,21 @@ var $elm$core$Maybe$withDefault = F2(
 		}
 	});
 var $author$project$ScreeptV2$resolveVariable = F2(
-	function (state, _var) {
+	function (env, _var) {
 		return A2(
 			$elm$core$Maybe$withDefault,
 			$elm$core$Result$Err($author$project$ScreeptV2$Undefined),
 			A2(
 				$elm$core$Maybe$map,
 				$elm$core$Result$Ok,
-				A2($elm$core$Dict$get, _var, state.vars)));
+				A2($elm$core$Dict$get, _var, env.vars)));
 	});
 var $elm$core$Basics$round = _Basics_round;
 var $author$project$ScreeptV2$setVariable = F3(
-	function (varName, v, state) {
-		var vars = A3($elm$core$Dict$insert, varName, v, state.vars);
+	function (varName, v, env) {
+		var vars = A3($elm$core$Dict$insert, varName, v, env.vars);
 		return _Utils_update(
-			state,
+			env,
 			{vars: vars});
 	});
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -6026,7 +6026,7 @@ var $elm$random$Random$step = F2(
 		return generator(seed);
 	});
 var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
-	function (state, e1, binaryOp, e2) {
+	function (env, e1, binaryOp, e2) {
 		var floatOperation = F3(
 			function (fn, expression1, expression2) {
 				var _v17 = _Utils_Tuple2(expression1, expression2);
@@ -6151,12 +6151,12 @@ var $author$project$ScreeptV2$evaluateBinaryExpression = F4(
 									expr2);
 						}
 					},
-					A2($author$project$ScreeptV2$evaluateExpression, state, e2));
+					A2($author$project$ScreeptV2$evaluateExpression, env, e2));
 			},
-			A2($author$project$ScreeptV2$evaluateExpression, state, e1));
+			A2($author$project$ScreeptV2$evaluateExpression, env, e1));
 	});
 var $author$project$ScreeptV2$evaluateExpression = F2(
-	function (state, expression) {
+	function (env, expression) {
 		var result = function () {
 			switch (expression.$) {
 				case 'Literal':
@@ -6166,23 +6166,23 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 					var _var = expression.a;
 					return A2(
 						$elm$core$Result$andThen,
-						$author$project$ScreeptV2$resolveVariable(state),
-						A2($author$project$ScreeptV2$resolveIdentifierToString, state, _var));
+						$author$project$ScreeptV2$resolveVariable(env),
+						A2($author$project$ScreeptV2$resolveIdentifierToString, env, _var));
 				case 'UnaryExpression':
 					var unaryOp = expression.a;
 					var e = expression.b;
-					return A3($author$project$ScreeptV2$evaluateUnaryExpression, state, unaryOp, e);
+					return A3($author$project$ScreeptV2$evaluateUnaryExpression, env, unaryOp, e);
 				case 'BinaryExpression':
 					var e1 = expression.a;
 					var binaryOp = expression.b;
 					var e2 = expression.c;
-					return A4($author$project$ScreeptV2$evaluateBinaryExpression, state, e1, binaryOp, e2);
+					return A4($author$project$ScreeptV2$evaluateBinaryExpression, env, e1, binaryOp, e2);
 				case 'TertiaryExpression':
 					var e1 = expression.a;
 					var tertiaryOp = expression.b;
 					var e2 = expression.c;
 					var e3 = expression.d;
-					return A5($author$project$ScreeptV2$evaluateTertiaryExpression, state, tertiaryOp, e1, e2, e3);
+					return A5($author$project$ScreeptV2$evaluateTertiaryExpression, env, tertiaryOp, e1, e2, e3);
 				case 'FunctionCall':
 					var identifier = expression.a;
 					var expressions = expression.b;
@@ -6211,7 +6211,7 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 									return A2(
 										$author$project$ScreeptV2$executeStatement,
 										bindings,
-										_Utils_Tuple2(state, _List_Nil));
+										_Utils_Tuple2(env, _List_Nil));
 								}();
 								return A2(
 									$elm$core$Result$andThen,
@@ -6226,8 +6226,8 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 						},
 						A2(
 							$elm$core$Result$andThen,
-							$author$project$ScreeptV2$resolveVariable(state),
-							A2($author$project$ScreeptV2$resolveIdentifierToString, state, identifier)));
+							$author$project$ScreeptV2$resolveVariable(env),
+							A2($author$project$ScreeptV2$resolveIdentifierToString, env, identifier)));
 				default:
 					var func = expression.a;
 					var expressions = expression.b;
@@ -6247,7 +6247,7 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 						$elm_community$result_extra$Result$Extra$combine(
 							A2(
 								$elm$core$List$map,
-								$author$project$ScreeptV2$evaluateExpression(state),
+								$author$project$ScreeptV2$evaluateExpression(env),
 								expressions)));
 			}
 		}();
@@ -6258,20 +6258,20 @@ var $author$project$ScreeptV2$evaluateExpression = F2(
 		return result;
 	});
 var $author$project$ScreeptV2$evaluateTertiaryExpression = F5(
-	function (state, tertiaryOp, e1, e2, e3) {
+	function (env, tertiaryOp, e1, e2, e3) {
 		return A4(
 			$elm$core$Result$map3,
 			F3(
 				function (cond, succ, fail) {
 					return $author$project$ScreeptV2$isTruthy(cond) ? succ : fail;
 				}),
-			A2($author$project$ScreeptV2$evaluateExpression, state, e1),
-			A2($author$project$ScreeptV2$evaluateExpression, state, e2),
-			A2($author$project$ScreeptV2$evaluateExpression, state, e3));
+			A2($author$project$ScreeptV2$evaluateExpression, env, e1),
+			A2($author$project$ScreeptV2$evaluateExpression, env, e2),
+			A2($author$project$ScreeptV2$evaluateExpression, env, e3));
 	});
 var $author$project$ScreeptV2$evaluateUnaryExpression = F3(
-	function (state, unaryOp, expression) {
-		var expr = A2($author$project$ScreeptV2$evaluateExpression, state, expression);
+	function (env, unaryOp, expression) {
+		var expr = A2($author$project$ScreeptV2$evaluateExpression, env, expression);
 		if (unaryOp.$ === 'Not') {
 			return A2(
 				$elm$core$Result$map,
@@ -6307,7 +6307,7 @@ var $author$project$ScreeptV2$evaluateUnaryExpression = F3(
 	});
 var $author$project$ScreeptV2$executeStatement = F2(
 	function (statement, _v1) {
-		var state = _v1.a;
+		var env = _v1.a;
 		var output = _v1.b;
 		switch (statement.$) {
 			case 'Bind':
@@ -6318,11 +6318,11 @@ var $author$project$ScreeptV2$executeStatement = F2(
 					F2(
 						function (v, id) {
 							return _Utils_Tuple2(
-								A3($author$project$ScreeptV2$setVariable, id, v, state),
+								A3($author$project$ScreeptV2$setVariable, id, v, env),
 								output);
 						}),
-					A2($author$project$ScreeptV2$evaluateExpression, state, expression),
-					A2($author$project$ScreeptV2$resolveIdentifierToString, state, ident));
+					A2($author$project$ScreeptV2$evaluateExpression, env, expression),
+					A2($author$project$ScreeptV2$resolveIdentifierToString, env, ident));
 			case 'Block':
 				var statements = statement.a;
 				return A3(
@@ -6335,7 +6335,7 @@ var $author$project$ScreeptV2$executeStatement = F2(
 								acc);
 						}),
 					$elm$core$Result$Ok(
-						_Utils_Tuple2(state, output)),
+						_Utils_Tuple2(env, output)),
 					statements);
 			case 'Print':
 				var expression = statement.a;
@@ -6355,13 +6355,13 @@ var $author$project$ScreeptV2$executeStatement = F2(
 							}
 						}();
 						return _Utils_Tuple2(
-							state,
+							env,
 							_Utils_ap(
 								output,
 								_List_fromArray(
 									[o])));
 					},
-					A2($author$project$ScreeptV2$evaluateExpression, state, expression));
+					A2($author$project$ScreeptV2$evaluateExpression, env, expression));
 			case 'If':
 				var expression = statement.a;
 				var success = statement.b;
@@ -6372,9 +6372,9 @@ var $author$project$ScreeptV2$executeStatement = F2(
 						return A2(
 							$author$project$ScreeptV2$executeStatement,
 							$author$project$ScreeptV2$isTruthy(v) ? success : failure,
-							_Utils_Tuple2(state, output));
+							_Utils_Tuple2(env, output));
 					},
-					A2($author$project$ScreeptV2$evaluateExpression, state, expression));
+					A2($author$project$ScreeptV2$evaluateExpression, env, expression));
 			case 'RunProc':
 				var procName = statement.a;
 				return A2(
@@ -6387,9 +6387,9 @@ var $author$project$ScreeptV2$executeStatement = F2(
 							return A2(
 								$author$project$ScreeptV2$executeStatement,
 								proc,
-								_Utils_Tuple2(state, output));
+								_Utils_Tuple2(env, output));
 						},
-						A2($elm$core$Dict$get, procName, state.procedures)));
+						A2($elm$core$Dict$get, procName, env.procedures)));
 			case 'Rnd':
 				var identifier = statement.a;
 				var from = statement.b;
@@ -6413,11 +6413,11 @@ var $author$project$ScreeptV2$executeStatement = F2(
 													$elm$random$Random$int,
 													$elm$core$Basics$round(x),
 													$elm$core$Basics$round(y)),
-												state.rnd);
+												env.rnd);
 											var result = _v6.a;
 											var newSeed = _v6.b;
 											var newState = _Utils_update(
-												state,
+												env,
 												{rnd: newSeed});
 											return $elm$core$Result$Ok(
 												_Utils_Tuple2(
@@ -6431,26 +6431,26 @@ var $author$project$ScreeptV2$executeStatement = F2(
 											return $elm$core$Result$Err($author$project$ScreeptV2$TypeError);
 										}
 									},
-									A2($author$project$ScreeptV2$evaluateExpression, state, to));
+									A2($author$project$ScreeptV2$evaluateExpression, env, to));
 							},
-							A2($author$project$ScreeptV2$evaluateExpression, state, from));
+							A2($author$project$ScreeptV2$evaluateExpression, env, from));
 					},
-					A2($author$project$ScreeptV2$resolveIdentifierToString, state, identifier));
+					A2($author$project$ScreeptV2$resolveIdentifierToString, env, identifier));
 			default:
 				var string = statement.a;
 				var procedure = statement.b;
 				return $elm$core$Result$Ok(
 					_Utils_Tuple2(
 						_Utils_update(
-							state,
+							env,
 							{
-								procedures: A3($elm$core$Dict$insert, string, procedure, state.procedures)
+								procedures: A3($elm$core$Dict$insert, string, procedure, env.procedures)
 							}),
 						output));
 		}
 	});
 var $author$project$ScreeptV2$resolveIdentifierToString = F2(
-	function (state, identifier) {
+	function (env, identifier) {
 		if (identifier.$ === 'LiteralIdentifier') {
 			var string = identifier.a;
 			return $elm$core$Result$Ok(string);
@@ -6459,7 +6459,7 @@ var $author$project$ScreeptV2$resolveIdentifierToString = F2(
 			return A2(
 				$elm$core$Result$map,
 				$author$project$ScreeptV2$getStringFromValue,
-				A2($author$project$ScreeptV2$evaluateExpression, state, expression));
+				A2($author$project$ScreeptV2$evaluateExpression, env, expression));
 		}
 	});
 var $author$project$ScreeptV2$Add = {$: 'Add'};
@@ -6901,19 +6901,6 @@ var $elm$parser$Parser$Advanced$float = F2(
 			});
 	});
 var $elm$parser$Parser$float = A2($elm$parser$Parser$Advanced$float, $elm$parser$Parser$ExpectingFloat, $elm$parser$Parser$ExpectingFloat);
-var $elm$core$Set$Set_elm_builtin = function (a) {
-	return {$: 'Set_elm_builtin', a: a};
-};
-var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return $elm$core$Set$Set_elm_builtin(
-			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
-	});
-var $elm$core$Set$fromList = function (list) {
-	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
-};
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
 		var parse = _v0.a;
@@ -7163,6 +7150,108 @@ var $author$project$ScreeptV2$parserBinaryOp = $elm$parser$Parser$oneOf(
 			$elm$parser$Parser$succeed($author$project$ScreeptV2$Or),
 			$elm$parser$Parser$symbol('||'))
 		]));
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$parser$Parser$ExpectingVariable = {$: 'ExpectingVariable'};
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $elm$parser$Parser$Advanced$varHelp = F7(
+	function (isGood, offset, row, col, src, indent, context) {
+		varHelp:
+		while (true) {
+			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, src);
+			if (_Utils_eq(newOffset, -1)) {
+				return {col: col, context: context, indent: indent, offset: offset, row: row, src: src};
+			} else {
+				if (_Utils_eq(newOffset, -2)) {
+					var $temp$isGood = isGood,
+						$temp$offset = offset + 1,
+						$temp$row = row + 1,
+						$temp$col = 1,
+						$temp$src = src,
+						$temp$indent = indent,
+						$temp$context = context;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					src = $temp$src;
+					indent = $temp$indent;
+					context = $temp$context;
+					continue varHelp;
+				} else {
+					var $temp$isGood = isGood,
+						$temp$offset = newOffset,
+						$temp$row = row,
+						$temp$col = col + 1,
+						$temp$src = src,
+						$temp$indent = indent,
+						$temp$context = context;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					src = $temp$src;
+					indent = $temp$indent;
+					context = $temp$context;
+					continue varHelp;
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$variable = function (i) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var firstOffset = A3($elm$parser$Parser$Advanced$isSubChar, i.start, s.offset, s.src);
+			if (_Utils_eq(firstOffset, -1)) {
+				return A2(
+					$elm$parser$Parser$Advanced$Bad,
+					false,
+					A2($elm$parser$Parser$Advanced$fromState, s, i.expecting));
+			} else {
+				var s1 = _Utils_eq(firstOffset, -2) ? A7($elm$parser$Parser$Advanced$varHelp, i.inner, s.offset + 1, s.row + 1, 1, s.src, s.indent, s.context) : A7($elm$parser$Parser$Advanced$varHelp, i.inner, firstOffset, s.row, s.col + 1, s.src, s.indent, s.context);
+				var name = A3($elm$core$String$slice, s.offset, s1.offset, s.src);
+				return A2($elm$core$Set$member, name, i.reserved) ? A2(
+					$elm$parser$Parser$Advanced$Bad,
+					false,
+					A2($elm$parser$Parser$Advanced$fromState, s, i.expecting)) : A3($elm$parser$Parser$Advanced$Good, true, name, s1);
+			}
+		});
+};
+var $elm$parser$Parser$variable = function (i) {
+	return $elm$parser$Parser$Advanced$variable(
+		{expecting: $elm$parser$Parser$ExpectingVariable, inner: i.inner, reserved: i.reserved, start: i.start});
+};
+var $author$project$ScreeptV2$parserLiteralIdentifier = $elm$parser$Parser$variable(
+	{
+		inner: function (c) {
+			return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+				c,
+				_Utils_chr('_'));
+		},
+		reserved: $elm$core$Set$empty,
+		start: function (c) {
+			return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || (_Utils_eq(
+				c,
+				_Utils_chr('_')) && (!_Utils_eq(
+				c,
+				_Utils_chr('e'))));
+		}
+	});
 var $author$project$ScreeptV2$parserStandardFunction = function (string) {
 	return A2(
 		$elm$parser$Parser$andThen,
@@ -7176,7 +7265,6 @@ var $author$project$ScreeptV2$parserStandardLibrary = $elm$parser$Parser$oneOf(
 		$elm$core$List$map,
 		$author$project$ScreeptV2$parserStandardFunction,
 		$elm$core$Dict$keys($author$project$ScreeptV2$standardLibrary)));
-var $author$project$ScreeptV2$reservedWords = _List_Nil;
 var $elm$parser$Parser$Advanced$loopHelp = F4(
 	function (p, state, callback, s0) {
 		loopHelp:
@@ -7440,88 +7528,6 @@ var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
 			_Utils_chr('\r')));
 	});
 var $elm$parser$Parser$spaces = $elm$parser$Parser$Advanced$spaces;
-var $elm$parser$Parser$ExpectingVariable = {$: 'ExpectingVariable'};
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $elm$core$Set$member = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return A2($elm$core$Dict$member, key, dict);
-	});
-var $elm$parser$Parser$Advanced$varHelp = F7(
-	function (isGood, offset, row, col, src, indent, context) {
-		varHelp:
-		while (true) {
-			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, src);
-			if (_Utils_eq(newOffset, -1)) {
-				return {col: col, context: context, indent: indent, offset: offset, row: row, src: src};
-			} else {
-				if (_Utils_eq(newOffset, -2)) {
-					var $temp$isGood = isGood,
-						$temp$offset = offset + 1,
-						$temp$row = row + 1,
-						$temp$col = 1,
-						$temp$src = src,
-						$temp$indent = indent,
-						$temp$context = context;
-					isGood = $temp$isGood;
-					offset = $temp$offset;
-					row = $temp$row;
-					col = $temp$col;
-					src = $temp$src;
-					indent = $temp$indent;
-					context = $temp$context;
-					continue varHelp;
-				} else {
-					var $temp$isGood = isGood,
-						$temp$offset = newOffset,
-						$temp$row = row,
-						$temp$col = col + 1,
-						$temp$src = src,
-						$temp$indent = indent,
-						$temp$context = context;
-					isGood = $temp$isGood;
-					offset = $temp$offset;
-					row = $temp$row;
-					col = $temp$col;
-					src = $temp$src;
-					indent = $temp$indent;
-					context = $temp$context;
-					continue varHelp;
-				}
-			}
-		}
-	});
-var $elm$parser$Parser$Advanced$variable = function (i) {
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			var firstOffset = A3($elm$parser$Parser$Advanced$isSubChar, i.start, s.offset, s.src);
-			if (_Utils_eq(firstOffset, -1)) {
-				return A2(
-					$elm$parser$Parser$Advanced$Bad,
-					false,
-					A2($elm$parser$Parser$Advanced$fromState, s, i.expecting));
-			} else {
-				var s1 = _Utils_eq(firstOffset, -2) ? A7($elm$parser$Parser$Advanced$varHelp, i.inner, s.offset + 1, s.row + 1, 1, s.src, s.indent, s.context) : A7($elm$parser$Parser$Advanced$varHelp, i.inner, firstOffset, s.row, s.col + 1, s.src, s.indent, s.context);
-				var name = A3($elm$core$String$slice, s.offset, s1.offset, s.src);
-				return A2($elm$core$Set$member, name, i.reserved) ? A2(
-					$elm$parser$Parser$Advanced$Bad,
-					false,
-					A2($elm$parser$Parser$Advanced$fromState, s, i.expecting)) : A3($elm$parser$Parser$Advanced$Good, true, name, s1);
-			}
-		});
-};
-var $elm$parser$Parser$variable = function (i) {
-	return $elm$parser$Parser$Advanced$variable(
-		{expecting: $elm$parser$Parser$ExpectingVariable, inner: i.inner, reserved: i.reserved, start: i.start});
-};
 function $author$project$ScreeptV2$cyclic$parserExpression() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -7677,25 +7683,7 @@ function $author$project$ScreeptV2$cyclic$parserIdentifier() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
 			[
-				A2(
-				$elm$parser$Parser$map,
-				$author$project$ScreeptV2$LiteralIdentifier,
-				$elm$parser$Parser$variable(
-					{
-						inner: function (c) {
-							return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
-								c,
-								_Utils_chr('_'));
-						},
-						reserved: $elm$core$Set$fromList($author$project$ScreeptV2$reservedWords),
-						start: function (c) {
-							return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || (_Utils_eq(
-								c,
-								_Utils_chr('_')) && (!_Utils_eq(
-								c,
-								_Utils_chr('e'))));
-						}
-					})),
+				A2($elm$parser$Parser$map, $author$project$ScreeptV2$LiteralIdentifier, $author$project$ScreeptV2$parserLiteralIdentifier),
 				A2(
 				$elm$parser$Parser$keeper,
 				A2(
@@ -7994,22 +7982,7 @@ function $author$project$ScreeptV2$cyclic$parserStatement() {
 						$elm$parser$Parser$succeed($author$project$ScreeptV2$RunProc),
 						$elm$parser$Parser$keyword('RUN')),
 					$elm$parser$Parser$spaces),
-				$elm$parser$Parser$variable(
-					{
-						inner: function (c) {
-							return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
-								c,
-								_Utils_chr('_'));
-						},
-						reserved: $elm$core$Set$fromList($author$project$ScreeptV2$reservedWords),
-						start: function (c) {
-							return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || (_Utils_eq(
-								c,
-								_Utils_chr('_')) && (!_Utils_eq(
-								c,
-								_Utils_chr('e'))));
-						}
-					})),
+				$author$project$ScreeptV2$parserLiteralIdentifier),
 				A2(
 				$elm$parser$Parser$keeper,
 				A2(
@@ -8037,25 +8010,7 @@ function $author$project$ScreeptV2$cyclic$parserStatement() {
 							$elm$parser$Parser$succeed($author$project$ScreeptV2$Proc),
 							$elm$parser$Parser$keyword('PROC')),
 						$elm$parser$Parser$spaces),
-					A2(
-						$elm$parser$Parser$ignorer,
-						$elm$parser$Parser$variable(
-							{
-								inner: function (c) {
-									return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
-										c,
-										_Utils_chr('_'));
-								},
-								reserved: $elm$core$Set$fromList($author$project$ScreeptV2$reservedWords),
-								start: function (c) {
-									return ($elm$core$Char$isAlphaNum(c) && $elm$core$Char$isLower(c)) || (_Utils_eq(
-										c,
-										_Utils_chr('_')) && (!_Utils_eq(
-										c,
-										_Utils_chr('e'))));
-								}
-							}),
-						$elm$parser$Parser$spaces)),
+					A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserLiteralIdentifier, $elm$parser$Parser$spaces)),
 				$elm$parser$Parser$lazy(
 					function (_v3) {
 						return $author$project$ScreeptV2$cyclic$parserStatement();
@@ -9063,7 +9018,7 @@ var $mhoare$elm_stack$Stack$push = F2(
 var $author$project$DialogGame$emptyGameState = {
 	dialogStack: A2($mhoare$elm_stack$Stack$push, 'start', $mhoare$elm_stack$Stack$initialise),
 	messages: _List_Nil,
-	screeptState: {
+	screeptEnv: {
 		procedures: $elm$core$Dict$empty,
 		rnd: $elm$random$Random$initialSeed(666),
 		vars: $elm$core$Dict$empty
@@ -9302,7 +9257,7 @@ var $elm$core$Result$withDefault = F2(
 		}
 	});
 var $author$project$ScreeptV2$executeStringStatement = F2(
-	function (statementString, state) {
+	function (statementString, _var) {
 		var _v0 = A2(
 			$elm$parser$Parser$run,
 			A2($elm$parser$Parser$ignorer, $author$project$ScreeptV2$parserStatement, $elm$parser$Parser$end),
@@ -9311,13 +9266,13 @@ var $author$project$ScreeptV2$executeStringStatement = F2(
 			var statement = _v0.a;
 			return A2(
 				$elm$core$Result$withDefault,
-				_Utils_Tuple2(state, _List_Nil),
+				_Utils_Tuple2(_var, _List_Nil),
 				A2(
 					$author$project$ScreeptV2$executeStatement,
 					statement,
-					_Utils_Tuple2(state, _List_Nil)));
+					_Utils_Tuple2(_var, _List_Nil)));
 		} else {
-			return _Utils_Tuple2(state, _List_Nil);
+			return _Utils_Tuple2(_var, _List_Nil);
 		}
 	});
 var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) {
@@ -9326,7 +9281,7 @@ var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) 
 		gameState: {
 			dialogStack: A2($mhoare$elm_stack$Stack$push, gameDefinition.startDialogId, $mhoare$elm_stack$Stack$initialise),
 			messages: _List_Nil,
-			screeptState: {
+			screeptEnv: {
 				procedures: gameDefinition.procedures,
 				rnd: $elm$random$Random$initialSeed(666),
 				vars: gameDefinition.vars
@@ -9390,15 +9345,15 @@ var $author$project$Main$mainMenuActions = F2(
 var $author$project$DialogGame$setRndSeed = F2(
 	function (seed, model) {
 		var gameState = model.gameState;
-		var screeptState = gameState.screeptState;
+		var screeptEnv = gameState.screeptEnv;
 		return _Utils_update(
 			model,
 			{
 				gameState: _Utils_update(
 					gameState,
 					{
-						screeptState: _Utils_update(
-							screeptState,
+						screeptEnv: _Utils_update(
+							screeptEnv,
 							{rnd: seed})
 					})
 			});
@@ -9418,14 +9373,14 @@ var $mhoare$elm_stack$Stack$pop = function (_v0) {
 	}
 };
 var $author$project$ScreeptV2$resolveExpressionToString = F2(
-	function (state, expression) {
+	function (env, expression) {
 		return A2(
 			$elm$core$Result$withDefault,
 			'',
 			A2(
 				$elm$core$Result$map,
 				$author$project$ScreeptV2$getStringFromValue,
-				A2($author$project$ScreeptV2$evaluateExpression, state, expression)));
+				A2($author$project$ScreeptV2$evaluateExpression, env, expression)));
 	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
@@ -9461,17 +9416,17 @@ var $author$project$DialogGame$executeAction = F2(
 							{
 								messages: A2(
 									$elm$core$List$cons,
-									A2($author$project$ScreeptV2$resolveExpressionToString, gameState.screeptState, msg),
+									A2($author$project$ScreeptV2$resolveExpressionToString, gameState.screeptEnv, msg),
 									gameState.messages)
 							}),
 						$elm$core$Maybe$Nothing);
 				case 'Screept':
 					var statement = dialogActionExecution.a;
-					var newScreeptState = function () {
+					var newScreeptEnv = function () {
 						var _v1 = A2(
 							$author$project$ScreeptV2$executeStatement,
 							statement,
-							_Utils_Tuple2(gameState.screeptState, _List_Nil));
+							_Utils_Tuple2(gameState.screeptEnv, _List_Nil));
 						if (_v1.$ === 'Ok') {
 							var _v2 = _v1.a;
 							var s = _v2.a;
@@ -9479,13 +9434,13 @@ var $author$project$DialogGame$executeAction = F2(
 						} else {
 							var e = _v1.a;
 							var _v3 = A2($elm$core$Debug$log, 'SCREEPT_STATEMENT_ERROR', e);
-							return gameState.screeptState;
+							return gameState.screeptEnv;
 						}
 					}();
 					return _Utils_Tuple2(
 						_Utils_update(
 							gameState,
-							{screeptState: newScreeptState}),
+							{screeptEnv: newScreeptEnv}),
 						$elm$core$Maybe$Nothing);
 				case 'ConditionalAction':
 					var condition = dialogActionExecution.a;
@@ -9497,7 +9452,7 @@ var $author$project$DialogGame$executeAction = F2(
 						A2(
 							$elm$core$Result$map,
 							$author$project$ScreeptV2$isTruthy,
-							A2($author$project$ScreeptV2$evaluateExpression, gameState.screeptState, condition)));
+							A2($author$project$ScreeptV2$evaluateExpression, gameState.screeptEnv, condition)));
 					var $temp$dialogActionExecution = isConditionMet ? success : failure,
 						$temp$gameState = gameState;
 					dialogActionExecution = $temp$dialogActionExecution;
@@ -9647,11 +9602,11 @@ var $author$project$Main$update = F2(
 					var value = result.a;
 					var m = model.mainMenuDialog;
 					var gameState = m.gameState;
-					var _v6 = A2($author$project$ScreeptV2$executeStringStatement, '{ game_loaded = 1;  game_title = \"' + (value.title + '\" }'), m.gameState.screeptState);
+					var _v6 = A2($author$project$ScreeptV2$executeStringStatement, '{ game_loaded = 1;  game_title = \"' + (value.title + '\" }'), m.gameState.screeptEnv);
 					var newScreeptState = _v6.a;
 					var newGameState = _Utils_update(
 						gameState,
-						{screeptState: newScreeptState});
+						{screeptEnv: newScreeptState});
 					var menuDialog = _Utils_update(
 						m,
 						{gameState: newGameState});
@@ -9860,23 +9815,23 @@ var $author$project$DialogGame$viewDebug = function (gameState) {
 									k + (':' + $author$project$ScreeptV2$stringifyValue(v)))
 								]));
 					},
-					$elm$core$Dict$toList(gameState.screeptState.vars)))
+					$elm$core$Dict$toList(gameState.screeptEnv.vars)))
 			]));
 };
 var $author$project$ScreeptV2$evaluateExpressionToString = F2(
-	function (state, expr) {
+	function (env, expr) {
 		return A2(
 			$elm$core$Result$withDefault,
 			'',
 			A2(
 				$elm$core$Result$map,
 				$author$project$ScreeptV2$getStringFromValue,
-				A2($author$project$ScreeptV2$evaluateExpression, state, expr)));
+				A2($author$project$ScreeptV2$evaluateExpression, env, expr)));
 	});
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$DialogGame$viewDialogText = F2(
 	function (expr, gameState) {
-		var s = A2($author$project$ScreeptV2$evaluateExpressionToString, gameState.screeptState, expr);
+		var s = A2($author$project$ScreeptV2$evaluateExpressionToString, gameState.screeptEnv, expr);
 		return A2(
 			$elm$html$Html$div,
 			_List_Nil,
@@ -9949,7 +9904,7 @@ var $author$project$DialogGame$viewOption = F2(
 			_List_fromArray(
 				[
 					$elm$html$Html$text(
-					A2($author$project$ScreeptV2$evaluateExpressionToString, gameState.screeptState, dialogOption.text))
+					A2($author$project$ScreeptV2$evaluateExpressionToString, gameState.screeptEnv, dialogOption.text))
 				]));
 	});
 var $author$project$DialogGame$view = function (_v0) {
@@ -9978,7 +9933,7 @@ var $author$project$DialogGame$view = function (_v0) {
 					]),
 				_List_fromArray(
 					[
-						A2($elm$core$Dict$member, '__statusLine', gameState.screeptState.vars) ? A2(
+						A2($elm$core$Dict$member, '__statusLine', gameState.screeptEnv.vars) ? A2(
 						$author$project$DialogGame$viewDialogText,
 						A2(
 							$author$project$ScreeptV2$FunctionCall,
@@ -10000,7 +9955,7 @@ var $author$project$DialogGame$view = function (_v0) {
 											A2(
 												$elm$core$Result$map,
 												$author$project$ScreeptV2$isTruthy,
-												A2($author$project$ScreeptV2$evaluateExpression, gameState.screeptState, condition)));
+												A2($author$project$ScreeptV2$evaluateExpression, gameState.screeptEnv, condition)));
 									},
 									mCondition));
 						};

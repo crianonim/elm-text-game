@@ -211,13 +211,13 @@ update msg model =
                             model.mainMenuDialog
 
                         ( newScreeptState, _ ) =
-                            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptState
+                            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptEnv
 
                         gameState =
                             m.gameState
 
                         newGameState =
-                            { gameState | screeptState = newScreeptState }
+                            { gameState | screeptEnv = newScreeptState }
 
                         menuDialog =
                             { m | gameState = newGameState }
@@ -330,7 +330,7 @@ initGameFromGameDefinition gameDefinition =
 
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptState = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
+        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
