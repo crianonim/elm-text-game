@@ -9,18 +9,50 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Platform.Cmd exposing (Cmd)
 import Random
-import Screept
 import ScreeptEditor
+import ScreeptV2 exposing (BinaryOp(..), Expression(..), Identifier(..), Value(..))
 import Stack exposing (Stack)
 import Task
 
 
 main : Program () Model Msg
 main =
-    --let
-    --    _ =
-    --        Debug.log "MAN" (List.map stringifyGameDefinition Game.dialogs)
-    --in
+    let
+        _ =
+            Debug.log "Stat Exec "
+                (ScreeptV2.parseStatementExample
+                    |> (\e ->
+                            case e of
+                                Err _ ->
+                                    Err ScreeptV2.UnimplementedYet
+
+                                Ok v ->
+                                    ScreeptV2.executeStatement v ( ScreeptV2.exampleScreeptState, [] )
+                       )
+                )
+
+        _ =
+            Debug.log "STAT" ScreeptV2.runExample
+
+        _ =
+            Debug.log "Statement Parse" ScreeptV2.parseStatementExample
+
+        _ =
+            Debug.log "S2 Parse" ScreeptV2.newScreeptParseExample
+
+        _ =
+            Debug.log "S2 Eval "
+                (ScreeptV2.newScreeptParseExample
+                    |> (\e ->
+                            case e of
+                                Err _ ->
+                                    Err ScreeptV2.UnimplementedYet
+
+                                Ok v ->
+                                    ScreeptV2.evaluateExpression ScreeptV2.exampleScreeptState v
+                       )
+                )
+    in
     Browser.element
         { init = init
         , update = update
@@ -56,9 +88,10 @@ init _ =
       }
     , Cmd.batch
         [ Random.generate SeedGenerated Random.independentSeed
-        , Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
 
-        --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         ]
     )
 
@@ -67,26 +100,26 @@ mainMenuDialogs : Dialogs
 mainMenuDialogs =
     DialogGame.listDialogToDictDialog
         [ { id = "start"
-          , text = Screept.S "Main Menu"
+          , text = Literal <| Text "Main Menu"
           , options =
-                [ { text = Screept.S "Load Game", condition = Nothing, action = [ GoAction "load_game_definition" ] }
-                , { text = Screept.S "Start Game", condition = Just (Screept.parseIntValue "game_loaded"), action = [ GoAction "in_game", Exit "start_game" ] }
+                [ { text = Literal <| Text "Load Game", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
+                , { text = Literal <| Text "Start Game", condition = Just (Variable <| LiteralIdentifier "game_loaded"), actions = [ GoAction "in_game", Exit "start_game" ] }
                 ]
           }
         , { id = "load_game_definition"
-          , text = Screept.S "Load game definition"
+          , text = Literal <| Text "Load game definition"
           , options =
-                [ { text = Screept.S "Load Sandbox", condition = Nothing, action = [ Exit "sandbox" ] }
-                , { text = Screept.S "Load Fabled Lands", condition = Nothing, action = [ Exit "fabled" ] }
-                , { text = Screept.S "Load from url", condition = Nothing, action = [ Exit "load_url" ] }
+                [ { text = Literal <| Text "Load Sandbox", condition = Nothing, actions = [ Exit "sandbox" ] }
+                , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, actions = [ Exit "fabled" ] }
+                , { text = Literal <| Text "Load from url", condition = Nothing, actions = [ Exit "load_url" ] }
                 , DialogGame.goBackOption
                 ]
           }
         , { id = "in_game"
-          , text = Screept.Concat [ Screept.S "Playing: ", Screept.TextVariable (Screept.VLit "game_title") ]
+          , text = BinaryExpression (Literal <| Text "Playing: ") Add (Variable <| LiteralIdentifier "game_title")
           , options =
-                [ { text = Screept.S "Restart", condition = Nothing, action = [ Exit "start_game" ] }
-                , { text = Screept.S "Stop game", condition = Nothing, action = [ GoAction "start", Exit "stop_game" ] }
+                [ { text = Literal <| Text "Restart", condition = Nothing, actions = [ Exit "start_game" ] }
+                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "stop_game" ] }
                 ]
           }
         ]
@@ -175,8 +208,17 @@ update msg model =
                         m =
                             model.mainMenuDialog
 
+                        ( newScreeptState, _ ) =
+                            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptEnv
+
+                        gameState =
+                            m.gameState
+
+                        newGameState =
+                            { gameState | screeptEnv = newScreeptState }
+
                         menuDialog =
-                            { m | gameState = Screept.exec ("{ INT game_loaded = 1; TEXT game_title = \"" ++ value.title ++ "\" }") m.gameState }
+                            { m | gameState = newGameState }
                     in
                     ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }, Cmd.none )
 
@@ -196,17 +238,8 @@ update msg model =
                     let
                         m =
                             initGameFromGameDefinition gameDefinition
-
-                        gameState =
-                            Screept.runStatement Screept.exampleStatement m.gameState
-
-                        _ =
-                            Debug.log "STR: " (Screept.statementStringify Screept.exampleStatement)
-
-                        newModel =
-                            { m | gameState = gameState }
                     in
-                    Started gameDefinition newModel
+                    Started gameDefinition m
             in
             case model.gameDialog of
                 NotLoaded ->
@@ -289,11 +322,12 @@ type Msg
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
 initGameFromGameDefinition gameDefinition =
     { gameState =
-        { procedures = gameDefinition.procedures
-        , messages = []
-        , rnd = Random.initialSeed 666
+        { --
+          messages = []
+
+        --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , vars = gameDefinition.vars
+        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
@@ -315,10 +349,10 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ --DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
-          DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
+        [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
+        , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
-            Started gameDef gameDialogMenu ->
+            Started _ gameDialogMenu ->
                 DialogGame.view gameDialogMenu |> Html.map GameDialog
 
             NotLoaded ->

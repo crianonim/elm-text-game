@@ -10,6 +10,7 @@ import Json.Encode as Json
 import Parser
 import Random
 import Screept
+import ScreeptV2 exposing (Environment, Expression(..), Identifier(..), Statement(..), Value(..))
 import Stack
 import Test exposing (..)
 
@@ -17,9 +18,9 @@ import Test exposing (..)
 exampleDialog : Dialog
 exampleDialog =
     { id = "start"
-    , text = Screept.S ""
+    , text = Literal <| Text ""
     , options =
-        [ { text = Screept.S "Option1", condition = Just (Screept.IntVariable (Screept.VLit "test1")), action = [] }
+        [ { text = Literal <| Text "Option1", condition = Just (Variable <| LiteralIdentifier "test1"), actions = [] }
         ]
     }
 
@@ -27,7 +28,7 @@ exampleDialog =
 exampleDialogs : Dialogs
 exampleDialogs =
     DialogGame.listDialogToDictDialog
-        [ { id = "start", text = Screept.S "", options = [] }
+        [ { id = "start", text = Literal <| Text "", options = [] }
         ]
 
 
@@ -46,23 +47,41 @@ codecDialog =
 
 stateEncoding : Test
 stateEncoding =
-    --Test.only <|
     describe "Encoding and decoding state"
         [ test "round trip example state" <|
-            \_ -> Expect.equal (DialogGame.encodeState exampleState |> Json.encode 0 |> Json.decodeString DialogGame.decodeState) (Ok exampleState)
+            \_ ->
+                Expect.equal
+                    (DialogGame.encodeState exampleState
+                        |> Json.encode 0
+                        |> Json.decodeString DialogGame.decodeState
+                    )
+                    (Ok exampleState)
         ]
+
+
+exampleScreeptEnv : Environment
+exampleScreeptEnv =
+    { vars =
+        Dict.fromList
+            [ ( "i1", Number 5 )
+            , ( "t1", Text "Jan" )
+            , ( "f1", Func (Variable (LiteralIdentifier "i1")) )
+            ]
+    , procedures =
+        Dict.fromList
+            [ ( "p1"
+              , Block
+                    [ Bind (LiteralIdentifier "v1") (Literal <| Number 5)
+                    ]
+              )
+            ]
+    , rnd = Random.initialSeed 666
+    }
 
 
 exampleState : GameState
 exampleState =
-    { vars =
-        Dict.fromList
-            [ ( "i1", Screept.VInt 5 )
-            , ( "t1", Screept.VText "Jan" )
-            , ( "f1", Screept.VLazyInt (Screept.IntVariable (Screept.VLit "i1")) )
-            ]
-    , procedures = Dict.empty
-    , rnd = Random.initialSeed 666
+    { screeptEnv = exampleScreeptEnv
     , messages = []
     , dialogStack = Stack.initialise
     }

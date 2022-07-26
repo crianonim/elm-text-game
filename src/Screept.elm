@@ -5,6 +5,7 @@ import Json.Decode as Json
 import Json.Encode as E
 import Parser exposing ((|.), (|=), Parser, spaces, symbol)
 import Random
+import Set
 
 
 type IntValue

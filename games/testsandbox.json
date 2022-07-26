@@ -13,7 +13,7 @@
           "text": "\"...\"",
           "action": [
             {
-              "screept": "{ RUN turn; RUN test; INT tt2 = test_func }"
+              "screept": "{ RUN turn; RUN test; tt2 = test_func }"
             }
           ]
         }
@@ -22,37 +22,37 @@
     ,
     {
       "id": "farm",
-      "text": "[\"Farm. Current level \", farm_level, \". To upgrade: \",farm_upgrade_cost]",
+      "text": "CONCAT(\"Farm. Current level \", farm_level, \". To upgrade: \",farm_upgrade_cost())",
       "options": [
         {
           "text": "\"Back\"",
           "action": [ "go_back"]
         },
         {
-          "text": "[\"Upgrade to \", TO_TEXT (farm_level + 1) ]",
+          "text": "CONCAT(\"Upgrade to \", (farm_level + 1) )",
           "action": [ {"screept": "RUN farm_upgrade"}],
-          "condition": "!(money < farm_upgrade_cost)"
+          "condition": "!(money < farm_upgrade_cost())"
         },
         {
           "text": "\"Look at the first plot \"",
-          "action": [ {"screept": "INT farm_plot = 1;"}, {"go_dialog": "farm_plot"}],
+          "action": [ {"screept": "farm_plot = 1"}, {"go_dialog": "farm_plot"}],
           "condition": "(farm_level > 0)"
         },
         {
           "text": "\"Look at the second plot \"",
-          "action": [ {"screept": "INT farm_plot = 2"}, {"go_dialog": "farm_plot"}],
+          "action": [ {"screept": "farm_plot = 2"}, {"go_dialog": "farm_plot"}],
           "condition": "(farm_level > 1)"
         },
         {
           "text": "\"Look at the third plot \"",
-          "action": [ {"screept": "INT farm_plot = 3"}, {"go_dialog": "farm_plot"}],
+          "action": [ {"screept": "farm_plot = 3"}, {"go_dialog": "farm_plot"}],
           "condition": "(farm_level > 2)"
         },
         {
           "text": "\"...\"",
           "action": [
             {
-              "screept": "{ RUN turn; RUN test; INT tt2 = test_func }"
+              "screept": "{ RUN turn; RUN test }"
             }
           ]
         }
@@ -60,12 +60,12 @@
     },
     {
       "id": "farm_plot",
-      "text": "[\"You are on plot \", farm_plot, ($[\"farm_plot_tilled_\",farm_plot]?\", tilled\":\", not tilled\")] ]",
+      "text": "CONCAT(\"You are on plot \", farm_plot, (${CONCAT(\"farm_plot_tilled_\",farm_plot)}?\", tilled\":\", not tilled\"))",
       "options": [
         {
           "text": "\"Till the ground\"",
           "action": [ {"screept": "RUN farm_till"}],
-          "condition" : "!$[\"farm_plot_tilled_\",farm_plot]"
+          "condition" : "!${CONCAT(\"farm_plot_tilled_\",farm_plot)}"
         },
         {
           "text": "\"Back\"",
@@ -76,10 +76,10 @@
   ],
   "startDialogId": "farm",
   "procedures": {
-    "turn": "{ INT turn = (turn + 1);\nINT turns_count = (turns_count - 1);\nINT minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));\nINT hour = ((turn / turns_per_hour) %% 24);\nINT day = (turn / (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE { INT turns_count = 5 } }",
-    "test": "{ RND $b 1 .. 6 }",
-    "farm_upgrade" : "{ INT money = (money - farm_upgrade_cost); INT farm_level = (farm_level + 1) }",
-    "farm_till": "{ INT turn_count = 10; RUN turn; INT $[\"farm_plot_tilled_\",farm_plot] = 1 }"
+    "turn": "{  turn = (turn + 1);\n turns_count = (turns_count - 1);\n minutes = ((turn %% turns_per_hour) * (60 // turns_per_hour));\n hour = ((turn // turns_per_hour) %% 24);\nday = (turn // (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 } }",
+    "test": "{ RND ${b} 1 6 }",
+    "farm_upgrade" : "{  money = (money - farm_upgrade_cost()); farm_level = (farm_level + 1) }",
+    "farm_till": "{  turn_count = 10; RUN turn;  ${CONCAT(\"farm_plot_tilled_\",farm_plot)} = 1 }"
   },
   "vars": {
     "money": 1000,
@@ -98,8 +98,8 @@
     "farm_plot_planted_2": 0,
     "farm_plot_stage_1": 0,
     "farm_plot_stage_2": 0,
-    "farm_upgrade_cost": {"lazy_int": "((farm_level + 1) * 50)"},
-    "test_func": { "lazy_int": "(turn + turns_per_hour)"},
-    "__statusLine": {"lazy_text":"[ \"SS Turn: \", turn, \" Time: \", hour, \":\", minutes, \", Gold: \", money  ]" }
+    "farm_upgrade_cost": {"func": "((farm_level + 1) * 50)"},
+    "test_func": { "func": "(turn + turns_per_hour)"},
+    "__statusLine": {"func":"CONCAT(\"SS Turn: \", turn, \" Time: \", hour, \":\", minutes, \", Gold: \", money)" }
   }
 }

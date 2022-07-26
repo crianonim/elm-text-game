@@ -1,0 +1,52 @@
+{
+  "name": "Test Sandbox",
+  "dialogs": [
+    {
+      "id": "start",
+      "text": "\"Test sandbox\"",
+      "options": [
+        {
+          "text": "\"Farm.\"",
+          "action": [{"go_dialog": "farm"}]
+        },
+        {
+          "text": "\"...\"",
+          "action": [
+            {
+              "screept": "{ RUN turn; RND r 200 300; tt2 = test_func }"
+            }
+          ]
+        }
+      ]
+    }
+
+
+  ],
+  "startDialogId": "start",
+  "procedures": {
+    "turn": "{ turn = (turn + 1);\nturns_count = (turns_count - 1);\nminutes = ((turn %% turns_per_hour) * (60 // turns_per_hour));\nhour = ((turn // turns_per_hour) %% 24);\nday = (turn // (turns_per_hour * 24));\nIF (turns_count > 0) THEN RUN turn ELSE {turns_count = 5} }",
+    "farm_upgrade" : "{ money = (money - farm_upgrade_cost()); farm_level = (farm_level + 1) }",
+    "farm_till": "{ turn_count = 10; RUN turn; ${CONCAT(\"farm_plot_tilled_\",farm_plot)} = 1 }"
+  },
+  "vars": {
+    "money": 1000,
+    "hour": 0,
+    "minutes": 0,
+    "turn": 1,
+    "turns_count": 3,
+    "turns_per_hour": 2,
+    "_enemy_name": "s",
+    "player_name": "Liana",
+    "player_profession": "wayfarer",
+    "farm_level": 1,
+    "farm_plot_tilled_1": 0,
+    "farm_plot_tilled_2": 0,
+    "farm_plot_planted_1": 0,
+    "farm_plot_planted_2": 0,
+    "farm_plot_stage_1": 0,
+    "farm_plot_stage_2": 0,
+    "farm_upgrade_cost": {"func": "((farm_level + 1) * 50)"},
+    "test_func": { "func": "(turn + turns_per_hour)"},
+    "__statusLine": {"func":"(\"Turn \" + turn)" }
+  }
+}

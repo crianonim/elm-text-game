@@ -8,54 +8,63 @@ import Parser
 
 type alias Model a =
     { text : String
-    , parsed : Maybe (Result (List Parser.DeadEnd) a)
+    , parsed : Result (List Parser.DeadEnd) a
     , parser : Parser.Parser a
+    , formatter : a -> String
     }
 
 
 type Msg
-    = ParseClick
+    = FormatClick
     | TextEdit String
 
 
-init : String -> Parser.Parser a -> Model a
-init text parser =
+init : String -> Parser.Parser a -> (a -> String) -> Model a
+init text parser formatter =
     { text = text
-    , parsed = Just <| Parser.run parser text
+    , parsed = Parser.run parser text
     , parser = parser
+    , formatter = formatter
     }
 
 
 update : Msg -> Model a -> Model a
 update msg model =
     case msg of
-        ParseClick ->
-            { model | parsed = Just <| Parser.run model.parser model.text }
+        FormatClick ->
+            let
+                parsed =
+                    Parser.run model.parser model.text
+
+                text =
+                    case parsed of
+                        Ok t ->
+                            model.formatter t
+
+                        _ ->
+                            model.text
+            in
+            { model | parsed = parsed, text = text }
 
         TextEdit v ->
-            { model | text = v, parsed = Just <| Parser.run model.parser v }
+            { model | text = v, parsed = Parser.run model.parser v }
 
 
 view : Model a -> Html Msg
 view model =
     div []
-        [ button [ onClick ParseClick ] [ text "Parse" ]
-        , textarea [ value model.text, onInput TextEdit, style "width" "100%", style "height" "10em", style "font-family" "monospace" ] []
+        [ textarea [ value model.text, onInput TextEdit, style "width" "100%", style "height" "10em", style "font-family" "monospace" ] []
+        , button [ onClick FormatClick ] [ text "Format" ]
         , case model.parsed of
-            Nothing ->
-                text ""
+            Ok _ ->
+                text "Parsed ok"
 
-            Just a ->
-                case a of
-                    Ok _ ->
-                        text "Parsed ok"
-
-                    Err errors ->
-                        let
-                            viewProblem { row, col, problem } =
-                                div [] [ text <| "row: " ++ String.fromInt row ++ ", col: " ++ String.fromInt col ++ ", problem: " ++ problemToString problem ]
-                        in
-                        div [] (List.map viewProblem errors)
+            Err errors ->
+                let
+                    viewProblem { row, col, problem } =
+                        div [] [ text <| "row: " ++ String.fromInt row ++ ", col: " ++ String.fromInt col ++ ", problem: " ++ problemToString problem ]
+                in
+                div [] (List.map viewProblem errors)
         ]
 
 

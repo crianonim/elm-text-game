@@ -3,7 +3,7 @@ module DialogGameEditor exposing (..)
 import DialogGame exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Screept exposing (..)
+import ScreeptV2 exposing (..)
 
 
 type alias Model =
@@ -40,11 +40,21 @@ init =
 --    }
 
 
+txt : String -> Expression
+txt s =
+    Literal <| Text s
+
+
+var : String -> Expression
+var s =
+    Variable <| LiteralIdentifier s
+
+
 exampleDialog =
     { id = "start"
-    , text = Screept.Concat [ Screept.S "You're in a dark room. " ]
+    , text = txt "You're in a dark room. "
     , options =
-        [ { text = Screept.S "Go through the exit", condition = Just (IntVariable <| VLit "start_look_around"), action = [ GoAction "second" ] }
+        [ { text = txt "Go through the exit", condition = Just (var "start_look_around"), actions = [ GoAction "second" ] }
 
         --, { text = Screept.S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| Screept.S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
         --, { text = Screept.S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), DialogGame.nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
@@ -69,7 +79,9 @@ viewDialog : Model -> Html Msg
 viewDialog model =
     case model.dialog of
         Nothing ->
-            button [ onClick <| Edit exampleDialog ] [ text "Edit" ]
+            div []
+                [ button [ onClick <| Edit exampleDialog ] [ text "Edit" ]
+                ]
 
         Just d ->
             div []
