@@ -472,6 +472,22 @@ decodeValue =
         ]
 
 
+encodeEnvironment : Environment -> E.Value
+encodeEnvironment { procedures, vars } =
+    E.object
+        [ ( "procedures", E.dict identity (stringifyStatement >> E.string) procedures )
+        , ( "vars", E.dict identity encodeValue vars )
+        ]
+
+
+decodeEnvironment : Json.Decoder Environment
+decodeEnvironment =
+    Json.map3 Environment
+        (Json.field "procedures" <| Json.dict decodeStatement)
+        (Json.field "vars" <| Json.dict decodeValue)
+        (Json.succeed <| Random.initialSeed 666)
+
+
 parserToDecoder : Parser value -> Json.Decoder value
 parserToDecoder parser =
     let

@@ -1,7 +1,5 @@
 module DialogGame exposing (..)
 
---import Screept exposing (IntValue(..), State, TextValue(..))
-
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, style)
@@ -176,94 +174,85 @@ goBackOption =
     { text = Literal <| Text "Go back", condition = Nothing, actions = [ GoBackAction ] }
 
 
+encodeDialogAction : DialogAction -> E.Value
+encodeDialogAction dialogAction =
+    case dialogAction of
+        GoAction dialogId ->
+            E.object [ ( "go_dialog", E.string dialogId ) ]
 
---
---encodeDialogAction : DialogAction -> E.Value
---encodeDialogAction dialogAction =
---    case dialogAction of
---        GoAction dialogId ->
---            E.object [ ( "go_dialog", E.string dialogId ) ]
---
---        GoBackAction ->
---            E.string "go_back"
---
---        Message expression ->
---            E.object [ ( "msg", E.string <| ScreeptV2.stringifyExpression expression ) ]
---
---        Screept statement ->
---            E.object [ ( "screept", E.string <| ScreeptV2.stringifyStatement statement ) ]
---
---        ConditionalAction intValue success failure ->
---            E.object
---                [ ( "if", E.string <| Screept.intValueStringify intValue )
---                , ( "then", encodeDialogAction success )
---                , ( "else", encodeDialogAction failure )
---                ]
---
---        ActionBlock dialogActions ->
---            E.list encodeDialogAction dialogActions
---
---        Exit s ->
---            E.object [ ( "exit", E.string s ) ]
---
---
---encodeDialogOption : DialogOption -> E.Value
---encodeDialogOption { text, condition, action } =
---    E.object
---        ([ ( "text", E.string <| Screept.textValueStringify text )
---         , ( "action", E.list encodeDialogAction action )
---         ]
---            ++ (case condition of
---                    Just a ->
---                        [ ( "condition", E.string <| Screept.intValueStringify a ) ]
---
---                    Nothing ->
---                        []
---               )
---        )
---
---
---encodeDialog : Dialog -> E.Value
---encodeDialog { id, text, options } =
---    E.object
---        [ ( "id", E.string id )
---        , ( "text", E.string <| Screept.textValueStringify text )
---        , ( "options", E.list encodeDialogOption options )
---        ]
---
---stringifyGameDefinition : GameDefinition -> String
---stringifyGameDefinition gd =
---    E.encode 2 (encodeGameDefinition gd)
---
---encodeState : GameState -> E.Value
---encodeState { dialogStack, messages, procedures, vars } =
---    E.object
---        [ ( "dialogStack", Stack.toList dialogStack |> E.list E.string )
---        , ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
---        , ( "vars", E.dict identity Screept.encodeVariable vars )
---        , ( "messages", E.list E.string messages )
---        ]
---
---decodeState : Json.Decoder GameState
---decodeState =
---    Json.map3 GameState
---        (Json.succeed Stack.initialise)
---        (Json.field "messages" <| Json.list Json.string)
---        --(Json.succeed <| Random.initialSeed 666)
---        (Json.map3 ScreeptV2.State
---            (Json.field "procedures" <| Json.dict ScreeptV2.decodeStatement)
---            (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
---
---        )
---
---encodeGameDefinition : GameDefinition -> E.Value
---encodeGameDefinition { dialogs, startDialogId,  vars } =
---    E.object
---        [ ( "dialogs", E.list encodeDialog dialogs )
---        , ( "startDialogId", E.string startDialogId )
---        --, ( "procedures", E.dict identity (Screept.statementStringify >> E.string) procedures )
---        , ( "vars", E.dict identity Screept.encodeVariable vars )
---        ]
+        GoBackAction ->
+            E.string "go_back"
+
+        Message expression ->
+            E.object [ ( "msg", E.string <| ScreeptV2.stringifyExpression expression ) ]
+
+        Screept statement ->
+            E.object [ ( "screept", E.string <| ScreeptV2.stringifyStatement statement ) ]
+
+        ConditionalAction condition success failure ->
+            E.object
+                [ ( "if", E.string <| ScreeptV2.stringifyExpression condition )
+                , ( "then", encodeDialogAction success )
+                , ( "else", encodeDialogAction failure )
+                ]
+
+        ActionBlock dialogActions ->
+            E.list encodeDialogAction dialogActions
+
+        Exit s ->
+            E.object [ ( "exit", E.string s ) ]
+
+
+encodeDialogOption : DialogOption -> E.Value
+encodeDialogOption { text, condition, actions } =
+    E.object
+        ([ ( "text", E.string <| ScreeptV2.stringifyExpression text )
+         , ( "action", E.list encodeDialogAction actions )
+         ]
+            ++ (case condition of
+                    Just a ->
+                        [ ( "condition", E.string <| ScreeptV2.stringifyExpression a ) ]
+
+                    Nothing ->
+                        []
+               )
+        )
+
+
+encodeDialog : Dialog -> E.Value
+encodeDialog { id, text, options } =
+    E.object
+        [ ( "id", E.string id )
+        , ( "text", E.string <| ScreeptV2.stringifyExpression text )
+        , ( "options", E.list encodeDialogOption options )
+        ]
+
+
+encodeState : GameState -> E.Value
+encodeState { dialogStack, messages, screeptEnv } =
+    E.object
+        [ ( "dialogStack", Stack.toList dialogStack |> E.list E.string )
+        , ( "messages", E.list E.string messages )
+        , ( "screeptEnv", ScreeptV2.encodeEnvironment screeptEnv )
+        ]
+
+
+decodeState : Json.Decoder GameState
+decodeState =
+    Json.map3 GameState
+        (Json.succeed Stack.initialise)
+        (Json.field "messages" <| Json.list Json.string)
+        (Json.field "screeptEnv" ScreeptV2.decodeEnvironment)
+
+
+encodeGameDefinition : GameDefinition -> E.Value
+encodeGameDefinition { dialogs, startDialogId, vars, procedures } =
+    E.object
+        [ ( "dialogs", E.list encodeDialog dialogs )
+        , ( "startDialogId", E.string startDialogId )
+        , ( "procedures", E.dict identity (ScreeptV2.stringifyStatement >> E.string) procedures )
+        , ( "vars", E.dict identity ScreeptV2.encodeValue vars )
+        ]
 
 
 decodeAction : Json.Decoder DialogAction
@@ -318,6 +307,11 @@ decodeGameDefinition =
         (Json.field "startDialogId" Json.string)
         (Json.field "procedures" <| Json.dict ScreeptV2.decodeStatement)
         (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
+
+
+stringifyGameDefinition : GameDefinition -> String
+stringifyGameDefinition gd =
+    E.encode 2 (encodeGameDefinition gd)
 
 
 update : Msg -> Model -> ( Model, Maybe String )
