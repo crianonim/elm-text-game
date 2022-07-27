@@ -8922,14 +8922,15 @@ var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
 			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
 			seed0);
 	});
-var $author$project$DialogGameEditor$init = {dialog: $elm$core$Maybe$Nothing, id: '', text: ''};
+var $author$project$DialogGameEditor$init = {editedDialog: $elm$core$Maybe$Nothing, gameDefinition: $elm$core$Maybe$Nothing};
 var $author$project$ParsedEditable$init = F3(
-	function (text, parser, formatter) {
+	function (item, parser, formatter) {
 		return {
 			formatter: formatter,
-			parsed: A2($elm$parser$Parser$run, parser, text),
-			parser: parser,
-			text: text
+			_new: $elm$core$Result$Ok(item),
+			old: item,
+			parser: A2($elm$parser$Parser$ignorer, parser, $elm$parser$Parser$end),
+			text: formatter(item)
 		};
 	});
 var $elm$core$List$isEmpty = function (xs) {
@@ -8997,11 +8998,22 @@ var $author$project$ScreeptV2$stringifyPrettyStatement = F2(
 				}
 			}());
 	});
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
 var $author$project$ScreeptEditor$init = {
-	intValueEditor: A3($author$project$ParsedEditable$init, '!(#[(farm_level?\"has level\":\"no level\"),\"_\",book,[\"jan\"]] + 1)', $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression),
 	statementEditor: A3(
 		$author$project$ParsedEditable$init,
-		'{ turn = (turn + 1);  turns_count = (turns_count - 1);  minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));  hour = ((turn / turns_per_hour) %% 24);  day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 }; IF (minutes?1:0) THEN {  } ELSE {  }; PROC sub { RND d6 1 6 } }',
+		A2(
+			$elm$core$Result$withDefault,
+			$author$project$ScreeptV2$Block(_List_Nil),
+			A2($elm$parser$Parser$run, $author$project$ScreeptV2$parserStatement, '{ turn = (turn + 1);  turns_count = (turns_count - 1);  minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));  hour = ((turn / turns_per_hour) %% 24);  day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 }; IF (minutes?1:0) THEN {  } ELSE {  }; PROC sub { RND d6 1 6 } }')),
 		$author$project$ScreeptV2$parserStatement,
 		$author$project$ScreeptV2$stringifyPrettyStatement(0)),
 	value: $elm$core$Maybe$Nothing
@@ -9249,15 +9261,6 @@ var $author$project$Main$Started = F2(
 	function (a, b) {
 		return {$: 'Started', a: a, b: b};
 	});
-var $elm$core$Result$withDefault = F2(
-	function (def, result) {
-		if (result.$ === 'Ok') {
-			var a = result.a;
-			return a;
-		} else {
-			return def;
-		}
-	});
 var $author$project$ScreeptV2$executeStringStatement = F2(
 	function (statementString, _var) {
 		var _v0 = A2(
@@ -9344,6 +9347,61 @@ var $author$project$Main$mainMenuActions = F2(
 			}
 		}
 	});
+var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
+	function (getOption, set) {
+		return {getOption: getOption, set: set};
+	});
+var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
+	function (lens, f) {
+		var mf = function (a) {
+			return function (b) {
+				return A2(lens.set, b, a);
+			}(
+				f(
+					lens.get(a)));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Compose$lensWithOptional = F2(
+	function (inner, outer) {
+		var set = function (c) {
+			return A2(
+				$arturopala$elm_monocle$Monocle$Lens$modify,
+				outer,
+				inner.set(c));
+		};
+		var getOption = A2($elm$core$Basics$composeR, outer.get, inner.getOption);
+		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
+	});
+var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
+	function (get, set) {
+		return {get: get, set: set};
+	});
+var $author$project$Main$model_dialogEditor = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.dialogEditor;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{dialogEditor: s});
+		}));
+var $author$project$DialogGameEditor$optional_gameDefinition = {
+	getOption: function (m) {
+		return m.gameDefinition;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					gameDefinition: $elm$core$Maybe$Just(s)
+				});
+		})
+};
+var $author$project$Main$model_de_gameDefinition = A2($arturopala$elm_monocle$Monocle$Compose$lensWithOptional, $author$project$DialogGameEditor$optional_gameDefinition, $author$project$Main$model_dialogEditor);
 var $author$project$DialogGame$setRndSeed = F2(
 	function (seed, model) {
 		var gameState = model.gameState;
@@ -9499,66 +9557,250 @@ var $author$project$DialogGame$update = F2(
 				{gameState: gs}),
 			code);
 	});
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$ParsedEditable$model_new = {
+	getOption: function (m) {
+		return $elm$core$Result$toMaybe(m._new);
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					_new: $elm$core$Result$Ok(s)
+				});
+		})
+};
+var $author$project$DialogGameEditor$editableDiablogToDialog = function (editableDialog) {
+	var _v0 = $author$project$ParsedEditable$model_new.getOption(editableDialog.text);
+	if (_v0.$ === 'Just') {
+		var text = _v0.a;
+		return {id: editableDialog.id, options: editableDialog.dialog.options, text: text};
+	} else {
+		return editableDialog.dialog;
+	}
+};
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $author$project$DialogGameEditor$editedDialog_dialog = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.dialog;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{dialog: s});
+		}));
+var $author$project$DialogGameEditor$model_editedDialog = {
+	getOption: function ($) {
+		return $.editedDialog;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedDialog: $elm$core$Maybe$Just(s)
+				});
+		})
+};
+var $arturopala$elm_monocle$Monocle$Optional$flip = F3(
+	function (f, b, a) {
+		return A2(f, a, b);
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modifyOption = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$map,
+				A2(
+					$elm$core$Basics$composeR,
+					fx,
+					A2($arturopala$elm_monocle$Monocle$Optional$flip, opt.set, a)),
+				opt.getOption(a));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modify = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				a,
+				A3($arturopala$elm_monocle$Monocle$Optional$modifyOption, opt, fx, a));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
+	function (inner, outer) {
+		var set = function (c) {
+			return A2(
+				$arturopala$elm_monocle$Monocle$Optional$modify,
+				outer,
+				inner.set(c));
+		};
+		var getOption = A2(
+			$elm$core$Basics$composeR,
+			outer.getOption,
+			$elm$core$Maybe$map(inner.get));
+		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
+	});
+var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
+var $author$project$DialogGameEditor$model_gameDefinition = {
+	getOption: function ($) {
+		return $.gameDefinition;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					gameDefinition: $elm$core$Maybe$Just(s)
+				});
+		})
+};
+var $author$project$DialogGameEditor$model_dialogs = A2(
+	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
+	A2(
+		$arturopala$elm_monocle$Monocle$Lens$Lens,
+		function ($) {
+			return $.dialogs;
+		},
+		F2(
+			function (s, m) {
+				return _Utils_update(
+					m,
+					{dialogs: s});
+			})),
+	$author$project$DialogGameEditor$model_gameDefinition);
+var $author$project$DialogGameEditor$editableDialog_text = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.text;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{text: s});
+		}));
+var $author$project$DialogGameEditor$model_text = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editableDialog_text, $author$project$DialogGameEditor$model_editedDialog);
+var $author$project$ParsedEditable$revert = function (model) {
+	return _Utils_update(
+		model,
+		{
+			_new: $elm$core$Result$Ok(model.old),
+			text: model.formatter(model.old)
+		});
+};
+var $author$project$ParsedEditable$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'FormatClick':
+				var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
+				var text = function () {
+					if (parsed.$ === 'Ok') {
+						var t = parsed.a;
+						return model.formatter(t);
+					} else {
+						return model.text;
+					}
+				}();
+				return _Utils_update(
+					model,
+					{_new: parsed, text: text});
+			case 'TextEdit':
+				var v = msg.a;
+				return _Utils_update(
+					model,
+					{
+						_new: A2($elm$parser$Parser$run, model.parser, v),
+						text: v
+					});
+			default:
+				return $author$project$ParsedEditable$revert(model);
+		}
+	});
 var $author$project$DialogGameEditor$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'Edit':
 				var dialog = msg.a;
-				return _Utils_update(
+				return _Utils_eq(
+					$author$project$DialogGameEditor$model_Dialog.getOption(model),
+					$elm$core$Maybe$Just(dialog)) ? model : _Utils_update(
 					model,
 					{
-						dialog: $elm$core$Maybe$Just(dialog),
-						id: dialog.id,
-						text: 'dialog.text'
+						editedDialog: $elm$core$Maybe$Just(
+							{
+								dialog: dialog,
+								id: dialog.id,
+								text: A3($author$project$ParsedEditable$init, dialog.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
+							})
 					});
 			case 'Save':
+				var newDialogs = A3(
+					$elm$core$Maybe$map2,
+					F2(
+						function (ed, gd) {
+							return A2(
+								$elm$core$List$map,
+								function (d) {
+									return _Utils_eq(ed.dialog, d) ? $author$project$DialogGameEditor$editableDiablogToDialog(ed) : d;
+								},
+								gd.dialogs);
+						}),
+					$author$project$DialogGameEditor$model_editedDialog.getOption(model),
+					$author$project$DialogGameEditor$model_gameDefinition.getOption(model));
+				if (newDialogs.$ === 'Nothing') {
+					return model;
+				} else {
+					var nd = newDialogs.a;
+					return A2($author$project$DialogGameEditor$model_dialogs.set, nd, model);
+				}
+			case 'Cancel':
 				return model;
 			default:
-				return model;
-		}
-	});
-var $author$project$ParsedEditable$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'FormatClick') {
-			var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
-			var text = function () {
-				if (parsed.$ === 'Ok') {
-					var t = parsed.a;
-					return model.formatter(t);
-				} else {
-					return model.text;
-				}
-			}();
-			return _Utils_update(
-				model,
-				{parsed: parsed, text: text});
-		} else {
-			var v = msg.a;
-			return _Utils_update(
-				model,
-				{
-					parsed: A2($elm$parser$Parser$run, model.parser, v),
-					text: v
-				});
+				var tMsg = msg.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$model_text,
+					function (m) {
+						return A2($author$project$ParsedEditable$update, tMsg, m);
+					},
+					model);
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'StatementEditor') {
-			var m = msg.a;
-			return _Utils_update(
-				model,
-				{
-					statementEditor: A2($author$project$ParsedEditable$update, m, model.statementEditor)
-				});
-		} else {
-			var m = msg.a;
-			return _Utils_update(
-				model,
-				{
-					intValueEditor: A2($author$project$ParsedEditable$update, m, model.intValueEditor)
-				});
-		}
+		var m = msg.a;
+		return _Utils_update(
+			model,
+			{
+				statementEditor: A2($author$project$ParsedEditable$update, m, model.statementEditor)
+			});
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -9641,12 +9883,15 @@ var $author$project$Main$update = F2(
 						{gameState: newGameState});
 					var _v7 = A2($elm$core$Debug$log, 'Success decode', value.dialogs);
 					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								gameDialog: $author$project$Main$Loaded(value),
-								mainMenuDialog: menuDialog
-							}),
+						A2(
+							$author$project$Main$model_de_gameDefinition.set,
+							value,
+							_Utils_update(
+								model,
+								{
+									gameDialog: $author$project$Main$Loaded(value),
+									mainMenuDialog: menuDialog
+								})),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'MainMenuDialog':
@@ -10009,25 +10254,279 @@ var $author$project$DialogGame$view = function (_v0) {
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
 };
-var $author$project$ScreeptEditor$StatementEditor = function (a) {
-	return {$: 'StatementEditor', a: a};
-};
-var $elm$html$Html$pre = _VirtualDom_node('pre');
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
-		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
+var $elm$html$Html$h6 = _VirtualDom_node('h6');
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
 	});
+var $elm$json$Json$Encode$dict = F3(
+	function (toKey, toValue, dictionary) {
+		return _Json_wrap(
+			A3(
+				$elm$core$Dict$foldl,
+				F3(
+					function (key, value, obj) {
+						return A3(
+							_Json_addField,
+							toKey(key),
+							toValue(value),
+							obj);
+					}),
+				_Json_emptyObject(_Utils_Tuple0),
+				dictionary));
+	});
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
 var $author$project$ScreeptV2$stringifyStatement = function (statement) {
 	return A2($author$project$ScreeptV2$stringifyPrettyStatement, 0, statement);
 };
-var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
-var $author$project$ParsedEditable$TextEdit = function (a) {
+var $author$project$DialogGame$encodeDialogAction = function (dialogAction) {
+	switch (dialogAction.$) {
+		case 'GoAction':
+			var dialogId = dialogAction.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'go_dialog',
+						$elm$json$Json$Encode$string(dialogId))
+					]));
+		case 'GoBackAction':
+			return $elm$json$Json$Encode$string('go_back');
+		case 'Message':
+			var expression = dialogAction.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'msg',
+						$elm$json$Json$Encode$string(
+							$author$project$ScreeptV2$stringifyExpression(expression)))
+					]));
+		case 'Screept':
+			var statement = dialogAction.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'screept',
+						$elm$json$Json$Encode$string(
+							$author$project$ScreeptV2$stringifyStatement(statement)))
+					]));
+		case 'ConditionalAction':
+			var condition = dialogAction.a;
+			var success = dialogAction.b;
+			var failure = dialogAction.c;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'if',
+						$elm$json$Json$Encode$string(
+							$author$project$ScreeptV2$stringifyExpression(condition))),
+						_Utils_Tuple2(
+						'then',
+						$author$project$DialogGame$encodeDialogAction(success)),
+						_Utils_Tuple2(
+						'else',
+						$author$project$DialogGame$encodeDialogAction(failure))
+					]));
+		case 'ActionBlock':
+			var dialogActions = dialogAction.a;
+			return A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogAction, dialogActions);
+		default:
+			var s = dialogAction.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'exit',
+						$elm$json$Json$Encode$string(s))
+					]));
+	}
+};
+var $author$project$DialogGame$encodeDialogOption = function (_v0) {
+	var text = _v0.text;
+	var condition = _v0.condition;
+	var actions = _v0.actions;
+	return $elm$json$Json$Encode$object(
+		_Utils_ap(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'text',
+					$elm$json$Json$Encode$string(
+						$author$project$ScreeptV2$stringifyExpression(text))),
+					_Utils_Tuple2(
+					'action',
+					A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogAction, actions))
+				]),
+			function () {
+				if (condition.$ === 'Just') {
+					var a = condition.a;
+					return _List_fromArray(
+						[
+							_Utils_Tuple2(
+							'condition',
+							$elm$json$Json$Encode$string(
+								$author$project$ScreeptV2$stringifyExpression(a)))
+						]);
+				} else {
+					return _List_Nil;
+				}
+			}()));
+};
+var $author$project$DialogGame$encodeDialog = function (_v0) {
+	var id = _v0.id;
+	var text = _v0.text;
+	var options = _v0.options;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$elm$json$Json$Encode$string(id)),
+				_Utils_Tuple2(
+				'text',
+				$elm$json$Json$Encode$string(
+					$author$project$ScreeptV2$stringifyExpression(text))),
+				_Utils_Tuple2(
+				'options',
+				A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialogOption, options))
+			]));
+};
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $author$project$ScreeptV2$encodeValue = function (value) {
+	switch (value.$) {
+		case 'Number':
+			var _float = value.a;
+			return $elm$json$Json$Encode$float(_float);
+		case 'Text':
+			var string = value.a;
+			return $elm$json$Json$Encode$string(string);
+		default:
+			var expression = value.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'func',
+						$elm$json$Json$Encode$string(
+							$author$project$ScreeptV2$stringifyExpression(expression)))
+					]));
+	}
+};
+var $author$project$DialogGame$encodeGameDefinition = function (_v0) {
+	var title = _v0.title;
+	var dialogs = _v0.dialogs;
+	var startDialogId = _v0.startDialogId;
+	var vars = _v0.vars;
+	var procedures = _v0.procedures;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(title)),
+				_Utils_Tuple2(
+				'dialogs',
+				A2($elm$json$Json$Encode$list, $author$project$DialogGame$encodeDialog, dialogs)),
+				_Utils_Tuple2(
+				'startDialogId',
+				$elm$json$Json$Encode$string(startDialogId)),
+				_Utils_Tuple2(
+				'procedures',
+				A3(
+					$elm$json$Json$Encode$dict,
+					$elm$core$Basics$identity,
+					A2($elm$core$Basics$composeR, $author$project$ScreeptV2$stringifyStatement, $elm$json$Json$Encode$string),
+					procedures)),
+				_Utils_Tuple2(
+				'vars',
+				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $author$project$ScreeptV2$encodeValue, vars))
+			]));
+};
+var $author$project$DialogGame$stringifyGameDefinition = function (gd) {
+	return A2(
+		$elm$json$Json$Encode$encode,
+		2,
+		$author$project$DialogGame$encodeGameDefinition(gd));
+};
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$DialogGameEditor$Edit = function (a) {
+	return {$: 'Edit', a: a};
+};
+var $author$project$DialogGameEditor$Save = {$: 'Save'};
+var $author$project$DialogGameEditor$TextEdit = function (a) {
 	return {$: 'TextEdit', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $author$project$ParsedEditable$isChanged = function (model) {
+	var _v0 = model._new;
+	if (_v0.$ === 'Ok') {
+		var _new = _v0.a;
+		return !_Utils_eq(model.old, _new);
+	} else {
+		return false;
+	}
+};
+var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
+var $author$project$ParsedEditable$Revert = {$: 'Revert'};
+var $author$project$ParsedEditable$TextEdit = function (a) {
+	return {$: 'TextEdit', a: a};
+};
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -10095,8 +10594,6 @@ var $author$project$ParsedEditable$problemToString = function (problem) {
 			return 'BadRepeat';
 	}
 };
-var $elm$html$Html$textarea = _VirtualDom_node('textarea');
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$ParsedEditable$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -10124,8 +10621,18 @@ var $author$project$ParsedEditable$view = function (model) {
 					[
 						$elm$html$Html$text('Format')
 					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$ParsedEditable$Revert)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Revert')
+					])),
 				function () {
-				var _v0 = model.parsed;
+				var _v0 = model._new;
 				if (_v0.$ === 'Ok') {
 					return $elm$html$Html$text('Parsed ok');
 				} else {
@@ -10151,6 +10658,227 @@ var $author$project$ParsedEditable$view = function (model) {
 			}()
 			]));
 };
+var $author$project$DialogGameEditor$elipsisText = function (s) {
+	return ($elm$core$String$length(s) > 100) ? (A3($elm$core$String$slice, 0, 100, s) + '...') : s;
+};
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$DialogGameEditor$viewExpression = function (expression) {
+	return A2(
+		$elm$html$Html$span,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				$author$project$DialogGameEditor$elipsisText(
+					$author$project$ScreeptV2$stringifyExpression(expression)))
+			]));
+};
+var $author$project$DialogGameEditor$viewAction = function (dialogAction) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				function () {
+					switch (dialogAction.$) {
+						case 'Message':
+							var expr = dialogAction.a;
+							return 'Message: ' + $author$project$ScreeptV2$stringifyExpression(expr);
+						case 'GoAction':
+							var dialogId = dialogAction.a;
+							return 'Go: ' + dialogId;
+						case 'GoBackAction':
+							return 'GoBack';
+						case 'Screept':
+							var statement = dialogAction.a;
+							return 'Screept: ' + $author$project$ScreeptV2$stringifyStatement(statement);
+						case 'ConditionalAction':
+							var expression = dialogAction.a;
+							var success = dialogAction.b;
+							var failure = dialogAction.c;
+							return 'IF';
+						case 'ActionBlock':
+							var dialogActions = dialogAction.a;
+							return '[]';
+						default:
+							var string = dialogAction.a;
+							return 'EXIT ' + string;
+					}
+				}())
+			]));
+};
+var $author$project$DialogGameEditor$viewOption = function (dialogOption) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('op_text: '),
+						$author$project$DialogGameEditor$viewExpression(dialogOption.text)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('condition: '),
+						A2(
+						$elm$core$Maybe$withDefault,
+						$elm$html$Html$text('n/a'),
+						A2($elm$core$Maybe$map, $author$project$DialogGameEditor$viewExpression, dialogOption.condition))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('actions:'),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						A2($elm$core$List$map, $author$project$DialogGameEditor$viewAction, dialogOption.actions))
+					]))
+			]));
+};
+var $author$project$DialogGameEditor$viewDialog = F2(
+	function (model, dialog) {
+		var isEdited = _Utils_eq(
+			$author$project$DialogGameEditor$model_Dialog.getOption(model),
+			$elm$core$Maybe$Just(dialog));
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Events$onClick(
+					$author$project$DialogGameEditor$Edit(dialog))
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('id: '),
+							isEdited ? A2($elm$html$Html$input, _List_Nil, _List_Nil) : $elm$html$Html$text(dialog.id)
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('text: '),
+							function () {
+							var _v0 = _Utils_Tuple2(model.editedDialog, isEdited);
+							if ((_v0.a.$ === 'Just') && _v0.b) {
+								var edModel = _v0.a.a;
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$map,
+											$author$project$DialogGameEditor$TextEdit,
+											$author$project$ParsedEditable$view(edModel.text))
+										]));
+							} else {
+								return $author$project$DialogGameEditor$viewExpression(dialog.text);
+							}
+						}()
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('options:'),
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							A2($elm$core$List$map, $author$project$DialogGameEditor$viewOption, dialog.options))
+						])),
+					function () {
+					var enabled = A2(
+						$elm$core$Maybe$withDefault,
+						false,
+						A2(
+							$elm$core$Maybe$map,
+							$author$project$ParsedEditable$isChanged,
+							$author$project$DialogGameEditor$model_text.getOption(model)));
+					return A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$disabled(!enabled),
+								$elm$html$Html$Events$onClick($author$project$DialogGameEditor$Save)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Save')
+							]));
+				}()
+				]));
+	});
+var $author$project$DialogGameEditor$view = function (model) {
+	var _v0 = model.gameDefinition;
+	if (_v0.$ === 'Just') {
+		var gd = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h6,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Dialogs:')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					A2(
+						$elm$core$List$map,
+						$author$project$DialogGameEditor$viewDialog(model),
+						gd.dialogs)),
+					A2(
+					$elm$html$Html$textarea,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$value(
+							$author$project$DialogGame$stringifyGameDefinition(gd))
+						]),
+					_List_Nil)
+				]));
+	} else {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('No GameDefintion loaded')
+				]));
+	}
+};
+var $author$project$ScreeptEditor$StatementEditor = function (a) {
+	return {$: 'StatementEditor', a: a};
+};
+var $elm$html$Html$pre = _VirtualDom_node('pre');
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
 var $author$project$ScreeptEditor$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -10162,7 +10890,7 @@ var $author$project$ScreeptEditor$view = function (model) {
 				$author$project$ScreeptEditor$StatementEditor,
 				$author$project$ParsedEditable$view(model.statementEditor)),
 				function () {
-				var _v0 = model.statementEditor.parsed;
+				var _v0 = model.statementEditor._new;
 				if (_v0.$ === 'Ok') {
 					var v = _v0.a;
 					return A2(
@@ -10201,77 +10929,11 @@ var $author$project$ScreeptEditor$view = function (model) {
 			}()
 			]));
 };
-var $author$project$DialogGameEditor$Edit = function (a) {
-	return {$: 'Edit', a: a};
-};
-var $author$project$DialogGameEditor$txt = function (s) {
-	return $author$project$ScreeptV2$Literal(
-		$author$project$ScreeptV2$Text(s));
-};
-var $author$project$DialogGameEditor$var = function (s) {
-	return $author$project$ScreeptV2$Variable(
-		$author$project$ScreeptV2$LiteralIdentifier(s));
-};
-var $author$project$DialogGameEditor$exampleDialog = {
-	id: 'start',
-	options: _List_fromArray(
-		[
-			{
-			actions: _List_fromArray(
-				[
-					$author$project$DialogGame$GoAction('second')
-				]),
-			condition: $elm$core$Maybe$Just(
-				$author$project$DialogGameEditor$var('start_look_around')),
-			text: $author$project$DialogGameEditor$txt('Go through the exit')
-		}
-		]),
-	text: $author$project$DialogGameEditor$txt('You\'re in a dark room. ')
-};
-var $author$project$DialogGameEditor$viewDialog = function (model) {
-	var _v0 = model.dialog;
-	if (_v0.$ === 'Nothing') {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$Edit($author$project$DialogGameEditor$exampleDialog))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Edit')
-						]))
-				]));
-	} else {
-		var d = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('id: '),
-							$elm$html$Html$text(d.id)
-						]))
-				]));
-	}
-};
 var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};
 var $author$project$Main$EditUrlLoader = function (a) {
 	return {$: 'EditUrlLoader', a: a};
 };
 var $author$project$Main$HideUrlLoader = {$: 'HideUrlLoader'};
-var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$viewUrlLoader = function (model) {
 	var _v0 = model.urlLoader;
 	if (_v0.$ === 'Just') {
@@ -10326,7 +10988,7 @@ var $author$project$Main$view = function (model) {
 				A2(
 				$elm$html$Html$map,
 				$author$project$Main$DialogEditor,
-				$author$project$DialogGameEditor$viewDialog(model.dialogEditor)),
+				$author$project$DialogGameEditor$view(model.dialogEditor)),
 				A2(
 				$elm$html$Html$map,
 				$author$project$Main$MainMenuDialog,

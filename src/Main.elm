@@ -7,6 +7,9 @@ import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Monocle.Compose
+import Monocle.Lens exposing (Lens)
+import Monocle.Optional exposing (Optional)
 import Platform.Cmd exposing (Cmd)
 import Random
 import ScreeptEditor
@@ -220,7 +223,10 @@ update msg model =
                         menuDialog =
                             { m | gameState = newGameState }
                     in
-                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }, Cmd.none )
+                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }
+                        |> model_de_gameDefinition.set value
+                    , Cmd.none
+                    )
 
         MainMenuDialog menuMsg ->
             let
@@ -343,13 +349,28 @@ subscriptions model =
 
 
 
+-- OPTICS
+
+
+model_dialogEditor : Lens Model DialogGameEditor.Model
+model_dialogEditor =
+    Lens .dialogEditor (\s m -> { m | dialogEditor = s })
+
+
+model_de_gameDefinition : Optional Model GameDefinition
+model_de_gameDefinition =
+    model_dialogEditor
+        |> Monocle.Compose.lensWithOptional DialogGameEditor.optional_gameDefinition
+
+
+
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
+        [ DialogGameEditor.view model.dialogEditor |> Html.map DialogEditor
         , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
             Started _ gameDialogMenu ->
