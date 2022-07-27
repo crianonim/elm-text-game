@@ -20,10 +20,10 @@ type alias Model =
 
 type Msg
     = StatementEditor ParsedEditable.Msg
-    --| IntValueEditor ParsedEditable.Msg
 
 
 
+--| IntValueEditor ParsedEditable.Msg
 --| ClickRun
 
 
@@ -44,11 +44,10 @@ update msg model =
         StatementEditor m ->
             { model | statementEditor = ParsedEditable.update m model.statementEditor }
 
-        --IntValueEditor m ->
-        --    { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 
 
-
+--IntValueEditor m ->
+--    { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 --ClickRun ->
 --    { model | value = Maybe.andThen (Screept.getMaybeIntValue gameState) (Maybe.andThen Result.toMaybe model.intValueEditor.parsed) }
 

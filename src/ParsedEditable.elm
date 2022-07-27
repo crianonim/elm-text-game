@@ -3,10 +3,11 @@ module ParsedEditable exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Parser exposing ((|.))
 import Monocle.Compose exposing (optionalWithLens)
 import Monocle.Lens exposing (Lens)
 import Monocle.Optional as Optional exposing (Optional)
+import Parser exposing ((|.))
+
 
 type alias Model a =
     { text : String
@@ -25,14 +26,12 @@ type Msg
 
 init : a -> Parser.Parser a -> (a -> String) -> Model a
 init item parser formatter =
-
     { text = formatter item
     , old = item
     , new = Ok item
     , parser = parser |. Parser.end
     , formatter = formatter
     }
-
 
 
 update : Msg -> Model a -> Model a
@@ -59,28 +58,32 @@ update msg model =
         Revert ->
             revert model
 
+
 revert : Model a -> Model a
 revert model =
-                { model | new = Ok model.old, text = model.formatter model.old  }
+    { model | new = Ok model.old, text = model.formatter model.old }
 
-isChanged : Model a-> Bool
+
+isChanged : Model a -> Bool
 isChanged model =
     case model.new of
-        Ok new ->model.old /= new
-        _ -> False
+        Ok new ->
+            model.old /= new
+
+        _ ->
+            False
 
 
 model_new : Optional (Model a) a
 model_new =
-    {
-     getOption = \m-> Result.toMaybe m.new
-    ,set = \s m-> {m|new=Ok s}
+    { getOption = \m -> Result.toMaybe m.new
+    , set = \s m -> { m | new = Ok s }
     }
 
 
 model_old : Lens (Model a) a
 model_old =
-    Lens .old (\s m-> {m|old=s})
+    Lens .old (\s m -> { m | old = s })
 
 
 view : Model a -> Html Msg
@@ -88,7 +91,7 @@ view model =
     div []
         [ textarea [ value model.text, onInput TextEdit, style "width" "100%", style "height" "10em", style "font-family" "monospace" ] []
         , button [ onClick FormatClick ] [ text "Format" ]
-        , button [onClick Revert] [text "Revert"]
+        , button [ onClick Revert ] [ text "Revert" ]
         , case model.new of
             Ok _ ->
                 text "Parsed ok"

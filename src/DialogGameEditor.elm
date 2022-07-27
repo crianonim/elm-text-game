@@ -2,8 +2,8 @@ module DialogGameEditor exposing (..)
 
 import DialogGame exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (disabled, value)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, disabled, value)
+import Html.Events exposing (onClick, onInput)
 import Monocle.Compose exposing (optionalWithLens, optionalWithOptional)
 import Monocle.Lens exposing (Lens)
 import Monocle.Optional as Optional exposing (Optional)
@@ -29,6 +29,9 @@ type Msg
     | Save
     | Cancel
     | TextEdit ParsedEditable.Msg
+    | IdExit String
+    | Delete Int
+    | Move Int Int
 
 
 init : Model
@@ -47,16 +50,16 @@ optional_gameDefinition =
 
 editableDiablogToDialog : EditableDialog -> Dialog
 editableDiablogToDialog editableDialog =
-    case (ParsedEditable.model_new.getOption editableDialog.text) of
-        Just (text) ->
-            {
-                id = editableDialog.id
-                ,text = text
-                , options = editableDialog.dialog.options
+    case ParsedEditable.model_new.getOption editableDialog.text of
+        Just text ->
+            { id = editableDialog.id
+            , text = text
+            , options = editableDialog.dialog.options
             }
 
         _ ->
-           editableDialog.dialog
+            editableDialog.dialog
+
 
 
 --
@@ -109,11 +112,13 @@ editedDialog_dialog : Lens EditableDialog Dialog
 editedDialog_dialog =
     Lens .dialog (\s m -> { m | dialog = s })
 
+
 model_dialogs : Optional Model (List Dialog)
 model_dialogs =
     model_gameDefinition
-    |> optionalWithLens
-     ( Lens .dialogs (\s m-> {m|dialogs=s}))
+        |> optionalWithLens
+            (Lens .dialogs (\s m -> { m | dialogs = s }))
+
 
 model_Dialog : Optional Model Dialog
 model_Dialog =
@@ -126,10 +131,17 @@ model_text =
     model_editedDialog
         |> optionalWithLens editableDialog_text
 
+
+model_id : Optional Model String
+model_id =
+    model_editedDialog
+        |> optionalWithLens (Lens .id (\s m -> { m | id = s }))
+
+
 model_gameDefinition : Optional Model GameDefinition
 model_gameDefinition =
-    {getOption = .gameDefinition
-    ,set = (\s m -> {m|gameDefinition=Just s})
+    { getOption = .gameDefinition
+    , set = \s m -> { m | gameDefinition = Just s }
     }
 
 
@@ -137,34 +149,88 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Edit dialog ->
-            if model_Dialog.getOption model == Just dialog then model else
-            { model
-                | editedDialog =
-                    Just
-                        { dialog = dialog
-                        , id = dialog.id
-                        , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
-                        }
-            }
+            if model_Dialog.getOption model == Just dialog then
+                model
+
+            else
+                { model
+                    | editedDialog =
+                        Just
+                            { dialog = dialog
+                            , id = dialog.id
+                            , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
+                            }
+                }
 
         Save ->
             let
                 newDialogs : Maybe (List Dialog)
                 newDialogs =
-                      Maybe.map2 (\ed gd -> List.map (\d->if ed.dialog == d then editableDiablogToDialog ed else d ) gd.dialogs )
-                    (model_editedDialog.getOption model)
-                    (model_gameDefinition.getOption model)
+                    Maybe.map2
+                        (\ed gd ->
+                            List.map
+                                (\d ->
+                                    if ed.dialog == d then
+                                        editableDiablogToDialog ed
+
+                                    else
+                                        d
+                                )
+                                gd.dialogs
+                        )
+                        (model_editedDialog.getOption model)
+                        (model_gameDefinition.getOption model)
             in
             case newDialogs of
-                Nothing -> model
-                Just nd -> model_dialogs.set nd model
+                Nothing ->
+                    model
+
+                Just nd ->
+                    model_dialogs.set nd model
+
         Cancel ->
             model
 
         TextEdit tMsg ->
             Optional.modify model_text (\m -> ParsedEditable.update tMsg m) model
 
+        Delete indexToDel ->
+            Optional.modify model_gameDefinition
+                (\gd ->
+                    { gd
+                        | dialogs =
+                            List.indexedMap Tuple.pair gd.dialogs
+                                |> List.filter (\( i, _ ) -> i /= indexToDel)
+                                |> List.map Tuple.second
+                    }
+                )
+                model
 
+        Move indexToMove step ->
+            Optional.modify model_gameDefinition
+                (\gd ->
+                    let
+                        item : List Dialog
+                        item =
+                            List.drop indexToMove gd.dialogs
+                                |> List.take 1
+
+                        rest : List Dialog
+                        rest =
+                            List.take indexToMove gd.dialogs
+                                ++ List.drop (indexToMove + 1) gd.dialogs
+                    in
+                    { gd
+                        | dialogs =
+                            List.take (indexToMove + step) rest
+                                ++ item
+                                ++ List.drop (indexToMove + step) rest
+                    }
+                )
+                model
+
+        IdExit string ->
+            model_id.set string model
 
 
 view : Model -> Html Msg
@@ -173,39 +239,38 @@ view model =
         Just gd ->
             div []
                 [ h6 [] [ text "Dialogs:" ]
-                , div [] (List.map (viewDialog model) gd.dialogs)
-                , textarea [value (DialogGame.stringifyGameDefinition gd ) ] []
+                , div [] (List.indexedMap (viewDialog model) gd.dialogs)
+                , textarea [ value (DialogGame.stringifyGameDefinition gd) ] []
                 ]
 
         Nothing ->
             div [] [ text "No GameDefintion loaded" ]
 
 
-viewDialog : Model -> Dialog -> Html Msg
-viewDialog model dialog =
+viewDialog : Model -> Int -> Dialog -> Html Msg
+viewDialog model i dialog =
     let
         isEdited =
             model_Dialog.getOption model == Just dialog
     in
-    div [ onClick <| Edit dialog ]
+    div [ class "de-dialog" ]
         [ div []
             [ text "id: "
-            , if isEdited then
-                input [] []
+            , case ( model.editedDialog, isEdited ) of
+                ( Just edModel, True ) ->
+                    input [ onInput IdExit, value edModel.id ] []
 
-              else
-                text dialog.id
+                _ ->
+                    span [ class "de-dialog-id" ] [ text dialog.id ]
             ]
         , div []
             [ text "text: "
             , case ( model.editedDialog, isEdited ) of
                 ( Just edModel, True ) ->
-                    div [] [
-                    ParsedEditable.view edModel.text |> Html.map TextEdit
+                    div []
+                        [ ParsedEditable.view edModel.text |> Html.map TextEdit
+                        ]
 
-
-
-                    ]
                 _ ->
                     viewExpression dialog.text
             ]
@@ -213,13 +278,28 @@ viewDialog model dialog =
             [ text "options:"
             , div [] (List.map viewOption dialog.options)
             ]
-         ,let
-                                enabled : Bool
-                                enabled =
-                                 Maybe.map (ParsedEditable.isChanged ) (model_text.getOption model) |> Maybe.withDefault False
-                             in
-                             button [disabled  <| not enabled , onClick <| Save] [text "Save"]
+        , let
+            enabled : Bool
+            enabled =
+                Maybe.map2 (\id t -> ParsedEditable.isChanged t || id /= dialog.id)
+                    (model_id.getOption model)
+                    (model_text.getOption model)
+                    |> Maybe.withDefault False
+          in
+          button [ disabled <| not enabled, onClick <| Save ] [ text "Save" ]
+        , button [ onClick <| Edit dialog ] [ text "EDIT" ]
+        , button [ onClick <| Delete i ] [ text "Delete" ]
+        , button
+            [ onClick <| Move i -1
+            , disabled <|
+                if i == 0 then
+                    True
 
+                else
+                    False
+            ]
+            [ text "Move Up" ]
+        , button [ onClick <| Move i 1 ] [ text "Move Down" ]
         ]
 
 
@@ -234,7 +314,7 @@ elipsisText s =
 
 viewOption : DialogOption -> Html msg
 viewOption dialogOption =
-    div []
+    div [ class "de-dialog-option" ]
         [ div [] [ text "op_text: ", viewExpression dialogOption.text ]
         , div [] [ text "condition: ", Maybe.map viewExpression dialogOption.condition |> Maybe.withDefault (text "n/a") ]
         , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
@@ -271,7 +351,7 @@ viewAction dialogAction =
 
 viewExpression : Expression -> Html msg
 viewExpression expression =
-    span [] [ text <| elipsisText <| ScreeptV2.stringifyExpression expression ]
+    span [ class "de-dialog-condition" ] [ text <| elipsisText <| ScreeptV2.stringifyExpression expression ]
 
 
 viewEditDialog : Model -> Html Msg

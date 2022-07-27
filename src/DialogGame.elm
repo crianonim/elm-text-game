@@ -248,8 +248,8 @@ decodeState =
 encodeGameDefinition : GameDefinition -> E.Value
 encodeGameDefinition { title, dialogs, startDialogId, vars, procedures } =
     E.object
-        [ ("name", E.string title)
-         ,( "dialogs", E.list encodeDialog dialogs )
+        [ ( "name", E.string title )
+        , ( "dialogs", E.list encodeDialog dialogs )
         , ( "startDialogId", E.string startDialogId )
         , ( "procedures", E.dict identity (ScreeptV2.stringifyStatement >> E.string) procedures )
         , ( "vars", E.dict identity ScreeptV2.encodeValue vars )
