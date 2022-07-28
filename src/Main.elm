@@ -81,7 +81,7 @@ init _ =
       --    (Just Game.statusLine)
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
-      , dialogEditor = DialogGameEditor.init
+      , dialogEditor = Nothing
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
@@ -192,7 +192,7 @@ update msg model =
             ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
 
         DialogEditor deMsg ->
-            ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
+            ( { model | dialogEditor = Maybe.map (DialogGameEditor.update deMsg) model.dialogEditor }, Cmd.none )
 
         GotGameDefinition result ->
             case result of
@@ -223,8 +223,7 @@ update msg model =
                         menuDialog =
                             { m | gameState = newGameState }
                     in
-                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }
-                        |> model_de_gameDefinition.set value
+                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog, dialogEditor = Just (DialogGameEditor.init value) }
                     , Cmd.none
                     )
 
@@ -302,7 +301,7 @@ type alias Model =
     { gameDialog : GameStatus
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
-    , dialogEditor : DialogGameEditor.Model
+    , dialogEditor : Maybe DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
     , urlLoader : Maybe String
@@ -352,15 +351,15 @@ subscriptions model =
 -- OPTICS
 
 
-model_dialogEditor : Lens Model DialogGameEditor.Model
+model_dialogEditor : Optional Model DialogGameEditor.Model
 model_dialogEditor =
-    Lens .dialogEditor (\s m -> { m | dialogEditor = s })
+    Optional .dialogEditor (\s m -> { m | dialogEditor = Just s })
 
 
 model_de_gameDefinition : Optional Model GameDefinition
 model_de_gameDefinition =
     model_dialogEditor
-        |> Monocle.Compose.lensWithOptional DialogGameEditor.optional_gameDefinition
+        |> Monocle.Compose.optionalWithLens DialogGameEditor.model_gameDefinition
 
 
 
@@ -370,7 +369,7 @@ model_de_gameDefinition =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ DialogGameEditor.view model.dialogEditor |> Html.map DialogEditor
+        [ Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
         , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
             Started _ gameDialogMenu ->

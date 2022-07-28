@@ -4,8 +4,8 @@ import DialogGame exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, value)
 import Html.Events exposing (onClick, onInput)
-import Monocle.Compose exposing (optionalWithLens, optionalWithOptional)
-import Monocle.Lens exposing (Lens)
+import Monocle.Compose exposing (lensWithLens, optionalWithLens, optionalWithOptional)
+import Monocle.Lens as Lens exposing (Lens)
 import Monocle.Optional as Optional exposing (Optional)
 import ParsedEditable
 import ScreeptV2 exposing (..)
@@ -13,7 +13,7 @@ import ScreeptV2 exposing (..)
 
 type alias Model =
     { editedDialog : Maybe EditableDialog
-    , gameDefinition : Maybe GameDefinition
+    , gameDefinition : GameDefinition
     }
 
 
@@ -35,17 +35,10 @@ type Msg
     | NewDialog Int
 
 
-init : Model
-init =
+init : GameDefinition -> Model
+init gd =
     { editedDialog = Nothing
-    , gameDefinition = Nothing
-    }
-
-
-optional_gameDefinition : Optional Model GameDefinition
-optional_gameDefinition =
-    { getOption = \m -> m.gameDefinition
-    , set = \s m -> { m | gameDefinition = Just s }
+    , gameDefinition = gd
     }
 
 
@@ -114,10 +107,10 @@ editedDialog_dialog =
     Lens .dialog (\s m -> { m | dialog = s })
 
 
-model_dialogs : Optional Model (List Dialog)
+model_dialogs : Lens Model (List Dialog)
 model_dialogs =
     model_gameDefinition
-        |> optionalWithLens
+        |> lensWithLens
             (Lens .dialogs (\s m -> { m | dialogs = s }))
 
 
@@ -139,10 +132,10 @@ model_id =
         |> optionalWithLens (Lens .id (\s m -> { m | id = s }))
 
 
-model_gameDefinition : Optional Model GameDefinition
+model_gameDefinition : Lens Model GameDefinition
 model_gameDefinition =
-    { getOption = .gameDefinition
-    , set = \s m -> { m | gameDefinition = Just s }
+    { get = .gameDefinition
+    , set = \s m -> { m | gameDefinition = s }
     }
 
 
@@ -167,8 +160,8 @@ update msg model =
             let
                 newDialogs : Maybe (List Dialog)
                 newDialogs =
-                    Maybe.map2
-                        (\ed gd ->
+                    Maybe.map
+                        (\ed ->
                             List.map
                                 (\d ->
                                     if ed.dialog == d then
@@ -177,10 +170,9 @@ update msg model =
                                     else
                                         d
                                 )
-                                gd.dialogs
+                                model.gameDefinition.dialogs
                         )
                         (model_editedDialog.getOption model)
-                        (model_gameDefinition.getOption model)
             in
             case newDialogs of
                 Nothing ->
@@ -196,7 +188,7 @@ update msg model =
             Optional.modify model_text (\m -> ParsedEditable.update tMsg m) model
 
         Delete indexToDel ->
-            Optional.modify model_gameDefinition
+            Lens.modify model_gameDefinition
                 (\gd ->
                     { gd
                         | dialogs =
@@ -208,7 +200,7 @@ update msg model =
                 model
 
         Move indexToMove step ->
-            Optional.modify model_gameDefinition
+            Lens.modify model_gameDefinition
                 (\gd ->
                     let
                         item : List Dialog
@@ -242,7 +234,7 @@ update msg model =
                     , options = []
                     }
             in
-            Optional.modify model_gameDefinition
+            Lens.modify model_gameDefinition
                 (\gd ->
                     { gd
                         | dialogs =
@@ -256,16 +248,11 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    case model.gameDefinition of
-        Just gd ->
-            div []
-                [ h6 [] [ text "Dialogs:" ]
-                , div [] (List.indexedMap (viewDialog model) gd.dialogs)
-                , textarea [ value (DialogGame.stringifyGameDefinition gd) ] []
-                ]
-
-        Nothing ->
-            div [] [ text "No GameDefintion loaded" ]
+    div []
+        [ h6 [] [ text "Dialogs:" ]
+        , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
+        , textarea [ value (DialogGame.stringifyGameDefinition model.gameDefinition) ] []
+        ]
 
 
 viewDialog : Model -> Int -> Dialog -> Html Msg
