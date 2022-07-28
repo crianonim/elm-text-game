@@ -32,6 +32,7 @@ type Msg
     | IdExit String
     | Delete Int
     | Move Int Int
+    | NewDialog Int
 
 
 init : Model
@@ -232,6 +233,26 @@ update msg model =
         IdExit string ->
             model_id.set string model
 
+        NewDialog i ->
+            let
+                newDialog : Dialog
+                newDialog =
+                    { id = ""
+                    , text = Literal <| Text ""
+                    , options = []
+                    }
+            in
+            Optional.modify model_gameDefinition
+                (\gd ->
+                    { gd
+                        | dialogs =
+                            List.take (i + 1) gd.dialogs
+                                ++ [ newDialog ]
+                                ++ List.drop (i + 1) gd.dialogs
+                    }
+                )
+                model
+
 
 view : Model -> Html Msg
 view model =
@@ -300,6 +321,7 @@ viewDialog model i dialog =
             ]
             [ text "Move Up" ]
         , button [ onClick <| Move i 1 ] [ text "Move Down" ]
+        , button [ onClick <| NewDialog i ] [ text "+New" ]
         ]
 
 

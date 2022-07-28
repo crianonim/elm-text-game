@@ -10010,9 +10010,33 @@ var $author$project$DialogGameEditor$update = F2(
 							});
 					},
 					model);
-			default:
+			case 'IdExit':
 				var string = msg.a;
 				return A2($author$project$DialogGameEditor$model_id.set, string, model);
+			default:
+				var i = msg.a;
+				var newDialog = {
+					id: '',
+					options: _List_Nil,
+					text: $author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Text(''))
+				};
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$model_gameDefinition,
+					function (gd) {
+						return _Utils_update(
+							gd,
+							{
+								dialogs: _Utils_ap(
+									A2($elm$core$List$take, i + 1, gd.dialogs),
+									_Utils_ap(
+										_List_fromArray(
+											[newDialog]),
+										A2($elm$core$List$drop, i + 1, gd.dialogs)))
+							});
+					},
+					model);
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
@@ -10719,6 +10743,9 @@ var $author$project$DialogGameEditor$Move = F2(
 	function (a, b) {
 		return {$: 'Move', a: a, b: b};
 	});
+var $author$project$DialogGameEditor$NewDialog = function (a) {
+	return {$: 'NewDialog', a: a};
+};
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$TextEdit = function (a) {
 	return {$: 'TextEdit', a: a};
@@ -11123,6 +11150,17 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					_List_fromArray(
 						[
 							$elm$html$Html$text('Move Down')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							$author$project$DialogGameEditor$NewDialog(i))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('+New')
 						]))
 				]));
 	});
