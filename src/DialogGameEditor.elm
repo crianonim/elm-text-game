@@ -4,7 +4,8 @@ import DialogGame exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, value)
 import Html.Events exposing (onClick, onInput)
-import Monocle.Compose exposing (lensWithLens, optionalWithLens, optionalWithOptional)
+import List.Extra
+import Monocle.Compose exposing (lensWithLens, lensWithOptional, optionalWithLens, optionalWithOptional)
 import Monocle.Lens as Lens exposing (Lens)
 import Monocle.Optional as Optional exposing (Optional)
 import ParsedEditable
@@ -21,6 +22,7 @@ type alias EditableDialog =
     { dialog : DialogGame.Dialog
     , id : String
     , text : ParsedEditable.Model Expression
+    , options : List DialogOption
     }
 
 
@@ -33,6 +35,9 @@ type Msg
     | Delete Int
     | Move Int Int
     | NewDialog Int
+    | OptionMove Int Int
+    | OptionDelete Int
+    | OptionNew Int
 
 
 init : GameDefinition -> Model
@@ -83,9 +88,6 @@ exampleDialog =
     , text = txt "You're in a dark room. "
     , options =
         [ { text = txt "Go through the exit", condition = Just (var "start_look_around"), actions = [ GoAction "second" ] }
-
-        --, { text = Screept.S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| Screept.S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
-        --, { text = Screept.S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), DialogGame.nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
         ]
     }
 
@@ -112,6 +114,13 @@ model_dialogs =
     model_gameDefinition
         |> lensWithLens
             (Lens .dialogs (\s m -> { m | dialogs = s }))
+
+
+model_options : Optional Model (List DialogOption)
+model_options =
+    model_editedDialog
+        |> optionalWithLens
+            (Lens .options (\s m -> { m | options = s }))
 
 
 model_Dialog : Optional Model Dialog
@@ -153,6 +162,7 @@ update msg model =
                             { dialog = dialog
                             , id = dialog.id
                             , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
+                            , options = dialog.options
                             }
                 }
 
@@ -188,38 +198,13 @@ update msg model =
             Optional.modify model_text (\m -> ParsedEditable.update tMsg m) model
 
         Delete indexToDel ->
-            Lens.modify model_gameDefinition
-                (\gd ->
-                    { gd
-                        | dialogs =
-                            List.indexedMap Tuple.pair gd.dialogs
-                                |> List.filter (\( i, _ ) -> i /= indexToDel)
-                                |> List.map Tuple.second
-                    }
-                )
+            Lens.modify model_dialogs
+                (List.Extra.removeAt indexToDel)
                 model
 
         Move indexToMove step ->
-            Lens.modify model_gameDefinition
-                (\gd ->
-                    let
-                        item : List Dialog
-                        item =
-                            List.drop indexToMove gd.dialogs
-                                |> List.take 1
-
-                        rest : List Dialog
-                        rest =
-                            List.take indexToMove gd.dialogs
-                                ++ List.drop (indexToMove + 1) gd.dialogs
-                    in
-                    { gd
-                        | dialogs =
-                            List.take (indexToMove + step) rest
-                                ++ item
-                                ++ List.drop (indexToMove + step) rest
-                    }
-                )
+            Lens.modify model_dialogs
+                (List.Extra.swapAt indexToMove (indexToMove + step))
                 model
 
         IdExit string ->
@@ -234,15 +219,30 @@ update msg model =
                     , options = []
                     }
             in
-            Lens.modify model_gameDefinition
-                (\gd ->
-                    { gd
-                        | dialogs =
-                            List.take (i + 1) gd.dialogs
-                                ++ [ newDialog ]
-                                ++ List.drop (i + 1) gd.dialogs
+            Lens.modify model_dialogs
+                (insertAt i newDialog)
+                model
+
+        OptionMove optionIndex step ->
+            Optional.modify model_options
+                (List.Extra.swapAt optionIndex step)
+                model
+
+        OptionDelete optionIndex ->
+            Optional.modify model_options
+                (List.Extra.removeAt optionIndex)
+                model
+
+        OptionNew optionIndex ->
+            let
+                newOption =
+                    { text = Literal <| Text ""
+                    , condition = Nothing
+                    , actions = []
                     }
-                )
+            in
+            Optional.modify model_options
+                (insertAt optionIndex newOption)
                 model
 
 
@@ -284,7 +284,13 @@ viewDialog model i dialog =
             ]
         , div []
             [ text "options:"
-            , div [] (List.map viewOption dialog.options)
+            , case ( model.editedDialog, isEdited ) of
+                ( Just edModel, True ) ->
+                    div []
+                        (List.indexedMap (viewOption True) edModel.options)
+
+                _ ->
+                    div [] (List.indexedMap (viewOption False) dialog.options)
             ]
         , let
             enabled : Bool
@@ -321,12 +327,22 @@ elipsisText s =
         s
 
 
-viewOption : DialogOption -> Html msg
-viewOption dialogOption =
+viewOption : Bool -> Int -> DialogOption -> Html Msg
+viewOption isEditing optionIndex dialogOption =
     div [ class "de-dialog-option" ]
         [ div [] [ text "op_text: ", viewExpression dialogOption.text ]
         , div [] [ text "condition: ", Maybe.map viewExpression dialogOption.condition |> Maybe.withDefault (text "n/a") ]
         , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
+        , if isEditing then
+            div []
+                [ button [ onClick <| OptionMove optionIndex (optionIndex - 1) ] [ text "Move Up" ]
+                , button [ onClick <| OptionMove optionIndex (optionIndex + 1) ] [ text "Move Down" ]
+                , button [ onClick <| OptionDelete optionIndex ] [ text "Delete" ]
+                , button [ onClick <| OptionNew (optionIndex + 1) ] [ text "New" ]
+                ]
+
+          else
+            text ""
         ]
 
 
@@ -375,3 +391,12 @@ viewEditDialog model =
             div []
                 [ div [] [ text "id: ", text d.id ]
                 ]
+
+
+insertAt : Int -> a -> List a -> List a
+insertAt index item items =
+    let
+        ( start, end ) =
+            List.Extra.splitAt index items
+    in
+    start ++ [ item ] ++ end
