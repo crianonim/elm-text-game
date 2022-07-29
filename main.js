@@ -9534,213 +9534,6 @@ var $author$project$DialogGameEditor$editableDiablogToDialog = function (editabl
 		return editableDialog.dialog;
 	}
 };
-var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
-	function (get, set) {
-		return {get: get, set: set};
-	});
-var $author$project$DialogGameEditor$editedDialog_dialog = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.dialog;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{dialog: s});
-		}));
-var $author$project$DialogGameEditor$model_editedDialog = {
-	getOption: function ($) {
-		return $.editedDialog;
-	},
-	set: F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{
-					editedDialog: $elm$core$Maybe$Just(s)
-				});
-		})
-};
-var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
-	function (getOption, set) {
-		return {getOption: getOption, set: set};
-	});
-var $arturopala$elm_monocle$Monocle$Optional$flip = F3(
-	function (f, b, a) {
-		return A2(f, a, b);
-	});
-var $arturopala$elm_monocle$Monocle$Optional$modifyOption = F2(
-	function (opt, fx) {
-		var mf = function (a) {
-			return A2(
-				$elm$core$Maybe$map,
-				A2(
-					$elm$core$Basics$composeR,
-					fx,
-					A2($arturopala$elm_monocle$Monocle$Optional$flip, opt.set, a)),
-				opt.getOption(a));
-		};
-		return mf;
-	});
-var $arturopala$elm_monocle$Monocle$Optional$modify = F2(
-	function (opt, fx) {
-		var mf = function (a) {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				a,
-				A3($arturopala$elm_monocle$Monocle$Optional$modifyOption, opt, fx, a));
-		};
-		return mf;
-	});
-var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
-	function (inner, outer) {
-		var set = function (c) {
-			return A2(
-				$arturopala$elm_monocle$Monocle$Optional$modify,
-				outer,
-				inner.set(c));
-		};
-		var getOption = A2(
-			$elm$core$Basics$composeR,
-			outer.getOption,
-			$elm$core$Maybe$map(inner.get));
-		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
-	});
-var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
-var $arturopala$elm_monocle$Monocle$Lens$compose = F2(
-	function (outer, inner) {
-		var set = F2(
-			function (c, a) {
-				return function (b) {
-					return A2(outer.set, b, a);
-				}(
-					A2(
-						inner.set,
-						c,
-						outer.get(a)));
-			});
-		return A2(
-			$arturopala$elm_monocle$Monocle$Lens$Lens,
-			A2($elm$core$Basics$composeR, outer.get, inner.get),
-			set);
-	});
-var $arturopala$elm_monocle$Monocle$Compose$lensWithLens = F2(
-	function (inner, outer) {
-		return A2($arturopala$elm_monocle$Monocle$Lens$compose, outer, inner);
-	});
-var $author$project$DialogGameEditor$model_gameDefinition = {
-	get: function ($) {
-		return $.gameDefinition;
-	},
-	set: F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{gameDefinition: s});
-		})
-};
-var $author$project$DialogGameEditor$model_dialogs = A2(
-	$arturopala$elm_monocle$Monocle$Compose$lensWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.dialogs;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{dialogs: s});
-			})),
-	$author$project$DialogGameEditor$model_gameDefinition);
-var $author$project$DialogGameEditor$model_id = A2(
-	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.id;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{id: s});
-			})),
-	$author$project$DialogGameEditor$model_editedDialog);
-var $author$project$DialogGameEditor$model_options = A2(
-	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.options;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{options: s});
-			})),
-	$author$project$DialogGameEditor$model_editedDialog);
-var $author$project$DialogGameEditor$editableDialog_text = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.text;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{text: s});
-		}));
-var $author$project$DialogGameEditor$model_text = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editableDialog_text, $author$project$DialogGameEditor$model_editedDialog);
-var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
-	function (lens, f) {
-		var mf = function (a) {
-			return function (b) {
-				return A2(lens.set, b, a);
-			}(
-				f(
-					lens.get(a)));
-		};
-		return mf;
-	});
-var $author$project$ParsedEditable$revert = function (model) {
-	return _Utils_update(
-		model,
-		{
-			_new: $elm$core$Result$Ok(model.old),
-			text: model.formatter(model.old)
-		});
-};
-var $author$project$ParsedEditable$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'FormatClick':
-				var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
-				var text = function () {
-					if (parsed.$ === 'Ok') {
-						var t = parsed.a;
-						return model.formatter(t);
-					} else {
-						return model.text;
-					}
-				}();
-				return _Utils_update(
-					model,
-					{_new: parsed, text: text});
-			case 'TextEdit':
-				var v = msg.a;
-				return _Utils_update(
-					model,
-					{
-						_new: A2($elm$parser$Parser$run, model.parser, v),
-						text: v
-					});
-			default:
-				return $author$project$ParsedEditable$revert(model);
-		}
-	});
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -9989,46 +9782,238 @@ var $elm_community$list_extra$List$Extra$swapAt = F3(
 			}
 		}
 	});
-var $author$project$DialogGameEditor$updateDialogs = F2(
-	function (manipulatePosition, dialogs) {
-		switch (manipulatePosition.$) {
+var $author$project$DialogGameEditor$manipulatePositionUpdate = F3(
+	function (newObject, msg, list) {
+		switch (msg.$) {
 			case 'MovePosition':
-				var index = manipulatePosition.a;
-				var step = manipulatePosition.b;
-				return A2($elm_community$list_extra$List$Extra$swapAt, index, index + step)(dialogs);
+				var index = msg.a;
+				var step = msg.b;
+				return A3($elm_community$list_extra$List$Extra$swapAt, index, index + step, list);
 			case 'DeletePosition':
-				var i = manipulatePosition.a;
-				return $elm_community$list_extra$List$Extra$removeAt(i)(dialogs);
+				var i = msg.a;
+				return A2($elm_community$list_extra$List$Extra$removeAt, i, list);
 			default:
-				var i = manipulatePosition.a;
-				var newDialog = {
-					id: '',
-					options: _List_Nil,
-					text: $author$project$ScreeptV2$Literal(
-						$author$project$ScreeptV2$Text(''))
-				};
-				return A2($author$project$DialogGameEditor$insertAt, i, newDialog)(dialogs);
+				var i = msg.a;
+				return A3($author$project$DialogGameEditor$insertAt, i, newObject, list);
 		}
 	});
-var $author$project$DialogGameEditor$updateOptions = F2(
-	function (manipulatePosition, dialogOptions) {
-		switch (manipulatePosition.$) {
-			case 'MovePosition':
-				var optionIndex = manipulatePosition.a;
-				var step = manipulatePosition.b;
-				return A2($elm_community$list_extra$List$Extra$swapAt, optionIndex, step)(dialogOptions);
-			case 'DeletePosition':
-				var optionIndex = manipulatePosition.a;
-				return A2($elm_community$list_extra$List$Extra$removeAt, optionIndex, dialogOptions);
+var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
+	function (get, set) {
+		return {get: get, set: set};
+	});
+var $author$project$DialogGameEditor$editedDialog_dialog = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.dialog;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{dialog: s});
+		}));
+var $author$project$DialogGameEditor$model_editedDialog = {
+	getOption: function ($) {
+		return $.editedDialog;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedDialog: $elm$core$Maybe$Just(s)
+				});
+		})
+};
+var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
+	function (getOption, set) {
+		return {getOption: getOption, set: set};
+	});
+var $arturopala$elm_monocle$Monocle$Optional$flip = F3(
+	function (f, b, a) {
+		return A2(f, a, b);
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modifyOption = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$map,
+				A2(
+					$elm$core$Basics$composeR,
+					fx,
+					A2($arturopala$elm_monocle$Monocle$Optional$flip, opt.set, a)),
+				opt.getOption(a));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modify = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				a,
+				A3($arturopala$elm_monocle$Monocle$Optional$modifyOption, opt, fx, a));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
+	function (inner, outer) {
+		var set = function (c) {
+			return A2(
+				$arturopala$elm_monocle$Monocle$Optional$modify,
+				outer,
+				inner.set(c));
+		};
+		var getOption = A2(
+			$elm$core$Basics$composeR,
+			outer.getOption,
+			$elm$core$Maybe$map(inner.get));
+		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
+	});
+var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
+var $arturopala$elm_monocle$Monocle$Lens$compose = F2(
+	function (outer, inner) {
+		var set = F2(
+			function (c, a) {
+				return function (b) {
+					return A2(outer.set, b, a);
+				}(
+					A2(
+						inner.set,
+						c,
+						outer.get(a)));
+			});
+		return A2(
+			$arturopala$elm_monocle$Monocle$Lens$Lens,
+			A2($elm$core$Basics$composeR, outer.get, inner.get),
+			set);
+	});
+var $arturopala$elm_monocle$Monocle$Compose$lensWithLens = F2(
+	function (inner, outer) {
+		return A2($arturopala$elm_monocle$Monocle$Lens$compose, outer, inner);
+	});
+var $author$project$DialogGameEditor$model_gameDefinition = {
+	get: function ($) {
+		return $.gameDefinition;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{gameDefinition: s});
+		})
+};
+var $author$project$DialogGameEditor$model_dialogs = A2(
+	$arturopala$elm_monocle$Monocle$Compose$lensWithLens,
+	A2(
+		$arturopala$elm_monocle$Monocle$Lens$Lens,
+		function ($) {
+			return $.dialogs;
+		},
+		F2(
+			function (s, m) {
+				return _Utils_update(
+					m,
+					{dialogs: s});
+			})),
+	$author$project$DialogGameEditor$model_gameDefinition);
+var $author$project$DialogGameEditor$model_id = A2(
+	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
+	A2(
+		$arturopala$elm_monocle$Monocle$Lens$Lens,
+		function ($) {
+			return $.id;
+		},
+		F2(
+			function (s, m) {
+				return _Utils_update(
+					m,
+					{id: s});
+			})),
+	$author$project$DialogGameEditor$model_editedDialog);
+var $author$project$DialogGameEditor$model_options = A2(
+	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
+	A2(
+		$arturopala$elm_monocle$Monocle$Lens$Lens,
+		function ($) {
+			return $.options;
+		},
+		F2(
+			function (s, m) {
+				return _Utils_update(
+					m,
+					{options: s});
+			})),
+	$author$project$DialogGameEditor$model_editedDialog);
+var $author$project$DialogGameEditor$editableDialog_text = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.text;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{text: s});
+		}));
+var $author$project$DialogGameEditor$model_text = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editableDialog_text, $author$project$DialogGameEditor$model_editedDialog);
+var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
+	function (lens, f) {
+		var mf = function (a) {
+			return function (b) {
+				return A2(lens.set, b, a);
+			}(
+				f(
+					lens.get(a)));
+		};
+		return mf;
+	});
+var $author$project$DialogGameEditor$newDialog = {
+	id: '',
+	options: _List_Nil,
+	text: $author$project$ScreeptV2$Literal(
+		$author$project$ScreeptV2$Text(''))
+};
+var $author$project$DialogGameEditor$newOption = {
+	actions: _List_Nil,
+	condition: $elm$core$Maybe$Nothing,
+	text: $author$project$ScreeptV2$Literal(
+		$author$project$ScreeptV2$Text(''))
+};
+var $author$project$ParsedEditable$revert = function (model) {
+	return _Utils_update(
+		model,
+		{
+			_new: $elm$core$Result$Ok(model.old),
+			text: model.formatter(model.old)
+		});
+};
+var $author$project$ParsedEditable$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'FormatClick':
+				var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
+				var text = function () {
+					if (parsed.$ === 'Ok') {
+						var t = parsed.a;
+						return model.formatter(t);
+					} else {
+						return model.text;
+					}
+				}();
+				return _Utils_update(
+					model,
+					{_new: parsed, text: text});
+			case 'TextEdit':
+				var v = msg.a;
+				return _Utils_update(
+					model,
+					{
+						_new: A2($elm$parser$Parser$run, model.parser, v),
+						text: v
+					});
 			default:
-				var optionIndex = manipulatePosition.a;
-				var newOption = {
-					actions: _List_Nil,
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$ScreeptV2$Literal(
-						$author$project$ScreeptV2$Text(''))
-				};
-				return A2($author$project$DialogGameEditor$insertAt, optionIndex, newOption)(dialogOptions);
+				return $author$project$ParsedEditable$revert(model);
 		}
 	});
 var $author$project$DialogGameEditor$update = F2(
@@ -10086,14 +10071,14 @@ var $author$project$DialogGameEditor$update = F2(
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$model_dialogs,
-					$author$project$DialogGameEditor$updateDialogs(manipulatePosition),
+					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
 					model);
 			default:
 				var manipulatePosition = msg.a;
 				return A3(
 					$arturopala$elm_monocle$Monocle$Optional$modify,
 					$author$project$DialogGameEditor$model_options,
-					$author$project$DialogGameEditor$updateOptions(manipulatePosition),
+					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
 					model);
 		}
 	});
