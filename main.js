@@ -9534,171 +9534,6 @@ var $author$project$DialogGameEditor$editableDiablogToDialog = function (editabl
 		return editableDialog.dialog;
 	}
 };
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $elm_community$list_extra$List$Extra$splitAt = F2(
-	function (n, xs) {
-		return _Utils_Tuple2(
-			A2($elm$core$List$take, n, xs),
-			A2($elm$core$List$drop, n, xs));
-	});
-var $author$project$DialogGameEditor$insertAt = F3(
-	function (index, item, items) {
-		var _v0 = A2($elm_community$list_extra$List$Extra$splitAt, index, items);
-		var start = _v0.a;
-		var end = _v0.b;
-		return _Utils_ap(
-			start,
-			_Utils_ap(
-				_List_fromArray(
-					[item]),
-				end));
-	});
 var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
 	function (get, set) {
 		return {get: get, set: set};
@@ -9870,6 +9705,207 @@ var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
 		};
 		return mf;
 	});
+var $author$project$ParsedEditable$revert = function (model) {
+	return _Utils_update(
+		model,
+		{
+			_new: $elm$core$Result$Ok(model.old),
+			text: model.formatter(model.old)
+		});
+};
+var $author$project$ParsedEditable$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'FormatClick':
+				var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
+				var text = function () {
+					if (parsed.$ === 'Ok') {
+						var t = parsed.a;
+						return model.formatter(t);
+					} else {
+						return model.text;
+					}
+				}();
+				return _Utils_update(
+					model,
+					{_new: parsed, text: text});
+			case 'TextEdit':
+				var v = msg.a;
+				return _Utils_update(
+					model,
+					{
+						_new: A2($elm$parser$Parser$run, model.parser, v),
+						text: v
+					});
+			default:
+				return $author$project$ParsedEditable$revert(model);
+		}
+	});
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $elm_community$list_extra$List$Extra$splitAt = F2(
+	function (n, xs) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, n, xs),
+			A2($elm$core$List$drop, n, xs));
+	});
+var $author$project$DialogGameEditor$insertAt = F3(
+	function (index, item, items) {
+		var _v0 = A2($elm_community$list_extra$List$Extra$splitAt, index, items);
+		var start = _v0.a;
+		var end = _v0.b;
+		return _Utils_ap(
+			start,
+			_Utils_ap(
+				_List_fromArray(
+					[item]),
+				end));
+	});
 var $elm_community$list_extra$List$Extra$removeAt = F2(
 	function (index, l) {
 		if (index < 0) {
@@ -9953,40 +9989,46 @@ var $elm_community$list_extra$List$Extra$swapAt = F3(
 			}
 		}
 	});
-var $author$project$ParsedEditable$revert = function (model) {
-	return _Utils_update(
-		model,
-		{
-			_new: $elm$core$Result$Ok(model.old),
-			text: model.formatter(model.old)
-		});
-};
-var $author$project$ParsedEditable$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'FormatClick':
-				var parsed = A2($elm$parser$Parser$run, model.parser, model.text);
-				var text = function () {
-					if (parsed.$ === 'Ok') {
-						var t = parsed.a;
-						return model.formatter(t);
-					} else {
-						return model.text;
-					}
-				}();
-				return _Utils_update(
-					model,
-					{_new: parsed, text: text});
-			case 'TextEdit':
-				var v = msg.a;
-				return _Utils_update(
-					model,
-					{
-						_new: A2($elm$parser$Parser$run, model.parser, v),
-						text: v
-					});
+var $author$project$DialogGameEditor$updateDialogs = F2(
+	function (manipulatePosition, dialogs) {
+		switch (manipulatePosition.$) {
+			case 'MovePosition':
+				var index = manipulatePosition.a;
+				var step = manipulatePosition.b;
+				return A2($elm_community$list_extra$List$Extra$swapAt, index, index + step)(dialogs);
+			case 'DeletePosition':
+				var i = manipulatePosition.a;
+				return $elm_community$list_extra$List$Extra$removeAt(i)(dialogs);
 			default:
-				return $author$project$ParsedEditable$revert(model);
+				var i = manipulatePosition.a;
+				var newDialog = {
+					id: '',
+					options: _List_Nil,
+					text: $author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Text(''))
+				};
+				return A2($author$project$DialogGameEditor$insertAt, i, newDialog)(dialogs);
+		}
+	});
+var $author$project$DialogGameEditor$updateOptions = F2(
+	function (manipulatePosition, dialogOptions) {
+		switch (manipulatePosition.$) {
+			case 'MovePosition':
+				var optionIndex = manipulatePosition.a;
+				var step = manipulatePosition.b;
+				return A2($elm_community$list_extra$List$Extra$swapAt, optionIndex, step)(dialogOptions);
+			case 'DeletePosition':
+				var optionIndex = manipulatePosition.a;
+				return A2($elm_community$list_extra$List$Extra$removeAt, optionIndex, dialogOptions);
+			default:
+				var optionIndex = manipulatePosition.a;
+				var newOption = {
+					actions: _List_Nil,
+					condition: $elm$core$Maybe$Nothing,
+					text: $author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Text(''))
+				};
+				return A2($author$project$DialogGameEditor$insertAt, optionIndex, newOption)(dialogOptions);
 		}
 	});
 var $author$project$DialogGameEditor$update = F2(
@@ -10036,64 +10078,22 @@ var $author$project$DialogGameEditor$update = F2(
 						return A2($author$project$ParsedEditable$update, tMsg, m);
 					},
 					model);
-			case 'Delete':
-				var indexToDel = msg.a;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Lens$modify,
-					$author$project$DialogGameEditor$model_dialogs,
-					$elm_community$list_extra$List$Extra$removeAt(indexToDel),
-					model);
-			case 'Move':
-				var indexToMove = msg.a;
-				var step = msg.b;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Lens$modify,
-					$author$project$DialogGameEditor$model_dialogs,
-					A2($elm_community$list_extra$List$Extra$swapAt, indexToMove, indexToMove + step),
-					model);
 			case 'IdExit':
 				var string = msg.a;
 				return A2($author$project$DialogGameEditor$model_id.set, string, model);
-			case 'NewDialog':
-				var i = msg.a;
-				var newDialog = {
-					id: '',
-					options: _List_Nil,
-					text: $author$project$ScreeptV2$Literal(
-						$author$project$ScreeptV2$Text(''))
-				};
+			case 'DialogsManipulation':
+				var manipulatePosition = msg.a;
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$model_dialogs,
-					A2($author$project$DialogGameEditor$insertAt, i, newDialog),
-					model);
-			case 'OptionMove':
-				var optionIndex = msg.a;
-				var step = msg.b;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Optional$modify,
-					$author$project$DialogGameEditor$model_options,
-					A2($elm_community$list_extra$List$Extra$swapAt, optionIndex, step),
-					model);
-			case 'OptionDelete':
-				var optionIndex = msg.a;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Optional$modify,
-					$author$project$DialogGameEditor$model_options,
-					$elm_community$list_extra$List$Extra$removeAt(optionIndex),
+					$author$project$DialogGameEditor$updateDialogs(manipulatePosition),
 					model);
 			default:
-				var optionIndex = msg.a;
-				var newOption = {
-					actions: _List_Nil,
-					condition: $elm$core$Maybe$Nothing,
-					text: $author$project$ScreeptV2$Literal(
-						$author$project$ScreeptV2$Text(''))
-				};
+				var manipulatePosition = msg.a;
 				return A3(
 					$arturopala$elm_monocle$Monocle$Optional$modify,
 					$author$project$DialogGameEditor$model_options,
-					A2($author$project$DialogGameEditor$insertAt, optionIndex, newOption),
+					$author$project$DialogGameEditor$updateOptions(manipulatePosition),
 					model);
 		}
 	});
@@ -10801,8 +10801,11 @@ var $author$project$DialogGame$stringifyGameDefinition = function (gd) {
 };
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$DialogGameEditor$Delete = function (a) {
-	return {$: 'Delete', a: a};
+var $author$project$DialogGameEditor$DeletePosition = function (a) {
+	return {$: 'DeletePosition', a: a};
+};
+var $author$project$DialogGameEditor$DialogsManipulation = function (a) {
+	return {$: 'DialogsManipulation', a: a};
 };
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
@@ -10810,12 +10813,12 @@ var $author$project$DialogGameEditor$Edit = function (a) {
 var $author$project$DialogGameEditor$IdExit = function (a) {
 	return {$: 'IdExit', a: a};
 };
-var $author$project$DialogGameEditor$Move = F2(
+var $author$project$DialogGameEditor$MovePosition = F2(
 	function (a, b) {
-		return {$: 'Move', a: a, b: b};
+		return {$: 'MovePosition', a: a, b: b};
 	});
-var $author$project$DialogGameEditor$NewDialog = function (a) {
-	return {$: 'NewDialog', a: a};
+var $author$project$DialogGameEditor$NewAt = function (a) {
+	return {$: 'NewAt', a: a};
 };
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$TextEdit = function (a) {
@@ -11010,15 +11013,8 @@ var $author$project$DialogGameEditor$viewExpression = function (expression) {
 					$author$project$ScreeptV2$stringifyExpression(expression)))
 			]));
 };
-var $author$project$DialogGameEditor$OptionDelete = function (a) {
-	return {$: 'OptionDelete', a: a};
-};
-var $author$project$DialogGameEditor$OptionMove = F2(
-	function (a, b) {
-		return {$: 'OptionMove', a: a, b: b};
-	});
-var $author$project$DialogGameEditor$OptionNew = function (a) {
-	return {$: 'OptionNew', a: a};
+var $author$project$DialogGameEditor$OptionsManipulation = function (a) {
+	return {$: 'OptionsManipulation', a: a};
 };
 var $author$project$DialogGameEditor$viewAction = function (dialogAction) {
 	return A2(
@@ -11105,7 +11101,8 @@ var $author$project$DialogGameEditor$viewOption = F3(
 							_List_fromArray(
 								[
 									$elm$html$Html$Events$onClick(
-									A2($author$project$DialogGameEditor$OptionMove, optionIndex, optionIndex - 1))
+									$author$project$DialogGameEditor$OptionsManipulation(
+										A2($author$project$DialogGameEditor$MovePosition, optionIndex, optionIndex - 1)))
 								]),
 							_List_fromArray(
 								[
@@ -11116,7 +11113,8 @@ var $author$project$DialogGameEditor$viewOption = F3(
 							_List_fromArray(
 								[
 									$elm$html$Html$Events$onClick(
-									A2($author$project$DialogGameEditor$OptionMove, optionIndex, optionIndex + 1))
+									$author$project$DialogGameEditor$OptionsManipulation(
+										A2($author$project$DialogGameEditor$MovePosition, optionIndex, optionIndex + 1)))
 								]),
 							_List_fromArray(
 								[
@@ -11127,7 +11125,8 @@ var $author$project$DialogGameEditor$viewOption = F3(
 							_List_fromArray(
 								[
 									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$OptionDelete(optionIndex))
+									$author$project$DialogGameEditor$OptionsManipulation(
+										$author$project$DialogGameEditor$DeletePosition(optionIndex)))
 								]),
 							_List_fromArray(
 								[
@@ -11138,7 +11137,8 @@ var $author$project$DialogGameEditor$viewOption = F3(
 							_List_fromArray(
 								[
 									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$OptionNew(optionIndex + 1))
+									$author$project$DialogGameEditor$OptionsManipulation(
+										$author$project$DialogGameEditor$NewAt(optionIndex + 1)))
 								]),
 							_List_fromArray(
 								[
@@ -11285,7 +11285,8 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$Delete(i))
+							$author$project$DialogGameEditor$DialogsManipulation(
+								$author$project$DialogGameEditor$DeletePosition(i)))
 						]),
 					_List_fromArray(
 						[
@@ -11296,7 +11297,8 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							A2($author$project$DialogGameEditor$Move, i, -1)),
+							$author$project$DialogGameEditor$DialogsManipulation(
+								A2($author$project$DialogGameEditor$MovePosition, i, -1))),
 							$elm$html$Html$Attributes$disabled(
 							(!i) ? true : false)
 						]),
@@ -11309,7 +11311,8 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							A2($author$project$DialogGameEditor$Move, i, 1))
+							$author$project$DialogGameEditor$DialogsManipulation(
+								A2($author$project$DialogGameEditor$MovePosition, i, 1)))
 						]),
 					_List_fromArray(
 						[
@@ -11320,7 +11323,8 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$NewDialog(i))
+							$author$project$DialogGameEditor$DialogsManipulation(
+								$author$project$DialogGameEditor$NewAt(i + 1)))
 						]),
 					_List_fromArray(
 						[

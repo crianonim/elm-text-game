@@ -32,13 +32,15 @@ type Msg
     | Cancel
     | TextEdit ParsedEditable.Msg
     | IdExit String
-    | Delete Int
-    | Move Int Int
-    | NewDialog Int
-    | OptionMove Int Int
-    | OptionDelete Int
-    | OptionNew Int
+    | DialogsManipulation ManipulatePosition
+    | OptionsManipulation ManipulatePosition
 
+
+
+type ManipulatePosition
+ = MovePosition Int Int
+ | DeletePosition Int
+ | NewAt Int
 
 init : GameDefinition -> Model
 init gd =
@@ -197,53 +199,70 @@ update msg model =
         TextEdit tMsg ->
             Optional.modify model_text (\m -> ParsedEditable.update tMsg m) model
 
-        Delete indexToDel ->
-            Lens.modify model_dialogs
-                (List.Extra.removeAt indexToDel)
-                model
-
-        Move indexToMove step ->
-            Lens.modify model_dialogs
-                (List.Extra.swapAt indexToMove (indexToMove + step))
-                model
 
         IdExit string ->
             model_id.set string model
 
-        NewDialog i ->
+
+
+
+
+        DialogsManipulation manipulatePosition ->
+             Lens.modify model_dialogs (updateDialogs manipulatePosition) model
+
+        OptionsManipulation manipulatePosition ->
+            Optional.modify model_options (updateOptions manipulatePosition) model
+
+
+
+
+updateDialogs :ManipulatePosition -> List Dialog  -> List Dialog
+updateDialogs  manipulatePosition dialogs=
+    case manipulatePosition of
+        MovePosition index step ->
+                            (List.Extra.swapAt index (index + step)) dialogs
+
+
+        DeletePosition i ->
+
+                            (List.Extra.removeAt i)
+                            dialogs
+
+        NewAt i ->
             let
-                newDialog : Dialog
-                newDialog =
-                    { id = ""
-                    , text = Literal <| Text ""
-                    , options = []
-                    }
-            in
-            Lens.modify model_dialogs
-                (insertAt i newDialog)
-                model
+                            newDialog : Dialog
+                            newDialog =
+                                { id = ""
+                                , text = Literal <| Text ""
+                                , options = []
+                                }
+                        in
 
-        OptionMove optionIndex step ->
-            Optional.modify model_options
-                (List.Extra.swapAt optionIndex step)
-                model
+                            (insertAt i newDialog)
+                            dialogs
 
-        OptionDelete optionIndex ->
-            Optional.modify model_options
-                (List.Extra.removeAt optionIndex)
-                model
+updateOptions : ManipulatePosition -> List DialogOption -> List DialogOption
+updateOptions manipulatePosition dialogOptions =
+    case manipulatePosition of
+        MovePosition optionIndex step ->
+             (List.Extra.swapAt optionIndex step) dialogOptions
 
-        OptionNew optionIndex ->
-            let
-                newOption =
-                    { text = Literal <| Text ""
-                    , condition = Nothing
-                    , actions = []
-                    }
-            in
-            Optional.modify model_options
-                (insertAt optionIndex newOption)
-                model
+        DeletePosition optionIndex ->
+            List.Extra.removeAt optionIndex dialogOptions
+
+        NewAt optionIndex ->
+             let
+                            newOption =
+                                { text = Literal <| Text ""
+                                , condition = Nothing
+                                , actions = []
+                                }
+                        in
+
+                            (insertAt optionIndex newOption)
+                            dialogOptions
+
+
 
 
 view : Model -> Html Msg
@@ -302,9 +321,9 @@ viewDialog model i dialog =
           in
           button [ disabled <| not enabled, onClick <| Save ] [ text "Save" ]
         , button [ onClick <| Edit dialog ] [ text "EDIT" ]
-        , button [ onClick <| Delete i ] [ text "Delete" ]
+        , button [ onClick <| DialogsManipulation <| DeletePosition i ] [ text "Delete" ]
         , button
-            [ onClick <| Move i -1
+            [ onClick <| DialogsManipulation <| MovePosition i -1
             , disabled <|
                 if i == 0 then
                     True
@@ -313,8 +332,8 @@ viewDialog model i dialog =
                     False
             ]
             [ text "Move Up" ]
-        , button [ onClick <| Move i 1 ] [ text "Move Down" ]
-        , button [ onClick <| NewDialog i ] [ text "+New" ]
+        , button [ onClick <| DialogsManipulation <| MovePosition i 1 ] [ text "Move Down" ]
+        , button [ onClick <| DialogsManipulation <| NewAt (i+1) ] [ text "+New" ]
         ]
 
 
@@ -335,10 +354,10 @@ viewOption isEditing optionIndex dialogOption =
         , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
         , if isEditing then
             div []
-                [ button [ onClick <| OptionMove optionIndex (optionIndex - 1) ] [ text "Move Up" ]
-                , button [ onClick <| OptionMove optionIndex (optionIndex + 1) ] [ text "Move Down" ]
-                , button [ onClick <| OptionDelete optionIndex ] [ text "Delete" ]
-                , button [ onClick <| OptionNew (optionIndex + 1) ] [ text "New" ]
+                [ button [ onClick <| OptionsManipulation <| MovePosition optionIndex (optionIndex - 1) ] [ text "Move Up" ]
+                , button [ onClick <|  OptionsManipulation <| MovePosition optionIndex (optionIndex + 1) ] [ text "Move Down" ]
+                , button [ onClick <|  OptionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
+                , button [ onClick <|  OptionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
                 ]
 
           else
