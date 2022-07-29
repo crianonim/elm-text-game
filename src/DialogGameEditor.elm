@@ -13,12 +13,12 @@ import ScreeptV2 exposing (..)
 
 
 type alias Model =
-    { editedDialog : Maybe EditableDialog
+    { editedDialog : Maybe EditedDialog
     , gameDefinition : GameDefinition
     }
 
 
-type alias EditableDialog =
+type alias EditedDialog =
     { dialog : DialogGame.Dialog
     , id : String
     , text : ParsedEditable.Model Expression
@@ -30,13 +30,17 @@ type Msg
     = Edit DialogGame.Dialog
     | Save
     | Cancel
-    | TextEdit ParsedEditable.Msg
-    | IdExit String
-    | DialogsManipulation ManipulatePosition
-    | OptionsManipulation ManipulatePosition
+    | DialogsManipulation ManipulatePositionAction
+    | OptionsManipulation ManipulatePositionAction
+    | DialogEdit DialogsEditAction
 
 
-type ManipulatePosition
+type DialogsEditAction
+    = DialogTextEdit ParsedEditable.Msg
+    | DialogIdEdit String
+
+
+type ManipulatePositionAction
     = MovePosition Int Int
     | DeletePosition Int
     | NewAt Int
@@ -49,7 +53,7 @@ init gd =
     }
 
 
-editableDiablogToDialog : EditableDialog -> Dialog
+editableDiablogToDialog : EditedDialog -> Dialog
 editableDiablogToDialog editableDialog =
     case ParsedEditable.model_new.getOption editableDialog.text of
         Just text ->
@@ -62,51 +66,19 @@ editableDiablogToDialog editableDialog =
             editableDialog.dialog
 
 
-
---
---exampleDialog =
---    { id = "start"
---    , text = Screept.Special [ Screept.S "You're in a dark room. ", Screept.Conditional (DialogGame.zero (Counter "start_look_around")) (S "You see nothing. "), Conditional (nonZero (Counter "start_look_around")) (S "You see a straw bed. "), Conditional (nonZero (Counter "start_search_bed")) (S "There is a rusty key among the straw. ") ]
---    , options =
---        [ { text = Screept.S "Go through the exit", condition = Just (nonZero (Counter "start_look_around")), action = [ GoAction "second" ] }
---        , { text = Screept.S "Look around", condition = Just (zero (Counter "start_look_around")), action = [ Screept <| Screept.inc "start_look_around", Message <| Screept.S "You noticed a straw bed", Turn 5, Screept <| Screept.Rnd (S "rrr") (Const 1) (Const 5) ] }
---        , { text = Screept.S "Search the bed", condition = Just (AND [ zero (Counter "start_search_bed"), DialogGame.nonZero (Counter "start_look_around") ]), action = [ Screept <| Screept.inc "start_search_bed" ] }
---        ]
---    }
-
-
-txt : String -> Expression
-txt s =
-    Literal <| Text s
-
-
-var : String -> Expression
-var s =
-    Variable <| LiteralIdentifier s
-
-
-exampleDialog =
-    { id = "start"
-    , text = txt "You're in a dark room. "
-    , options =
-        [ { text = txt "Go through the exit", condition = Just (var "start_look_around"), actions = [ GoAction "second" ] }
-        ]
-    }
-
-
-model_editedDialog : Optional Model EditableDialog
+model_editedDialog : Optional Model EditedDialog
 model_editedDialog =
     { getOption = .editedDialog
     , set = \s m -> { m | editedDialog = Just s }
     }
 
 
-editableDialog_text : Lens EditableDialog (ParsedEditable.Model Expression)
+editableDialog_text : Lens EditedDialog (ParsedEditable.Model Expression)
 editableDialog_text =
     Lens .text (\s m -> { m | text = s })
 
 
-editedDialog_dialog : Lens EditableDialog Dialog
+editedDialog_dialog : Lens EditedDialog Dialog
 editedDialog_dialog =
     Lens .dialog (\s m -> { m | dialog = s })
 
@@ -140,7 +112,12 @@ model_text =
 model_id : Optional Model String
 model_id =
     model_editedDialog
-        |> optionalWithLens (Lens .id (\s m -> { m | id = s }))
+        |> optionalWithLens lens_id
+
+
+lens_id : Lens { a | id : String } String
+lens_id =
+    Lens .id (\s m -> { m | id = s })
 
 
 model_gameDefinition : Lens Model GameDefinition
@@ -196,17 +173,24 @@ update msg model =
         Cancel ->
             model
 
-        TextEdit tMsg ->
-            Optional.modify model_text (\m -> ParsedEditable.update tMsg m) model
-
-        IdExit string ->
-            model_id.set string model
-
         DialogsManipulation manipulatePosition ->
             Lens.modify model_dialogs (manipulatePositionUpdate newDialog manipulatePosition) model
 
         OptionsManipulation manipulatePosition ->
             Optional.modify model_options (manipulatePositionUpdate newOption manipulatePosition) model
+
+        DialogEdit dialogAction ->
+            Optional.modify model_editedDialog (updateEditedDialog dialogAction) model
+
+
+updateEditedDialog : DialogsEditAction -> EditedDialog -> EditedDialog
+updateEditedDialog dialogEditAction dialog =
+    case dialogEditAction of
+        DialogTextEdit msg ->
+            Lens.modify editableDialog_text (\m -> ParsedEditable.update msg m) dialog
+
+        DialogIdEdit string ->
+            lens_id.set string dialog
 
 
 newDialog : Dialog
@@ -225,7 +209,7 @@ newOption =
     }
 
 
-manipulatePositionUpdate : a -> ManipulatePosition -> List a -> List a
+manipulatePositionUpdate : a -> ManipulatePositionAction -> List a -> List a
 manipulatePositionUpdate newObject msg list =
     case msg of
         MovePosition index step ->
@@ -236,7 +220,8 @@ manipulatePositionUpdate newObject msg list =
                 list
 
         NewAt i ->
-            insertAt i newObject
+            insertAt i
+                newObject
                 list
 
 
@@ -260,7 +245,7 @@ viewDialog model i dialog =
             [ text "id: "
             , case ( model.editedDialog, isEdited ) of
                 ( Just edModel, True ) ->
-                    input [ onInput IdExit, value edModel.id ] []
+                    input [ onInput (\a -> DialogEdit <| DialogIdEdit a), value edModel.id ] []
 
                 _ ->
                     span [ class "de-dialog-id" ] [ text dialog.id ]
@@ -270,7 +255,7 @@ viewDialog model i dialog =
             , case ( model.editedDialog, isEdited ) of
                 ( Just edModel, True ) ->
                     div []
-                        [ ParsedEditable.view edModel.text |> Html.map TextEdit
+                        [ ParsedEditable.view edModel.text |> Html.map (\a -> DialogEdit <| DialogTextEdit a)
                         ]
 
                 _ ->
@@ -371,20 +356,6 @@ viewAction dialogAction =
 viewExpression : Expression -> Html msg
 viewExpression expression =
     span [ class "de-dialog-condition" ] [ text <| elipsisText <| ScreeptV2.stringifyExpression expression ]
-
-
-viewEditDialog : Model -> Html Msg
-viewEditDialog model =
-    case model.editedDialog of
-        Nothing ->
-            div []
-                [ button [ onClick <| Edit exampleDialog ] [ text "Edit" ]
-                ]
-
-        Just d ->
-            div []
-                [ div [] [ text "id: ", text d.id ]
-                ]
 
 
 insertAt : Int -> a -> List a -> List a

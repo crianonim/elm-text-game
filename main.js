@@ -9917,20 +9917,6 @@ var $author$project$DialogGameEditor$model_dialogs = A2(
 					{dialogs: s});
 			})),
 	$author$project$DialogGameEditor$model_gameDefinition);
-var $author$project$DialogGameEditor$model_id = A2(
-	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.id;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{id: s});
-			})),
-	$author$project$DialogGameEditor$model_editedDialog);
 var $author$project$DialogGameEditor$model_options = A2(
 	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
 	A2(
@@ -9945,18 +9931,6 @@ var $author$project$DialogGameEditor$model_options = A2(
 					{options: s});
 			})),
 	$author$project$DialogGameEditor$model_editedDialog);
-var $author$project$DialogGameEditor$editableDialog_text = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.text;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{text: s});
-		}));
-var $author$project$DialogGameEditor$model_text = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editableDialog_text, $author$project$DialogGameEditor$model_editedDialog);
 var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
 	function (lens, f) {
 		var mf = function (a) {
@@ -9980,6 +9954,28 @@ var $author$project$DialogGameEditor$newOption = {
 	text: $author$project$ScreeptV2$Literal(
 		$author$project$ScreeptV2$Text(''))
 };
+var $author$project$DialogGameEditor$editableDialog_text = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.text;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{text: s});
+		}));
+var $author$project$DialogGameEditor$lens_id = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.id;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{id: s});
+		}));
 var $author$project$ParsedEditable$revert = function (model) {
 	return _Utils_update(
 		model,
@@ -10014,6 +10010,22 @@ var $author$project$ParsedEditable$update = F2(
 					});
 			default:
 				return $author$project$ParsedEditable$revert(model);
+		}
+	});
+var $author$project$DialogGameEditor$updateEditedDialog = F2(
+	function (dialogEditAction, dialog) {
+		if (dialogEditAction.$ === 'DialogTextEdit') {
+			var msg = dialogEditAction.a;
+			return A3(
+				$arturopala$elm_monocle$Monocle$Lens$modify,
+				$author$project$DialogGameEditor$editableDialog_text,
+				function (m) {
+					return A2($author$project$ParsedEditable$update, msg, m);
+				},
+				dialog);
+		} else {
+			var string = dialogEditAction.a;
+			return A2($author$project$DialogGameEditor$lens_id.set, string, dialog);
 		}
 	});
 var $author$project$DialogGameEditor$update = F2(
@@ -10054,18 +10066,6 @@ var $author$project$DialogGameEditor$update = F2(
 				}
 			case 'Cancel':
 				return model;
-			case 'TextEdit':
-				var tMsg = msg.a;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Optional$modify,
-					$author$project$DialogGameEditor$model_text,
-					function (m) {
-						return A2($author$project$ParsedEditable$update, tMsg, m);
-					},
-					model);
-			case 'IdExit':
-				var string = msg.a;
-				return A2($author$project$DialogGameEditor$model_id.set, string, model);
 			case 'DialogsManipulation':
 				var manipulatePosition = msg.a;
 				return A3(
@@ -10073,12 +10073,19 @@ var $author$project$DialogGameEditor$update = F2(
 					$author$project$DialogGameEditor$model_dialogs,
 					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
 					model);
-			default:
+			case 'OptionsManipulation':
 				var manipulatePosition = msg.a;
 				return A3(
 					$arturopala$elm_monocle$Monocle$Optional$modify,
 					$author$project$DialogGameEditor$model_options,
 					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
+					model);
+			default:
+				var dialogAction = msg.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$model_editedDialog,
+					$author$project$DialogGameEditor$updateEditedDialog(dialogAction),
 					model);
 		}
 	});
@@ -10789,14 +10796,20 @@ var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('
 var $author$project$DialogGameEditor$DeletePosition = function (a) {
 	return {$: 'DeletePosition', a: a};
 };
+var $author$project$DialogGameEditor$DialogEdit = function (a) {
+	return {$: 'DialogEdit', a: a};
+};
+var $author$project$DialogGameEditor$DialogIdEdit = function (a) {
+	return {$: 'DialogIdEdit', a: a};
+};
+var $author$project$DialogGameEditor$DialogTextEdit = function (a) {
+	return {$: 'DialogTextEdit', a: a};
+};
 var $author$project$DialogGameEditor$DialogsManipulation = function (a) {
 	return {$: 'DialogsManipulation', a: a};
 };
 var $author$project$DialogGameEditor$Edit = function (a) {
 	return {$: 'Edit', a: a};
-};
-var $author$project$DialogGameEditor$IdExit = function (a) {
-	return {$: 'IdExit', a: a};
 };
 var $author$project$DialogGameEditor$MovePosition = F2(
 	function (a, b) {
@@ -10806,9 +10819,6 @@ var $author$project$DialogGameEditor$NewAt = function (a) {
 	return {$: 'NewAt', a: a};
 };
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
-var $author$project$DialogGameEditor$TextEdit = function (a) {
-	return {$: 'TextEdit', a: a};
-};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -10844,6 +10854,8 @@ var $elm$core$Maybe$map2 = F3(
 			}
 		}
 	});
+var $author$project$DialogGameEditor$model_id = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_id, $author$project$DialogGameEditor$model_editedDialog);
+var $author$project$DialogGameEditor$model_text = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editableDialog_text, $author$project$DialogGameEditor$model_editedDialog);
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -11159,7 +11171,11 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 									$elm$html$Html$input,
 									_List_fromArray(
 										[
-											$elm$html$Html$Events$onInput($author$project$DialogGameEditor$IdExit),
+											$elm$html$Html$Events$onInput(
+											function (a) {
+												return $author$project$DialogGameEditor$DialogEdit(
+													$author$project$DialogGameEditor$DialogIdEdit(a));
+											}),
 											$elm$html$Html$Attributes$value(edModel.id)
 										]),
 									_List_Nil);
@@ -11194,7 +11210,10 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 										[
 											A2(
 											$elm$html$Html$map,
-											$author$project$DialogGameEditor$TextEdit,
+											function (a) {
+												return $author$project$DialogGameEditor$DialogEdit(
+													$author$project$DialogGameEditor$DialogTextEdit(a));
+											},
 											$author$project$ParsedEditable$view(edModel.text))
 										]));
 							} else {
