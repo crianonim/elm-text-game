@@ -55,6 +55,8 @@ type DialogsEditAction
 type OptionEditAction
     = OptionTextEdit ParsedEditable.Msg
     | OptionConditionEdit ParsedEditable.Msg
+    | OptionConditionRemove
+    | OptionConditionAdd
 
 
 type ManipulatePositionAction
@@ -303,6 +305,12 @@ updateEditedOption optionEditAction editedOption =
         OptionConditionEdit msg ->
             Optional.modify editedOption_condition (ParsedEditable.update msg) editedOption
 
+        OptionConditionRemove ->
+            editedOption_mCondition.set Nothing editedOption
+
+        OptionConditionAdd ->
+            editedOption_condition.set (ParsedEditable.init (Literal <| Number 1) parserExpression stringifyExpression) editedOption
+
 
 newDialog : Dialog
 newDialog =
@@ -430,9 +438,23 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
             div [ class "de-dialog-option" ]
                 [ div []
                     [ text "text: "
-                    , ParsedEditable.view editedOption.text |> Html.map (\a -> OptionEdit <| OptionTextEdit a)
+                    , ParsedEditable.view editedOption.text |> Html.map (OptionConditionEdit >> OptionEdit)
                     ]
-                , div [] [ text "condition: ", Maybe.map ParsedEditable.view editedOption.condition |> Maybe.withDefault (text "n/a") |> Html.map (\a -> OptionEdit <| OptionConditionEdit a) ]
+                , div []
+                    [ text "condition: "
+                    , case editedOption.condition of
+                        Just condition ->
+                            div []
+                                [ ParsedEditable.view condition |> Html.map (OptionConditionEdit >> OptionEdit)
+                                , button [ onClick <| OptionEdit OptionConditionRemove ] [ text "Remove condition" ]
+                                ]
+
+                        Nothing ->
+                            div []
+                                [ text "n/a"
+                                , button [ onClick <| OptionEdit OptionConditionAdd ] [ text "Add condition" ]
+                                ]
+                    ]
                 , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
                 , div []
                     [ button [ onClick SaveOption ] [ text "Save Option" ]

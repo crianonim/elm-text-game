@@ -10136,22 +10136,46 @@ var $author$project$DialogGameEditor$editedOption_condition = A2(
 					condition: $elm$core$Maybe$Just(s)
 				});
 		}));
+var $author$project$DialogGameEditor$editedOption_mCondition = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.condition;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{condition: s});
+		}));
 var $author$project$DialogGameEditor$updateEditedOption = F2(
 	function (optionEditAction, editedOption) {
-		if (optionEditAction.$ === 'OptionTextEdit') {
-			var msg = optionEditAction.a;
-			return A3(
-				$arturopala$elm_monocle$Monocle$Lens$modify,
-				$author$project$DialogGameEditor$lens_text,
-				$author$project$ParsedEditable$update(msg),
-				editedOption);
-		} else {
-			var msg = optionEditAction.a;
-			return A3(
-				$arturopala$elm_monocle$Monocle$Optional$modify,
-				$author$project$DialogGameEditor$editedOption_condition,
-				$author$project$ParsedEditable$update(msg),
-				editedOption);
+		switch (optionEditAction.$) {
+			case 'OptionTextEdit':
+				var msg = optionEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Lens$modify,
+					$author$project$DialogGameEditor$lens_text,
+					$author$project$ParsedEditable$update(msg),
+					editedOption);
+			case 'OptionConditionEdit':
+				var msg = optionEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$editedOption_condition,
+					$author$project$ParsedEditable$update(msg),
+					editedOption);
+			case 'OptionConditionRemove':
+				return A2($author$project$DialogGameEditor$editedOption_mCondition.set, $elm$core$Maybe$Nothing, editedOption);
+			default:
+				return A2(
+					$author$project$DialogGameEditor$editedOption_condition.set,
+					A3(
+						$author$project$ParsedEditable$init,
+						$author$project$ScreeptV2$Literal(
+							$author$project$ScreeptV2$Number(1)),
+						$author$project$ScreeptV2$parserExpression,
+						$author$project$ScreeptV2$stringifyExpression),
+					editedOption);
 		}
 	});
 var $author$project$DialogGameEditor$update = F2(
@@ -11156,14 +11180,13 @@ var $author$project$DialogGameEditor$viewExpression = function (expression) {
 					$author$project$ScreeptV2$stringifyExpression(expression)))
 			]));
 };
+var $author$project$DialogGameEditor$OptionConditionAdd = {$: 'OptionConditionAdd'};
 var $author$project$DialogGameEditor$OptionConditionEdit = function (a) {
 	return {$: 'OptionConditionEdit', a: a};
 };
+var $author$project$DialogGameEditor$OptionConditionRemove = {$: 'OptionConditionRemove'};
 var $author$project$DialogGameEditor$OptionEdit = function (a) {
 	return {$: 'OptionEdit', a: a};
-};
-var $author$project$DialogGameEditor$OptionTextEdit = function (a) {
-	return {$: 'OptionTextEdit', a: a};
 };
 var $author$project$DialogGameEditor$OptionsManipulation = function (a) {
 	return {$: 'OptionsManipulation', a: a};
@@ -11237,10 +11260,7 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								$elm$html$Html$text('text: '),
 								A2(
 								$elm$html$Html$map,
-								function (a) {
-									return $author$project$DialogGameEditor$OptionEdit(
-										$author$project$DialogGameEditor$OptionTextEdit(a));
-								},
+								A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionConditionEdit, $author$project$DialogGameEditor$OptionEdit),
 								$author$project$ParsedEditable$view(editedOption.text))
 							])),
 						A2(
@@ -11249,16 +11269,52 @@ var $author$project$DialogGameEditor$viewOption = F4(
 						_List_fromArray(
 							[
 								$elm$html$Html$text('condition: '),
-								A2(
-								$elm$html$Html$map,
-								function (a) {
-									return $author$project$DialogGameEditor$OptionEdit(
-										$author$project$DialogGameEditor$OptionConditionEdit(a));
-								},
-								A2(
-									$elm$core$Maybe$withDefault,
-									$elm$html$Html$text('n/a'),
-									A2($elm$core$Maybe$map, $author$project$ParsedEditable$view, editedOption.condition)))
+								function () {
+								var _v1 = editedOption.condition;
+								if (_v1.$ === 'Just') {
+									var condition = _v1.a;
+									return A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$map,
+												A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionConditionEdit, $author$project$DialogGameEditor$OptionEdit),
+												$author$project$ParsedEditable$view(condition)),
+												A2(
+												$elm$html$Html$button,
+												_List_fromArray(
+													[
+														$elm$html$Html$Events$onClick(
+														$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionRemove))
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text('Remove condition')
+													]))
+											]));
+								} else {
+									return A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('n/a'),
+												A2(
+												$elm$html$Html$button,
+												_List_fromArray(
+													[
+														$elm$html$Html$Events$onClick(
+														$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionAdd))
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text('Add condition')
+													]))
+											]));
+								}
+							}()
 							])),
 						A2(
 						$elm$html$Html$div,
