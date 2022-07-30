@@ -54,6 +54,7 @@ type DialogsEditAction
 
 type OptionEditAction
     = OptionTextEdit ParsedEditable.Msg
+    | OptionConditionEdit ParsedEditable.Msg
 
 
 type ManipulatePositionAction
@@ -128,6 +129,16 @@ model_editedOptionOption =
     model_editedOption
         |> optionalWithLens
             (Lens .option (\s m -> { m | option = s }))
+
+
+editedOption_mCondition : Lens EditedOption (Maybe (ParsedEditable.Model Expression))
+editedOption_mCondition =
+    Lens .condition (\s m -> { m | condition = s })
+
+
+editedOption_condition : Optional EditedOption (ParsedEditable.Model Expression)
+editedOption_condition =
+    Optional .condition (\s m -> { m | condition = Just s })
 
 
 model_dialogs : Lens Model (List Dialog)
@@ -287,7 +298,10 @@ updateEditedOption : OptionEditAction -> EditedOption -> EditedOption
 updateEditedOption optionEditAction editedOption =
     case optionEditAction of
         OptionTextEdit msg ->
-            Lens.modify lens_text (\m -> ParsedEditable.update msg m) editedOption
+            Lens.modify lens_text (ParsedEditable.update msg) editedOption
+
+        OptionConditionEdit msg ->
+            Optional.modify editedOption_condition (ParsedEditable.update msg) editedOption
 
 
 newDialog : Dialog
@@ -418,7 +432,7 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
                     [ text "text: "
                     , ParsedEditable.view editedOption.text |> Html.map (\a -> OptionEdit <| OptionTextEdit a)
                     ]
-                , div [] [ text "condition: ", Maybe.map viewExpression dialogOption.condition |> Maybe.withDefault (text "n/a") ]
+                , div [] [ text "condition: ", Maybe.map ParsedEditable.view editedOption.condition |> Maybe.withDefault (text "n/a") |> Html.map (\a -> OptionEdit <| OptionConditionEdit a) ]
                 , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
                 , div []
                     [ button [ onClick SaveOption ] [ text "Save Option" ]
