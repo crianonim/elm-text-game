@@ -8,6 +8,7 @@ import List.Extra
 import Monocle.Compose exposing (lensWithLens, lensWithOptional, optionalWithLens, optionalWithOptional)
 import Monocle.Lens as Lens exposing (Lens)
 import Monocle.Optional as Optional exposing (Optional)
+import Monocle.Prism as Prism exposing (Prism)
 import ParsedEditable
 import ScreeptV2 exposing (..)
 
@@ -32,7 +33,26 @@ type alias EditedOption =
     , text : ParsedEditable.Model Expression
     , condition : Maybe (ParsedEditable.Model Expression)
     , actions : List DialogAction
+    , editedAction : Maybe EditedAction
     }
+
+
+type alias EditedAction =
+    { action : DialogAction
+    , editedActionUI : EditedActionUI
+    }
+
+
+type EditedActionUI
+    = EAGoBack
+    | EAGo String
+    | EAScreept (ParsedEditable.Model Statement)
+
+
+type ActionType
+    = ATGoBack
+    | ATGo
+    | ATScreept
 
 
 type Msg
@@ -40,16 +60,16 @@ type Msg
     | Save
     | Cancel
     | DialogsManipulation ManipulatePositionAction
-    | OptionsManipulation ManipulatePositionAction
     | DialogEdit DialogsEditAction
-    | StartOptionEdit DialogOption
-    | OptionEdit OptionEditAction
-    | SaveOption
 
 
 type DialogsEditAction
     = DialogTextEdit ParsedEditable.Msg
     | DialogIdEdit String
+    | StartOptionEdit DialogOption
+    | OptionEdit OptionEditAction
+    | OptionsManipulation ManipulatePositionAction
+    | SaveOption
 
 
 type OptionEditAction
@@ -57,6 +77,16 @@ type OptionEditAction
     | OptionConditionEdit ParsedEditable.Msg
     | OptionConditionRemove
     | OptionConditionAdd
+    | OptionActionStartEdit DialogAction
+    | OptionActionEditAction ActionEditAction
+    | ActionEdit ActionEditAction
+    | SaveAction
+
+
+type ActionEditAction
+    = SelectActionType ActionType
+    | EditGoToText String
+    | EditScreept ParsedEditable.Msg
 
 
 type ManipulatePositionAction
@@ -98,6 +128,62 @@ editedDialogOptionToDialogOption editableOption =
             editableOption.option
 
 
+editedActionToDialogAction : EditedAction -> DialogAction
+editedActionToDialogAction action =
+    case action.editedActionUI of
+        EAGoBack ->
+            GoBackAction
+
+        EAGo string ->
+            GoAction string
+
+        EAScreept statement ->
+            case ParsedEditable.model_new.getOption statement of
+                Just stmt ->
+                    Screept stmt
+
+                Nothing ->
+                    action.action
+
+
+dialogActionToEditedAction : DialogAction -> EditedActionUI
+dialogActionToEditedAction dialogAction =
+    case dialogAction of
+        GoAction dialogId ->
+            EAGo dialogId
+
+        GoBackAction ->
+            EAGoBack
+
+        Message expression ->
+            EAGoBack
+
+        Screept statement ->
+            EAScreept (ParsedEditable.init statement parserStatement stringifyStatement)
+
+        ConditionalAction expression succes failure ->
+            EAGoBack
+
+        ActionBlock dialogActions ->
+            EAGoBack
+
+        Exit string ->
+            EAGoBack
+
+
+initEditedAction : ActionType -> EditedActionUI
+initEditedAction kind =
+    case kind of
+        ATGoBack ->
+            EAGoBack
+
+        ATGo ->
+            EAGo ""
+
+        ATScreept ->
+            EAScreept (ParsedEditable.init (Block []) parserStatement stringifyStatement)
+
+
 model_editedDialog : Optional Model EditedDialog
 model_editedDialog =
     { getOption = .editedDialog
@@ -120,17 +206,31 @@ editedDialog_editedOption =
     Optional .editedOption (\s m -> { m | editedOption = Just s })
 
 
+lens_options : Lens { a | options : b } b
+lens_options =
+    Lens .options (\s m -> { m | options = s })
+
+
 model_editedOption : Optional Model EditedOption
 model_editedOption =
     model_editedDialog
         |> optionalWithOptional editedDialog_editedOption
 
 
-model_editedOptionOption : Optional Model DialogOption
-model_editedOptionOption =
-    model_editedOption
-        |> optionalWithLens
-            (Lens .option (\s m -> { m | option = s }))
+model_mEditedOption : Optional Model (Maybe EditedOption)
+model_mEditedOption =
+    model_editedDialog
+        |> optionalWithLens (Lens .editedOption (\s m -> { m | editedOption = s }))
+
+
+lens_editedOption : Lens { a | editedOption : b } b
+lens_editedOption =
+    Lens .editedOption (\s m -> { m | editedOption = s })
+
+
+lens_option : Lens { a | option : DialogOption } DialogOption
+lens_option =
+    Lens .option (\s m -> { m | option = s })
 
 
 editedOption_mCondition : Lens EditedOption (Maybe (ParsedEditable.Model Expression))
@@ -141,6 +241,51 @@ editedOption_mCondition =
 editedOption_condition : Optional EditedOption (ParsedEditable.Model Expression)
 editedOption_condition =
     Optional .condition (\s m -> { m | condition = Just s })
+
+
+editedOption_editedAction : Optional EditedOption EditedAction
+editedOption_editedAction =
+    Optional .editedAction (\s m -> { m | editedAction = Just s })
+
+
+editedOption_mEditedAction : Lens EditedOption (Maybe EditedAction)
+editedOption_mEditedAction =
+    Lens .editedAction (\s m -> { m | editedAction = s })
+
+
+editedAction_goTo : Prism EditedActionUI String
+editedAction_goTo =
+    { getOption =
+        \ea ->
+            case ea of
+                EAGo s ->
+                    Just s
+
+                _ ->
+                    Nothing
+    , reverseGet = EAGo
+    }
+
+
+editedAction_screept : Prism EditedActionUI (ParsedEditable.Model Statement)
+editedAction_screept =
+    { getOption =
+        \ea ->
+            case ea of
+                EAScreept s ->
+                    Just s
+
+                _ ->
+                    Nothing
+    , reverseGet = EAScreept
+    }
+
+
+model_editedAction : Optional Model EditedAction
+model_editedAction =
+    model_editedOption
+        |> optionalWithOptional
+            editedOption_editedAction
 
 
 model_dialogs : Lens Model (List Dialog)
@@ -191,20 +336,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         StartDialogEdit dialog ->
-            if model_Dialog.getOption model == Just dialog then
-                model
-
-            else
-                { model
-                    | editedDialog =
-                        Just
-                            { dialog = dialog
-                            , id = dialog.id
-                            , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
-                            , options = dialog.options
-                            , editedOption = Nothing
-                            }
-                }
+            startEditingDialog dialog model
 
         Save ->
             let
@@ -230,6 +362,7 @@ update msg model =
 
                 Just nd ->
                     model_dialogs.set nd model
+                        |> (\m -> { m | editedDialog = Nothing })
 
         Cancel ->
             model
@@ -237,53 +370,61 @@ update msg model =
         DialogsManipulation manipulatePosition ->
             Lens.modify model_dialogs (manipulatePositionUpdate newDialog manipulatePosition) model
 
-        OptionsManipulation manipulatePosition ->
-            Optional.modify model_options (manipulatePositionUpdate newOption manipulatePosition) model
-
         DialogEdit dialogAction ->
-            Optional.modify model_editedDialog (updateEditedDialog dialogAction) model
-
-        StartOptionEdit dialogOption ->
-            if model_editedOptionOption.getOption model == Just dialogOption then
-                model
-
-            else
-                model_editedOption.set
-                    { option = dialogOption
-                    , text = ParsedEditable.init dialogOption.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
-                    , condition = Maybe.map (\condition -> ParsedEditable.init condition ScreeptV2.parserExpression ScreeptV2.stringifyExpression) dialogOption.condition
-                    , actions = dialogOption.actions
-                    }
-                    model
-
-        OptionEdit optionEditAction ->
-            Optional.modify model_editedOption (updateEditedOption optionEditAction) model
-
-        SaveOption ->
             let
-                newOptions : Maybe (List DialogOption)
-                newOptions =
-                    Maybe.map2
-                        (\eOp ed ->
-                            List.map
-                                (\d ->
-                                    if eOp.option == d then
-                                        editedDialogOptionToDialogOption eOp
+                m =
+                    case dialogAction of
+                        StartOptionEdit dialogOption ->
+                            List.Extra.find
+                                (\d -> List.member dialogOption d.options)
+                                model.gameDefinition.dialogs
+                                |> Maybe.map (\x -> startEditingDialog x model)
+                                |> Maybe.withDefault model
 
-                                    else
-                                        d
-                                )
-                                ed.options
-                        )
-                        (model_editedOption.getOption model)
-                        (model_editedDialog.getOption model)
+                        _ ->
+                            model
             in
-            case newOptions of
-                Nothing ->
-                    model
+            Optional.modify model_editedDialog (updateEditedDialog dialogAction) m
 
-                Just nd ->
-                    model_options.set nd model
+
+startEditingDialog : Dialog -> Model -> Model
+startEditingDialog dialog model =
+    if model_Dialog.getOption model == Just dialog then
+        model
+
+    else
+        { model
+            | editedDialog =
+                Just
+                    { dialog = dialog
+                    , id = dialog.id
+                    , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
+                    , options = dialog.options
+                    , editedOption = Nothing
+                    }
+        }
+
+
+startEditingOption : DialogOption -> EditedDialog -> EditedDialog
+startEditingOption dialogOption dialog =
+    if
+        (editedDialog_editedOption
+            |> optionalWithLens lens_option
+        ).getOption
+            dialog
+            == Just dialogOption
+    then
+        dialog
+
+    else
+        editedDialog_editedOption.set
+            { option = dialogOption
+            , text = ParsedEditable.init dialogOption.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
+            , condition = Maybe.map (\condition -> ParsedEditable.init condition ScreeptV2.parserExpression ScreeptV2.stringifyExpression) dialogOption.condition
+            , actions = dialogOption.actions
+            , editedAction = Nothing
+            }
+            dialog
 
 
 updateEditedDialog : DialogsEditAction -> EditedDialog -> EditedDialog
@@ -295,11 +436,63 @@ updateEditedDialog dialogEditAction dialog =
         DialogIdEdit string ->
             lens_id.set string dialog
 
+        StartOptionEdit dialogOption ->
+            startEditingOption dialogOption dialog
+
+        OptionEdit optionEditAction ->
+            let
+                d =
+                    case optionEditAction of
+                        OptionActionStartEdit dialogAction ->
+                            List.Extra.find
+                                (\o -> List.member dialogAction o.actions)
+                                dialog.options
+                                |> Maybe.map (\x -> startEditingOption x dialog)
+                                |> Maybe.withDefault dialog
+
+                        _ ->
+                            dialog
+            in
+            Optional.modify editedDialog_editedOption (updateEditedOption optionEditAction) d
+
+        OptionsManipulation manipulatePosition ->
+            Lens.modify lens_options (manipulatePositionUpdate newOption manipulatePosition) dialog
+
+        SaveOption ->
+            let
+                newOptions : Maybe (List DialogOption)
+                newOptions =
+                    Maybe.map
+                        (\eOp ->
+                            List.map
+                                (\d ->
+                                    if eOp.option == d then
+                                        editedDialogOptionToDialogOption eOp
+
+                                    else
+                                        d
+                                )
+                                dialog.options
+                        )
+                        (editedDialog_editedOption.getOption dialog)
+            in
+            case newOptions of
+                Nothing ->
+                    dialog
+
+                Just nd ->
+                    lens_options.set nd dialog
+                        |> lens_editedOption.set Nothing
+
 
 updateEditedOption : OptionEditAction -> EditedOption -> EditedOption
 updateEditedOption optionEditAction editedOption =
     case optionEditAction of
         OptionTextEdit msg ->
+            let
+                _ =
+                    Debug.log "OTE" ( msg, optionEditAction, editedOption )
+            in
             Lens.modify lens_text (ParsedEditable.update msg) editedOption
 
         OptionConditionEdit msg ->
@@ -310,6 +503,64 @@ updateEditedOption optionEditAction editedOption =
 
         OptionConditionAdd ->
             editedOption_condition.set (ParsedEditable.init (Literal <| Number 1) parserExpression stringifyExpression) editedOption
+
+        OptionActionStartEdit dialogAction ->
+            editedOption_editedAction.set
+                { action = dialogAction
+                , editedActionUI = dialogActionToEditedAction dialogAction
+                }
+                editedOption
+
+        OptionActionEditAction actionEditAction ->
+            Optional.modify editedOption_editedAction (updateEditedAction actionEditAction) editedOption
+
+        SaveAction ->
+            let
+                newActions =
+                    Maybe.map
+                        (\eA ->
+                            List.map
+                                (\v ->
+                                    if eA.action == v then
+                                        editedActionToDialogAction eA
+
+                                    else
+                                        v
+                                )
+                                editedOption.actions
+                        )
+                        (editedOption_editedAction.getOption editedOption)
+            in
+            case newActions of
+                Nothing ->
+                    editedOption
+
+                Just neo ->
+                    { editedOption | actions = neo }
+                        |> editedOption_mEditedAction.set Nothing
+                        |> Debug.log "EO"
+
+        ActionEdit actionEditAction ->
+            Optional.modify editedOption_editedAction (updateEditedAction actionEditAction) editedOption
+
+
+updateEditedAction : ActionEditAction -> EditedAction -> EditedAction
+updateEditedAction actionEditAction editedAction =
+    case actionEditAction of
+        SelectActionType kind ->
+            { editedAction | editedActionUI = initEditedAction kind }
+
+        EditGoToText string ->
+            { editedAction
+                | editedActionUI =
+                    editedAction_goTo.reverseGet string
+            }
+
+        EditScreept msg ->
+            { editedAction
+                | editedActionUI =
+                    Prism.modify editedAction_screept (ParsedEditable.update msg) editedAction.editedActionUI
+            }
 
 
 newDialog : Dialog
@@ -390,17 +641,7 @@ viewDialog model i dialog =
                 _ ->
                     div [] (List.indexedMap (viewOption Nothing False) dialog.options)
             ]
-        , let
-            enabled : Bool
-            enabled =
-                True
-
-            --Maybe.map2 (\id t -> ParsedEditable.isChanged t || id /= dialog.id)
-            --    (model_id.getOption model)
-            --    (model_text.getOption model)
-            --    |> Maybe.withDefault False
-          in
-          button [ disabled <| not enabled, onClick <| Save ] [ text "Save" ]
+        , button [ onClick <| Save ] [ text "Save" ]
         , button [ onClick <| StartDialogEdit dialog ] [ text "EDIT" ]
         , button [ onClick <| DialogsManipulation <| DeletePosition i ] [ text "Delete" ]
         , button
@@ -438,26 +679,36 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
             div [ class "de-dialog-option" ]
                 [ div []
                     [ text "text: "
-                    , ParsedEditable.view editedOption.text |> Html.map (OptionConditionEdit >> OptionEdit)
+                    , ParsedEditable.view editedOption.text |> Html.map (OptionTextEdit >> OptionEdit >> DialogEdit)
                     ]
                 , div []
                     [ text "condition: "
                     , case editedOption.condition of
                         Just condition ->
                             div []
-                                [ ParsedEditable.view condition |> Html.map (OptionConditionEdit >> OptionEdit)
-                                , button [ onClick <| OptionEdit OptionConditionRemove ] [ text "Remove condition" ]
+                                [ ParsedEditable.view condition |> Html.map (OptionConditionEdit >> OptionEdit >> DialogEdit)
+                                , button [ onClick <| DialogEdit <| OptionEdit OptionConditionRemove ] [ text "Remove condition" ]
                                 ]
 
                         Nothing ->
                             div []
                                 [ text "n/a"
-                                , button [ onClick <| OptionEdit OptionConditionAdd ] [ text "Add condition" ]
+                                , button [ onClick <| DialogEdit <| OptionEdit <| OptionConditionAdd ] [ text "Add condition" ]
                                 ]
                     ]
-                , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
                 , div []
-                    [ button [ onClick SaveOption ] [ text "Save Option" ]
+                    [ text "actions:"
+                    , div []
+                        (case editedOption.editedAction of
+                            Nothing ->
+                                List.map viewAction editedOption.actions
+
+                            Just ea ->
+                                List.map (viewActionEdited ea) editedOption.actions
+                        )
+                    ]
+                , div []
+                    [ button [ onClick <| DialogEdit SaveOption ] [ text "Save Option" ]
                     ]
                 ]
 
@@ -468,19 +719,48 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
                 , div [] [ text "actions:", div [] (List.map viewAction dialogOption.actions) ]
                 , if isDialogEditing then
                     div []
-                        [ button [ onClick <| OptionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
-                        , button [ onClick <| OptionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
-                        , button [ onClick <| OptionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
-                        , button [ onClick <| OptionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
-                        , button [ onClick <| StartOptionEdit dialogOption ] [ text "Edit Option" ]
+                        [ button [ onClick <| DialogEdit <| OptionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
+                        , button [ onClick <| DialogEdit <| OptionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
+                        , button [ onClick <| DialogEdit <| OptionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
+                        , button [ onClick <| DialogEdit <| OptionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
                         ]
 
                   else
                     text ""
+                , button [ onClick <| DialogEdit <| StartOptionEdit dialogOption ] [ text "Edit Option" ]
                 ]
 
 
-viewAction : DialogAction -> Html msg
+viewActionEdited : EditedAction -> DialogAction -> Html Msg
+viewActionEdited editedAction da =
+    if editedAction.action /= da then
+        viewAction da
+
+    else
+        div []
+            [ case editedAction.editedActionUI of
+                EAGoBack ->
+                    text "Go back"
+
+                _ ->
+                    button [ onClick <| DialogEdit <| OptionEdit <| OptionActionEditAction <| SelectActionType ATGoBack ] [ text "Go Back" ]
+            , case editedAction.editedActionUI of
+                EAGo goTo ->
+                    span [] [ text "GoTo", input [ value goTo, onInput (DialogEdit << OptionEdit << OptionActionEditAction << EditGoToText) ] [] ]
+
+                _ ->
+                    button [ onClick <| DialogEdit <| OptionEdit <| OptionActionEditAction <| SelectActionType ATGo ] [ text "Go to .." ]
+            , case editedAction.editedActionUI of
+                EAScreept screept ->
+                    ParsedEditable.view screept |> Html.map (EditScreept >> OptionActionEditAction >> OptionEdit >> DialogEdit)
+
+                _ ->
+                    button [ onClick <| DialogEdit <| OptionEdit <| OptionActionEditAction <| SelectActionType ATScreept ] [ text "Screept" ]
+            , button [ onClick <| DialogEdit <| OptionEdit <| SaveAction ] [ text "Save Action" ]
+            ]
+
+
+viewAction : DialogAction -> Html Msg
 viewAction dialogAction =
     div []
         [ text <|
@@ -505,6 +785,7 @@ viewAction dialogAction =
 
                 Exit string ->
                     "EXIT " ++ string
+        , button [ onClick <| DialogEdit <| OptionEdit <| OptionActionStartEdit dialogAction ] [ text "Edit Action" ]
         ]
 
 

@@ -9504,15 +9504,6 @@ var $author$project$DialogGame$update = F2(
 				{gameState: gs}),
 			code);
 	});
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm$core$Result$toMaybe = function (result) {
 	if (result.$ === 'Ok') {
 		var v = result.a;
@@ -9534,19 +9525,6 @@ var $author$project$ParsedEditable$model_new = {
 				});
 		})
 };
-var $author$project$DialogGameEditor$editedDialogOptionToDialogOption = function (editableOption) {
-	var _v0 = $author$project$ParsedEditable$model_new.getOption(editableOption.text);
-	if (_v0.$ === 'Just') {
-		var text = _v0.a;
-		return {
-			actions: editableOption.actions,
-			condition: A2($elm$core$Maybe$andThen, $author$project$ParsedEditable$model_new.getOption, editableOption.condition),
-			text: text
-		};
-	} else {
-		return editableOption.option;
-	}
-};
 var $author$project$DialogGameEditor$editedDialogToDialog = function (editableDialog) {
 	var _v0 = $author$project$ParsedEditable$model_new.getOption(editableDialog.text);
 	if (_v0.$ === 'Just') {
@@ -9556,6 +9534,27 @@ var $author$project$DialogGameEditor$editedDialogToDialog = function (editableDi
 		return editableDialog.dialog;
 	}
 };
+var $elm_community$list_extra$List$Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var first = list.a;
+				var rest = list.b;
+				if (predicate(first)) {
+					return $elm$core$Maybe$Just(first);
+				} else {
+					var $temp$predicate = predicate,
+						$temp$list = rest;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue find;
+				}
+			}
+		}
+	});
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -9819,95 +9818,40 @@ var $author$project$DialogGameEditor$manipulatePositionUpdate = F3(
 				return A3($author$project$DialogGameEditor$insertAt, i, newObject, list);
 		}
 	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
 			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
 			}
 		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
 	});
 var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
 	function (get, set) {
 		return {get: get, set: set};
 	});
-var $author$project$DialogGameEditor$editedDialog_dialog = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.dialog;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{dialog: s});
-		}));
-var $author$project$DialogGameEditor$model_editedDialog = {
-	getOption: function ($) {
-		return $.editedDialog;
-	},
-	set: F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{
-					editedDialog: $elm$core$Maybe$Just(s)
-				});
-		})
-};
-var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
-	function (getOption, set) {
-		return {getOption: getOption, set: set};
-	});
-var $arturopala$elm_monocle$Monocle$Optional$flip = F3(
-	function (f, b, a) {
-		return A2(f, a, b);
-	});
-var $arturopala$elm_monocle$Monocle$Optional$modifyOption = F2(
-	function (opt, fx) {
-		var mf = function (a) {
-			return A2(
-				$elm$core$Maybe$map,
-				A2(
-					$elm$core$Basics$composeR,
-					fx,
-					A2($arturopala$elm_monocle$Monocle$Optional$flip, opt.set, a)),
-				opt.getOption(a));
-		};
-		return mf;
-	});
-var $arturopala$elm_monocle$Monocle$Optional$modify = F2(
-	function (opt, fx) {
-		var mf = function (a) {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				a,
-				A3($arturopala$elm_monocle$Monocle$Optional$modifyOption, opt, fx, a));
-		};
-		return mf;
-	});
-var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
-	function (inner, outer) {
-		var set = function (c) {
-			return A2(
-				$arturopala$elm_monocle$Monocle$Optional$modify,
-				outer,
-				inner.set(c));
-		};
-		var getOption = A2(
-			$elm$core$Basics$composeR,
-			outer.getOption,
-			$elm$core$Maybe$map(inner.get));
-		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
-	});
-var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
 var $arturopala$elm_monocle$Monocle$Lens$compose = F2(
 	function (outer, inner) {
 		var set = F2(
@@ -9954,6 +9898,132 @@ var $author$project$DialogGameEditor$model_dialogs = A2(
 					{dialogs: s});
 			})),
 	$author$project$DialogGameEditor$model_gameDefinition);
+var $author$project$DialogGameEditor$model_editedDialog = {
+	getOption: function ($) {
+		return $.editedDialog;
+	},
+	set: F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedDialog: $elm$core$Maybe$Just(s)
+				});
+		})
+};
+var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
+	function (lens, f) {
+		var mf = function (a) {
+			return function (b) {
+				return A2(lens.set, b, a);
+			}(
+				f(
+					lens.get(a)));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Optional$flip = F3(
+	function (f, b, a) {
+		return A2(f, a, b);
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modifyOption = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$map,
+				A2(
+					$elm$core$Basics$composeR,
+					fx,
+					A2($arturopala$elm_monocle$Monocle$Optional$flip, opt.set, a)),
+				opt.getOption(a));
+		};
+		return mf;
+	});
+var $arturopala$elm_monocle$Monocle$Optional$modify = F2(
+	function (opt, fx) {
+		var mf = function (a) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				a,
+				A3($arturopala$elm_monocle$Monocle$Optional$modifyOption, opt, fx, a));
+		};
+		return mf;
+	});
+var $author$project$DialogGameEditor$newDialog = {
+	id: '',
+	options: _List_Nil,
+	text: $author$project$ScreeptV2$Literal(
+		$author$project$ScreeptV2$Text(''))
+};
+var $author$project$DialogGameEditor$editedDialog_dialog = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.dialog;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{dialog: s});
+		}));
+var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
+	function (getOption, set) {
+		return {getOption: getOption, set: set};
+	});
+var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
+	function (inner, outer) {
+		var set = function (c) {
+			return A2(
+				$arturopala$elm_monocle$Monocle$Optional$modify,
+				outer,
+				inner.set(c));
+		};
+		var getOption = A2(
+			$elm$core$Basics$composeR,
+			outer.getOption,
+			$elm$core$Maybe$map(inner.get));
+		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
+	});
+var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
+var $author$project$DialogGameEditor$startEditingDialog = F2(
+	function (dialog, model) {
+		return _Utils_eq(
+			$author$project$DialogGameEditor$model_Dialog.getOption(model),
+			$elm$core$Maybe$Just(dialog)) ? model : _Utils_update(
+			model,
+			{
+				editedDialog: $elm$core$Maybe$Just(
+					{
+						dialog: dialog,
+						editedOption: $elm$core$Maybe$Nothing,
+						id: dialog.id,
+						options: dialog.options,
+						text: A3($author$project$ParsedEditable$init, dialog.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
+					})
+			});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$DialogGameEditor$editedDialogOptionToDialogOption = function (editableOption) {
+	var _v0 = $author$project$ParsedEditable$model_new.getOption(editableOption.text);
+	if (_v0.$ === 'Just') {
+		var text = _v0.a;
+		return {
+			actions: editableOption.actions,
+			condition: A2($elm$core$Maybe$andThen, $author$project$ParsedEditable$model_new.getOption, editableOption.condition),
+			text: text
+		};
+	} else {
+		return editableOption.option;
+	}
+};
 var $author$project$DialogGameEditor$editedDialog_editedOption = A2(
 	$arturopala$elm_monocle$Monocle$Optional$Optional,
 	function ($) {
@@ -9967,88 +10037,17 @@ var $author$project$DialogGameEditor$editedDialog_editedOption = A2(
 					editedOption: $elm$core$Maybe$Just(s)
 				});
 		}));
-var $arturopala$elm_monocle$Monocle$Optional$compose = F2(
-	function (outer, inner) {
-		var set = F2(
-			function (c, a) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					a,
-					A2(
-						$elm$core$Maybe$map,
-						A2(
-							$elm$core$Basics$composeR,
-							inner.set(c),
-							A2($arturopala$elm_monocle$Monocle$Optional$flip, outer.set, a)),
-						outer.getOption(a)));
-			});
-		var getOption = function (a) {
-			var _v0 = outer.getOption(a);
-			if (_v0.$ === 'Just') {
-				var x = _v0.a;
-				return inner.getOption(x);
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		};
-		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
-	});
-var $arturopala$elm_monocle$Monocle$Compose$optionalWithOptional = F2(
-	function (inner, outer) {
-		return A2($arturopala$elm_monocle$Monocle$Optional$compose, outer, inner);
-	});
-var $author$project$DialogGameEditor$model_editedOption = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithOptional, $author$project$DialogGameEditor$editedDialog_editedOption, $author$project$DialogGameEditor$model_editedDialog);
-var $author$project$DialogGameEditor$model_editedOptionOption = A2(
-	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.option;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{option: s});
-			})),
-	$author$project$DialogGameEditor$model_editedOption);
-var $author$project$DialogGameEditor$model_options = A2(
-	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
-	A2(
-		$arturopala$elm_monocle$Monocle$Lens$Lens,
-		function ($) {
-			return $.options;
-		},
-		F2(
-			function (s, m) {
-				return _Utils_update(
-					m,
-					{options: s});
-			})),
-	$author$project$DialogGameEditor$model_editedDialog);
-var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
-	function (lens, f) {
-		var mf = function (a) {
-			return function (b) {
-				return A2(lens.set, b, a);
-			}(
-				f(
-					lens.get(a)));
-		};
-		return mf;
-	});
-var $author$project$DialogGameEditor$newDialog = {
-	id: '',
-	options: _List_Nil,
-	text: $author$project$ScreeptV2$Literal(
-		$author$project$ScreeptV2$Text(''))
-};
-var $author$project$DialogGameEditor$newOption = {
-	actions: _List_Nil,
-	condition: $elm$core$Maybe$Nothing,
-	text: $author$project$ScreeptV2$Literal(
-		$author$project$ScreeptV2$Text(''))
-};
+var $author$project$DialogGameEditor$lens_editedOption = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.editedOption;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{editedOption: s});
+		}));
 var $author$project$DialogGameEditor$lens_id = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
 	function ($) {
@@ -10059,6 +10058,17 @@ var $author$project$DialogGameEditor$lens_id = A2(
 			return _Utils_update(
 				m,
 				{id: s});
+		}));
+var $author$project$DialogGameEditor$lens_options = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.options;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{options: s});
 		}));
 var $author$project$DialogGameEditor$lens_text = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
@@ -10071,6 +10081,43 @@ var $author$project$DialogGameEditor$lens_text = A2(
 				m,
 				{text: s});
 		}));
+var $author$project$DialogGameEditor$newOption = {
+	actions: _List_Nil,
+	condition: $elm$core$Maybe$Nothing,
+	text: $author$project$ScreeptV2$Literal(
+		$author$project$ScreeptV2$Text(''))
+};
+var $author$project$DialogGameEditor$lens_option = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.option;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{option: s});
+		}));
+var $author$project$DialogGameEditor$startEditingOption = F2(
+	function (dialogOption, dialog) {
+		return _Utils_eq(
+			A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_option, $author$project$DialogGameEditor$editedDialog_editedOption).getOption(dialog),
+			$elm$core$Maybe$Just(dialogOption)) ? dialog : A2(
+			$author$project$DialogGameEditor$editedDialog_editedOption.set,
+			{
+				actions: dialogOption.actions,
+				condition: A2(
+					$elm$core$Maybe$map,
+					function (condition) {
+						return A3($author$project$ParsedEditable$init, condition, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression);
+					},
+					dialogOption.condition),
+				editedAction: $elm$core$Maybe$Nothing,
+				option: dialogOption,
+				text: A3($author$project$ParsedEditable$init, dialogOption.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
+			},
+			dialog);
+	});
 var $author$project$ParsedEditable$revert = function (model) {
 	return _Utils_update(
 		model,
@@ -10107,22 +10154,62 @@ var $author$project$ParsedEditable$update = F2(
 				return $author$project$ParsedEditable$revert(model);
 		}
 	});
-var $author$project$DialogGameEditor$updateEditedDialog = F2(
-	function (dialogEditAction, dialog) {
-		if (dialogEditAction.$ === 'DialogTextEdit') {
-			var msg = dialogEditAction.a;
-			return A3(
-				$arturopala$elm_monocle$Monocle$Lens$modify,
-				$author$project$DialogGameEditor$lens_text,
-				function (m) {
-					return A2($author$project$ParsedEditable$update, msg, m);
-				},
-				dialog);
-		} else {
-			var string = dialogEditAction.a;
-			return A2($author$project$DialogGameEditor$lens_id.set, string, dialog);
-		}
-	});
+var $author$project$DialogGameEditor$EAGo = function (a) {
+	return {$: 'EAGo', a: a};
+};
+var $author$project$DialogGameEditor$EAGoBack = {$: 'EAGoBack'};
+var $author$project$DialogGameEditor$EAScreept = function (a) {
+	return {$: 'EAScreept', a: a};
+};
+var $author$project$ScreeptV2$stringifyStatement = function (statement) {
+	return A2($author$project$ScreeptV2$stringifyPrettyStatement, 0, statement);
+};
+var $author$project$DialogGameEditor$dialogActionToEditedAction = function (dialogAction) {
+	switch (dialogAction.$) {
+		case 'GoAction':
+			var dialogId = dialogAction.a;
+			return $author$project$DialogGameEditor$EAGo(dialogId);
+		case 'GoBackAction':
+			return $author$project$DialogGameEditor$EAGoBack;
+		case 'Message':
+			var expression = dialogAction.a;
+			return $author$project$DialogGameEditor$EAGoBack;
+		case 'Screept':
+			var statement = dialogAction.a;
+			return $author$project$DialogGameEditor$EAScreept(
+				A3($author$project$ParsedEditable$init, statement, $author$project$ScreeptV2$parserStatement, $author$project$ScreeptV2$stringifyStatement));
+		case 'ConditionalAction':
+			var expression = dialogAction.a;
+			var succes = dialogAction.b;
+			var failure = dialogAction.c;
+			return $author$project$DialogGameEditor$EAGoBack;
+		case 'ActionBlock':
+			var dialogActions = dialogAction.a;
+			return $author$project$DialogGameEditor$EAGoBack;
+		default:
+			var string = dialogAction.a;
+			return $author$project$DialogGameEditor$EAGoBack;
+	}
+};
+var $author$project$DialogGameEditor$editedActionToDialogAction = function (action) {
+	var _v0 = action.editedActionUI;
+	switch (_v0.$) {
+		case 'EAGoBack':
+			return $author$project$DialogGame$GoBackAction;
+		case 'EAGo':
+			var string = _v0.a;
+			return $author$project$DialogGame$GoAction(string);
+		default:
+			var statement = _v0.a;
+			var _v1 = $author$project$ParsedEditable$model_new.getOption(statement);
+			if (_v1.$ === 'Just') {
+				var stmt = _v1.a;
+				return $author$project$DialogGame$Screept(stmt);
+			} else {
+				return action.action;
+			}
+	}
+};
 var $author$project$DialogGameEditor$editedOption_condition = A2(
 	$arturopala$elm_monocle$Monocle$Optional$Optional,
 	function ($) {
@@ -10136,6 +10223,19 @@ var $author$project$DialogGameEditor$editedOption_condition = A2(
 					condition: $elm$core$Maybe$Just(s)
 				});
 		}));
+var $author$project$DialogGameEditor$editedOption_editedAction = A2(
+	$arturopala$elm_monocle$Monocle$Optional$Optional,
+	function ($) {
+		return $.editedAction;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedAction: $elm$core$Maybe$Just(s)
+				});
+		}));
 var $author$project$DialogGameEditor$editedOption_mCondition = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
 	function ($) {
@@ -10147,11 +10247,111 @@ var $author$project$DialogGameEditor$editedOption_mCondition = A2(
 				m,
 				{condition: s});
 		}));
+var $author$project$DialogGameEditor$editedOption_mEditedAction = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.editedAction;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{editedAction: s});
+		}));
+var $author$project$DialogGameEditor$editedAction_goTo = {
+	getOption: function (ea) {
+		if (ea.$ === 'EAGo') {
+			var s = ea.a;
+			return $elm$core$Maybe$Just(s);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	},
+	reverseGet: $author$project$DialogGameEditor$EAGo
+};
+var $author$project$DialogGameEditor$editedAction_screept = {
+	getOption: function (ea) {
+		if (ea.$ === 'EAScreept') {
+			var s = ea.a;
+			return $elm$core$Maybe$Just(s);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	},
+	reverseGet: $author$project$DialogGameEditor$EAScreept
+};
+var $author$project$DialogGameEditor$initEditedAction = function (kind) {
+	switch (kind.$) {
+		case 'ATGoBack':
+			return $author$project$DialogGameEditor$EAGoBack;
+		case 'ATGo':
+			return $author$project$DialogGameEditor$EAGo('');
+		default:
+			return $author$project$DialogGameEditor$EAScreept(
+				A3(
+					$author$project$ParsedEditable$init,
+					$author$project$ScreeptV2$Block(_List_Nil),
+					$author$project$ScreeptV2$parserStatement,
+					$author$project$ScreeptV2$stringifyStatement));
+	}
+};
+var $arturopala$elm_monocle$Monocle$Prism$modifyOption = F2(
+	function (prism, f) {
+		return A2(
+			$elm$core$Basics$composeR,
+			prism.getOption,
+			$elm$core$Maybe$map(
+				A2($elm$core$Basics$composeR, f, prism.reverseGet)));
+	});
+var $arturopala$elm_monocle$Monocle$Prism$modify = F2(
+	function (prism, f) {
+		var m = function (x) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				x,
+				A3($arturopala$elm_monocle$Monocle$Prism$modifyOption, prism, f, x));
+		};
+		return m;
+	});
+var $author$project$DialogGameEditor$updateEditedAction = F2(
+	function (actionEditAction, editedAction) {
+		switch (actionEditAction.$) {
+			case 'SelectActionType':
+				var kind = actionEditAction.a;
+				return _Utils_update(
+					editedAction,
+					{
+						editedActionUI: $author$project$DialogGameEditor$initEditedAction(kind)
+					});
+			case 'EditGoToText':
+				var string = actionEditAction.a;
+				return _Utils_update(
+					editedAction,
+					{
+						editedActionUI: $author$project$DialogGameEditor$editedAction_goTo.reverseGet(string)
+					});
+			default:
+				var msg = actionEditAction.a;
+				return _Utils_update(
+					editedAction,
+					{
+						editedActionUI: A3(
+							$arturopala$elm_monocle$Monocle$Prism$modify,
+							$author$project$DialogGameEditor$editedAction_screept,
+							$author$project$ParsedEditable$update(msg),
+							editedAction.editedActionUI)
+					});
+		}
+	});
 var $author$project$DialogGameEditor$updateEditedOption = F2(
 	function (optionEditAction, editedOption) {
 		switch (optionEditAction.$) {
 			case 'OptionTextEdit':
 				var msg = optionEditAction.a;
+				var _v1 = A2(
+					$elm$core$Debug$log,
+					'OTE',
+					_Utils_Tuple3(msg, optionEditAction, editedOption));
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$lens_text,
@@ -10166,7 +10366,7 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 					editedOption);
 			case 'OptionConditionRemove':
 				return A2($author$project$DialogGameEditor$editedOption_mCondition.set, $elm$core$Maybe$Nothing, editedOption);
-			default:
+			case 'OptionConditionAdd':
 				return A2(
 					$author$project$DialogGameEditor$editedOption_condition.set,
 					A3(
@@ -10176,6 +10376,131 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 						$author$project$ScreeptV2$parserExpression,
 						$author$project$ScreeptV2$stringifyExpression),
 					editedOption);
+			case 'OptionActionStartEdit':
+				var dialogAction = optionEditAction.a;
+				return A2(
+					$author$project$DialogGameEditor$editedOption_editedAction.set,
+					{
+						action: dialogAction,
+						editedActionUI: $author$project$DialogGameEditor$dialogActionToEditedAction(dialogAction)
+					},
+					editedOption);
+			case 'OptionActionEditAction':
+				var actionEditAction = optionEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$editedOption_editedAction,
+					$author$project$DialogGameEditor$updateEditedAction(actionEditAction),
+					editedOption);
+			case 'SaveAction':
+				var newActions = A2(
+					$elm$core$Maybe$map,
+					function (eA) {
+						return A2(
+							$elm$core$List$map,
+							function (v) {
+								return _Utils_eq(eA.action, v) ? $author$project$DialogGameEditor$editedActionToDialogAction(eA) : v;
+							},
+							editedOption.actions);
+					},
+					$author$project$DialogGameEditor$editedOption_editedAction.getOption(editedOption));
+				if (newActions.$ === 'Nothing') {
+					return editedOption;
+				} else {
+					var neo = newActions.a;
+					return A2(
+						$elm$core$Debug$log,
+						'EO',
+						A2(
+							$author$project$DialogGameEditor$editedOption_mEditedAction.set,
+							$elm$core$Maybe$Nothing,
+							_Utils_update(
+								editedOption,
+								{actions: neo})));
+				}
+			default:
+				var actionEditAction = optionEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$editedOption_editedAction,
+					$author$project$DialogGameEditor$updateEditedAction(actionEditAction),
+					editedOption);
+		}
+	});
+var $author$project$DialogGameEditor$updateEditedDialog = F2(
+	function (dialogEditAction, dialog) {
+		switch (dialogEditAction.$) {
+			case 'DialogTextEdit':
+				var msg = dialogEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Lens$modify,
+					$author$project$DialogGameEditor$lens_text,
+					function (m) {
+						return A2($author$project$ParsedEditable$update, msg, m);
+					},
+					dialog);
+			case 'DialogIdEdit':
+				var string = dialogEditAction.a;
+				return A2($author$project$DialogGameEditor$lens_id.set, string, dialog);
+			case 'StartOptionEdit':
+				var dialogOption = dialogEditAction.a;
+				return A2($author$project$DialogGameEditor$startEditingOption, dialogOption, dialog);
+			case 'OptionEdit':
+				var optionEditAction = dialogEditAction.a;
+				var d = function () {
+					if (optionEditAction.$ === 'OptionActionStartEdit') {
+						var dialogAction = optionEditAction.a;
+						return A2(
+							$elm$core$Maybe$withDefault,
+							dialog,
+							A2(
+								$elm$core$Maybe$map,
+								function (x) {
+									return A2($author$project$DialogGameEditor$startEditingOption, x, dialog);
+								},
+								A2(
+									$elm_community$list_extra$List$Extra$find,
+									function (o) {
+										return A2($elm$core$List$member, dialogAction, o.actions);
+									},
+									dialog.options)));
+					} else {
+						return dialog;
+					}
+				}();
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$editedDialog_editedOption,
+					$author$project$DialogGameEditor$updateEditedOption(optionEditAction),
+					d);
+			case 'OptionsManipulation':
+				var manipulatePosition = dialogEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Lens$modify,
+					$author$project$DialogGameEditor$lens_options,
+					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
+					dialog);
+			default:
+				var newOptions = A2(
+					$elm$core$Maybe$map,
+					function (eOp) {
+						return A2(
+							$elm$core$List$map,
+							function (d) {
+								return _Utils_eq(eOp.option, d) ? $author$project$DialogGameEditor$editedDialogOptionToDialogOption(eOp) : d;
+							},
+							dialog.options);
+					},
+					$author$project$DialogGameEditor$editedDialog_editedOption.getOption(dialog));
+				if (newOptions.$ === 'Nothing') {
+					return dialog;
+				} else {
+					var nd = newOptions.a;
+					return A2(
+						$author$project$DialogGameEditor$lens_editedOption.set,
+						$elm$core$Maybe$Nothing,
+						A2($author$project$DialogGameEditor$lens_options.set, nd, dialog));
+				}
 		}
 	});
 var $author$project$DialogGameEditor$update = F2(
@@ -10183,20 +10508,7 @@ var $author$project$DialogGameEditor$update = F2(
 		switch (msg.$) {
 			case 'StartDialogEdit':
 				var dialog = msg.a;
-				return _Utils_eq(
-					$author$project$DialogGameEditor$model_Dialog.getOption(model),
-					$elm$core$Maybe$Just(dialog)) ? model : _Utils_update(
-					model,
-					{
-						editedDialog: $elm$core$Maybe$Just(
-							{
-								dialog: dialog,
-								editedOption: $elm$core$Maybe$Nothing,
-								id: dialog.id,
-								options: dialog.options,
-								text: A3($author$project$ParsedEditable$init, dialog.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
-							})
-					});
+				return A2($author$project$DialogGameEditor$startEditingDialog, dialog, model);
 			case 'Save':
 				var newDialogs = A2(
 					$elm$core$Maybe$map,
@@ -10213,7 +10525,12 @@ var $author$project$DialogGameEditor$update = F2(
 					return model;
 				} else {
 					var nd = newDialogs.a;
-					return A2($author$project$DialogGameEditor$model_dialogs.set, nd, model);
+					return function (m) {
+						return _Utils_update(
+							m,
+							{editedDialog: $elm$core$Maybe$Nothing});
+					}(
+						A2($author$project$DialogGameEditor$model_dialogs.set, nd, model));
 				}
 			case 'Cancel':
 				return model;
@@ -10224,65 +10541,34 @@ var $author$project$DialogGameEditor$update = F2(
 					$author$project$DialogGameEditor$model_dialogs,
 					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
 					model);
-			case 'OptionsManipulation':
-				var manipulatePosition = msg.a;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Optional$modify,
-					$author$project$DialogGameEditor$model_options,
-					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
-					model);
-			case 'DialogEdit':
+			default:
 				var dialogAction = msg.a;
+				var m = function () {
+					if (dialogAction.$ === 'StartOptionEdit') {
+						var dialogOption = dialogAction.a;
+						return A2(
+							$elm$core$Maybe$withDefault,
+							model,
+							A2(
+								$elm$core$Maybe$map,
+								function (x) {
+									return A2($author$project$DialogGameEditor$startEditingDialog, x, model);
+								},
+								A2(
+									$elm_community$list_extra$List$Extra$find,
+									function (d) {
+										return A2($elm$core$List$member, dialogOption, d.options);
+									},
+									model.gameDefinition.dialogs)));
+					} else {
+						return model;
+					}
+				}();
 				return A3(
 					$arturopala$elm_monocle$Monocle$Optional$modify,
 					$author$project$DialogGameEditor$model_editedDialog,
 					$author$project$DialogGameEditor$updateEditedDialog(dialogAction),
-					model);
-			case 'StartOptionEdit':
-				var dialogOption = msg.a;
-				return _Utils_eq(
-					$author$project$DialogGameEditor$model_editedOptionOption.getOption(model),
-					$elm$core$Maybe$Just(dialogOption)) ? model : A2(
-					$author$project$DialogGameEditor$model_editedOption.set,
-					{
-						actions: dialogOption.actions,
-						condition: A2(
-							$elm$core$Maybe$map,
-							function (condition) {
-								return A3($author$project$ParsedEditable$init, condition, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression);
-							},
-							dialogOption.condition),
-						option: dialogOption,
-						text: A3($author$project$ParsedEditable$init, dialogOption.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
-					},
-					model);
-			case 'OptionEdit':
-				var optionEditAction = msg.a;
-				return A3(
-					$arturopala$elm_monocle$Monocle$Optional$modify,
-					$author$project$DialogGameEditor$model_editedOption,
-					$author$project$DialogGameEditor$updateEditedOption(optionEditAction),
-					model);
-			default:
-				var newOptions = A3(
-					$elm$core$Maybe$map2,
-					F2(
-						function (eOp, ed) {
-							return A2(
-								$elm$core$List$map,
-								function (d) {
-									return _Utils_eq(eOp.option, d) ? $author$project$DialogGameEditor$editedDialogOptionToDialogOption(eOp) : d;
-								},
-								ed.options);
-						}),
-					$author$project$DialogGameEditor$model_editedOption.getOption(model),
-					$author$project$DialogGameEditor$model_editedDialog.getOption(model));
-				if (newOptions.$ === 'Nothing') {
-					return model;
-				} else {
-					var nd = newOptions.a;
-					return A2($author$project$DialogGameEditor$model_options.set, nd, model);
-				}
+					m);
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
@@ -10812,9 +11098,6 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
-var $author$project$ScreeptV2$stringifyStatement = function (statement) {
-	return A2($author$project$ScreeptV2$stringifyPrettyStatement, 0, statement);
-};
 var $author$project$DialogGame$encodeDialogAction = function (dialogAction) {
 	switch (dialogAction.$) {
 		case 'GoAction':
@@ -11188,12 +11471,18 @@ var $author$project$DialogGameEditor$OptionConditionRemove = {$: 'OptionConditio
 var $author$project$DialogGameEditor$OptionEdit = function (a) {
 	return {$: 'OptionEdit', a: a};
 };
+var $author$project$DialogGameEditor$OptionTextEdit = function (a) {
+	return {$: 'OptionTextEdit', a: a};
+};
 var $author$project$DialogGameEditor$OptionsManipulation = function (a) {
 	return {$: 'OptionsManipulation', a: a};
 };
 var $author$project$DialogGameEditor$SaveOption = {$: 'SaveOption'};
 var $author$project$DialogGameEditor$StartOptionEdit = function (a) {
 	return {$: 'StartOptionEdit', a: a};
+};
+var $author$project$DialogGameEditor$OptionActionStartEdit = function (a) {
+	return {$: 'OptionActionStartEdit', a: a};
 };
 var $author$project$DialogGameEditor$viewAction = function (dialogAction) {
 	return A2(
@@ -11227,9 +11516,159 @@ var $author$project$DialogGameEditor$viewAction = function (dialogAction) {
 							var string = dialogAction.a;
 							return 'EXIT ' + string;
 					}
-				}())
+				}()),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$DialogEdit(
+							$author$project$DialogGameEditor$OptionEdit(
+								$author$project$DialogGameEditor$OptionActionStartEdit(dialogAction))))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Edit Action')
+					]))
 			]));
 };
+var $author$project$DialogGameEditor$ATGo = {$: 'ATGo'};
+var $author$project$DialogGameEditor$ATGoBack = {$: 'ATGoBack'};
+var $author$project$DialogGameEditor$ATScreept = {$: 'ATScreept'};
+var $author$project$DialogGameEditor$EditGoToText = function (a) {
+	return {$: 'EditGoToText', a: a};
+};
+var $author$project$DialogGameEditor$EditScreept = function (a) {
+	return {$: 'EditScreept', a: a};
+};
+var $author$project$DialogGameEditor$OptionActionEditAction = function (a) {
+	return {$: 'OptionActionEditAction', a: a};
+};
+var $author$project$DialogGameEditor$SaveAction = {$: 'SaveAction'};
+var $author$project$DialogGameEditor$SelectActionType = function (a) {
+	return {$: 'SelectActionType', a: a};
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $author$project$DialogGameEditor$viewActionEdited = F2(
+	function (editedAction, da) {
+		return (!_Utils_eq(editedAction.action, da)) ? $author$project$DialogGameEditor$viewAction(da) : A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					function () {
+					var _v0 = editedAction.editedActionUI;
+					if (_v0.$ === 'EAGoBack') {
+						return $elm$html$Html$text('Go back');
+					} else {
+						return A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$OptionActionEditAction(
+												$author$project$DialogGameEditor$SelectActionType($author$project$DialogGameEditor$ATGoBack)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Go Back')
+								]));
+					}
+				}(),
+					function () {
+					var _v1 = editedAction.editedActionUI;
+					if (_v1.$ === 'EAGo') {
+						var goTo = _v1.a;
+						return A2(
+							$elm$html$Html$span,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('GoTo'),
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value(goTo),
+											$elm$html$Html$Events$onInput(
+											A2(
+												$elm$core$Basics$composeL,
+												A2(
+													$elm$core$Basics$composeL,
+													A2($elm$core$Basics$composeL, $author$project$DialogGameEditor$DialogEdit, $author$project$DialogGameEditor$OptionEdit),
+													$author$project$DialogGameEditor$OptionActionEditAction),
+												$author$project$DialogGameEditor$EditGoToText))
+										]),
+									_List_Nil)
+								]));
+					} else {
+						return A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$OptionActionEditAction(
+												$author$project$DialogGameEditor$SelectActionType($author$project$DialogGameEditor$ATGo)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Go to ..')
+								]));
+					}
+				}(),
+					function () {
+					var _v2 = editedAction.editedActionUI;
+					if (_v2.$ === 'EAScreept') {
+						var screept = _v2.a;
+						return A2(
+							$elm$html$Html$map,
+							A2(
+								$elm$core$Basics$composeR,
+								$author$project$DialogGameEditor$EditScreept,
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$DialogGameEditor$OptionActionEditAction,
+									A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionEdit, $author$project$DialogGameEditor$DialogEdit))),
+							$author$project$ParsedEditable$view(screept));
+					} else {
+						return A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$OptionActionEditAction(
+												$author$project$DialogGameEditor$SelectActionType($author$project$DialogGameEditor$ATScreept)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Screept')
+								]));
+					}
+				}(),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							$author$project$DialogGameEditor$DialogEdit(
+								$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$SaveAction)))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Save Action')
+						]))
+				]));
+	});
 var $author$project$DialogGameEditor$viewOption = F4(
 	function (mEditedOption, isDialogEditing, optionIndex, dialogOption) {
 		var isOptionEdited = A2(
@@ -11260,7 +11699,10 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								$elm$html$Html$text('text: '),
 								A2(
 								$elm$html$Html$map,
-								A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionConditionEdit, $author$project$DialogGameEditor$OptionEdit),
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$DialogGameEditor$OptionTextEdit,
+									A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionEdit, $author$project$DialogGameEditor$DialogEdit)),
 								$author$project$ParsedEditable$view(editedOption.text))
 							])),
 						A2(
@@ -11280,14 +11722,18 @@ var $author$project$DialogGameEditor$viewOption = F4(
 											[
 												A2(
 												$elm$html$Html$map,
-												A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionConditionEdit, $author$project$DialogGameEditor$OptionEdit),
+												A2(
+													$elm$core$Basics$composeR,
+													$author$project$DialogGameEditor$OptionConditionEdit,
+													A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$OptionEdit, $author$project$DialogGameEditor$DialogEdit)),
 												$author$project$ParsedEditable$view(condition)),
 												A2(
 												$elm$html$Html$button,
 												_List_fromArray(
 													[
 														$elm$html$Html$Events$onClick(
-														$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionRemove))
+														$author$project$DialogGameEditor$DialogEdit(
+															$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionRemove)))
 													]),
 												_List_fromArray(
 													[
@@ -11306,7 +11752,8 @@ var $author$project$DialogGameEditor$viewOption = F4(
 												_List_fromArray(
 													[
 														$elm$html$Html$Events$onClick(
-														$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionAdd))
+														$author$project$DialogGameEditor$DialogEdit(
+															$author$project$DialogGameEditor$OptionEdit($author$project$DialogGameEditor$OptionConditionAdd)))
 													]),
 												_List_fromArray(
 													[
@@ -11325,7 +11772,18 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								A2(
 								$elm$html$Html$div,
 								_List_Nil,
-								A2($elm$core$List$map, $author$project$DialogGameEditor$viewAction, dialogOption.actions))
+								function () {
+									var _v2 = editedOption.editedAction;
+									if (_v2.$ === 'Nothing') {
+										return A2($elm$core$List$map, $author$project$DialogGameEditor$viewAction, editedOption.actions);
+									} else {
+										var ea = _v2.a;
+										return A2(
+											$elm$core$List$map,
+											$author$project$DialogGameEditor$viewActionEdited(ea),
+											editedOption.actions);
+									}
+								}())
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -11336,7 +11794,8 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								$elm$html$Html$button,
 								_List_fromArray(
 									[
-										$elm$html$Html$Events$onClick($author$project$DialogGameEditor$SaveOption)
+										$elm$html$Html$Events$onClick(
+										$author$project$DialogGameEditor$DialogEdit($author$project$DialogGameEditor$SaveOption))
 									]),
 								_List_fromArray(
 									[
@@ -11393,8 +11852,9 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$OptionsManipulation(
-											A2($author$project$DialogGameEditor$MovePosition, optionIndex, -1)))
+										$author$project$DialogGameEditor$DialogEdit(
+											$author$project$DialogGameEditor$OptionsManipulation(
+												A2($author$project$DialogGameEditor$MovePosition, optionIndex, -1))))
 									]),
 								_List_fromArray(
 									[
@@ -11405,8 +11865,9 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$OptionsManipulation(
-											A2($author$project$DialogGameEditor$MovePosition, optionIndex, 1)))
+										$author$project$DialogGameEditor$DialogEdit(
+											$author$project$DialogGameEditor$OptionsManipulation(
+												A2($author$project$DialogGameEditor$MovePosition, optionIndex, 1))))
 									]),
 								_List_fromArray(
 									[
@@ -11417,8 +11878,9 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$OptionsManipulation(
-											$author$project$DialogGameEditor$DeletePosition(optionIndex)))
+										$author$project$DialogGameEditor$DialogEdit(
+											$author$project$DialogGameEditor$OptionsManipulation(
+												$author$project$DialogGameEditor$DeletePosition(optionIndex))))
 									]),
 								_List_fromArray(
 									[
@@ -11429,25 +11891,27 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$OptionsManipulation(
-											$author$project$DialogGameEditor$NewAt(optionIndex + 1)))
+										$author$project$DialogGameEditor$DialogEdit(
+											$author$project$DialogGameEditor$OptionsManipulation(
+												$author$project$DialogGameEditor$NewAt(optionIndex + 1))))
 									]),
 								_List_fromArray(
 									[
 										$elm$html$Html$text('New')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$StartOptionEdit(dialogOption))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Edit Option')
 									]))
-							])) : $elm$html$Html$text('')
+							])) : $elm$html$Html$text(''),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								$author$project$DialogGameEditor$DialogEdit(
+									$author$project$DialogGameEditor$StartOptionEdit(dialogOption)))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Edit Option')
+							]))
 					]));
 		}
 	});
@@ -11556,20 +12020,16 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 							}
 						}()
 						])),
-					function () {
-					var enabled = true;
-					return A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$disabled(!enabled),
-								$elm$html$Html$Events$onClick($author$project$DialogGameEditor$Save)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Save')
-							]));
-				}(),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($author$project$DialogGameEditor$Save)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Save')
+						])),
 					A2(
 					$elm$html$Html$button,
 					_List_fromArray(
