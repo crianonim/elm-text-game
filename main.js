@@ -10258,6 +10258,18 @@ var $author$project$DialogGameEditor$editedOption_mEditedAction = A2(
 				m,
 				{editedAction: s});
 		}));
+var $author$project$DialogGameEditor$lens_actions = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.actions;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{actions: s});
+		}));
+var $author$project$DialogGameEditor$newAction = $author$project$DialogGame$GoBackAction;
 var $author$project$DialogGameEditor$editedAction_goTo = {
 	getOption: function (ea) {
 		if (ea.$ === 'EAGo') {
@@ -10418,12 +10430,19 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 								editedOption,
 								{actions: neo})));
 				}
-			default:
+			case 'ActionEdit':
 				var actionEditAction = optionEditAction.a;
 				return A3(
 					$arturopala$elm_monocle$Monocle$Optional$modify,
 					$author$project$DialogGameEditor$editedOption_editedAction,
 					$author$project$DialogGameEditor$updateEditedAction(actionEditAction),
+					editedOption);
+			default:
+				var manipulatePositionAction = optionEditAction.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Lens$modify,
+					$author$project$DialogGameEditor$lens_actions,
+					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newAction, manipulatePositionAction),
 					editedOption);
 		}
 	});
@@ -11481,57 +11500,123 @@ var $author$project$DialogGameEditor$SaveOption = {$: 'SaveOption'};
 var $author$project$DialogGameEditor$StartOptionEdit = function (a) {
 	return {$: 'StartOptionEdit', a: a};
 };
+var $author$project$DialogGameEditor$ActionsManipulation = function (a) {
+	return {$: 'ActionsManipulation', a: a};
+};
 var $author$project$DialogGameEditor$OptionActionStartEdit = function (a) {
 	return {$: 'OptionActionStartEdit', a: a};
 };
-var $author$project$DialogGameEditor$viewAction = function (dialogAction) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(
-				function () {
-					switch (dialogAction.$) {
-						case 'Message':
-							var expr = dialogAction.a;
-							return 'Message: ' + $author$project$ScreeptV2$stringifyExpression(expr);
-						case 'GoAction':
-							var dialogId = dialogAction.a;
-							return 'Go: ' + dialogId;
-						case 'GoBackAction':
-							return 'GoBack';
-						case 'Screept':
-							var statement = dialogAction.a;
-							return 'Screept: ' + $author$project$ScreeptV2$stringifyStatement(statement);
-						case 'ConditionalAction':
-							var expression = dialogAction.a;
-							var success = dialogAction.b;
-							var failure = dialogAction.c;
-							return 'IF';
-						case 'ActionBlock':
-							var dialogActions = dialogAction.a;
-							return '[]';
-						default:
-							var string = dialogAction.a;
-							return 'EXIT ' + string;
-					}
-				}()),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick(
-						$author$project$DialogGameEditor$DialogEdit(
-							$author$project$DialogGameEditor$OptionEdit(
-								$author$project$DialogGameEditor$OptionActionStartEdit(dialogAction))))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Edit Action')
-					]))
-			]));
-};
+var $author$project$DialogGameEditor$viewAction = F3(
+	function (isEdited, optionIndex, dialogAction) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					function () {
+						switch (dialogAction.$) {
+							case 'Message':
+								var expr = dialogAction.a;
+								return 'Message: ' + $author$project$ScreeptV2$stringifyExpression(expr);
+							case 'GoAction':
+								var dialogId = dialogAction.a;
+								return 'Go: ' + dialogId;
+							case 'GoBackAction':
+								return 'GoBack';
+							case 'Screept':
+								var statement = dialogAction.a;
+								return 'Screept: ' + $author$project$ScreeptV2$stringifyStatement(statement);
+							case 'ConditionalAction':
+								var expression = dialogAction.a;
+								var success = dialogAction.b;
+								var failure = dialogAction.c;
+								return 'IF';
+							case 'ActionBlock':
+								var dialogActions = dialogAction.a;
+								return '[]';
+							default:
+								var string = dialogAction.a;
+								return 'EXIT ' + string;
+						}
+					}()),
+					isEdited ? A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$ActionsManipulation(
+												A2($author$project$DialogGameEditor$MovePosition, optionIndex, -1)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Move Up')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$ActionsManipulation(
+												A2($author$project$DialogGameEditor$MovePosition, optionIndex, 1)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Move Down')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$ActionsManipulation(
+												$author$project$DialogGameEditor$DeletePosition(optionIndex)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Delete')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$DialogGameEditor$DialogEdit(
+										$author$project$DialogGameEditor$OptionEdit(
+											$author$project$DialogGameEditor$ActionsManipulation(
+												$author$project$DialogGameEditor$NewAt(optionIndex + 1)))))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('New')
+								]))
+						])) : $elm$html$Html$text(''),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							$author$project$DialogGameEditor$DialogEdit(
+								$author$project$DialogGameEditor$OptionEdit(
+									$author$project$DialogGameEditor$OptionActionStartEdit(dialogAction))))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Edit Action')
+						]))
+				]));
+	});
 var $author$project$DialogGameEditor$ATGo = {$: 'ATGo'};
 var $author$project$DialogGameEditor$ATGoBack = {$: 'ATGoBack'};
 var $author$project$DialogGameEditor$ATScreept = {$: 'ATScreept'};
@@ -11553,9 +11638,9 @@ var $elm$core$Basics$composeL = F3(
 		return g(
 			f(x));
 	});
-var $author$project$DialogGameEditor$viewActionEdited = F2(
-	function (editedAction, da) {
-		return (!_Utils_eq(editedAction.action, da)) ? $author$project$DialogGameEditor$viewAction(da) : A2(
+var $author$project$DialogGameEditor$viewActionEdited = F3(
+	function (editedAction, i, da) {
+		return (!_Utils_eq(editedAction.action, da)) ? A3($author$project$DialogGameEditor$viewAction, true, i, da) : A2(
 			$elm$html$Html$div,
 			_List_Nil,
 			_List_fromArray(
@@ -11775,11 +11860,14 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								function () {
 									var _v2 = editedOption.editedAction;
 									if (_v2.$ === 'Nothing') {
-										return A2($elm$core$List$map, $author$project$DialogGameEditor$viewAction, editedOption.actions);
+										return A2(
+											$elm$core$List$indexedMap,
+											$author$project$DialogGameEditor$viewAction(true),
+											editedOption.actions);
 									} else {
 										var ea = _v2.a;
 										return A2(
-											$elm$core$List$map,
+											$elm$core$List$indexedMap,
 											$author$project$DialogGameEditor$viewActionEdited(ea),
 											editedOption.actions);
 									}
@@ -11840,7 +11928,10 @@ var $author$project$DialogGameEditor$viewOption = F4(
 								A2(
 								$elm$html$Html$div,
 								_List_Nil,
-								A2($elm$core$List$map, $author$project$DialogGameEditor$viewAction, dialogOption.actions))
+								A2(
+									$elm$core$List$indexedMap,
+									$author$project$DialogGameEditor$viewAction(false),
+									dialogOption.actions))
 							])),
 						isDialogEditing ? A2(
 						$elm$html$Html$div,
