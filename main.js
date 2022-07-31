@@ -10160,6 +10160,18 @@ var $author$project$DialogGameEditor$model_editedDialog = {
 				});
 		})
 };
+var $author$project$DialogGameEditor$lens_title = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.title;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{title: s});
+		}));
+var $author$project$DialogGameEditor$model_title = A2($arturopala$elm_monocle$Monocle$Compose$lensWithLens, $author$project$DialogGameEditor$lens_title, $author$project$DialogGameEditor$model_gameDefinition);
 var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
 	function (lens, f) {
 		var mf = function (a) {
@@ -10806,7 +10818,7 @@ var $author$project$DialogGameEditor$update = F2(
 					$author$project$DialogGameEditor$model_dialogs,
 					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
 					model);
-			default:
+			case 'DialogEdit':
 				var dialogAction = msg.a;
 				var m = function () {
 					if (dialogAction.$ === 'StartOptionEdit') {
@@ -10834,6 +10846,9 @@ var $author$project$DialogGameEditor$update = F2(
 					$author$project$DialogGameEditor$model_editedDialog,
 					$author$project$DialogGameEditor$updateEditedDialog(dialogAction),
 					m);
+			default:
+				var string = msg.a;
+				return A2($author$project$DialogGameEditor$model_title.set, string, model);
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
@@ -11327,7 +11342,43 @@ var $author$project$DialogGame$view = function (_v0) {
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
 };
+var $author$project$DialogGameEditor$EditTitle = function (a) {
+	return {$: 'EditTitle', a: a};
+};
+var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $elm$html$Html$h6 = _VirtualDom_node('h6');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$DialogGameEditor$DeletePosition = function (a) {
@@ -11365,38 +11416,6 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			$elm$json$Json$Encode$bool(bool));
 	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
 var $author$project$ParsedEditable$Revert = {$: 'Revert'};
@@ -12228,6 +12247,29 @@ var $author$project$DialogGameEditor$view = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
+				A2(
+				$elm$html$Html$h5,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Dialog Editor')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Title: '),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(
+								$author$project$DialogGameEditor$model_title.get(model)),
+								$elm$html$Html$Events$onInput($author$project$DialogGameEditor$EditTitle)
+							]),
+						_List_Nil)
+					])),
 				A2(
 				$elm$html$Html$h6,
 				_List_Nil,

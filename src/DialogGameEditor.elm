@@ -61,6 +61,7 @@ type Msg
     | Cancel
     | DialogsManipulation ManipulatePositionAction
     | DialogEdit DialogsEditAction
+    | EditTitle String
 
 
 type DialogsEditAction
@@ -338,6 +339,17 @@ model_gameDefinition =
     }
 
 
+lens_title : Lens { a | title : String } String
+lens_title =
+    Lens .title (\s m -> { m | title = s })
+
+
+model_title : Lens Model String
+model_title =
+    model_gameDefinition
+        |> lensWithLens lens_title
+
+
 update : Msg -> Model -> Model
 update msg model =
     case msg of
@@ -391,6 +403,9 @@ update msg model =
                             model
             in
             Optional.modify model_editedDialog (updateEditedDialog dialogAction) m
+
+        EditTitle string ->
+            model_title.set string model
 
 
 startEditingDialog : Dialog -> Model -> Model
@@ -612,7 +627,16 @@ manipulatePositionUpdate newObject msg list =
 view : Model -> Html Msg
 view model =
     div []
-        [ h6 [] [ text "Dialogs:" ]
+        [ h5 [] [ text "Dialog Editor" ]
+        , div []
+            [ text "Title: "
+            , input
+                [ value <| model_title.get model
+                , onInput EditTitle
+                ]
+                []
+            ]
+        , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
         , textarea [ value (DialogGame.stringifyGameDefinition model.gameDefinition) ] []
         ]
