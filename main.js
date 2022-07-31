@@ -10160,6 +10160,18 @@ var $author$project$DialogGameEditor$model_editedDialog = {
 				});
 		})
 };
+var $author$project$DialogGameEditor$lens_startDialogId = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.startDialogId;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{startDialogId: s});
+		}));
+var $author$project$DialogGameEditor$model_startDialogId = A2($arturopala$elm_monocle$Monocle$Compose$lensWithLens, $author$project$DialogGameEditor$lens_startDialogId, $author$project$DialogGameEditor$model_gameDefinition);
 var $author$project$DialogGameEditor$lens_title = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
 	function ($) {
@@ -10846,9 +10858,12 @@ var $author$project$DialogGameEditor$update = F2(
 					$author$project$DialogGameEditor$model_editedDialog,
 					$author$project$DialogGameEditor$updateEditedDialog(dialogAction),
 					m);
-			default:
+			case 'EditTitle':
 				var string = msg.a;
 				return A2($author$project$DialogGameEditor$model_title.set, string, model);
+			default:
+				var string = msg.a;
+				return A2($author$project$DialogGameEditor$model_startDialogId.set, string, model);
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
@@ -11341,6 +11356,9 @@ var $author$project$DialogGame$view = function (_v0) {
 				($elm$core$List$length(gameState.messages) > 0) ? $author$project$DialogGame$viewMessages(gameState.messages) : $elm$html$Html$text(''),
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
+};
+var $author$project$DialogGameEditor$EditStartDialogId = function (a) {
+	return {$: 'EditStartDialogId', a: a};
 };
 var $author$project$DialogGameEditor$EditTitle = function (a) {
 	return {$: 'EditTitle', a: a};
@@ -12267,6 +12285,22 @@ var $author$project$DialogGameEditor$view = function (model) {
 								$elm$html$Html$Attributes$value(
 								$author$project$DialogGameEditor$model_title.get(model)),
 								$elm$html$Html$Events$onInput($author$project$DialogGameEditor$EditTitle)
+							]),
+						_List_Nil)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('StartDialogId: '),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(
+								$author$project$DialogGameEditor$model_startDialogId.get(model)),
+								$elm$html$Html$Events$onInput($author$project$DialogGameEditor$EditStartDialogId)
 							]),
 						_List_Nil)
 					])),

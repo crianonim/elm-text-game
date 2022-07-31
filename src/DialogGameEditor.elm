@@ -62,6 +62,7 @@ type Msg
     | DialogsManipulation ManipulatePositionAction
     | DialogEdit DialogsEditAction
     | EditTitle String
+    | EditStartDialogId String
 
 
 type DialogsEditAction
@@ -344,10 +345,21 @@ lens_title =
     Lens .title (\s m -> { m | title = s })
 
 
+lens_startDialogId : Lens { a | startDialogId : b } b
+lens_startDialogId =
+    Lens .startDialogId (\s m -> { m | startDialogId = s })
+
+
 model_title : Lens Model String
 model_title =
     model_gameDefinition
         |> lensWithLens lens_title
+
+
+model_startDialogId : Lens Model String
+model_startDialogId =
+    model_gameDefinition
+        |> lensWithLens lens_startDialogId
 
 
 update : Msg -> Model -> Model
@@ -406,6 +418,9 @@ update msg model =
 
         EditTitle string ->
             model_title.set string model
+
+        EditStartDialogId string ->
+            model_startDialogId.set string model
 
 
 startEditingDialog : Dialog -> Model -> Model
@@ -633,6 +648,14 @@ view model =
             , input
                 [ value <| model_title.get model
                 , onInput EditTitle
+                ]
+                []
+            ]
+        , div []
+            [ text "StartDialogId: "
+            , input
+                [ value <| model_startDialogId.get model
+                , onInput EditStartDialogId
                 ]
                 []
             ]
