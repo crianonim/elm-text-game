@@ -211,9 +211,11 @@ lens_options : Lens { a | options : b } b
 lens_options =
     Lens .options (\s m -> { m | options = s })
 
+
 lens_actions : Lens { a | actions : b } b
 lens_actions =
     Lens .actions (\s m -> { m | actions = s })
+
 
 model_editedOption : Optional Model EditedOption
 model_editedOption =
@@ -548,8 +550,7 @@ updateEditedOption optionEditAction editedOption =
             Optional.modify editedOption_editedAction (updateEditedAction actionEditAction) editedOption
 
         ActionsManipulation manipulatePositionAction ->
-                        Lens.modify lens_actions (manipulatePositionUpdate newAction manipulatePositionAction) editedOption
-
+            Lens.modify lens_actions (manipulatePositionUpdate newAction manipulatePositionAction) editedOption
 
 
 updateEditedAction : ActionEditAction -> EditedAction -> EditedAction
@@ -585,6 +586,7 @@ newOption =
     , condition = Nothing
     , actions = []
     }
+
 
 newAction : DialogAction
 newAction =
@@ -743,8 +745,8 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
                 ]
 
 
-viewActionEdited : EditedAction ->Int -> DialogAction -> Html Msg
-viewActionEdited  editedAction i da =
+viewActionEdited : EditedAction -> Int -> DialogAction -> Html Msg
+viewActionEdited editedAction i da =
     if editedAction.action /= da then
         viewAction True i da
 
@@ -772,7 +774,7 @@ viewActionEdited  editedAction i da =
             ]
 
 
-viewAction : Bool-> Int -> DialogAction -> Html Msg
+viewAction : Bool -> Int -> DialogAction -> Html Msg
 viewAction isEdited optionIndex dialogAction =
     div []
         [ text <|
@@ -797,19 +799,17 @@ viewAction isEdited optionIndex dialogAction =
 
                 Exit string ->
                     "EXIT " ++ string
-        ,
-         if isEdited then
-                            div []
-                                [ button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
-                                , button [ onClick <| DialogEdit <|  OptionEdit <| ActionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
-                                , button [ onClick <| DialogEdit <|  OptionEdit <| ActionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
-                                , button [ onClick <| DialogEdit <|  OptionEdit <| ActionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
-                                ]
+        , if isEdited then
+            div []
+                [ button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
+                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
+                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
+                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
+                ]
 
-                          else
-                          text "",
-        button [ onClick <| DialogEdit <| OptionEdit <| OptionActionStartEdit dialogAction ] [ text "Edit Action" ]
-
+          else
+            text ""
+        , button [ onClick <| DialogEdit <| OptionEdit <| OptionActionStartEdit dialogAction ] [ text "Edit Action" ]
         ]
 
 

@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import DialogGame exposing (..)
@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Json.Decode as Json
 import Monocle.Compose
 import Monocle.Lens exposing (Lens)
 import Monocle.Optional exposing (Optional)
@@ -94,7 +95,8 @@ init _ =
 
         --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , askforGame ()
         ]
     )
 
@@ -296,6 +298,13 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        SaveGameDefinition ->
+            let
+                _ =
+                    Debug.log "SGD" (Maybe.map (.gameDefinition >> stringifyGameDefinition) model.dialogEditor)
+            in
+            ( model, Maybe.map (.gameDefinition >> stringifyGameDefinition >> saveGame) model.dialogEditor |> Maybe.withDefault Cmd.none )
+
 
 type alias Model =
     { gameDialog : GameStatus
@@ -322,6 +331,7 @@ type Msg
     | HideUrlLoader
     | EditUrlLoader String
     | ClickUrlLoader
+    | SaveGameDefinition
 
 
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
@@ -344,7 +354,7 @@ initGameFromGameDefinition gameDefinition =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    loadGame (\s -> Json.decodeString decodeGameDefinition s |> Result.mapError (always <| Http.BadBody "bad body") |> GotGameDefinition)
 
 
 
@@ -369,7 +379,8 @@ model_de_gameDefinition =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
+        [ button [ onClick SaveGameDefinition ] [ text "Save to Localstorage" ]
+        , Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
         , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
             Started _ gameDialogMenu ->
@@ -403,3 +414,12 @@ viewUrlLoader model =
 
         Nothing ->
             text ""
+
+
+port saveGame : String -> Cmd msg
+
+
+port loadGame : (String -> msg) -> Sub msg
+
+
+port askforGame : () -> Cmd msg

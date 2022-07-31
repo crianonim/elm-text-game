@@ -18,6 +18,11 @@
       var app = Elm.Main.init({
         node: document.getElementById("elm-app")
       });
-    </script>
+      app.ports.saveGame.subscribe(s=>localStorage.setItem("game",s))
+      app.ports.askforGame.subscribe(()=>
+               app.ports.loadGame.send(localStorage.getItem("game"))
+
+         )
+</script>
 </body>
 </html>
