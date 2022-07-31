@@ -11,6 +11,7 @@ import Monocle.Optional as Optional exposing (Optional)
 import Monocle.Prism as Prism exposing (Prism)
 import ParsedEditable
 import ScreeptV2 exposing (..)
+import Shared exposing (..)
 
 
 type alias Model =
@@ -90,12 +91,6 @@ type ActionEditAction
     = SelectActionType ActionType
     | EditGoToText String
     | EditScreept ParsedEditable.Msg
-
-
-type ManipulatePositionAction
-    = MovePosition Int Int
-    | DeletePosition Int
-    | NewAt Int
 
 
 init : GameDefinition -> Model
@@ -623,22 +618,6 @@ newAction =
     GoBackAction
 
 
-manipulatePositionUpdate : a -> ManipulatePositionAction -> List a -> List a
-manipulatePositionUpdate newObject msg list =
-    case msg of
-        MovePosition index step ->
-            List.Extra.swapAt index (index + step) list
-
-        DeletePosition i ->
-            List.Extra.removeAt i
-                list
-
-        NewAt i ->
-            insertAt i
-                newObject
-                list
-
-
 getDialogIds : Model -> List String
 getDialogIds model =
     List.map .id model.gameDefinition.dialogs
@@ -661,10 +640,16 @@ view model =
             , select
                 [ onInput EditStartDialogId
                 ]
-                (List.map (\o -> option [ value o,
-                 selected (o==model_startDialogId.get model)  ]
-                 [ text o ]) (getDialogIds model))
-
+                (List.map
+                    (\o ->
+                        option
+                            [ value o
+                            , selected (o == model_startDialogId.get model)
+                            ]
+                            [ text o ]
+                    )
+                    (getDialogIds model)
+                )
             ]
         , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
@@ -711,19 +696,7 @@ viewDialog model i dialog =
             ]
         , button [ onClick <| Save ] [ text "Save" ]
         , button [ onClick <| StartDialogEdit dialog ] [ text "EDIT" ]
-        , button [ onClick <| DialogsManipulation <| DeletePosition i ] [ text "Delete" ]
-        , button
-            [ onClick <| DialogsManipulation <| MovePosition i -1
-            , disabled <|
-                if i == 0 then
-                    True
-
-                else
-                    False
-            ]
-            [ text "Move Up" ]
-        , button [ onClick <| DialogsManipulation <| MovePosition i 1 ] [ text "Move Down" ]
-        , button [ onClick <| DialogsManipulation <| NewAt (i + 1) ] [ text "+New" ]
+        , viewManipulateButtons "dialog" DialogsManipulation i
         ]
 
 
@@ -786,12 +759,7 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
                 , div [] [ text "condition: ", Maybe.map viewExpression dialogOption.condition |> Maybe.withDefault (text "n/a") ]
                 , div [] [ text "actions:", div [] (List.indexedMap (viewAction False) dialogOption.actions) ]
                 , if isDialogEditing then
-                    div []
-                        [ button [ onClick <| DialogEdit <| OptionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
-                        , button [ onClick <| DialogEdit <| OptionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
-                        , button [ onClick <| DialogEdit <| OptionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
-                        , button [ onClick <| DialogEdit <| OptionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
-                        ]
+                    viewManipulateButtons "option" (DialogEdit << OptionsManipulation) optionIndex
 
                   else
                     text ""
@@ -854,12 +822,7 @@ viewAction isEdited optionIndex dialogAction =
                 Exit string ->
                     "EXIT " ++ string
         , if isEdited then
-            div []
-                [ button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| MovePosition optionIndex -1 ] [ text "Move Up" ]
-                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| MovePosition optionIndex 1 ] [ text "Move Down" ]
-                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| DeletePosition optionIndex ] [ text "Delete" ]
-                , button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| NewAt (optionIndex + 1) ] [ text "New" ]
-                ]
+            viewManipulateButtons "action" (DialogEdit << OptionEdit << ActionsManipulation) optionIndex
 
           else
             text ""
@@ -870,12 +833,3 @@ viewAction isEdited optionIndex dialogAction =
 viewExpression : Expression -> Html msg
 viewExpression expression =
     span [ class "de-dialog-condition" ] [ text <| elipsisText <| ScreeptV2.stringifyExpression expression ]
-
-
-insertAt : Int -> a -> List a -> List a
-insertAt index item items =
-    let
-        ( start, end ) =
-            List.Extra.splitAt index items
-    in
-    start ++ [ item ] ++ end

@@ -9957,7 +9957,7 @@ var $elm_community$list_extra$List$Extra$splitAt = F2(
 			A2($elm$core$List$take, n, xs),
 			A2($elm$core$List$drop, n, xs));
 	});
-var $author$project$DialogGameEditor$insertAt = F3(
+var $author$project$Shared$insertAt = F3(
 	function (index, item, items) {
 		var _v0 = A2($elm_community$list_extra$List$Extra$splitAt, index, items);
 		var start = _v0.a;
@@ -10052,7 +10052,7 @@ var $elm_community$list_extra$List$Extra$swapAt = F3(
 			}
 		}
 	});
-var $author$project$DialogGameEditor$manipulatePositionUpdate = F3(
+var $author$project$Shared$manipulatePositionUpdate = F3(
 	function (newObject, msg, list) {
 		switch (msg.$) {
 			case 'MovePosition':
@@ -10064,7 +10064,7 @@ var $author$project$DialogGameEditor$manipulatePositionUpdate = F3(
 				return A2($elm_community$list_extra$List$Extra$removeAt, i, list);
 			default:
 				var i = msg.a;
-				return A3($author$project$DialogGameEditor$insertAt, i, newObject, list);
+				return A3($author$project$Shared$insertAt, i, newObject, list);
 		}
 	});
 var $elm$core$List$any = F2(
@@ -10712,7 +10712,7 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$lens_actions,
-					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newAction, manipulatePositionAction),
+					A2($author$project$Shared$manipulatePositionUpdate, $author$project$DialogGameEditor$newAction, manipulatePositionAction),
 					editedOption);
 		}
 	});
@@ -10767,7 +10767,7 @@ var $author$project$DialogGameEditor$updateEditedDialog = F2(
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$lens_options,
-					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
+					A2($author$project$Shared$manipulatePositionUpdate, $author$project$DialogGameEditor$newOption, manipulatePosition),
 					dialog);
 			default:
 				var newOptions = A2(
@@ -10828,7 +10828,7 @@ var $author$project$DialogGameEditor$update = F2(
 				return A3(
 					$arturopala$elm_monocle$Monocle$Lens$modify,
 					$author$project$DialogGameEditor$model_dialogs,
-					A2($author$project$DialogGameEditor$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
+					A2($author$project$Shared$manipulatePositionUpdate, $author$project$DialogGameEditor$newDialog, manipulatePosition),
 					model);
 			case 'DialogEdit':
 				var dialogAction = msg.a;
@@ -11418,9 +11418,6 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$DialogGameEditor$DeletePosition = function (a) {
-	return {$: 'DeletePosition', a: a};
-};
 var $author$project$DialogGameEditor$DialogEdit = function (a) {
 	return {$: 'DialogEdit', a: a};
 };
@@ -11433,18 +11430,10 @@ var $author$project$DialogGameEditor$DialogTextEdit = function (a) {
 var $author$project$DialogGameEditor$DialogsManipulation = function (a) {
 	return {$: 'DialogsManipulation', a: a};
 };
-var $author$project$DialogGameEditor$MovePosition = F2(
-	function (a, b) {
-		return {$: 'MovePosition', a: a, b: b};
-	});
-var $author$project$DialogGameEditor$NewAt = function (a) {
-	return {$: 'NewAt', a: a};
-};
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$StartDialogEdit = function (a) {
 	return {$: 'StartDialogEdit', a: a};
 };
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
 var $author$project$ParsedEditable$Revert = {$: 'Revert'};
@@ -11568,6 +11557,73 @@ var $author$project$DialogGameEditor$viewExpression = function (expression) {
 					$author$project$ScreeptV2$stringifyExpression(expression)))
 			]));
 };
+var $author$project$Shared$DeletePosition = function (a) {
+	return {$: 'DeletePosition', a: a};
+};
+var $author$project$Shared$MovePosition = F2(
+	function (a, b) {
+		return {$: 'MovePosition', a: a, b: b};
+	});
+var $author$project$Shared$NewAt = function (a) {
+	return {$: 'NewAt', a: a};
+};
+var $author$project$Shared$viewManipulateButtons = F3(
+	function (kind, msgWrap, index) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							msgWrap(
+								A2($author$project$Shared$MovePosition, index, -1)))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Move Up ' + kind)
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							msgWrap(
+								A2($author$project$Shared$MovePosition, index, 1)))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Move Down ' + kind)
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							msgWrap(
+								$author$project$Shared$DeletePosition(index)))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Delete ' + kind)
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							msgWrap(
+								$author$project$Shared$NewAt(index + 1)))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('New ' + kind)
+						]))
+				]));
+	});
 var $author$project$DialogGameEditor$OptionConditionAdd = {$: 'OptionConditionAdd'};
 var $author$project$DialogGameEditor$OptionConditionEdit = function (a) {
 	return {$: 'OptionConditionEdit', a: a};
@@ -11586,6 +11642,11 @@ var $author$project$DialogGameEditor$SaveOption = {$: 'SaveOption'};
 var $author$project$DialogGameEditor$StartOptionEdit = function (a) {
 	return {$: 'StartOptionEdit', a: a};
 };
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
 var $author$project$DialogGameEditor$ActionsManipulation = function (a) {
 	return {$: 'ActionsManipulation', a: a};
 };
@@ -11626,68 +11687,14 @@ var $author$project$DialogGameEditor$viewAction = F3(
 								return 'EXIT ' + string;
 						}
 					}()),
-					isEdited ? A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$DialogEdit(
-										$author$project$DialogGameEditor$OptionEdit(
-											$author$project$DialogGameEditor$ActionsManipulation(
-												A2($author$project$DialogGameEditor$MovePosition, optionIndex, -1)))))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Move Up')
-								])),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$DialogEdit(
-										$author$project$DialogGameEditor$OptionEdit(
-											$author$project$DialogGameEditor$ActionsManipulation(
-												A2($author$project$DialogGameEditor$MovePosition, optionIndex, 1)))))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Move Down')
-								])),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$DialogEdit(
-										$author$project$DialogGameEditor$OptionEdit(
-											$author$project$DialogGameEditor$ActionsManipulation(
-												$author$project$DialogGameEditor$DeletePosition(optionIndex)))))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Delete')
-								])),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$DialogGameEditor$DialogEdit(
-										$author$project$DialogGameEditor$OptionEdit(
-											$author$project$DialogGameEditor$ActionsManipulation(
-												$author$project$DialogGameEditor$NewAt(optionIndex + 1)))))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('New')
-								]))
-						])) : $elm$html$Html$text(''),
+					isEdited ? A3(
+					$author$project$Shared$viewManipulateButtons,
+					'action',
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $author$project$DialogGameEditor$DialogEdit, $author$project$DialogGameEditor$OptionEdit),
+						$author$project$DialogGameEditor$ActionsManipulation),
+					optionIndex) : $elm$html$Html$text(''),
 					A2(
 					$elm$html$Html$button,
 					_List_fromArray(
@@ -11719,11 +11726,6 @@ var $author$project$DialogGameEditor$SaveAction = {$: 'SaveAction'};
 var $author$project$DialogGameEditor$SelectActionType = function (a) {
 	return {$: 'SelectActionType', a: a};
 };
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var $author$project$DialogGameEditor$viewActionEdited = F3(
 	function (editedAction, i, da) {
 		return (!_Utils_eq(editedAction.action, da)) ? A3($author$project$DialogGameEditor$viewAction, true, i, da) : A2(
@@ -12019,64 +12021,11 @@ var $author$project$DialogGameEditor$viewOption = F4(
 									$author$project$DialogGameEditor$viewAction(false),
 									dialogOption.actions))
 							])),
-						isDialogEditing ? A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$DialogEdit(
-											$author$project$DialogGameEditor$OptionsManipulation(
-												A2($author$project$DialogGameEditor$MovePosition, optionIndex, -1))))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Move Up')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$DialogEdit(
-											$author$project$DialogGameEditor$OptionsManipulation(
-												A2($author$project$DialogGameEditor$MovePosition, optionIndex, 1))))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Move Down')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$DialogEdit(
-											$author$project$DialogGameEditor$OptionsManipulation(
-												$author$project$DialogGameEditor$DeletePosition(optionIndex))))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Delete')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$DialogGameEditor$DialogEdit(
-											$author$project$DialogGameEditor$OptionsManipulation(
-												$author$project$DialogGameEditor$NewAt(optionIndex + 1))))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('New')
-									]))
-							])) : $elm$html$Html$text(''),
+						isDialogEditing ? A3(
+						$author$project$Shared$viewManipulateButtons,
+						'option',
+						A2($elm$core$Basics$composeL, $author$project$DialogGameEditor$DialogEdit, $author$project$DialogGameEditor$OptionsManipulation),
+						optionIndex) : $elm$html$Html$text(''),
 						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
@@ -12218,56 +12167,7 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 						[
 							$elm$html$Html$text('EDIT')
 						])),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$DialogsManipulation(
-								$author$project$DialogGameEditor$DeletePosition(i)))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Delete')
-						])),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$DialogsManipulation(
-								A2($author$project$DialogGameEditor$MovePosition, i, -1))),
-							$elm$html$Html$Attributes$disabled(
-							(!i) ? true : false)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Move Up')
-						])),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$DialogsManipulation(
-								A2($author$project$DialogGameEditor$MovePosition, i, 1)))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Move Down')
-						])),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$DialogGameEditor$DialogsManipulation(
-								$author$project$DialogGameEditor$NewAt(i + 1)))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('+New')
-						]))
+					A3($author$project$Shared$viewManipulateButtons, 'dialog', $author$project$DialogGameEditor$DialogsManipulation, i)
 				]));
 	});
 var $author$project$DialogGameEditor$view = function (model) {
