@@ -2,7 +2,7 @@ module DialogGameEditor exposing (..)
 
 import DialogGame exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, disabled, value)
+import Html.Attributes exposing (class, disabled, selected, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra
 import Monocle.Compose exposing (lensWithLens, lensWithOptional, optionalWithLens, optionalWithOptional)
@@ -639,6 +639,11 @@ manipulatePositionUpdate newObject msg list =
                 list
 
 
+getDialogIds : Model -> List String
+getDialogIds model =
+    List.map .id model.gameDefinition.dialogs
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -653,11 +658,13 @@ view model =
             ]
         , div []
             [ text "StartDialogId: "
-            , input
-                [ value <| model_startDialogId.get model
-                , onInput EditStartDialogId
+            , select
+                [ onInput EditStartDialogId
                 ]
-                []
+                (List.map (\o -> option [ value o,
+                 selected (o==model_startDialogId.get model)  ]
+                 [ text o ]) (getDialogIds model))
+
             ]
         , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)

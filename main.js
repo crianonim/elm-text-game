@@ -11363,6 +11363,14 @@ var $author$project$DialogGameEditor$EditStartDialogId = function (a) {
 var $author$project$DialogGameEditor$EditTitle = function (a) {
 	return {$: 'EditTitle', a: a};
 };
+var $author$project$DialogGameEditor$getDialogIds = function (model) {
+	return A2(
+		$elm$core$List$map,
+		function ($) {
+			return $.id;
+		},
+		model.gameDefinition.dialogs);
+};
 var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $elm$html$Html$h6 = _VirtualDom_node('h6');
 var $elm$html$Html$input = _VirtualDom_node('input');
@@ -11397,6 +11405,17 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$DialogGameEditor$DeletePosition = function (a) {
@@ -11425,14 +11444,6 @@ var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$StartDialogEdit = function (a) {
 	return {$: 'StartDialogEdit', a: a};
 };
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
@@ -12295,14 +12306,30 @@ var $author$project$DialogGameEditor$view = function (model) {
 					[
 						$elm$html$Html$text('StartDialogId: '),
 						A2(
-						$elm$html$Html$input,
+						$elm$html$Html$select,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$value(
-								$author$project$DialogGameEditor$model_startDialogId.get(model)),
 								$elm$html$Html$Events$onInput($author$project$DialogGameEditor$EditStartDialogId)
 							]),
-						_List_Nil)
+						A2(
+							$elm$core$List$map,
+							function (o) {
+								return A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value(o),
+											$elm$html$Html$Attributes$selected(
+											_Utils_eq(
+												o,
+												$author$project$DialogGameEditor$model_startDialogId.get(model)))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(o)
+										]));
+							},
+							$author$project$DialogGameEditor$getDialogIds(model)))
 					])),
 				A2(
 				$elm$html$Html$h6,
