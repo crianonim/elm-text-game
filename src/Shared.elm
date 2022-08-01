@@ -3,6 +3,7 @@ module Shared exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import List.Extra
+import Monocle.Compose exposing (optionalWithLens)
 import Monocle.Lens exposing (Lens)
 import Monocle.Optional exposing (Optional)
 import ParsedEditable
@@ -60,9 +61,19 @@ lens_definition =
     Lens .definition (\s m -> { m | definition = s })
 
 
+lens_oldValue : Lens { a | oldValue : b } b
+lens_oldValue =
+    Lens .oldValue (\s m -> { m | oldValue = s })
+
+
 optional_editedProcedure : Optional { a | editedProcedure : Maybe b } b
 optional_editedProcedure =
     Optional .editedProcedure (\s m -> { m | editedProcedure = Just s })
+
+
+parsedEditableExpression : Expression -> ParsedEditable.Model Expression
+parsedEditableExpression value =
+    ParsedEditable.init value parserExpression stringifyExpression
 
 
 parsedEditableStatement : Statement -> ParsedEditable.Model Statement
@@ -73,3 +84,14 @@ parsedEditableStatement value =
 updateOldValueWithTransformation : ({ b | oldValue : a } -> a) -> List a -> { b | oldValue : a } -> List a
 updateOldValueWithTransformation fn list new =
     List.Extra.setIf (\x -> x == new.oldValue) (fn new) list
+
+
+startEditing : a -> Optional a { b | oldValue : c } -> c -> (c -> { b | oldValue : c }) -> a
+startEditing model optional_editedValue value fnValueToEditedValue =
+    if (optional_editedValue |> optionalWithLens lens_oldValue).getOption model == Just value then
+        model
+
+    else
+        optional_editedValue.set
+            (fnValueToEditedValue value)
+            model

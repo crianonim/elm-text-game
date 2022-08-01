@@ -132,6 +132,16 @@ editedDialogToDialog editableDialog =
             editableDialog.oldValue
 
 
+dialogToEditedDialog : Dialog -> EditedDialog
+dialogToEditedDialog dialog =
+    { oldValue = dialog
+    , id = dialog.id
+    , text = parsedEditableExpression dialog.text
+    , options = dialog.options
+    , editedOption = Nothing
+    }
+
+
 editedProcedureToProcedure : EditedValue Statement -> ( String, Statement )
 editedProcedureToProcedure editedValue =
     ( editedValue.name, ParsedEditable.current editedValue.definition )
@@ -148,6 +158,16 @@ editedDialogOptionToDialogOption editableOption =
 
         _ ->
             editableOption.oldValue
+
+
+dialogOptionToEditedOption : DialogOption -> EditedOption
+dialogOptionToEditedOption dialogOption =
+    { oldValue = dialogOption
+    , text = parsedEditableExpression dialogOption.text
+    , condition = Maybe.map parsedEditableExpression dialogOption.condition
+    , actions = dialogOption.actions
+    , editedAction = Nothing
+    }
 
 
 editedActionToDialogAction : EditedAction -> DialogAction
@@ -335,11 +355,6 @@ model_Dialog =
         |> optionalWithLens lens_oldValue
 
 
-lens_oldValue : Lens { a | oldValue : b } b
-lens_oldValue =
-    Lens .oldValue (\s m -> { m | oldValue = s })
-
-
 lens_procedures : Lens { a | procedures : b } b
 lens_procedures =
     Lens .procedures (\s m -> { m | procedures = s })
@@ -487,42 +502,12 @@ update msg model =
 
 startEditingDialog : Dialog -> Model -> Model
 startEditingDialog dialog model =
-    if model_Dialog.getOption model == Just dialog then
-        model
-
-    else
-        { model
-            | editedDialog =
-                Just
-                    { oldValue = dialog
-                    , id = dialog.id
-                    , text = ParsedEditable.init dialog.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
-                    , options = dialog.options
-                    , editedOption = Nothing
-                    }
-        }
+    startEditing model model_editedDialog dialog dialogToEditedDialog
 
 
 startEditingOption : DialogOption -> EditedDialog -> EditedDialog
 startEditingOption dialogOption dialog =
-    if
-        (editedDialog_editedOption
-            |> optionalWithLens lens_oldValue
-        ).getOption
-            dialog
-            == Just dialogOption
-    then
-        dialog
-
-    else
-        editedDialog_editedOption.set
-            { oldValue = dialogOption
-            , text = ParsedEditable.init dialogOption.text ScreeptV2.parserExpression ScreeptV2.stringifyExpression
-            , condition = Maybe.map (\condition -> ParsedEditable.init condition ScreeptV2.parserExpression ScreeptV2.stringifyExpression) dialogOption.condition
-            , actions = dialogOption.actions
-            , editedAction = Nothing
-            }
-            dialog
+    startEditing dialog editedDialog_editedOption dialogOption dialogOptionToEditedOption
 
 
 updateEditedDialog : DialogsEditAction -> EditedDialog -> EditedDialog
@@ -593,11 +578,14 @@ updateEditedOption optionEditAction editedOption =
             editedOption_condition.set (ParsedEditable.init (Literal <| Number 1) parserExpression stringifyExpression) editedOption
 
         OptionActionStartEdit dialogAction ->
-            editedOption_editedAction.set
-                { oldValue = dialogAction
-                , editedActionUI = dialogActionToEditedAction dialogAction
-                }
-                editedOption
+            startEditing editedOption
+                editedOption_editedAction
+                dialogAction
+                (\v ->
+                    { oldValue = v
+                    , editedActionUI = dialogActionToEditedAction v
+                    }
+                )
 
         OptionActionEditAction actionEditAction ->
             Optional.modify editedOption_editedAction (updateEditedAction actionEditAction) editedOption
@@ -739,6 +727,33 @@ viewProcedure model i ( name, definition ) =
                     ]
                 ]
         )
+
+
+
+--
+--viewVar : Model -> Int -> ( String, Expression ) -> Html Msg
+--viewVar model i ( name, definition ) =
+--    let
+--        isEdited =
+--            (model_editedProcedure |> optionalWithLens lens_oldValue).getOption model == Just ( name, definition )
+--    in
+--    div []
+--        (case ( model_editedProcedure.getOption model, isEdited ) of
+--            ( Just eP, True ) ->
+--                [ input [ value eP.name, onInput (EditProcName >> ProcedureEdit) ] []
+--                , ParsedEditable.view eP.definition |> Html.map (EditProcDefinition >> ProcedureEdit)
+--                , button [ onClick SaveProcedure ] [ text "Save Procedure" ]
+--                ]
+--
+--            _ ->
+--                [ div []
+--                    [ span [] [ text name ]
+--                    , code [] [ text <| stringifyStatement definition ]
+--                    , viewManipulateButtons "procedure" ProcedureManipulation i
+--                    , button [ onClick <| StartProcedureEdit ( name, definition ) ] [ text "EDIT" ]
+--                    ]
+--                ]
+--        )
 
 
 viewDialog : Model -> Int -> Dialog -> Html Msg
