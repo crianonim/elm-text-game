@@ -40,7 +40,7 @@ type alias GameDefinition =
     , dialogs : List Dialog
     , startDialogId : String
     , procedures : List ( String, Statement )
-    , vars : Dict String Value
+    , vars : List ( String, Value )
     }
 
 
@@ -252,7 +252,7 @@ encodeGameDefinition { title, dialogs, startDialogId, vars, procedures } =
         , ( "dialogs", E.list encodeDialog dialogs )
         , ( "startDialogId", E.string startDialogId )
         , ( "procedures", E.dict identity (ScreeptV2.stringifyStatement >> E.string) (Dict.fromList procedures) )
-        , ( "vars", E.dict identity ScreeptV2.encodeValue vars )
+        , ( "vars", E.dict identity ScreeptV2.encodeValue (Dict.fromList vars) )
         ]
 
 
@@ -307,7 +307,7 @@ decodeGameDefinition =
         (Json.field "dialogs" decodeDialogs)
         (Json.field "startDialogId" Json.string)
         (Json.field "procedures" <| Json.map Dict.toList <| Json.dict ScreeptV2.decodeStatement)
-        (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
+        (Json.field "vars" <| Json.map Dict.toList <| Json.dict ScreeptV2.decodeValue)
 
 
 stringifyGameDefinition : GameDefinition -> String

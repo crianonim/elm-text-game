@@ -56,6 +56,11 @@ lens_editedProcedure =
     Lens .editedProcedure (\s m -> { m | editedProcedure = s })
 
 
+lens_vars : Lens { a | vars : b } b
+lens_vars =
+    Lens .vars (\s m -> { m | vars = s })
+
+
 lens_definition : Lens { a | definition : b } b
 lens_definition =
     Lens .definition (\s m -> { m | definition = s })
@@ -69,6 +74,11 @@ lens_oldValue =
 optional_editedProcedure : Optional { a | editedProcedure : Maybe b } b
 optional_editedProcedure =
     Optional .editedProcedure (\s m -> { m | editedProcedure = Just s })
+
+
+optional_editedVar : Optional { a | editedVar : Maybe b } b
+optional_editedVar =
+    Optional .editedVar (\s m -> { m | editedVar = Just s })
 
 
 parsedEditableExpression : Expression -> ParsedEditable.Model Expression

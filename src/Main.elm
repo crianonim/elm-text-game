@@ -343,7 +343,7 @@ initGameFromGameDefinition gameDefinition =
 
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures |> Dict.fromList, rnd = Random.initialSeed 666 }
+        , screeptEnv = { vars = gameDefinition.vars |> Dict.fromList, procedures = gameDefinition.procedures |> Dict.fromList, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }

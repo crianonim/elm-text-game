@@ -17,7 +17,8 @@ import Shared exposing (..)
 
 type alias Model =
     { editedDialog : Maybe EditedDialog
-    , editedProcedure : Maybe (EditedValue Statement)
+    , editedProcedure : Maybe (EditedValue Statement (ParsedEditable.Model Statement))
+    , editedVar : Maybe (EditedValue Value ValueUI)
     , gameDefinition : GameDefinition
     }
 
@@ -46,10 +47,10 @@ type alias EditedAction =
     }
 
 
-type alias EditedValue a =
+type alias EditedValue a b =
     { oldValue : ( String, a )
     , name : String
-    , definition : ParsedEditable.Model a
+    , definition : b
     }
 
 
@@ -57,6 +58,12 @@ type EditedActionUI
     = EAGoBack
     | EAGo String
     | EAScreept (ParsedEditable.Model Statement)
+
+
+type ValueUI
+    = VNumber String
+    | VText String
+    | VFunc (ParsedEditable.Model Expression)
 
 
 type ActionType
@@ -77,6 +84,10 @@ type Msg
     | StartProcedureEdit ( String, Statement )
     | ProcedureEdit ProcedureEditAction
     | SaveProcedure
+    | StartVarEdit ( String, Value )
+    | VarsManipulation ManipulatePositionAction
+    | VarEdit VarEditAction
+    | SaveVar
 
 
 type DialogsEditAction
@@ -111,10 +122,18 @@ type ProcedureEditAction
     | EditProcDefinition ParsedEditable.Msg
 
 
+type VarEditAction
+    = EditVarName String
+    | EditDefNumber String
+    | EditDefText String
+    | EditDefFunc ParsedEditable.Msg
+
+
 init : GameDefinition -> Model
 init gd =
     { editedDialog = Nothing
     , editedProcedure = Nothing
+    , editedVar = Nothing
     , gameDefinition = gd
     }
 
@@ -142,9 +161,24 @@ dialogToEditedDialog dialog =
     }
 
 
-editedProcedureToProcedure : EditedValue Statement -> ( String, Statement )
+editedProcedureToProcedure : EditedValue Statement (ParsedEditable.Model Statement) -> ( String, Statement )
 editedProcedureToProcedure editedValue =
     ( editedValue.name, ParsedEditable.current editedValue.definition )
+
+
+editedVarToVar : EditedValue Value ValueUI -> ( String, Value )
+editedVarToVar editedValue =
+    ( editedValue.name
+    , case editedValue.definition of
+        VNumber s ->
+            Number (String.toFloat s |> Maybe.withDefault 0)
+
+        VText string ->
+            Text string
+
+        VFunc model ->
+            Func <| ParsedEditable.current model
+    )
 
 
 editedDialogOptionToDialogOption : EditedOption -> DialogOption
@@ -360,7 +394,7 @@ lens_procedures =
     Lens .procedures (\s m -> { m | procedures = s })
 
 
-model_editedProcedure : Optional Model (EditedValue Statement)
+model_editedProcedure : Optional Model (EditedValue Statement (ParsedEditable.Model Statement))
 model_editedProcedure =
     Optional .editedProcedure (\s m -> { m | editedProcedure = Just s })
 
@@ -463,22 +497,19 @@ update msg model =
 
         ProcedureManipulation manipulatePositionAction ->
             Lens.modify (model_gameDefinition |> lensWithLens lens_procedures)
-                (manipulatePositionUpdate ( "procName    ", Block [] ) manipulatePositionAction)
+                (manipulatePositionUpdate ( "procName", Block [] ) manipulatePositionAction)
                 model
 
         StartProcedureEdit ( name, statement ) ->
-            if (optional_editedProcedure |> optionalWithLens lens_oldValue).getOption model == Just ( name, statement ) then
-                model
-
-            else
-                lens_editedProcedure.set
-                    (Just
-                        { oldValue = ( name, statement )
-                        , name = name
-                        , definition = parsedEditableStatement statement
-                        }
-                    )
-                    model
+            startEditing model
+                optional_editedProcedure
+                ( name, statement )
+                (\_ ->
+                    { oldValue = ( name, statement )
+                    , name = name
+                    , definition = parsedEditableStatement statement
+                    }
+                )
 
         ProcedureEdit procedureEditAction ->
             Optional.modify model_editedProcedure (updateEditedProcedure procedureEditAction) model
@@ -498,6 +529,54 @@ update msg model =
                 Just nd ->
                     (model_gameDefinition |> lensWithLens lens_procedures).set nd model
                         |> (\m -> { m | editedProcedure = Nothing })
+
+        StartVarEdit var ->
+            startEditing model
+                optional_editedVar
+                var
+                (\v ->
+                    { oldValue = var
+                    , name = Tuple.first var
+                    , definition = valueToValueUI <| Tuple.second v
+                    }
+                )
+
+        VarsManipulation manipulatePositionAction ->
+            Lens.modify (model_gameDefinition |> lensWithLens lens_vars)
+                (manipulatePositionUpdate ( "varName", Number 0 ) manipulatePositionAction)
+                model
+
+        VarEdit varEditAction ->
+            Optional.modify optional_editedVar (updateEditedVar varEditAction) model
+
+        SaveVar ->
+            let
+                newVars : Maybe (List ( String, Value ))
+                newVars =
+                    Maybe.map
+                        (updateOldValueWithTransformation editedVarToVar model.gameDefinition.vars)
+                        (optional_editedVar.getOption model)
+            in
+            case newVars of
+                Nothing ->
+                    model
+
+                Just nd ->
+                    (model_gameDefinition |> lensWithLens lens_vars).set nd model
+                        |> (\m -> { m | editedVar = Nothing })
+
+
+valueToValueUI : Value -> ValueUI
+valueToValueUI value =
+    case value of
+        Number float ->
+            VNumber <| String.fromFloat float
+
+        Text string ->
+            VText string
+
+        Func expression ->
+            VFunc <| parsedEditableExpression expression
 
 
 startEditingDialog : Dialog -> Model -> Model
@@ -631,7 +710,7 @@ updateEditedAction actionEditAction editedAction =
             }
 
 
-updateEditedProcedure : ProcedureEditAction -> EditedValue Statement -> EditedValue Statement
+updateEditedProcedure : ProcedureEditAction -> EditedValue Statement (ParsedEditable.Model Statement) -> EditedValue Statement (ParsedEditable.Model Statement)
 updateEditedProcedure procedureEditAction editedValue =
     case procedureEditAction of
         EditProcName string ->
@@ -639,6 +718,30 @@ updateEditedProcedure procedureEditAction editedValue =
 
         EditProcDefinition msg ->
             Lens.modify lens_definition (ParsedEditable.update msg) editedValue
+
+
+updateEditedVar : VarEditAction -> EditedValue Value ValueUI -> EditedValue Value ValueUI
+updateEditedVar varEditAction var =
+    case varEditAction of
+        EditVarName string ->
+            { var | name = string }
+
+        EditDefNumber string ->
+            { var | definition = VNumber string }
+
+        EditDefText string ->
+            { var | definition = VText string }
+
+        EditDefFunc msg ->
+            { var
+                | definition =
+                    case var.definition of
+                        VFunc func ->
+                            VFunc (ParsedEditable.update msg func)
+
+                        _ ->
+                            var.definition
+            }
 
 
 newDialog : Dialog
@@ -698,6 +801,8 @@ view model =
             ]
         , h6 [] [ text "Procedures:" ]
         , div [] (List.indexedMap (viewProcedure model) model.gameDefinition.procedures)
+        , h6 [] [ text "Vars:" ]
+        , div [] (List.indexedMap (viewVar model) model.gameDefinition.vars)
         , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
         , textarea [ value (DialogGame.stringifyGameDefinition model.gameDefinition) ] []
@@ -729,31 +834,55 @@ viewProcedure model i ( name, definition ) =
         )
 
 
+viewVar : Model -> Int -> ( String, Value ) -> Html Msg
+viewVar model i ( name, definition ) =
+    let
+        isEdited =
+            (optional_editedVar |> optionalWithLens lens_oldValue).getOption model == Just ( name, definition )
+    in
+    div []
+        (case ( optional_editedVar.getOption model, isEdited ) of
+            ( Just eP, True ) ->
+                [ input [ value eP.name, onInput (EditVarName >> VarEdit) ] []
+                , viewValueIO eP.definition
+                , button [ onClick SaveVar ] [ text "Save Var" ]
+                ]
 
---
---viewVar : Model -> Int -> ( String, Expression ) -> Html Msg
---viewVar model i ( name, definition ) =
---    let
---        isEdited =
---            (model_editedProcedure |> optionalWithLens lens_oldValue).getOption model == Just ( name, definition )
---    in
---    div []
---        (case ( model_editedProcedure.getOption model, isEdited ) of
---            ( Just eP, True ) ->
---                [ input [ value eP.name, onInput (EditProcName >> ProcedureEdit) ] []
---                , ParsedEditable.view eP.definition |> Html.map (EditProcDefinition >> ProcedureEdit)
---                , button [ onClick SaveProcedure ] [ text "Save Procedure" ]
---                ]
---
---            _ ->
---                [ div []
---                    [ span [] [ text name ]
---                    , code [] [ text <| stringifyStatement definition ]
---                    , viewManipulateButtons "procedure" ProcedureManipulation i
---                    , button [ onClick <| StartProcedureEdit ( name, definition ) ] [ text "EDIT" ]
---                    ]
---                ]
---        )
+            _ ->
+                [ div []
+                    [ span [] [ text name ]
+                    , viewValue definition
+                    , viewManipulateButtons "var" VarsManipulation i
+                    , button [ onClick <| StartVarEdit ( name, definition ) ] [ text "EDIT" ]
+                    ]
+                ]
+        )
+
+
+viewValue : Value -> Html msg
+viewValue value =
+    case value of
+        Number float ->
+            text <| String.fromFloat float
+
+        Text string ->
+            text string
+
+        Func expression ->
+            text <| stringifyExpression expression
+
+
+viewValueIO : ValueUI -> Html Msg
+viewValueIO valueUI =
+    case valueUI of
+        VNumber string ->
+            input [ value string, onInput (EditDefNumber >> VarEdit) ] []
+
+        VText string ->
+            input [ value string, onInput (EditDefText >> VarEdit) ] []
+
+        VFunc model ->
+            ParsedEditable.view model |> Html.map (EditDefFunc >> VarEdit)
 
 
 viewDialog : Model -> Int -> Dialog -> Html Msg
