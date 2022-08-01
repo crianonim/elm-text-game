@@ -8608,7 +8608,10 @@ var $author$project$DialogGame$decodeGameDefinition = A6(
 	A2(
 		$elm$json$Json$Decode$field,
 		'procedures',
-		$elm$json$Json$Decode$dict($author$project$ScreeptV2$decodeStatement)),
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Dict$toList,
+			$elm$json$Json$Decode$dict($author$project$ScreeptV2$decodeStatement))),
 	A2(
 		$elm$json$Json$Decode$field,
 		'vars',
@@ -9289,7 +9292,7 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $author$project$DialogGameEditor$init = function (gd) {
-	return {editedDialog: $elm$core$Maybe$Nothing, gameDefinition: gd};
+	return {editedDialog: $elm$core$Maybe$Nothing, editedProcedure: $elm$core$Maybe$Nothing, gameDefinition: gd};
 };
 var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) {
 	return {
@@ -9298,7 +9301,7 @@ var $author$project$Main$initGameFromGameDefinition = function (gameDefinition) 
 			dialogStack: A2($mhoare$elm_stack$Stack$push, gameDefinition.startDialogId, $mhoare$elm_stack$Stack$initialise),
 			messages: _List_Nil,
 			screeptEnv: {
-				procedures: gameDefinition.procedures,
+				procedures: $elm$core$Dict$fromList(gameDefinition.procedures),
 				rnd: $elm$random$Random$initialSeed(666),
 				vars: gameDefinition.vars
 			}
@@ -9602,7 +9605,7 @@ var $author$project$DialogGame$encodeGameDefinition = function (_v0) {
 					$elm$json$Json$Encode$dict,
 					$elm$core$Basics$identity,
 					A2($elm$core$Basics$composeR, $author$project$ScreeptV2$stringifyStatement, $elm$json$Json$Encode$string),
-					procedures)),
+					$elm$core$Dict$fromList(procedures))),
 				_Utils_Tuple2(
 				'vars',
 				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $author$project$ScreeptV2$encodeValue, vars))
@@ -9780,8 +9783,16 @@ var $author$project$DialogGameEditor$editedDialogToDialog = function (editableDi
 		var text = _v0.a;
 		return {id: editableDialog.id, options: editableDialog.options, text: text};
 	} else {
-		return editableDialog.dialog;
+		return editableDialog.oldValue;
 	}
+};
+var $author$project$ParsedEditable$current = function (model) {
+	return A2($elm$core$Result$withDefault, model.old, model._new);
+};
+var $author$project$DialogGameEditor$editedProcedureToProcedure = function (editedValue) {
+	return _Utils_Tuple2(
+		editedValue.name,
+		$author$project$ParsedEditable$current(editedValue.definition));
 };
 var $elm_community$list_extra$List$Extra$find = F2(
 	function (predicate, list) {
@@ -9804,6 +9815,64 @@ var $elm_community$list_extra$List$Extra$find = F2(
 			}
 		}
 	});
+var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
+	function (get, set) {
+		return {get: get, set: set};
+	});
+var $arturopala$elm_monocle$Monocle$Lens$compose = F2(
+	function (outer, inner) {
+		var set = F2(
+			function (c, a) {
+				return function (b) {
+					return A2(outer.set, b, a);
+				}(
+					A2(
+						inner.set,
+						c,
+						outer.get(a)));
+			});
+		return A2(
+			$arturopala$elm_monocle$Monocle$Lens$Lens,
+			A2($elm$core$Basics$composeR, outer.get, inner.get),
+			set);
+	});
+var $arturopala$elm_monocle$Monocle$Compose$lensWithLens = F2(
+	function (inner, outer) {
+		return A2($arturopala$elm_monocle$Monocle$Lens$compose, outer, inner);
+	});
+var $author$project$Shared$lens_editedProcedure = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.editedProcedure;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{editedProcedure: s});
+		}));
+var $author$project$DialogGameEditor$lens_oldValue = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.oldValue;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{oldValue: s});
+		}));
+var $author$project$DialogGameEditor$lens_procedures = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.procedures;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{procedures: s});
+		}));
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -10097,31 +10166,6 @@ var $elm$core$List$member = F2(
 			},
 			xs);
 	});
-var $arturopala$elm_monocle$Monocle$Lens$Lens = F2(
-	function (get, set) {
-		return {get: get, set: set};
-	});
-var $arturopala$elm_monocle$Monocle$Lens$compose = F2(
-	function (outer, inner) {
-		var set = F2(
-			function (c, a) {
-				return function (b) {
-					return A2(outer.set, b, a);
-				}(
-					A2(
-						inner.set,
-						c,
-						outer.get(a)));
-			});
-		return A2(
-			$arturopala$elm_monocle$Monocle$Lens$Lens,
-			A2($elm$core$Basics$composeR, outer.get, inner.get),
-			set);
-	});
-var $arturopala$elm_monocle$Monocle$Compose$lensWithLens = F2(
-	function (inner, outer) {
-		return A2($arturopala$elm_monocle$Monocle$Lens$compose, outer, inner);
-	});
 var $author$project$DialogGameEditor$model_gameDefinition = {
 	get: function ($) {
 		return $.gameDefinition;
@@ -10160,6 +10204,23 @@ var $author$project$DialogGameEditor$model_editedDialog = {
 				});
 		})
 };
+var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
+	function (getOption, set) {
+		return {getOption: getOption, set: set};
+	});
+var $author$project$DialogGameEditor$model_editedProcedure = A2(
+	$arturopala$elm_monocle$Monocle$Optional$Optional,
+	function ($) {
+		return $.editedProcedure;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedProcedure: $elm$core$Maybe$Just(s)
+				});
+		}));
 var $author$project$DialogGameEditor$lens_startDialogId = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
 	function ($) {
@@ -10228,21 +10289,6 @@ var $author$project$DialogGameEditor$newDialog = {
 	text: $author$project$ScreeptV2$Literal(
 		$author$project$ScreeptV2$Text(''))
 };
-var $author$project$DialogGameEditor$editedDialog_dialog = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.dialog;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{dialog: s});
-		}));
-var $arturopala$elm_monocle$Monocle$Optional$Optional = F2(
-	function (getOption, set) {
-		return {getOption: getOption, set: set};
-	});
 var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
 	function (inner, outer) {
 		var set = function (c) {
@@ -10257,7 +10303,23 @@ var $arturopala$elm_monocle$Monocle$Compose$optionalWithLens = F2(
 			$elm$core$Maybe$map(inner.get));
 		return A2($arturopala$elm_monocle$Monocle$Optional$Optional, getOption, set);
 	});
-var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$editedDialog_dialog, $author$project$DialogGameEditor$model_editedDialog);
+var $author$project$Shared$optional_editedProcedure = A2(
+	$arturopala$elm_monocle$Monocle$Optional$Optional,
+	function ($) {
+		return $.editedProcedure;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{
+					editedProcedure: $elm$core$Maybe$Just(s)
+				});
+		}));
+var $author$project$Shared$parsedEditableStatement = function (value) {
+	return A3($author$project$ParsedEditable$init, value, $author$project$ScreeptV2$parserStatement, $author$project$ScreeptV2$stringifyStatement);
+};
+var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_oldValue, $author$project$DialogGameEditor$model_editedDialog);
 var $author$project$DialogGameEditor$startEditingDialog = F2(
 	function (dialog, model) {
 		return _Utils_eq(
@@ -10267,9 +10329,9 @@ var $author$project$DialogGameEditor$startEditingDialog = F2(
 			{
 				editedDialog: $elm$core$Maybe$Just(
 					{
-						dialog: dialog,
 						editedOption: $elm$core$Maybe$Nothing,
 						id: dialog.id,
+						oldValue: dialog,
 						options: dialog.options,
 						text: A3($author$project$ParsedEditable$init, dialog.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
 					})
@@ -10294,7 +10356,7 @@ var $author$project$DialogGameEditor$editedDialogOptionToDialogOption = function
 			text: text
 		};
 	} else {
-		return editableOption.option;
+		return editableOption.oldValue;
 	}
 };
 var $author$project$DialogGameEditor$editedDialog_editedOption = A2(
@@ -10360,21 +10422,10 @@ var $author$project$DialogGameEditor$newOption = {
 	text: $author$project$ScreeptV2$Literal(
 		$author$project$ScreeptV2$Text(''))
 };
-var $author$project$DialogGameEditor$lens_option = A2(
-	$arturopala$elm_monocle$Monocle$Lens$Lens,
-	function ($) {
-		return $.option;
-	},
-	F2(
-		function (s, m) {
-			return _Utils_update(
-				m,
-				{option: s});
-		}));
 var $author$project$DialogGameEditor$startEditingOption = F2(
 	function (dialogOption, dialog) {
 		return _Utils_eq(
-			A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_option, $author$project$DialogGameEditor$editedDialog_editedOption).getOption(dialog),
+			A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_oldValue, $author$project$DialogGameEditor$editedDialog_editedOption).getOption(dialog),
 			$elm$core$Maybe$Just(dialogOption)) ? dialog : A2(
 			$author$project$DialogGameEditor$editedDialog_editedOption.set,
 			{
@@ -10386,7 +10437,7 @@ var $author$project$DialogGameEditor$startEditingOption = F2(
 					},
 					dialogOption.condition),
 				editedAction: $elm$core$Maybe$Nothing,
-				option: dialogOption,
+				oldValue: dialogOption,
 				text: A3($author$project$ParsedEditable$init, dialogOption.text, $author$project$ScreeptV2$parserExpression, $author$project$ScreeptV2$stringifyExpression)
 			},
 			dialog);
@@ -10476,7 +10527,7 @@ var $author$project$DialogGameEditor$editedActionToDialogAction = function (acti
 				var stmt = _v1.a;
 				return $author$project$DialogGame$Screept(stmt);
 			} else {
-				return action.action;
+				return action.oldValue;
 			}
 	}
 };
@@ -10663,8 +10714,8 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 				return A2(
 					$author$project$DialogGameEditor$editedOption_editedAction.set,
 					{
-						action: dialogAction,
-						editedActionUI: $author$project$DialogGameEditor$dialogActionToEditedAction(dialogAction)
+						editedActionUI: $author$project$DialogGameEditor$dialogActionToEditedAction(dialogAction),
+						oldValue: dialogAction
 					},
 					editedOption);
 			case 'OptionActionEditAction':
@@ -10681,7 +10732,7 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 						return A2(
 							$elm$core$List$map,
 							function (v) {
-								return _Utils_eq(eA.action, v) ? $author$project$DialogGameEditor$editedActionToDialogAction(eA) : v;
+								return _Utils_eq(eA.oldValue, v) ? $author$project$DialogGameEditor$editedActionToDialogAction(eA) : v;
 							},
 							editedOption.actions);
 					},
@@ -10776,7 +10827,7 @@ var $author$project$DialogGameEditor$updateEditedDialog = F2(
 						return A2(
 							$elm$core$List$map,
 							function (d) {
-								return _Utils_eq(eOp.option, d) ? $author$project$DialogGameEditor$editedDialogOptionToDialogOption(eOp) : d;
+								return _Utils_eq(eOp.oldValue, d) ? $author$project$DialogGameEditor$editedDialogOptionToDialogOption(eOp) : d;
 							},
 							dialog.options);
 					},
@@ -10792,6 +10843,33 @@ var $author$project$DialogGameEditor$updateEditedDialog = F2(
 				}
 		}
 	});
+var $author$project$Shared$lens_definition = A2(
+	$arturopala$elm_monocle$Monocle$Lens$Lens,
+	function ($) {
+		return $.definition;
+	},
+	F2(
+		function (s, m) {
+			return _Utils_update(
+				m,
+				{definition: s});
+		}));
+var $author$project$DialogGameEditor$updateEditedProcedure = F2(
+	function (procedureEditAction, editedValue) {
+		if (procedureEditAction.$ === 'EditProcName') {
+			var string = procedureEditAction.a;
+			return _Utils_update(
+				editedValue,
+				{name: string});
+		} else {
+			var msg = procedureEditAction.a;
+			return A3(
+				$arturopala$elm_monocle$Monocle$Lens$modify,
+				$author$project$Shared$lens_definition,
+				$author$project$ParsedEditable$update(msg),
+				editedValue);
+		}
+	});
 var $author$project$DialogGameEditor$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -10805,7 +10883,7 @@ var $author$project$DialogGameEditor$update = F2(
 						return A2(
 							$elm$core$List$map,
 							function (d) {
-								return _Utils_eq(ed.dialog, d) ? $author$project$DialogGameEditor$editedDialogToDialog(ed) : d;
+								return _Utils_eq(ed.oldValue, d) ? $author$project$DialogGameEditor$editedDialogToDialog(ed) : d;
 							},
 							model.gameDefinition.dialogs);
 					},
@@ -10861,9 +10939,70 @@ var $author$project$DialogGameEditor$update = F2(
 			case 'EditTitle':
 				var string = msg.a;
 				return A2($author$project$DialogGameEditor$model_title.set, string, model);
-			default:
+			case 'EditStartDialogId':
 				var string = msg.a;
 				return A2($author$project$DialogGameEditor$model_startDialogId.set, string, model);
+			case 'ProcedureManipulation':
+				var manipulatePositionAction = msg.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Lens$modify,
+					A2($arturopala$elm_monocle$Monocle$Compose$lensWithLens, $author$project$DialogGameEditor$lens_procedures, $author$project$DialogGameEditor$model_gameDefinition),
+					A2(
+						$author$project$Shared$manipulatePositionUpdate,
+						_Utils_Tuple2(
+							'procName    ',
+							$author$project$ScreeptV2$Block(_List_Nil)),
+						manipulatePositionAction),
+					model);
+			case 'StartProcedureEdit':
+				var _v3 = msg.a;
+				var name = _v3.a;
+				var statement = _v3.b;
+				return _Utils_eq(
+					A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_oldValue, $author$project$Shared$optional_editedProcedure).getOption(model),
+					$elm$core$Maybe$Just(
+						_Utils_Tuple2(name, statement))) ? model : A2(
+					$author$project$Shared$lens_editedProcedure.set,
+					$elm$core$Maybe$Just(
+						{
+							definition: $author$project$Shared$parsedEditableStatement(statement),
+							name: name,
+							oldValue: _Utils_Tuple2(name, statement)
+						}),
+					model);
+			case 'ProcedureEdit':
+				var procedureEditAction = msg.a;
+				return A3(
+					$arturopala$elm_monocle$Monocle$Optional$modify,
+					$author$project$DialogGameEditor$model_editedProcedure,
+					$author$project$DialogGameEditor$updateEditedProcedure(procedureEditAction),
+					model);
+			default:
+				var newProcedures = A2(
+					$elm$core$Maybe$map,
+					function (ed) {
+						return A2(
+							$elm$core$List$map,
+							function (d) {
+								return _Utils_eq(ed.oldValue, d) ? $author$project$DialogGameEditor$editedProcedureToProcedure(ed) : d;
+							},
+							model.gameDefinition.procedures);
+					},
+					$author$project$DialogGameEditor$model_editedProcedure.getOption(model));
+				if (newProcedures.$ === 'Nothing') {
+					return model;
+				} else {
+					var nd = newProcedures.a;
+					return function (m) {
+						return _Utils_update(
+							m,
+							{editedProcedure: $elm$core$Maybe$Nothing});
+					}(
+						A2(
+							A2($arturopala$elm_monocle$Monocle$Compose$lensWithLens, $author$project$DialogGameEditor$lens_procedures, $author$project$DialogGameEditor$model_gameDefinition).set,
+							nd,
+							model));
+				}
 		}
 	});
 var $author$project$ScreeptEditor$update = F2(
@@ -11728,7 +11867,7 @@ var $author$project$DialogGameEditor$SelectActionType = function (a) {
 };
 var $author$project$DialogGameEditor$viewActionEdited = F3(
 	function (editedAction, i, da) {
-		return (!_Utils_eq(editedAction.action, da)) ? A3($author$project$DialogGameEditor$viewAction, true, i, da) : A2(
+		return (!_Utils_eq(editedAction.oldValue, da)) ? A3($author$project$DialogGameEditor$viewAction, true, i, da) : A2(
 			$elm$html$Html$div,
 			_List_Nil,
 			_List_fromArray(
@@ -11850,7 +11989,7 @@ var $author$project$DialogGameEditor$viewOption = F4(
 			A2(
 				$elm$core$Maybe$map,
 				function (eop) {
-					return _Utils_eq(eop.option, dialogOption);
+					return _Utils_eq(eop.oldValue, dialogOption);
 				},
 				mEditedOption));
 		var _v0 = _Utils_Tuple2(mEditedOption, isOptionEdited);
@@ -12170,6 +12309,107 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 					A3($author$project$Shared$viewManipulateButtons, 'dialog', $author$project$DialogGameEditor$DialogsManipulation, i)
 				]));
 	});
+var $author$project$DialogGameEditor$EditProcDefinition = function (a) {
+	return {$: 'EditProcDefinition', a: a};
+};
+var $author$project$DialogGameEditor$EditProcName = function (a) {
+	return {$: 'EditProcName', a: a};
+};
+var $author$project$DialogGameEditor$ProcedureEdit = function (a) {
+	return {$: 'ProcedureEdit', a: a};
+};
+var $author$project$DialogGameEditor$ProcedureManipulation = function (a) {
+	return {$: 'ProcedureManipulation', a: a};
+};
+var $author$project$DialogGameEditor$SaveProcedure = {$: 'SaveProcedure'};
+var $author$project$DialogGameEditor$StartProcedureEdit = function (a) {
+	return {$: 'StartProcedureEdit', a: a};
+};
+var $elm$html$Html$code = _VirtualDom_node('code');
+var $author$project$DialogGameEditor$viewProcedure = F3(
+	function (model, i, _v0) {
+		var name = _v0.a;
+		var definition = _v0.b;
+		var isEdited = _Utils_eq(
+			A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$DialogGameEditor$lens_oldValue, $author$project$DialogGameEditor$model_editedProcedure).getOption(model),
+			$elm$core$Maybe$Just(
+				_Utils_Tuple2(name, definition)));
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			function () {
+				var _v1 = _Utils_Tuple2(
+					$author$project$DialogGameEditor$model_editedProcedure.getOption(model),
+					isEdited);
+				if ((_v1.a.$ === 'Just') && _v1.b) {
+					var eP = _v1.a.a;
+					return _List_fromArray(
+						[
+							A2(
+							$elm$html$Html$input,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$value(eP.name),
+									$elm$html$Html$Events$onInput(
+									A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditProcName, $author$project$DialogGameEditor$ProcedureEdit))
+								]),
+							_List_Nil),
+							A2(
+							$elm$html$Html$map,
+							A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditProcDefinition, $author$project$DialogGameEditor$ProcedureEdit),
+							$author$project$ParsedEditable$view(eP.definition)),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$DialogGameEditor$SaveProcedure)
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Save Procedure')
+								]))
+						]);
+				} else {
+					return _List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text(name)
+										])),
+									A2(
+									$elm$html$Html$code,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											$author$project$ScreeptV2$stringifyStatement(definition))
+										])),
+									A3($author$project$Shared$viewManipulateButtons, 'procedure', $author$project$DialogGameEditor$ProcedureManipulation, i),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick(
+											$author$project$DialogGameEditor$StartProcedureEdit(
+												_Utils_Tuple2(name, definition)))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('EDIT')
+										]))
+								]))
+						]);
+				}
+			}());
+	});
 var $author$project$DialogGameEditor$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -12195,6 +12435,7 @@ var $author$project$DialogGameEditor$view = function (model) {
 							[
 								$elm$html$Html$Attributes$value(
 								$author$project$DialogGameEditor$model_title.get(model)),
+								$elm$html$Html$Attributes$class('focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none w-full text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm'),
 								$elm$html$Html$Events$onInput($author$project$DialogGameEditor$EditTitle)
 							]),
 						_List_Nil)
@@ -12231,6 +12472,20 @@ var $author$project$DialogGameEditor$view = function (model) {
 							},
 							$author$project$DialogGameEditor$getDialogIds(model)))
 					])),
+				A2(
+				$elm$html$Html$h6,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Procedures:')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$indexedMap,
+					$author$project$DialogGameEditor$viewProcedure(model),
+					model.gameDefinition.procedures)),
 				A2(
 				$elm$html$Html$h6,
 				_List_Nil,

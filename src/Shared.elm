@@ -3,6 +3,10 @@ module Shared exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import List.Extra
+import Monocle.Lens exposing (Lens)
+import Monocle.Optional exposing (Optional)
+import ParsedEditable
+import ScreeptV2 exposing (..)
 
 
 type ManipulatePositionAction
@@ -44,3 +48,23 @@ viewManipulateButtons kind msgWrap index =
         , button [ onClick <| msgWrap <| DeletePosition index ] [ text <| "Delete " ++ kind ]
         , button [ onClick <| msgWrap <| NewAt (index + 1) ] [ text <| "New " ++ kind ]
         ]
+
+
+lens_editedProcedure : Lens { a | editedProcedure : b } b
+lens_editedProcedure =
+    Lens .editedProcedure (\s m -> { m | editedProcedure = s })
+
+
+lens_definition : Lens { a | definition : b } b
+lens_definition =
+    Lens .definition (\s m -> { m | definition = s })
+
+
+optional_editedProcedure : Optional { a | editedProcedure : Maybe b } b
+optional_editedProcedure =
+    Optional .editedProcedure (\s m -> { m | editedProcedure = Just s })
+
+
+parsedEditableStatement : Statement -> ParsedEditable.Model Statement
+parsedEditableStatement value =
+    ParsedEditable.init value parserStatement stringifyStatement

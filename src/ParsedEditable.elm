@@ -64,6 +64,12 @@ revert model =
     { model | new = Ok model.old, text = model.formatter model.old }
 
 
+current : Model a -> a
+current model =
+    model.new
+        |> Result.withDefault model.old
+
+
 isChanged : Model a -> Bool
 isChanged model =
     case model.new of

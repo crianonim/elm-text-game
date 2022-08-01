@@ -3,6 +3,7 @@ port module Main exposing (main)
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
@@ -342,7 +343,7 @@ initGameFromGameDefinition gameDefinition =
 
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
+        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures |> Dict.fromList, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
