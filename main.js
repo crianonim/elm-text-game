@@ -10676,6 +10676,33 @@ var $author$project$DialogGameEditor$updateEditedAction = F2(
 					});
 		}
 	});
+var $elm_community$list_extra$List$Extra$updateIf = F3(
+	function (predicate, update, list) {
+		return A2(
+			$elm$core$List$map,
+			function (item) {
+				return predicate(item) ? update(item) : item;
+			},
+			list);
+	});
+var $elm_community$list_extra$List$Extra$setIf = F3(
+	function (predicate, replacement, list) {
+		return A3(
+			$elm_community$list_extra$List$Extra$updateIf,
+			predicate,
+			$elm$core$Basics$always(replacement),
+			list);
+	});
+var $author$project$Shared$updateOldValueWithTransformation = F3(
+	function (fn, list, _new) {
+		return A3(
+			$elm_community$list_extra$List$Extra$setIf,
+			function (x) {
+				return _Utils_eq(x, _new.oldValue);
+			},
+			fn(_new),
+			list);
+	});
 var $author$project$DialogGameEditor$updateEditedOption = F2(
 	function (optionEditAction, editedOption) {
 		switch (optionEditAction.$) {
@@ -10728,28 +10755,18 @@ var $author$project$DialogGameEditor$updateEditedOption = F2(
 			case 'SaveAction':
 				var newActions = A2(
 					$elm$core$Maybe$map,
-					function (eA) {
-						return A2(
-							$elm$core$List$map,
-							function (v) {
-								return _Utils_eq(eA.oldValue, v) ? $author$project$DialogGameEditor$editedActionToDialogAction(eA) : v;
-							},
-							editedOption.actions);
-					},
+					A2($author$project$Shared$updateOldValueWithTransformation, $author$project$DialogGameEditor$editedActionToDialogAction, editedOption.actions),
 					$author$project$DialogGameEditor$editedOption_editedAction.getOption(editedOption));
 				if (newActions.$ === 'Nothing') {
 					return editedOption;
 				} else {
 					var neo = newActions.a;
 					return A2(
-						$elm$core$Debug$log,
-						'EO',
-						A2(
-							$author$project$DialogGameEditor$editedOption_mEditedAction.set,
-							$elm$core$Maybe$Nothing,
-							_Utils_update(
-								editedOption,
-								{actions: neo})));
+						$author$project$DialogGameEditor$editedOption_mEditedAction.set,
+						$elm$core$Maybe$Nothing,
+						_Utils_update(
+							editedOption,
+							{actions: neo}));
 				}
 			case 'ActionEdit':
 				var actionEditAction = optionEditAction.a;
@@ -10823,14 +10840,7 @@ var $author$project$DialogGameEditor$updateEditedDialog = F2(
 			default:
 				var newOptions = A2(
 					$elm$core$Maybe$map,
-					function (eOp) {
-						return A2(
-							$elm$core$List$map,
-							function (d) {
-								return _Utils_eq(eOp.oldValue, d) ? $author$project$DialogGameEditor$editedDialogOptionToDialogOption(eOp) : d;
-							},
-							dialog.options);
-					},
+					A2($author$project$Shared$updateOldValueWithTransformation, $author$project$DialogGameEditor$editedDialogOptionToDialogOption, dialog.options),
 					$author$project$DialogGameEditor$editedDialog_editedOption.getOption(dialog));
 				if (newOptions.$ === 'Nothing') {
 					return dialog;
@@ -10879,14 +10889,7 @@ var $author$project$DialogGameEditor$update = F2(
 			case 'Save':
 				var newDialogs = A2(
 					$elm$core$Maybe$map,
-					function (ed) {
-						return A2(
-							$elm$core$List$map,
-							function (d) {
-								return _Utils_eq(ed.oldValue, d) ? $author$project$DialogGameEditor$editedDialogToDialog(ed) : d;
-							},
-							model.gameDefinition.dialogs);
-					},
+					A2($author$project$Shared$updateOldValueWithTransformation, $author$project$DialogGameEditor$editedDialogToDialog, model.gameDefinition.dialogs),
 					$author$project$DialogGameEditor$model_editedDialog.getOption(model));
 				if (newDialogs.$ === 'Nothing') {
 					return model;
@@ -10980,14 +10983,7 @@ var $author$project$DialogGameEditor$update = F2(
 			default:
 				var newProcedures = A2(
 					$elm$core$Maybe$map,
-					function (ed) {
-						return A2(
-							$elm$core$List$map,
-							function (d) {
-								return _Utils_eq(ed.oldValue, d) ? $author$project$DialogGameEditor$editedProcedureToProcedure(ed) : d;
-							},
-							model.gameDefinition.procedures);
-					},
+					A2($author$project$Shared$updateOldValueWithTransformation, $author$project$DialogGameEditor$editedProcedureToProcedure, model.gameDefinition.procedures),
 					$author$project$DialogGameEditor$model_editedProcedure.getOption(model));
 				if (newProcedures.$ === 'Nothing') {
 					return model;

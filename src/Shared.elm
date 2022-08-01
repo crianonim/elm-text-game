@@ -68,3 +68,8 @@ optional_editedProcedure =
 parsedEditableStatement : Statement -> ParsedEditable.Model Statement
 parsedEditableStatement value =
     ParsedEditable.init value parserStatement stringifyStatement
+
+
+updateOldValueWithTransformation : ({ b | oldValue : a } -> a) -> List a -> { b | oldValue : a } -> List a
+updateOldValueWithTransformation fn list new =
+    List.Extra.setIf (\x -> x == new.oldValue) (fn new) list

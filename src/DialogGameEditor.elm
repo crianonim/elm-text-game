@@ -407,17 +407,7 @@ update msg model =
                 newDialogs : Maybe (List Dialog)
                 newDialogs =
                     Maybe.map
-                        (\ed ->
-                            List.map
-                                (\d ->
-                                    if ed.oldValue == d then
-                                        editedDialogToDialog ed
-
-                                    else
-                                        d
-                                )
-                                model.gameDefinition.dialogs
-                        )
+                        (updateOldValueWithTransformation editedDialogToDialog model.gameDefinition.dialogs)
                         (model_editedDialog.getOption model)
             in
             case newDialogs of
@@ -483,17 +473,7 @@ update msg model =
                 newProcedures : Maybe (List ( String, Statement ))
                 newProcedures =
                     Maybe.map
-                        (\ed ->
-                            List.map
-                                (\d ->
-                                    if ed.oldValue == d then
-                                        editedProcedureToProcedure ed
-
-                                    else
-                                        d
-                                )
-                                model.gameDefinition.procedures
-                        )
+                        (updateOldValueWithTransformation editedProcedureToProcedure model.gameDefinition.procedures)
                         (model_editedProcedure.getOption model)
             in
             case newProcedures of
@@ -581,17 +561,7 @@ updateEditedDialog dialogEditAction dialog =
                 newOptions : Maybe (List DialogOption)
                 newOptions =
                     Maybe.map
-                        (\eOp ->
-                            List.map
-                                (\d ->
-                                    if eOp.oldValue == d then
-                                        editedDialogOptionToDialogOption eOp
-
-                                    else
-                                        d
-                                )
-                                dialog.options
-                        )
+                        (updateOldValueWithTransformation editedDialogOptionToDialogOption dialog.options)
                         (editedDialog_editedOption.getOption dialog)
             in
             case newOptions of
@@ -636,17 +606,7 @@ updateEditedOption optionEditAction editedOption =
             let
                 newActions =
                     Maybe.map
-                        (\eA ->
-                            List.map
-                                (\v ->
-                                    if eA.oldValue == v then
-                                        editedActionToDialogAction eA
-
-                                    else
-                                        v
-                                )
-                                editedOption.actions
-                        )
+                        (updateOldValueWithTransformation editedActionToDialogAction editedOption.actions)
                         (editedOption_editedAction.getOption editedOption)
             in
             case newActions of
@@ -656,7 +616,6 @@ updateEditedOption optionEditAction editedOption =
                 Just neo ->
                     { editedOption | actions = neo }
                         |> editedOption_mEditedAction.set Nothing
-                        |> Debug.log "EO"
 
         ActionEdit actionEditAction ->
             Optional.modify editedOption_editedAction (updateEditedAction actionEditAction) editedOption
