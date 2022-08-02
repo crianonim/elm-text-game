@@ -10936,6 +10936,21 @@ var $author$project$DialogGameEditor$VNumber = function (a) {
 var $author$project$DialogGameEditor$VText = function (a) {
 	return {$: 'VText', a: a};
 };
+var $author$project$DialogGameEditor$valueToValueUI = function (value) {
+	switch (value.$) {
+		case 'Number':
+			var _float = value.a;
+			return $author$project$DialogGameEditor$VNumber(
+				$elm$core$String$fromFloat(_float));
+		case 'Text':
+			var string = value.a;
+			return $author$project$DialogGameEditor$VText(string);
+		default:
+			var expression = value.a;
+			return $author$project$DialogGameEditor$VFunc(
+				$author$project$Shared$parsedEditableExpression(expression));
+	}
+};
 var $author$project$DialogGameEditor$updateEditedVar = F2(
 	function (varEditAction, _var) {
 		switch (varEditAction.$) {
@@ -10958,7 +10973,7 @@ var $author$project$DialogGameEditor$updateEditedVar = F2(
 					{
 						definition: $author$project$DialogGameEditor$VText(string)
 					});
-			default:
+			case 'EditDefFunc':
 				var msg = varEditAction.a;
 				return _Utils_update(
 					_var,
@@ -10974,23 +10989,15 @@ var $author$project$DialogGameEditor$updateEditedVar = F2(
 							}
 						}()
 					});
+			default:
+				var value = varEditAction.a;
+				return _Utils_update(
+					_var,
+					{
+						definition: $author$project$DialogGameEditor$valueToValueUI(value)
+					});
 		}
 	});
-var $author$project$DialogGameEditor$valueToValueUI = function (value) {
-	switch (value.$) {
-		case 'Number':
-			var _float = value.a;
-			return $author$project$DialogGameEditor$VNumber(
-				$elm$core$String$fromFloat(_float));
-		case 'Text':
-			var string = value.a;
-			return $author$project$DialogGameEditor$VText(string);
-		default:
-			var expression = value.a;
-			return $author$project$DialogGameEditor$VFunc(
-				$author$project$Shared$parsedEditableExpression(expression));
-	}
-};
 var $author$project$DialogGameEditor$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -12588,15 +12595,18 @@ var $author$project$DialogGameEditor$viewValue = function (value) {
 		case 'Number':
 			var _float = value.a;
 			return $elm$html$Html$text(
-				$elm$core$String$fromFloat(_float));
+				'(N)' + $elm$core$String$fromFloat(_float));
 		case 'Text':
 			var string = value.a;
-			return $elm$html$Html$text(string);
+			return $elm$html$Html$text('(T)' + string);
 		default:
 			var expression = value.a;
 			return $elm$html$Html$text(
-				$author$project$ScreeptV2$stringifyExpression(expression));
+				'(F)' + $author$project$ScreeptV2$stringifyExpression(expression));
 	}
+};
+var $author$project$DialogGameEditor$ChangeVarType = function (a) {
+	return {$: 'ChangeVarType', a: a};
 };
 var $author$project$DialogGameEditor$EditDefFunc = function (a) {
 	return {$: 'EditDefFunc', a: a};
@@ -12607,37 +12617,100 @@ var $author$project$DialogGameEditor$EditDefNumber = function (a) {
 var $author$project$DialogGameEditor$EditDefText = function (a) {
 	return {$: 'EditDefText', a: a};
 };
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $author$project$DialogGameEditor$viewValueIO = function (valueUI) {
-	switch (valueUI.$) {
-		case 'VNumber':
-			var string = valueUI.a;
-			return A2(
-				$elm$html$Html$input,
+	var buttonSelected = function () {
+		switch (valueUI.$) {
+			case 'VNumber':
+				return 1;
+			case 'VText':
+				return 2;
+			default:
+				return 3;
+		}
+	}();
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$value(string),
-						$elm$html$Html$Events$onInput(
-						A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefNumber, $author$project$DialogGameEditor$VarEdit))
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$VarEdit(
+							$author$project$DialogGameEditor$ChangeVarType(
+								$author$project$ScreeptV2$Number(0)))),
+						$elm$html$Html$Attributes$disabled(buttonSelected === 1)
 					]),
-				_List_Nil);
-		case 'VText':
-			var string = valueUI.a;
-			return A2(
-				$elm$html$Html$input,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$value(string),
-						$elm$html$Html$Events$onInput(
-						A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefText, $author$project$DialogGameEditor$VarEdit))
+						$elm$html$Html$text('Number')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$VarEdit(
+							$author$project$DialogGameEditor$ChangeVarType(
+								$author$project$ScreeptV2$Text('')))),
+						$elm$html$Html$Attributes$disabled(buttonSelected === 2)
 					]),
-				_List_Nil);
-		default:
-			var model = valueUI.a;
-			return A2(
-				$elm$html$Html$map,
-				A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefFunc, $author$project$DialogGameEditor$VarEdit),
-				$author$project$ParsedEditable$view(model));
-	}
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Text')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$VarEdit(
+							$author$project$DialogGameEditor$ChangeVarType(
+								$author$project$ScreeptV2$Func(
+									$author$project$ScreeptV2$Literal(
+										$author$project$ScreeptV2$Number(0)))))),
+						$elm$html$Html$Attributes$disabled(buttonSelected === 3)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Func')
+					])),
+				function () {
+				switch (valueUI.$) {
+					case 'VNumber':
+						var string = valueUI.a;
+						return A2(
+							$elm$html$Html$input,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$value(string),
+									$elm$html$Html$Events$onInput(
+									A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefNumber, $author$project$DialogGameEditor$VarEdit))
+								]),
+							_List_Nil);
+					case 'VText':
+						var string = valueUI.a;
+						return A2(
+							$elm$html$Html$input,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$value(string),
+									$elm$html$Html$Events$onInput(
+									A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefText, $author$project$DialogGameEditor$VarEdit))
+								]),
+							_List_Nil);
+					default:
+						var model = valueUI.a;
+						return A2(
+							$elm$html$Html$map,
+							A2($elm$core$Basics$composeR, $author$project$DialogGameEditor$EditDefFunc, $author$project$DialogGameEditor$VarEdit),
+							$author$project$ParsedEditable$view(model));
+				}
+			}()
+			]));
 };
 var $author$project$DialogGameEditor$viewVar = F3(
 	function (model, i, _v0) {

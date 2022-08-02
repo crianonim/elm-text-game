@@ -127,6 +127,7 @@ type VarEditAction
     | EditDefNumber String
     | EditDefText String
     | EditDefFunc ParsedEditable.Msg
+    | ChangeVarType Value
 
 
 init : GameDefinition -> Model
@@ -743,6 +744,9 @@ updateEditedVar varEditAction var =
                             var.definition
             }
 
+        ChangeVarType value ->
+            { var | definition = valueToValueUI value }
+
 
 newDialog : Dialog
 newDialog =
@@ -863,26 +867,43 @@ viewValue : Value -> Html msg
 viewValue value =
     case value of
         Number float ->
-            text <| String.fromFloat float
+            text <| "(N)" ++ String.fromFloat float
 
         Text string ->
-            text string
+            text <| "(T)" ++ string
 
         Func expression ->
-            text <| stringifyExpression expression
+            text <| "(F)" ++ stringifyExpression expression
 
 
 viewValueIO : ValueUI -> Html Msg
 viewValueIO valueUI =
-    case valueUI of
-        VNumber string ->
-            input [ value string, onInput (EditDefNumber >> VarEdit) ] []
+    let
+        buttonSelected =
+            case valueUI of
+                VNumber _ ->
+                    1
 
-        VText string ->
-            input [ value string, onInput (EditDefText >> VarEdit) ] []
+                VText _ ->
+                    2
 
-        VFunc model ->
-            ParsedEditable.view model |> Html.map (EditDefFunc >> VarEdit)
+                VFunc _ ->
+                    3
+    in
+    div []
+        [ button [ onClick <| VarEdit <| ChangeVarType <| Number 0, disabled <| buttonSelected == 1 ] [ text "Number" ]
+        , button [ onClick <| VarEdit <| ChangeVarType <| Text "", disabled <| buttonSelected == 2 ] [ text "Text" ]
+        , button [ onClick <| VarEdit <| ChangeVarType <| Func (Literal <| Number 0), disabled <| buttonSelected == 3 ] [ text "Func" ]
+        , case valueUI of
+            VNumber string ->
+                input [ value string, onInput (EditDefNumber >> VarEdit) ] []
+
+            VText string ->
+                input [ value string, onInput (EditDefText >> VarEdit) ] []
+
+            VFunc model ->
+                ParsedEditable.view model |> Html.map (EditDefFunc >> VarEdit)
+        ]
 
 
 viewDialog : Model -> Int -> Dialog -> Html Msg
