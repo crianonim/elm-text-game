@@ -39,8 +39,8 @@ type alias GameDefinition =
     { title : String
     , dialogs : List Dialog
     , startDialogId : String
-    , procedures : Dict String Statement
-    , vars : Dict String Value
+    , procedures : List ( String, Statement )
+    , vars : List ( String, Value )
     }
 
 
@@ -246,12 +246,13 @@ decodeState =
 
 
 encodeGameDefinition : GameDefinition -> E.Value
-encodeGameDefinition { dialogs, startDialogId, vars, procedures } =
+encodeGameDefinition { title, dialogs, startDialogId, vars, procedures } =
     E.object
-        [ ( "dialogs", E.list encodeDialog dialogs )
+        [ ( "name", E.string title )
+        , ( "dialogs", E.list encodeDialog dialogs )
         , ( "startDialogId", E.string startDialogId )
-        , ( "procedures", E.dict identity (ScreeptV2.stringifyStatement >> E.string) procedures )
-        , ( "vars", E.dict identity ScreeptV2.encodeValue vars )
+        , ( "procedures", E.dict identity (ScreeptV2.stringifyStatement >> E.string) (Dict.fromList procedures) )
+        , ( "vars", E.dict identity ScreeptV2.encodeValue (Dict.fromList vars) )
         ]
 
 
@@ -305,8 +306,8 @@ decodeGameDefinition =
         (Json.field "name" Json.string)
         (Json.field "dialogs" decodeDialogs)
         (Json.field "startDialogId" Json.string)
-        (Json.field "procedures" <| Json.dict ScreeptV2.decodeStatement)
-        (Json.field "vars" <| Json.dict ScreeptV2.decodeValue)
+        (Json.field "procedures" <| Json.map Dict.toList <| Json.dict ScreeptV2.decodeStatement)
+        (Json.field "vars" <| Json.map Dict.toList <| Json.dict ScreeptV2.decodeValue)
 
 
 stringifyGameDefinition : GameDefinition -> String

@@ -3,12 +3,16 @@ module ParsedEditable exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Parser
+import Monocle.Compose exposing (optionalWithLens)
+import Monocle.Lens exposing (Lens)
+import Monocle.Optional as Optional exposing (Optional)
+import Parser exposing ((|.))
 
 
 type alias Model a =
     { text : String
-    , parsed : Result (List Parser.DeadEnd) a
+    , old : a
+    , new : Result (List Parser.DeadEnd) a
     , parser : Parser.Parser a
     , formatter : a -> String
     }
@@ -17,13 +21,15 @@ type alias Model a =
 type Msg
     = FormatClick
     | TextEdit String
+    | Revert
 
 
-init : String -> Parser.Parser a -> (a -> String) -> Model a
-init text parser formatter =
-    { text = text
-    , parsed = Parser.run parser text
-    , parser = parser
+init : a -> Parser.Parser a -> (a -> String) -> Model a
+init item parser formatter =
+    { text = formatter item
+    , old = item
+    , new = Ok item
+    , parser = parser |. Parser.end
     , formatter = formatter
     }
 
@@ -44,10 +50,46 @@ update msg model =
                         _ ->
                             model.text
             in
-            { model | parsed = parsed, text = text }
+            { model | new = parsed, text = text }
 
         TextEdit v ->
-            { model | text = v, parsed = Parser.run model.parser v }
+            { model | text = v, new = Parser.run model.parser v }
+
+        Revert ->
+            revert model
+
+
+revert : Model a -> Model a
+revert model =
+    { model | new = Ok model.old, text = model.formatter model.old }
+
+
+current : Model a -> a
+current model =
+    model.new
+        |> Result.withDefault model.old
+
+
+isChanged : Model a -> Bool
+isChanged model =
+    case model.new of
+        Ok new ->
+            model.old /= new
+
+        _ ->
+            False
+
+
+model_new : Optional (Model a) a
+model_new =
+    { getOption = \m -> Result.toMaybe m.new
+    , set = \s m -> { m | new = Ok s }
+    }
+
+
+model_old : Lens (Model a) a
+model_old =
+    Lens .old (\s m -> { m | old = s })
 
 
 view : Model a -> Html Msg
@@ -55,7 +97,8 @@ view model =
     div []
         [ textarea [ value model.text, onInput TextEdit, style "width" "100%", style "height" "10em", style "font-family" "monospace" ] []
         , button [ onClick FormatClick ] [ text "Format" ]
-        , case model.parsed of
+        , button [ onClick Revert ] [ text "Revert" ]
+        , case model.new of
             Ok _ ->
                 text "Parsed ok"
 

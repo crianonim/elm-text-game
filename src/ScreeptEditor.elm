@@ -14,17 +14,16 @@ import Stack
 
 type alias Model =
     { statementEditor : ParsedEditable.Model Statement
-    , intValueEditor : ParsedEditable.Model Expression
     , value : Maybe Int
     }
 
 
 type Msg
     = StatementEditor ParsedEditable.Msg
-    | IntValueEditor ParsedEditable.Msg
 
 
 
+--| IntValueEditor ParsedEditable.Msg
 --| ClickRun
 
 
@@ -32,10 +31,9 @@ init : Model
 init =
     { statementEditor =
         ParsedEditable.init
-            "{ turn = (turn + 1);  turns_count = (turns_count - 1);  minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));  hour = ((turn / turns_per_hour) %% 24);  day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 }; IF (minutes?1:0) THEN {  } ELSE {  }; PROC sub { RND d6 1 6 } }"
+            (Result.withDefault (Block []) <| Parser.run parserStatement "{ turn = (turn + 1);  turns_count = (turns_count - 1);  minutes = ((turn %% turns_per_hour) * (60 / turns_per_hour));  hour = ((turn / turns_per_hour) %% 24);  day = (turn / (turns_per_hour * 24)); IF (turns_count > 0) THEN RUN turn ELSE {  turns_count = 5 }; IF (minutes?1:0) THEN {  } ELSE {  }; PROC sub { RND d6 1 6 } }")
             parserStatement
             (stringifyPrettyStatement 0)
-    , intValueEditor = ParsedEditable.init "!(#[(farm_level?\"has level\":\"no level\"),\"_\",book,[\"jan\"]] + 1)" parserExpression stringifyExpression
     , value = Nothing
     }
 
@@ -46,11 +44,10 @@ update msg model =
         StatementEditor m ->
             { model | statementEditor = ParsedEditable.update m model.statementEditor }
 
-        IntValueEditor m ->
-            { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 
 
-
+--IntValueEditor m ->
+--    { model | intValueEditor = ParsedEditable.update m model.intValueEditor }
 --ClickRun ->
 --    { model | value = Maybe.andThen (Screept.getMaybeIntValue gameState) (Maybe.andThen Result.toMaybe model.intValueEditor.parsed) }
 
@@ -62,7 +59,7 @@ view model =
           ParsedEditable.view model.statementEditor |> Html.map StatementEditor
 
         --, button [ onClick ClickRun ] [ text "RUN" ]
-        , case model.statementEditor.parsed of
+        , case model.statementEditor.new of
             Ok v ->
                 div []
                     [ pre [] [ text (stringifyPrettyStatement 0 v) ]

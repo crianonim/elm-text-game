@@ -1,12 +1,17 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import DialogGame exposing (..)
 import DialogGameEditor
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Json.Decode as Json
+import Monocle.Compose
+import Monocle.Lens exposing (Lens)
+import Monocle.Optional exposing (Optional)
 import Platform.Cmd exposing (Cmd)
 import Random
 import ScreeptEditor
@@ -78,7 +83,7 @@ init _ =
       --    (Just Game.statusLine)
       , isDebug = True
       , screeptEditor = ScreeptEditor.init
-      , dialogEditor = DialogGameEditor.init
+      , dialogEditor = Nothing
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
@@ -91,7 +96,8 @@ init _ =
 
         --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-        , Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
+        , askforGame ()
         ]
     )
 
@@ -189,7 +195,7 @@ update msg model =
             ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
 
         DialogEditor deMsg ->
-            ( { model | dialogEditor = DialogGameEditor.update deMsg model.dialogEditor }, Cmd.none )
+            ( { model | dialogEditor = Maybe.map (DialogGameEditor.update deMsg) model.dialogEditor }, Cmd.none )
 
         GotGameDefinition result ->
             case result of
@@ -220,7 +226,9 @@ update msg model =
                         menuDialog =
                             { m | gameState = newGameState }
                     in
-                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog }, Cmd.none )
+                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog, dialogEditor = Just (DialogGameEditor.init value) }
+                    , Cmd.none
+                    )
 
         MainMenuDialog menuMsg ->
             let
@@ -291,12 +299,19 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
+        SaveGameDefinition ->
+            let
+                _ =
+                    Debug.log "SGD" (Maybe.map (.gameDefinition >> stringifyGameDefinition) model.dialogEditor)
+            in
+            ( model, Maybe.map (.gameDefinition >> stringifyGameDefinition >> saveGame) model.dialogEditor |> Maybe.withDefault Cmd.none )
+
 
 type alias Model =
     { gameDialog : GameStatus
     , isDebug : Bool
     , screeptEditor : ScreeptEditor.Model
-    , dialogEditor : DialogGameEditor.Model
+    , dialogEditor : Maybe DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
     , urlLoader : Maybe String
@@ -317,6 +332,7 @@ type Msg
     | HideUrlLoader
     | EditUrlLoader String
     | ClickUrlLoader
+    | SaveGameDefinition
 
 
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
@@ -327,7 +343,7 @@ initGameFromGameDefinition gameDefinition =
 
         --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
-        , screeptEnv = { vars = gameDefinition.vars, procedures = gameDefinition.procedures, rnd = Random.initialSeed 666 }
+        , screeptEnv = { vars = gameDefinition.vars |> Dict.fromList, procedures = gameDefinition.procedures |> Dict.fromList, rnd = Random.initialSeed 666 }
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
@@ -339,7 +355,22 @@ initGameFromGameDefinition gameDefinition =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    loadGame (\s -> Json.decodeString decodeGameDefinition s |> Result.mapError (always <| Http.BadBody "bad body") |> GotGameDefinition)
+
+
+
+-- OPTICS
+
+
+model_dialogEditor : Optional Model DialogGameEditor.Model
+model_dialogEditor =
+    Optional .dialogEditor (\s m -> { m | dialogEditor = Just s })
+
+
+model_de_gameDefinition : Optional Model GameDefinition
+model_de_gameDefinition =
+    model_dialogEditor
+        |> Monocle.Compose.optionalWithLens DialogGameEditor.model_gameDefinition
 
 
 
@@ -349,7 +380,8 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ DialogGameEditor.viewDialog model.dialogEditor |> Html.map DialogEditor
+        [ button [ onClick SaveGameDefinition ] [ text "Save to Localstorage" ]
+        , Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
         , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.gameDialog of
             Started _ gameDialogMenu ->
@@ -383,3 +415,12 @@ viewUrlLoader model =
 
         Nothing ->
             text ""
+
+
+port saveGame : String -> Cmd msg
+
+
+port loadGame : (String -> msg) -> Sub msg
+
+
+port askforGame : () -> Cmd msg
