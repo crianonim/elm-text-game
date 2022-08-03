@@ -1082,3 +1082,18 @@ viewAction isEdited optionIndex dialogAction =
 viewExpression : Expression -> Html msg
 viewExpression expression =
     span [ class "de-dialog-condition" ] [ text <| elipsisText <| ScreeptV2.stringifyExpression expression ]
+
+
+emptyGameDefinition : GameDefinition
+emptyGameDefinition =
+    { title = "Game Title"
+    , startDialogId = "start"
+    , vars = []
+    , procedures = []
+    , dialogs =
+        [ { id = "start"
+          , text = Literal <| Text "Dialog text"
+          , options = []
+          }
+        ]
+    }

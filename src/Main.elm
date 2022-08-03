@@ -9,55 +9,21 @@ import Html.Attributes exposing (class, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Json
-import Monocle.Compose
+import Monocle.Compose exposing (lensWithPrism, optionalWithLens, prismWithLens)
 import Monocle.Lens exposing (Lens)
-import Monocle.Optional exposing (Optional)
+import Monocle.Optional as Optional exposing (Optional)
+import Monocle.Prism as Prism exposing (Prism)
 import Platform.Cmd exposing (Cmd)
 import Random
 import ScreeptEditor
-import ScreeptV2 exposing (BinaryOp(..), Expression(..), Identifier(..), Value(..))
+import ScreeptV2 exposing (BinaryOp(..), Expression(..), Identifier(..), TertiaryOp(..), Value(..))
+import Shared exposing (lens_gameDefinition, lens_page)
 import Stack exposing (Stack)
 import Task
 
 
 main : Program () Model Msg
 main =
-    let
-        _ =
-            Debug.log "Stat Exec "
-                (ScreeptV2.parseStatementExample
-                    |> (\e ->
-                            case e of
-                                Err _ ->
-                                    Err ScreeptV2.UnimplementedYet
-
-                                Ok v ->
-                                    ScreeptV2.executeStatement v ( ScreeptV2.exampleScreeptState, [] )
-                       )
-                )
-
-        _ =
-            Debug.log "STAT" ScreeptV2.runExample
-
-        _ =
-            Debug.log "Statement Parse" ScreeptV2.parseStatementExample
-
-        _ =
-            Debug.log "S2 Parse" ScreeptV2.newScreeptParseExample
-
-        _ =
-            Debug.log "S2 Eval "
-                (ScreeptV2.newScreeptParseExample
-                    |> (\e ->
-                            case e of
-                                Err _ ->
-                                    Err ScreeptV2.UnimplementedYet
-
-                                Ok v ->
-                                    ScreeptV2.evaluateExpression ScreeptV2.exampleScreeptState v
-                       )
-                )
-    in
     Browser.element
         { init = init
         , update = update
@@ -66,29 +32,51 @@ main =
         }
 
 
+type alias Model =
+    { page : Page
+    , gameDialog : GameStatus
+    , isDebug : Bool
+
+    --, dialogEditor : Maybe DialogGameEditor.Model
+    , gameDefinition : Maybe GameDefinition
+    , mainMenuDialog : DialogGame.Model
+    , urlLoader : Maybe String
+    }
+
+
+type Page
+    = MainMenuPage
+    | GamePage GameStatus
+    | DialogEditorPage DialogGameEditor.Model
+
+
+type Msg
+    = None
+    | GameDialog DialogGame.Msg
+    | SeedGenerated Random.Seed
+    | DialogEditor DialogGameEditor.Msg
+    | GotGameDefinition (Result Http.Error GameDefinition)
+    | MainMenuDialog DialogGame.Msg
+    | StartGame
+    | StopGame
+    | StartEditor
+    | ShowUrlLoader
+    | HideUrlLoader
+    | EditUrlLoader String
+    | ClickUrlLoader
+    | SaveGameDefinition
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { gameDialog = NotLoaded
-
-      --DialogGame.init
-      --    { counters = Game.counters
-      --    , labels = Game.labels
-      --    , dialogStack = Stack.push Game.initialDialogId Stack.initialise
-      --    , procedures = Game.procedures
-      --    , functions = Game.functions
-      --    , messages = []
-      --    , rnd = Random.initialSeed 666
-      --    }
-      --    (listDialogToDictDialog Game.dialogs)
-      --    (Just Game.statusLine)
+    ( { page = MainMenuPage
+      , gameDialog = NotLoaded
       , isDebug = True
-      , screeptEditor = ScreeptEditor.init
-      , dialogEditor = Nothing
+
+      --, dialogEditor = Nothing
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
-
-      --|> DialogGame.setStatusLine (Just (Screept.Conditional (Screept.parseIntValue "$game_loaded") (Screept.Concat [ Screept.S "Loaded game: ", Screept.Label "game_title" ]) (Screept.S "No game definition loaded.")))
       , urlLoader = Nothing
       }
     , Cmd.batch
@@ -106,10 +94,11 @@ mainMenuDialogs : Dialogs
 mainMenuDialogs =
     DialogGame.listDialogToDictDialog
         [ { id = "start"
-          , text = Literal <| Text "Main Menu"
+          , text = StandardLibrary "CONCAT" [ Literal <| Text "Main Menu. ", TertiaryExpression (Variable <| LiteralIdentifier "game_loaded") Conditional (Variable <| LiteralIdentifier "game_title") (Literal <| Text "No game loaded.") ]
           , options =
                 [ { text = Literal <| Text "Load Game", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
                 , { text = Literal <| Text "Start Game", condition = Just (Variable <| LiteralIdentifier "game_loaded"), actions = [ GoAction "in_game", Exit "start_game" ] }
+                , { text = Literal <| Text "Start Editor", condition = Nothing, actions = [ GoAction "editor", Exit "start_editor" ] }
                 ]
           }
         , { id = "load_game_definition"
@@ -119,6 +108,13 @@ mainMenuDialogs =
                 , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, actions = [ Exit "fabled" ] }
                 , { text = Literal <| Text "Load from url", condition = Nothing, actions = [ Exit "load_url" ] }
                 , DialogGame.goBackOption
+                ]
+          }
+        , { id = "editor"
+          , text = Literal <| Text "Dialog Editor"
+          , options =
+                [ { text = Literal <| Text "Restart", condition = Nothing, actions = [ Exit "start_game" ] }
+                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "stop_game" ] }
                 ]
           }
         , { id = "in_game"
@@ -153,6 +149,9 @@ mainMenuActions dialModel mcode =
 
                 "load_url" ->
                     ( dialModel, Task.succeed ShowUrlLoader |> Task.perform identity )
+
+                "start_editor" ->
+                    ( dialModel, Task.succeed StartEditor |> Task.perform identity )
 
                 _ ->
                     ( dialModel, Cmd.none )
@@ -191,11 +190,8 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ScreeptEditor seMsg ->
-            ( { model | screeptEditor = ScreeptEditor.update seMsg model.screeptEditor }, Cmd.none )
-
         DialogEditor deMsg ->
-            ( { model | dialogEditor = Maybe.map (DialogGameEditor.update deMsg) model.dialogEditor }, Cmd.none )
+            ( { model | page = Prism.modify prism_page_dialogEditorModel (DialogGameEditor.update deMsg) model.page }, Cmd.none )
 
         GotGameDefinition result ->
             case result of
@@ -226,7 +222,7 @@ update msg model =
                         menuDialog =
                             { m | gameState = newGameState }
                     in
-                    ( { model | gameDialog = Loaded value, mainMenuDialog = menuDialog, dialogEditor = Just (DialogGameEditor.init value) }
+                    ( { model | gameDialog = Loaded value, gameDefinition = Just value, mainMenuDialog = menuDialog, page = Prism.modify prism_page_dialogEditorModel (always <| DialogGameEditor.init value) model.page }
                     , Cmd.none
                     )
 
@@ -300,39 +296,14 @@ update msg model =
                     ( model, Cmd.none )
 
         SaveGameDefinition ->
+            ( model, Maybe.map (stringifyGameDefinition >> saveGame) (model_dialogEditorGameDefinition.getOption model) |> Maybe.withDefault Cmd.none )
+
+        StartEditor ->
             let
-                _ =
-                    Debug.log "SGD" (Maybe.map (.gameDefinition >> stringifyGameDefinition) model.dialogEditor)
+                gd =
+                    model.gameDefinition |> Maybe.withDefault DialogGameEditor.emptyGameDefinition
             in
-            ( model, Maybe.map (.gameDefinition >> stringifyGameDefinition >> saveGame) model.dialogEditor |> Maybe.withDefault Cmd.none )
-
-
-type alias Model =
-    { gameDialog : GameStatus
-    , isDebug : Bool
-    , screeptEditor : ScreeptEditor.Model
-    , dialogEditor : Maybe DialogGameEditor.Model
-    , gameDefinition : Maybe GameDefinition
-    , mainMenuDialog : DialogGame.Model
-    , urlLoader : Maybe String
-    }
-
-
-type Msg
-    = None
-    | GameDialog DialogGame.Msg
-    | SeedGenerated Random.Seed
-    | ScreeptEditor ScreeptEditor.Msg
-    | DialogEditor DialogGameEditor.Msg
-    | GotGameDefinition (Result Http.Error GameDefinition)
-    | MainMenuDialog DialogGame.Msg
-    | StartGame
-    | StopGame
-    | ShowUrlLoader
-    | HideUrlLoader
-    | EditUrlLoader String
-    | ClickUrlLoader
-    | SaveGameDefinition
+            ( { model | page = DialogEditorPage <| DialogGameEditor.init gd }, Cmd.none )
 
 
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
@@ -362,15 +333,39 @@ subscriptions model =
 -- OPTICS
 
 
-model_dialogEditor : Optional Model DialogGameEditor.Model
-model_dialogEditor =
-    Optional .dialogEditor (\s m -> { m | dialogEditor = Just s })
+model_dialogEditorGameDefinition : Optional Model GameDefinition
+model_dialogEditorGameDefinition =
+    lens_page
+        |> lensWithPrism
+            prism_page_dialogEditorModel
+        |> optionalWithLens
+            lens_gameDefinition
 
 
-model_de_gameDefinition : Optional Model GameDefinition
-model_de_gameDefinition =
-    model_dialogEditor
-        |> Monocle.Compose.optionalWithLens DialogGameEditor.model_gameDefinition
+
+--
+--model_dialogEditor : Optional Model DialogGameEditor.Model
+--model_dialogEditor =
+--    Optional .dialogEditor (\s m -> { m | dialogEditor = Just s })
+--
+--model_de_gameDefinition : Optional Model GameDefinition
+--model_de_gameDefinition =
+--    model_dialogEditor
+--        |> Monocle.Compose.optionalWithLens DialogGameEditor.model_gameDefinition
+
+
+prism_page_dialogEditorModel : Prism Page DialogGameEditor.Model
+prism_page_dialogEditorModel =
+    { getOption =
+        \page ->
+            case page of
+                DialogEditorPage m ->
+                    Just m
+
+                _ ->
+                    Nothing
+    , reverseGet = DialogEditorPage
+    }
 
 
 
@@ -379,10 +374,20 @@ model_de_gameDefinition =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ button [ onClick SaveGameDefinition ] [ text "Save to Localstorage" ]
-        , Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
-        , DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
+    div [ class "my-container" ]
+        [ DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
+        , button [ onClick SaveGameDefinition ] [ text "Save to Localstorage" ]
+
+        --, Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
+        , case model.page of
+            MainMenuPage ->
+                text "Main menu"
+
+            GamePage gameStatus ->
+                text "game"
+
+            DialogEditorPage dialogEditorModel ->
+                DialogGameEditor.view dialogEditorModel |> Html.map DialogEditor
         , case model.gameDialog of
             Started _ gameDialogMenu ->
                 DialogGame.view gameDialogMenu |> Html.map GameDialog
@@ -395,10 +400,6 @@ view model =
 
             Loaded m ->
                 div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
-        , ScreeptEditor.view model.screeptEditor |> Html.map ScreeptEditor
-
-        --, textarea [] [ text <| stringifyGameDefinition (GameDefinition (model.dialogs |> Dict.values) model.statusLine Game.initialDialogId model.gameState.counters model.gameState.labels model.gameState.procedures model.gameState.functions) ]
-        --, ScreeptEditor.viewStatement ScreeptEditor.init.screept
         , viewUrlLoader model
         ]
 

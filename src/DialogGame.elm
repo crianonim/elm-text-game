@@ -336,7 +336,7 @@ view { gameState, dialogs } =
         dialog =
             getDialog (Stack.top gameState.dialogStack |> Maybe.withDefault "bad") dialogs
     in
-    div [ class "container" ]
+    div [ class "my-container" ]
         [ div [ class "dialog" ]
             [ if Dict.member "__statusLine" gameState.screeptEnv.vars then
                 viewDialogText (FunctionCall (LiteralIdentifier "__statusLine") []) gameState

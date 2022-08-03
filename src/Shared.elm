@@ -81,6 +81,16 @@ optional_editedVar =
     Optional .editedVar (\s m -> { m | editedVar = Just s })
 
 
+lens_gameDefinition : Lens { a | gameDefinition : b } b
+lens_gameDefinition =
+    Lens .gameDefinition (\s m -> { m | gameDefinition = s })
+
+
+lens_page : Lens { a | page : b } b
+lens_page =
+    Lens .page (\s m -> { m | page = s })
+
+
 parsedEditableExpression : Expression -> ParsedEditable.Model Expression
 parsedEditableExpression value =
     ParsedEditable.init value parserExpression stringifyExpression
