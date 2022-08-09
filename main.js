@@ -5548,7 +5548,6 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$MainMenuPage = {$: 'MainMenuPage'};
-var $author$project$Main$NotLoaded = {$: 'NotLoaded'};
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
@@ -5777,6 +5776,7 @@ var $author$project$DialogGame$Exit = function (a) {
 var $author$project$DialogGame$GoAction = function (a) {
 	return {$: 'GoAction', a: a};
 };
+var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
 var $author$project$ScreeptV2$Literal = function (a) {
 	return {$: 'Literal', a: a};
 };
@@ -5797,7 +5797,6 @@ var $author$project$ScreeptV2$Text = function (a) {
 var $author$project$ScreeptV2$Variable = function (a) {
 	return {$: 'Variable', a: a};
 };
-var $author$project$DialogGame$GoBackAction = {$: 'GoBackAction'};
 var $author$project$DialogGame$goBackOption = {
 	actions: _List_fromArray(
 		[$author$project$DialogGame$GoBackAction]),
@@ -6086,7 +6085,16 @@ var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialog
 					text: $author$project$ScreeptV2$Literal(
 						$author$project$ScreeptV2$Text('New GameDefinition'))
 				},
-					$author$project$DialogGame$goBackOption
+					{
+					actions: _List_fromArray(
+						[
+							$author$project$DialogGame$GoBackAction,
+							$author$project$DialogGame$Exit('goto_main')
+						]),
+					condition: $elm$core$Maybe$Nothing,
+					text: $author$project$ScreeptV2$Literal(
+						$author$project$ScreeptV2$Text('Go back'))
+				}
 				]),
 			text: $author$project$ScreeptV2$Literal(
 				$author$project$ScreeptV2$Text('Dialog Editor'))
@@ -6108,7 +6116,7 @@ var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialog
 					actions: _List_fromArray(
 						[
 							$author$project$DialogGame$GoAction('start'),
-							$author$project$DialogGame$Exit('stop_game')
+							$author$project$DialogGame$Exit('goto_main')
 						]),
 					condition: $elm$core$Maybe$Nothing,
 					text: $author$project$ScreeptV2$Literal(
@@ -6128,7 +6136,6 @@ var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			gameDefinition: $elm$core$Maybe$Nothing,
-			gameDialog: $author$project$Main$NotLoaded,
 			isDebug: true,
 			mainMenuDialog: $author$project$DialogGame$initSimple($author$project$Main$mainMenuDialogs),
 			page: $author$project$Main$MainMenuPage,
@@ -7971,13 +7978,9 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$DialogEditorPage = function (a) {
 	return {$: 'DialogEditorPage', a: a};
 };
-var $author$project$Main$Loaded = function (a) {
-	return {$: 'Loaded', a: a};
+var $author$project$Main$GamePage = function (a) {
+	return {$: 'GamePage', a: a};
 };
-var $author$project$Main$Started = F2(
-	function (a, b) {
-		return {$: 'Started', a: a, b: b};
-	});
 var $author$project$DialogGameEditor$emptyGameDefinition = {
 	dialogs: _List_fromArray(
 		[
@@ -9268,7 +9271,6 @@ var $author$project$Main$loadedGame = F2(
 			model,
 			{
 				gameDefinition: $elm$core$Maybe$Just(value),
-				gameDialog: $author$project$Main$Loaded(value),
 				mainMenuDialog: menuDialog,
 				page: A3(
 					$arturopala$elm_monocle$Monocle$Prism$modify,
@@ -9278,11 +9280,11 @@ var $author$project$Main$loadedGame = F2(
 					model.page)
 			});
 	});
+var $author$project$Main$GotoMainMenu = {$: 'GotoMainMenu'};
 var $author$project$Main$SaveGameDefinition = {$: 'SaveGameDefinition'};
 var $author$project$Main$ShowUrlLoader = {$: 'ShowUrlLoader'};
 var $author$project$Main$StartEditor = {$: 'StartEditor'};
 var $author$project$Main$StartGame = {$: 'StartGame'};
-var $author$project$Main$StopGame = {$: 'StopGame'};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Main$askforGame = _Platform_outgoingPort(
 	'askforGame',
@@ -9320,13 +9322,13 @@ var $author$project$Main$mainMenuActions = F2(
 							$elm$core$Task$perform,
 							$elm$core$Basics$identity,
 							$elm$core$Task$succeed($author$project$Main$StartGame)));
-				case 'stop_game':
+				case 'goto_main':
 					return _Utils_Tuple2(
 						dialModel,
 						A2(
 							$elm$core$Task$perform,
 							$elm$core$Basics$identity,
-							$elm$core$Task$succeed($author$project$Main$StopGame)));
+							$elm$core$Task$succeed($author$project$Main$GotoMainMenu)));
 				case 'load_url':
 					return _Utils_Tuple2(
 						dialModel,
@@ -9450,6 +9452,18 @@ var $author$project$Main$model_dialogEditorGameDefinition = A2(
 	$arturopala$elm_monocle$Monocle$Compose$optionalWithLens,
 	$author$project$Shared$lens_gameDefinition,
 	A2($arturopala$elm_monocle$Monocle$Compose$lensWithPrism, $author$project$Main$prism_page_dialogEditorModel, $author$project$Shared$lens_page));
+var $author$project$Main$prism_page_game = {
+	getOption: function (page) {
+		if (page.$ === 'GamePage') {
+			var m = page.a;
+			return $elm$core$Maybe$Just(m);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	},
+	reverseGet: $author$project$Main$GamePage
+};
+var $author$project$Main$model_gameModel = A2($arturopala$elm_monocle$Monocle$Compose$lensWithPrism, $author$project$Main$prism_page_game, $author$project$Shared$lens_page);
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Main$saveGame = _Platform_outgoingPort('saveGame', $elm$json$Json$Encode$string);
 var $author$project$DialogGame$setRndSeed = F2(
@@ -11272,42 +11286,25 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'GameDialog':
 				var gdm = msg.a;
-				var _v1 = model.gameDialog;
-				if (_v1.$ === 'Started') {
-					var gamedef = _v1.a;
-					var gameDialogModel = _v1.b;
-					var _v2 = A2($author$project$DialogGame$update, gdm, gameDialogModel);
-					var gdModel = _v2.a;
-					var exitCode = _v2.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								gameDialog: A2($author$project$Main$Started, gamedef, gdModel)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				return _Utils_Tuple2(
+					A3(
+						$arturopala$elm_monocle$Monocle$Optional$modify,
+						$author$project$Main$model_gameModel,
+						A2(
+							$elm$core$Basics$composeR,
+							$author$project$DialogGame$update(gdm),
+							$elm$core$Tuple$first),
+						model),
+					$elm$core$Platform$Cmd$none);
 			case 'SeedGenerated':
 				var seed = msg.a;
-				var _v3 = model.gameDialog;
-				if (_v3.$ === 'Started') {
-					var gamedef = _v3.a;
-					var gameDialogModel = _v3.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								gameDialog: A2(
-									$author$project$Main$Started,
-									gamedef,
-									A2($author$project$DialogGame$setRndSeed, seed, gameDialogModel))
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				return _Utils_Tuple2(
+					A3(
+						$arturopala$elm_monocle$Monocle$Optional$modify,
+						$author$project$Main$model_gameModel,
+						$author$project$DialogGame$setRndSeed(seed),
+						model),
+					$elm$core$Platform$Cmd$none);
 			case 'DialogEditor':
 				var deMsg = msg.a;
 				return _Utils_Tuple2(
@@ -11325,7 +11322,7 @@ var $author$project$Main$update = F2(
 				var result = msg.a;
 				if (result.$ === 'Err') {
 					var e = result.a;
-					var _v5 = A2($elm$core$Debug$log, 'Error', e);
+					var _v2 = A2($elm$core$Debug$log, 'Error', e);
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
 					var value = result.a;
@@ -11335,62 +11332,33 @@ var $author$project$Main$update = F2(
 				}
 			case 'MainMenuDialog':
 				var menuMsg = msg.a;
-				var _v6 = A2($author$project$DialogGame$update, menuMsg, model.mainMenuDialog);
-				var menuModel = _v6.a;
-				var exitCode = _v6.b;
-				var _v7 = A2($author$project$Main$mainMenuActions, menuModel, exitCode);
-				var newMenuModel = _v7.a;
-				var cmd = _v7.b;
+				var _v3 = A2($author$project$DialogGame$update, menuMsg, model.mainMenuDialog);
+				var menuModel = _v3.a;
+				var exitCode = _v3.b;
+				var _v4 = A2($author$project$Main$mainMenuActions, menuModel, exitCode);
+				var newMenuModel = _v4.a;
+				var cmd = _v4.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{mainMenuDialog: newMenuModel}),
 					cmd);
 			case 'StartGame':
-				var gameDialog = function (gameDefinition) {
-					var m = $author$project$Main$initGameFromGameDefinition(gameDefinition);
-					return A2($author$project$Main$Started, gameDefinition, m);
-				};
-				var _v8 = model.gameDialog;
-				switch (_v8.$) {
-					case 'NotLoaded':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'Loading':
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					case 'Loaded':
-						var gameDefinition = _v8.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									gameDialog: gameDialog(gameDefinition)
-								}),
-							A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
-					default:
-						var gameDefinition = _v8.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									gameDialog: gameDialog(gameDefinition)
-								}),
-							A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
-				}
-			case 'StopGame':
-				var _v9 = model.gameDialog;
-				if (_v9.$ === 'Started') {
-					var gd = _v9.a;
-					var m = _v9.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								gameDialog: $author$project$Main$Loaded(gd)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var gd = A2($elm$core$Maybe$withDefault, $author$project$DialogGameEditor$emptyGameDefinition, model.gameDefinition);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							page: $author$project$Main$GamePage(
+								$author$project$Main$initGameFromGameDefinition(gd))
+						}),
+					A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed));
+			case 'GotoMainMenu':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{page: $author$project$Main$MainMenuPage}),
+					$elm$core$Platform$Cmd$none);
 			case 'ShowUrlLoader':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -11417,10 +11385,10 @@ var $author$project$Main$update = F2(
 						{urlLoader: urlModel}),
 					$elm$core$Platform$Cmd$none);
 			case 'ClickUrlLoader':
-				var _v10 = model.urlLoader;
-				if (_v10.$ === 'Just') {
-					var urlLoader = _v10.a;
-					var _v11 = A2($elm$core$Debug$log, 'URL', urlLoader);
+				var _v5 = model.urlLoader;
+				if (_v5.$ === 'Just') {
+					var urlLoader = _v5.a;
+					var _v6 = A2($elm$core$Debug$log, 'URL', urlLoader);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -11445,8 +11413,8 @@ var $author$project$Main$update = F2(
 							$author$project$Main$model_dialogEditorGameDefinition.getOption(model))));
 			default:
 				var newModel = function () {
-					var _v12 = model.gameDefinition;
-					if (_v12.$ === 'Nothing') {
+					var _v7 = model.gameDefinition;
+					if (_v7.$ === 'Nothing') {
 						return A2($author$project$Main$loadedGame, model, $author$project$DialogGameEditor$emptyGameDefinition);
 					} else {
 						return model;
@@ -13023,52 +12991,19 @@ var $author$project$Main$view = function (model) {
 				var _v0 = model.page;
 				switch (_v0.$) {
 					case 'MainMenuPage':
-						return $elm$html$Html$text('Main menu');
+						return $elm$html$Html$text('');
 					case 'GamePage':
-						var gameStatus = _v0.a;
-						return $elm$html$Html$text('game');
+						var gameModel = _v0.a;
+						return A2(
+							$elm$html$Html$map,
+							$author$project$Main$GameDialog,
+							$author$project$DialogGame$view(gameModel));
 					default:
 						var dialogEditorModel = _v0.a;
 						return A2(
 							$elm$html$Html$map,
 							$author$project$Main$DialogEditor,
 							$author$project$DialogGameEditor$view(dialogEditorModel));
-				}
-			}(),
-				function () {
-				var _v1 = model.gameDialog;
-				switch (_v1.$) {
-					case 'Started':
-						var gameDialogMenu = _v1.b;
-						return A2(
-							$elm$html$Html$map,
-							$author$project$Main$GameDialog,
-							$author$project$DialogGame$view(gameDialogMenu));
-					case 'NotLoaded':
-						return A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('dialog')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('No game definition loaded.')
-								]));
-					case 'Loading':
-						return $elm$html$Html$text('Loading...');
-					default:
-						var m = _v1.a;
-						return A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('dialog')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Loaded game:  ' + (m.title + '.'))
-								]));
 				}
 			}(),
 				$author$project$Main$viewUrlLoader(model)

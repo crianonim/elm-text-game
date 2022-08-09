@@ -34,10 +34,7 @@ main =
 
 type alias Model =
     { page : Page
-    , gameDialog : GameStatus
     , isDebug : Bool
-
-    --, dialogEditor : Maybe DialogGameEditor.Model
     , gameDefinition : Maybe GameDefinition
     , mainMenuDialog : DialogGame.Model
     , urlLoader : Maybe String
@@ -46,7 +43,7 @@ type alias Model =
 
 type Page
     = MainMenuPage
-    | GamePage GameStatus
+    | GamePage DialogGame.Model
     | DialogEditorPage DialogGameEditor.Model
 
 
@@ -58,7 +55,7 @@ type Msg
     | GotGameDefinition (Result Http.Error GameDefinition)
     | MainMenuDialog DialogGame.Msg
     | StartGame
-    | StopGame
+    | GotoMainMenu
     | StartEditor
     | ShowUrlLoader
     | HideUrlLoader
@@ -70,10 +67,7 @@ type Msg
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { page = MainMenuPage
-      , gameDialog = NotLoaded
       , isDebug = True
-
-      --, dialogEditor = Nothing
       , gameDefinition = Nothing
       , mainMenuDialog =
             DialogGame.initSimple mainMenuDialogs
@@ -124,14 +118,14 @@ mainMenuDialogs =
                 [ { text = Literal <| Text "Load GameDefinition", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
                 , { text = Literal <| Text "Save GameDefinition", condition = Nothing, actions = [ GoAction "   save_game_definition" ] }
                 , { text = Literal <| Text "New GameDefinition", condition = Nothing, actions = [ Exit "new_game_definition" ] }
-                , DialogGame.goBackOption
+                , { text = Literal <| Text "Go back", condition = Nothing, actions = [ GoBackAction, Exit "goto_main" ] }
                 ]
           }
         , { id = "in_game"
           , text = BinaryExpression (Literal <| Text "Playing: ") Add (Variable <| LiteralIdentifier "game_title")
           , options =
                 [ { text = Literal <| Text "Restart", condition = Nothing, actions = [ Exit "start_game" ] }
-                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "stop_game" ] }
+                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "goto_main" ] }
                 ]
           }
         ]
@@ -154,8 +148,8 @@ mainMenuActions dialModel mcode =
                 "start_game" ->
                     ( dialModel, Task.succeed StartGame |> Task.perform identity )
 
-                "stop_game" ->
-                    ( dialModel, Task.succeed StopGame |> Task.perform identity )
+                "goto_main" ->
+                    ( dialModel, Task.succeed GotoMainMenu |> Task.perform identity )
 
                 "load_url" ->
                     ( dialModel, Task.succeed ShowUrlLoader |> Task.perform identity )
@@ -176,13 +170,6 @@ mainMenuActions dialModel mcode =
                     ( dialModel, Cmd.none )
 
 
-type GameStatus
-    = NotLoaded
-    | Loading
-    | Loaded GameDefinition
-    | Started GameDefinition DialogGame.Model
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -190,24 +177,14 @@ update msg model =
             ( model, Cmd.none )
 
         GameDialog gdm ->
-            case model.gameDialog of
-                Started gamedef gameDialogModel ->
-                    let
-                        ( gdModel, exitCode ) =
-                            DialogGame.update gdm gameDialogModel
-                    in
-                    ( { model | gameDialog = Started gamedef gdModel }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+            ( Optional.modify model_gameModel
+                (DialogGame.update gdm >> Tuple.first)
+                model
+            , Cmd.none
+            )
 
         SeedGenerated seed ->
-            case model.gameDialog of
-                Started gamedef gameDialogModel ->
-                    ( { model | gameDialog = Started gamedef <| DialogGame.setRndSeed seed gameDialogModel }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+            ( Optional.modify model_gameModel (DialogGame.setRndSeed seed) model, Cmd.none )
 
         DialogEditor deMsg ->
             ( { model | page = Prism.modify prism_page_dialogEditorModel (DialogGameEditor.update deMsg) model.page }, Cmd.none )
@@ -236,37 +213,15 @@ update msg model =
 
         StartGame ->
             let
-                gameDialog gameDefinition =
-                    let
-                        m =
-                            initGameFromGameDefinition gameDefinition
-                    in
-                    Started gameDefinition m
+                gd =
+                    model.gameDefinition |> Maybe.withDefault DialogGameEditor.emptyGameDefinition
             in
-            case model.gameDialog of
-                NotLoaded ->
-                    ( model, Cmd.none )
+            ( { model | page = GamePage (initGameFromGameDefinition gd) }
+            , Random.generate SeedGenerated Random.independentSeed
+            )
 
-                Loading ->
-                    ( model, Cmd.none )
-
-                Loaded gameDefinition ->
-                    ( { model
-                        | gameDialog = gameDialog gameDefinition
-                      }
-                    , Random.generate SeedGenerated Random.independentSeed
-                    )
-
-                Started gameDefinition _ ->
-                    ( { model | gameDialog = gameDialog gameDefinition }, Random.generate SeedGenerated Random.independentSeed )
-
-        StopGame ->
-            case model.gameDialog of
-                Started gd m ->
-                    ( { model | gameDialog = Loaded gd }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+        GotoMainMenu ->
+            ( { model | page = MainMenuPage }, Cmd.none )
 
         ShowUrlLoader ->
             ( { model | urlLoader = Just "" }, Cmd.none )
@@ -317,8 +272,6 @@ initGameFromGameDefinition gameDefinition =
     { gameState =
         { --
           messages = []
-
-        --, rnd = Random.initialSeed 666
         , dialogStack = Stack.initialise |> Stack.push gameDefinition.startDialogId
         , screeptEnv = { vars = gameDefinition.vars |> Dict.fromList, procedures = gameDefinition.procedures |> Dict.fromList, rnd = Random.initialSeed 666 }
         }
@@ -347,7 +300,7 @@ loadedGame model value =
         menuDialog =
             { m | gameState = newGameState }
     in
-    { model | gameDialog = Loaded value, gameDefinition = Just value, mainMenuDialog = menuDialog, page = Prism.modify prism_page_dialogEditorModel (always <| DialogGameEditor.init value) model.page }
+    { model | gameDefinition = Just value, mainMenuDialog = menuDialog, page = Prism.modify prism_page_dialogEditorModel (always <| DialogGameEditor.init value) model.page }
 
 
 
@@ -372,18 +325,6 @@ model_dialogEditorGameDefinition =
             lens_gameDefinition
 
 
-
---
---model_dialogEditor : Optional Model DialogGameEditor.Model
---model_dialogEditor =
---    Optional .dialogEditor (\s m -> { m | dialogEditor = Just s })
---
---model_de_gameDefinition : Optional Model GameDefinition
---model_de_gameDefinition =
---    model_dialogEditor
---        |> Monocle.Compose.optionalWithLens DialogGameEditor.model_gameDefinition
-
-
 prism_page_dialogEditorModel : Prism Page DialogGameEditor.Model
 prism_page_dialogEditorModel =
     { getOption =
@@ -398,6 +339,26 @@ prism_page_dialogEditorModel =
     }
 
 
+prism_page_game : Prism Page DialogGame.Model
+prism_page_game =
+    { getOption =
+        \page ->
+            case page of
+                GamePage m ->
+                    Just m
+
+                _ ->
+                    Nothing
+    , reverseGet = GamePage
+    }
+
+
+model_gameModel : Optional Model DialogGame.Model
+model_gameModel =
+    lens_page
+        |> lensWithPrism prism_page_game
+
+
 
 -- VIEW
 
@@ -408,25 +369,13 @@ view model =
         [ DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.page of
             MainMenuPage ->
-                text "Main menu"
+                text ""
 
-            GamePage gameStatus ->
-                text "game"
+            GamePage gameModel ->
+                DialogGame.view gameModel |> Html.map GameDialog
 
             DialogEditorPage dialogEditorModel ->
                 DialogGameEditor.view dialogEditorModel |> Html.map DialogEditor
-        , case model.gameDialog of
-            Started _ gameDialogMenu ->
-                DialogGame.view gameDialogMenu |> Html.map GameDialog
-
-            NotLoaded ->
-                div [ class "dialog" ] [ text "No game definition loaded." ]
-
-            Loading ->
-                text "Loading..."
-
-            Loaded m ->
-                div [ class "dialog" ] [ text <| "Loaded game:  " ++ m.title ++ "." ]
         , viewUrlLoader model
         ]
 
