@@ -3,7 +3,7 @@ module DialogGameEditor exposing (..)
 import DialogGame exposing (..)
 import Dict
 import Html exposing (..)
-import Html.Attributes exposing (class, disabled, selected, value)
+import Html.Attributes exposing (class, disabled, selected, style, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra
 import Monocle.Compose exposing (lensWithLens, lensWithOptional, optionalWithLens, optionalWithOptional)
@@ -778,6 +778,13 @@ view : Model -> Html Msg
 view model =
     div []
         [ h5 [] [ text "Dialog Editor" ]
+        , textarea
+            [ style "width" "100%"
+            , style "height" "10em"
+            , disabled True
+            , value (DialogGame.stringifyGameDefinition model.gameDefinition)
+            ]
+            []
         , div []
             [ text "Title: "
             , input
@@ -809,7 +816,6 @@ view model =
         , div [] (List.indexedMap (viewVar model) model.gameDefinition.vars)
         , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
-        , textarea [ value (DialogGame.stringifyGameDefinition model.gameDefinition) ] []
         ]
 
 

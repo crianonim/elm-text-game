@@ -85,7 +85,7 @@ init _ =
         --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-        , askforGame ()
+        --, askforGame ()
         ]
     )
 
@@ -107,14 +107,24 @@ mainMenuDialogs =
                 [ { text = Literal <| Text "Load Sandbox", condition = Nothing, actions = [ Exit "sandbox" ] }
                 , { text = Literal <| Text "Load Fabled Lands", condition = Nothing, actions = [ Exit "fabled" ] }
                 , { text = Literal <| Text "Load from url", condition = Nothing, actions = [ Exit "load_url" ] }
+                , { text = Literal <| Text "Load from localStorage", condition = Nothing, actions = [ Exit "load_localStorage" ] }
+                , DialogGame.goBackOption
+                ]
+          }
+        , { id = "save_game_definition"
+          , text = Literal <| Text "Save game definition"
+          , options =
+                [ { text = Literal <| Text "Save to localStorage", condition = Nothing, actions = [ Exit "save_game_definition_localStorage" ] }
                 , DialogGame.goBackOption
                 ]
           }
         , { id = "editor"
           , text = Literal <| Text "Dialog Editor"
           , options =
-                [ { text = Literal <| Text "Restart", condition = Nothing, actions = [ Exit "start_game" ] }
-                , { text = Literal <| Text "Stop game", condition = Nothing, actions = [ GoAction "start", Exit "stop_game" ] }
+                [ { text = Literal <| Text "Load GameDefinition", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
+                , { text = Literal <| Text "Save GameDefinition", condition = Nothing, actions = [ GoAction "   save_game_definition" ] }
+                , { text = Literal <| Text "New GameDefinition", condition = Nothing, actions = [ Exit "new_game_definition" ] }
+                , DialogGame.goBackOption
                 ]
           }
         , { id = "in_game"
@@ -152,6 +162,15 @@ mainMenuActions dialModel mcode =
 
                 "start_editor" ->
                     ( dialModel, Task.succeed StartEditor |> Task.perform identity )
+
+                "new_game_definition" ->
+                    ( dialModel, Task.succeed (GotGameDefinition (Ok DialogGameEditor.emptyGameDefinition)) |> Task.perform identity )
+
+                "load_localStorage" ->
+                    ( dialModel, askforGame () )
+
+                "save_game_definition_localStorage" ->
+                    ( dialModel, Task.succeed SaveGameDefinition |> Task.perform identity )
 
                 _ ->
                     ( dialModel, Cmd.none )
@@ -203,28 +222,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 Ok value ->
-                    let
-                        _ =
-                            Debug.log "Success decode" value.dialogs
-
-                        m =
-                            model.mainMenuDialog
-
-                        ( newScreeptState, _ ) =
-                            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptEnv
-
-                        gameState =
-                            m.gameState
-
-                        newGameState =
-                            { gameState | screeptEnv = newScreeptState }
-
-                        menuDialog =
-                            { m | gameState = newGameState }
-                    in
-                    ( { model | gameDialog = Loaded value, gameDefinition = Just value, mainMenuDialog = menuDialog, page = Prism.modify prism_page_dialogEditorModel (always <| DialogGameEditor.init value) model.page }
-                    , Cmd.none
-                    )
+                    ( loadedGame model value, Cmd.none )
 
         MainMenuDialog menuMsg ->
             let
@@ -302,8 +300,16 @@ update msg model =
             let
                 gd =
                     model.gameDefinition |> Maybe.withDefault DialogGameEditor.emptyGameDefinition
+
+                newModel =
+                    case model.gameDefinition of
+                        Nothing ->
+                            loadedGame model DialogGameEditor.emptyGameDefinition
+
+                        Just _ ->
+                            model
             in
-            ( { model | page = DialogEditorPage <| DialogGameEditor.init gd }, Cmd.none )
+            ( { newModel | page = DialogEditorPage <| DialogGameEditor.init gd }, Cmd.none )
 
 
 initGameFromGameDefinition : GameDefinition -> DialogGame.Model
@@ -318,6 +324,30 @@ initGameFromGameDefinition gameDefinition =
         }
     , dialogs = listDialogToDictDialog gameDefinition.dialogs
     }
+
+
+loadedGame : Model -> GameDefinition -> Model
+loadedGame model value =
+    let
+        _ =
+            Debug.log "Success decode" value.dialogs
+
+        m =
+            model.mainMenuDialog
+
+        ( newScreeptState, _ ) =
+            ScreeptV2.executeStringStatement ("{ game_loaded = 1;  game_title = \"" ++ value.title ++ "\" }") m.gameState.screeptEnv
+
+        gameState =
+            m.gameState
+
+        newGameState =
+            { gameState | screeptEnv = newScreeptState }
+
+        menuDialog =
+            { m | gameState = newGameState }
+    in
+    { model | gameDialog = Loaded value, gameDefinition = Just value, mainMenuDialog = menuDialog, page = Prism.modify prism_page_dialogEditorModel (always <| DialogGameEditor.init value) model.page }
 
 
 
@@ -376,9 +406,6 @@ view : Model -> Html Msg
 view model =
     div [ class "my-container" ]
         [ DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
-        , button [ onClick SaveGameDefinition ] [ text "Save to Localstorage" ]
-
-        --, Maybe.map DialogGameEditor.view model.dialogEditor |> Maybe.withDefault (text "") |> Html.map DialogEditor
         , case model.page of
             MainMenuPage ->
                 text "Main menu"
