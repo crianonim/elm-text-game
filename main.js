@@ -6070,7 +6070,7 @@ var $author$project$Main$mainMenuDialogs = $author$project$DialogGame$listDialog
 					{
 					actions: _List_fromArray(
 						[
-							$author$project$DialogGame$GoAction('   save_game_definition')
+							$author$project$DialogGame$GoAction('save_game_definition')
 						]),
 					condition: $elm$core$Maybe$Nothing,
 					text: $author$project$ScreeptV2$Literal(
@@ -11685,12 +11685,25 @@ var $author$project$DialogGame$view = function (_v0) {
 				$author$project$DialogGame$viewDebug(gameState)
 			]));
 };
+var $author$project$DialogGameEditor$DialogsManipulation = function (a) {
+	return {$: 'DialogsManipulation', a: a};
+};
 var $author$project$DialogGameEditor$EditStartDialogId = function (a) {
 	return {$: 'EditStartDialogId', a: a};
 };
 var $author$project$DialogGameEditor$EditTitle = function (a) {
 	return {$: 'EditTitle', a: a};
 };
+var $author$project$Shared$NewAt = function (a) {
+	return {$: 'NewAt', a: a};
+};
+var $author$project$DialogGameEditor$ProcedureManipulation = function (a) {
+	return {$: 'ProcedureManipulation', a: a};
+};
+var $author$project$DialogGameEditor$VarsManipulation = function (a) {
+	return {$: 'VarsManipulation', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -11756,14 +11769,10 @@ var $author$project$DialogGameEditor$DialogIdEdit = function (a) {
 var $author$project$DialogGameEditor$DialogTextEdit = function (a) {
 	return {$: 'DialogTextEdit', a: a};
 };
-var $author$project$DialogGameEditor$DialogsManipulation = function (a) {
-	return {$: 'DialogsManipulation', a: a};
-};
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$StartDialogEdit = function (a) {
 	return {$: 'StartDialogEdit', a: a};
 };
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$Shared$lens_oldValue, $author$project$DialogGameEditor$model_editedDialog);
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
@@ -11895,9 +11904,6 @@ var $author$project$Shared$MovePosition = F2(
 	function (a, b) {
 		return {$: 'MovePosition', a: a, b: b};
 	});
-var $author$project$Shared$NewAt = function (a) {
-	return {$: 'NewAt', a: a};
-};
 var $author$project$Shared$viewManipulateButtons = F3(
 	function (kind, msgWrap, index) {
 		return A2(
@@ -12510,9 +12516,6 @@ var $author$project$DialogGameEditor$EditProcName = function (a) {
 var $author$project$DialogGameEditor$ProcedureEdit = function (a) {
 	return {$: 'ProcedureEdit', a: a};
 };
-var $author$project$DialogGameEditor$ProcedureManipulation = function (a) {
-	return {$: 'ProcedureManipulation', a: a};
-};
 var $author$project$DialogGameEditor$SaveProcedure = {$: 'SaveProcedure'};
 var $author$project$DialogGameEditor$StartProcedureEdit = function (a) {
 	return {$: 'StartProcedureEdit', a: a};
@@ -12611,9 +12614,6 @@ var $author$project$DialogGameEditor$StartVarEdit = function (a) {
 };
 var $author$project$DialogGameEditor$VarEdit = function (a) {
 	return {$: 'VarEdit', a: a};
-};
-var $author$project$DialogGameEditor$VarsManipulation = function (a) {
-	return {$: 'VarsManipulation', a: a};
 };
 var $author$project$DialogGameEditor$viewValue = function (value) {
 	switch (value.$) {
@@ -12897,6 +12897,18 @@ var $author$project$DialogGameEditor$view = function (model) {
 					$elm$core$List$indexedMap,
 					$author$project$DialogGameEditor$viewProcedure(model),
 					model.gameDefinition.procedures)),
+				$elm$core$List$isEmpty(model.gameDefinition.procedures) ? A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$ProcedureManipulation(
+							$author$project$Shared$NewAt(0)))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('New procedure')
+					])) : $elm$html$Html$text(''),
 				A2(
 				$elm$html$Html$h6,
 				_List_Nil,
@@ -12911,6 +12923,18 @@ var $author$project$DialogGameEditor$view = function (model) {
 					$elm$core$List$indexedMap,
 					$author$project$DialogGameEditor$viewVar(model),
 					model.gameDefinition.vars)),
+				$elm$core$List$isEmpty(model.gameDefinition.vars) ? A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$VarsManipulation(
+							$author$project$Shared$NewAt(0)))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('New var')
+					])) : $elm$html$Html$text(''),
 				A2(
 				$elm$html$Html$h6,
 				_List_Nil,
@@ -12924,7 +12948,19 @@ var $author$project$DialogGameEditor$view = function (model) {
 				A2(
 					$elm$core$List$indexedMap,
 					$author$project$DialogGameEditor$viewDialog(model),
-					model.gameDefinition.dialogs))
+					model.gameDefinition.dialogs)),
+				$elm$core$List$isEmpty(model.gameDefinition.dialogs) ? A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$DialogGameEditor$DialogsManipulation(
+							$author$project$Shared$NewAt(0)))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('New dialog')
+					])) : $elm$html$Html$text('')
 			]));
 };
 var $author$project$Main$ClickUrlLoader = {$: 'ClickUrlLoader'};

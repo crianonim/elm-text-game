@@ -116,7 +116,7 @@ mainMenuDialogs =
           , text = Literal <| Text "Dialog Editor"
           , options =
                 [ { text = Literal <| Text "Load GameDefinition", condition = Nothing, actions = [ GoAction "load_game_definition" ] }
-                , { text = Literal <| Text "Save GameDefinition", condition = Nothing, actions = [ GoAction "   save_game_definition" ] }
+                , { text = Literal <| Text "Save GameDefinition", condition = Nothing, actions = [ GoAction "save_game_definition" ] }
                 , { text = Literal <| Text "New GameDefinition", condition = Nothing, actions = [ Exit "new_game_definition" ] }
                 , { text = Literal <| Text "Go back", condition = Nothing, actions = [ GoBackAction, Exit "goto_main" ] }
                 ]

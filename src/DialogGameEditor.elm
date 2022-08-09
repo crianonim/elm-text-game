@@ -812,10 +812,25 @@ view model =
             ]
         , h6 [] [ text "Procedures:" ]
         , div [] (List.indexedMap (viewProcedure model) model.gameDefinition.procedures)
+        , if List.isEmpty model.gameDefinition.procedures then
+            button [ onClick <| ProcedureManipulation <| NewAt 0 ] [ text <| "New procedure" ]
+
+          else
+            text ""
         , h6 [] [ text "Vars:" ]
         , div [] (List.indexedMap (viewVar model) model.gameDefinition.vars)
+        , if List.isEmpty model.gameDefinition.vars then
+            button [ onClick <| VarsManipulation <| NewAt 0 ] [ text <| "New var" ]
+
+          else
+            text ""
         , h6 [] [ text "Dialogs:" ]
         , div [] (List.indexedMap (viewDialog model) model.gameDefinition.dialogs)
+        , if List.isEmpty model.gameDefinition.dialogs then
+            button [ onClick <| DialogsManipulation <| NewAt 0 ] [ text <| "New dialog" ]
+
+          else
+            text ""
         ]
 
 
