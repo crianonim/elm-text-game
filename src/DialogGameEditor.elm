@@ -959,7 +959,14 @@ viewDialog model i dialog =
             , case ( model.editedDialog, isEdited ) of
                 ( Just edModel, True ) ->
                     div []
-                        (List.indexedMap (viewOption edModel.editedOption True) edModel.options)
+                        (List.indexedMap (viewOption edModel.editedOption True) edModel.options
+                            ++ [ if List.isEmpty edModel.options then
+                                    button [ onClick <| DialogEdit <| OptionsManipulation <| NewAt 0 ] [ text <| "New option" ]
+
+                                 else
+                                    text ""
+                               ]
+                        )
 
                 _ ->
                     div [] (List.indexedMap (viewOption Nothing False) dialog.options)
@@ -1017,6 +1024,11 @@ viewOption mEditedOption isDialogEditing optionIndex dialogOption =
                             Just ea ->
                                 List.indexedMap (viewActionEdited ea) editedOption.actions
                         )
+                    , if List.isEmpty editedOption.actions then
+                        button [ onClick <| DialogEdit <| OptionEdit <| ActionsManipulation <| NewAt 0 ] [ text <| "New action" ]
+
+                      else
+                        text ""
                     ]
                 , div []
                     [ button [ onClick <| DialogEdit SaveOption ] [ text "Save Option" ]

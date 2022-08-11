@@ -11769,6 +11769,9 @@ var $author$project$DialogGameEditor$DialogIdEdit = function (a) {
 var $author$project$DialogGameEditor$DialogTextEdit = function (a) {
 	return {$: 'DialogTextEdit', a: a};
 };
+var $author$project$DialogGameEditor$OptionsManipulation = function (a) {
+	return {$: 'OptionsManipulation', a: a};
+};
 var $author$project$DialogGameEditor$Save = {$: 'Save'};
 var $author$project$DialogGameEditor$StartDialogEdit = function (a) {
 	return {$: 'StartDialogEdit', a: a};
@@ -11961,6 +11964,9 @@ var $author$project$Shared$viewManipulateButtons = F3(
 						]))
 				]));
 	});
+var $author$project$DialogGameEditor$ActionsManipulation = function (a) {
+	return {$: 'ActionsManipulation', a: a};
+};
 var $author$project$DialogGameEditor$OptionConditionAdd = {$: 'OptionConditionAdd'};
 var $author$project$DialogGameEditor$OptionConditionEdit = function (a) {
 	return {$: 'OptionConditionEdit', a: a};
@@ -11972,9 +11978,6 @@ var $author$project$DialogGameEditor$OptionEdit = function (a) {
 var $author$project$DialogGameEditor$OptionTextEdit = function (a) {
 	return {$: 'OptionTextEdit', a: a};
 };
-var $author$project$DialogGameEditor$OptionsManipulation = function (a) {
-	return {$: 'OptionsManipulation', a: a};
-};
 var $author$project$DialogGameEditor$SaveOption = {$: 'SaveOption'};
 var $author$project$DialogGameEditor$StartOptionEdit = function (a) {
 	return {$: 'StartOptionEdit', a: a};
@@ -11984,9 +11987,6 @@ var $elm$core$Basics$composeL = F3(
 		return g(
 			f(x));
 	});
-var $author$project$DialogGameEditor$ActionsManipulation = function (a) {
-	return {$: 'ActionsManipulation', a: a};
-};
 var $author$project$DialogGameEditor$OptionActionStartEdit = function (a) {
 	return {$: 'OptionActionStartEdit', a: a};
 };
@@ -12296,7 +12296,21 @@ var $author$project$DialogGameEditor$viewOption = F4(
 											$author$project$DialogGameEditor$viewActionEdited(ea),
 											editedOption.actions);
 									}
-								}())
+								}()),
+								$elm$core$List$isEmpty(editedOption.actions) ? A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$DialogGameEditor$DialogEdit(
+											$author$project$DialogGameEditor$OptionEdit(
+												$author$project$DialogGameEditor$ActionsManipulation(
+													$author$project$Shared$NewAt(0)))))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('New action')
+									])) : $elm$html$Html$text('')
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -12468,10 +12482,27 @@ var $author$project$DialogGameEditor$viewDialog = F3(
 								return A2(
 									$elm$html$Html$div,
 									_List_Nil,
-									A2(
-										$elm$core$List$indexedMap,
-										A2($author$project$DialogGameEditor$viewOption, edModel.editedOption, true),
-										edModel.options));
+									_Utils_ap(
+										A2(
+											$elm$core$List$indexedMap,
+											A2($author$project$DialogGameEditor$viewOption, edModel.editedOption, true),
+											edModel.options),
+										_List_fromArray(
+											[
+												$elm$core$List$isEmpty(edModel.options) ? A2(
+												$elm$html$Html$button,
+												_List_fromArray(
+													[
+														$elm$html$Html$Events$onClick(
+														$author$project$DialogGameEditor$DialogEdit(
+															$author$project$DialogGameEditor$OptionsManipulation(
+																$author$project$Shared$NewAt(0))))
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text('New option')
+													])) : $elm$html$Html$text('')
+											])));
 							} else {
 								return A2(
 									$elm$html$Html$div,
