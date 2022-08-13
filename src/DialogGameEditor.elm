@@ -13,6 +13,7 @@ import Monocle.Prism as Prism exposing (Prism)
 import ParsedEditable
 import ScreeptV2 exposing (..)
 import Shared exposing (..)
+import Styled exposing (btnSmall)
 
 
 type alias Model =
@@ -776,17 +777,17 @@ getDialogIds model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h5 [] [ text "Dialog Editor" ]
-        , textarea
-            [ style "width" "100%"
-            , style "height" "10em"
-            , disabled True
-            , value (DialogGame.stringifyGameDefinition model.gameDefinition)
-            ]
-            []
-        , div []
-            [ text "Title: "
+    div [ class "container" ]
+        [ --h5 [class "text-xl font-bold" ] [ text "Dialog Editor" ]
+          -- textarea
+          --    [ style "width" "100%"
+          --    , style "height" "10em"
+          --    , disabled True
+          --    , value (DialogGame.stringifyGameDefinition model.gameDefinition)
+          --    ]
+          --    []
+          div [ class "flex flex-row space-x-4 items-center" ]
+            [ span [] [ text "Title: " ]
             , input
                 [ value <| model_title.get model
                 , class "focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none w-full text-sm leading-6 text-slate-900 placeholder-slate-400 rounded-md py-2 pl-10 ring-1 ring-slate-200 shadow-sm"
@@ -813,7 +814,7 @@ view model =
         , h6 [] [ text "Procedures:" ]
         , div [] (List.indexedMap (viewProcedure model) model.gameDefinition.procedures)
         , if List.isEmpty model.gameDefinition.procedures then
-            button [ onClick <| ProcedureManipulation <| NewAt 0 ] [ text <| "New procedure" ]
+            btnSmall [ onClick <| ProcedureManipulation <| NewAt 0 ] [ text <| "Add" ]
 
           else
             text ""

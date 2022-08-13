@@ -5551,6 +5551,12 @@ var $author$project$Main$MainMenuPage = {$: 'MainMenuPage'};
 var $author$project$Main$SeedGenerated = function (a) {
 	return {$: 'SeedGenerated', a: a};
 };
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Main$askforGame = _Platform_outgoingPort(
+	'askforGame',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
@@ -6144,7 +6150,8 @@ var $author$project$Main$init = function (_v0) {
 		$elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
-					A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed)
+					A2($elm$random$Random$generate, $author$project$Main$SeedGenerated, $elm$random$Random$independentSeed),
+					$author$project$Main$askforGame(_Utils_Tuple0)
 				])));
 };
 var $elm$http$Http$BadBody = function (a) {
@@ -9285,12 +9292,6 @@ var $author$project$Main$SaveGameDefinition = {$: 'SaveGameDefinition'};
 var $author$project$Main$ShowUrlLoader = {$: 'ShowUrlLoader'};
 var $author$project$Main$StartEditor = {$: 'StartEditor'};
 var $author$project$Main$StartGame = {$: 'StartGame'};
-var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $author$project$Main$askforGame = _Platform_outgoingPort(
-	'askforGame',
-	function ($) {
-		return $elm$json$Json$Encode$null;
-	});
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$mainMenuActions = F2(
 	function (dialModel, mcode) {
@@ -11451,6 +11452,8 @@ var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$core$List$filter = F2(
@@ -11490,8 +11493,6 @@ var $mhoare$elm_stack$Stack$top = function (_v0) {
 	var stack = _v0.a;
 	return $elm$core$List$head(stack);
 };
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$DialogGame$viewDebug = function (gameState) {
 	return A2(
 		$elm$html$Html$div,
@@ -11629,7 +11630,8 @@ var $author$project$DialogGame$view = function (_v0) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('my-container')
+				$elm$html$Html$Attributes$class('container'),
+				A2($elm$html$Html$Attributes$style, 'margin', 'auto')
 			]),
 		_List_fromArray(
 			[
@@ -11704,15 +11706,13 @@ var $author$project$DialogGameEditor$VarsManipulation = function (a) {
 	return {$: 'VarsManipulation', a: a};
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $author$project$Styled$btnSmall = function (attrs) {
+	return $elm$html$Html$button(
+		A2(
+			$elm$core$List$cons,
+			$elm$html$Html$Attributes$class('bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm'),
+			attrs));
+};
 var $author$project$DialogGameEditor$getDialogIds = function (model) {
 	return A2(
 		$elm$core$List$map,
@@ -11721,7 +11721,6 @@ var $author$project$DialogGameEditor$getDialogIds = function (model) {
 		},
 		model.gameDefinition.dialogs);
 };
-var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $elm$html$Html$h6 = _VirtualDom_node('h6');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$Events$alwaysStop = function (x) {
@@ -11757,8 +11756,16 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 };
 var $elm$html$Html$option = _VirtualDom_node('option');
 var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
 var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
-var $elm$html$Html$textarea = _VirtualDom_node('textarea');
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$DialogGameEditor$DialogEdit = function (a) {
 	return {$: 'DialogEdit', a: a};
@@ -11777,7 +11784,6 @@ var $author$project$DialogGameEditor$StartDialogEdit = function (a) {
 	return {$: 'StartDialogEdit', a: a};
 };
 var $author$project$DialogGameEditor$model_Dialog = A2($arturopala$elm_monocle$Monocle$Compose$optionalWithLens, $author$project$Shared$lens_oldValue, $author$project$DialogGameEditor$model_editedDialog);
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$ParsedEditable$FormatClick = {$: 'FormatClick'};
 var $author$project$ParsedEditable$Revert = {$: 'Revert'};
 var $author$project$ParsedEditable$TextEdit = function (a) {
@@ -11819,6 +11825,7 @@ var $author$project$ParsedEditable$problemToString = function (problem) {
 			return 'BadRepeat';
 	}
 };
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $author$project$ParsedEditable$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -11911,11 +11918,14 @@ var $author$project$Shared$viewManipulateButtons = F3(
 	function (kind, msgWrap, index) {
 		return A2(
 			$elm$html$Html$div,
-			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('flex flex-row')
+				]),
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$button,
+					$author$project$Styled$btnSmall,
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
@@ -11927,7 +11937,7 @@ var $author$project$Shared$viewManipulateButtons = F3(
 							$elm$html$Html$text('Move Up ' + kind)
 						])),
 					A2(
-					$elm$html$Html$button,
+					$author$project$Styled$btnSmall,
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
@@ -11939,7 +11949,7 @@ var $author$project$Shared$viewManipulateButtons = F3(
 							$elm$html$Html$text('Move Down ' + kind)
 						])),
 					A2(
-					$elm$html$Html$button,
+					$author$project$Styled$btnSmall,
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
@@ -11951,7 +11961,7 @@ var $author$project$Shared$viewManipulateButtons = F3(
 							$elm$html$Html$text('Delete ' + kind)
 						])),
 					A2(
-					$elm$html$Html$button,
+					$author$project$Styled$btnSmall,
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
@@ -12673,6 +12683,7 @@ var $author$project$DialogGameEditor$EditDefNumber = function (a) {
 var $author$project$DialogGameEditor$EditDefText = function (a) {
 	return {$: 'EditDefText', a: a};
 };
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $author$project$DialogGameEditor$viewValueIO = function (valueUI) {
 	var buttonSelected = function () {
 		switch (valueUI.$) {
@@ -12844,33 +12855,27 @@ var $author$project$DialogGameEditor$viewVar = F3(
 var $author$project$DialogGameEditor$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('container')
+			]),
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$h5,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Dialog Editor')
-					])),
-				A2(
-				$elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'width', '100%'),
-						A2($elm$html$Html$Attributes$style, 'height', '10em'),
-						$elm$html$Html$Attributes$disabled(true),
-						$elm$html$Html$Attributes$value(
-						$author$project$DialogGame$stringifyGameDefinition(model.gameDefinition))
-					]),
-				_List_Nil),
-				A2(
 				$elm$html$Html$div,
-				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Title: '),
+						$elm$html$Html$Attributes$class('flex flex-row space-x-4 items-center')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Title: ')
+							])),
 						A2(
 						$elm$html$Html$input,
 						_List_fromArray(
@@ -12929,7 +12934,7 @@ var $author$project$DialogGameEditor$view = function (model) {
 					$author$project$DialogGameEditor$viewProcedure(model),
 					model.gameDefinition.procedures)),
 				$elm$core$List$isEmpty(model.gameDefinition.procedures) ? A2(
-				$elm$html$Html$button,
+				$author$project$Styled$btnSmall,
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
@@ -12938,7 +12943,7 @@ var $author$project$DialogGameEditor$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('New procedure')
+						$elm$html$Html$text('Add')
 					])) : $elm$html$Html$text(''),
 				A2(
 				$elm$html$Html$h6,
@@ -13046,7 +13051,8 @@ var $author$project$Main$view = function (model) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('my-container')
+				$elm$html$Html$Attributes$class('container'),
+				A2($elm$html$Html$Attributes$style, 'margin', 'auto')
 			]),
 		_List_fromArray(
 			[

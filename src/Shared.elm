@@ -1,6 +1,7 @@
 module Shared exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import Html.Events exposing (..)
 import List.Extra
 import Monocle.Compose exposing (optionalWithLens)
@@ -8,6 +9,7 @@ import Monocle.Lens exposing (Lens)
 import Monocle.Optional exposing (Optional)
 import ParsedEditable
 import ScreeptV2 exposing (..)
+import Styled exposing (btnSmall)
 
 
 type ManipulatePositionAction
@@ -43,11 +45,11 @@ insertAt index item items =
 
 viewManipulateButtons : String -> (ManipulatePositionAction -> msg) -> Int -> Html msg
 viewManipulateButtons kind msgWrap index =
-    div []
-        [ button [ onClick <| msgWrap <| MovePosition index -1 ] [ text <| "Move Up " ++ kind ]
-        , button [ onClick <| msgWrap <| MovePosition index 1 ] [ text <| "Move Down " ++ kind ]
-        , button [ onClick <| msgWrap <| DeletePosition index ] [ text <| "Delete " ++ kind ]
-        , button [ onClick <| msgWrap <| NewAt (index + 1) ] [ text <| "New " ++ kind ]
+    div [ class "flex flex-row" ]
+        [ btnSmall [ onClick <| msgWrap <| MovePosition index -1 ] [ text <| "Move Up " ++ kind ]
+        , btnSmall [ onClick <| msgWrap <| MovePosition index 1 ] [ text <| "Move Down " ++ kind ]
+        , btnSmall [ onClick <| msgWrap <| DeletePosition index ] [ text <| "Delete " ++ kind ]
+        , btnSmall [ onClick <| msgWrap <| NewAt (index + 1) ] [ text <| "New " ++ kind ]
         ]
 
 
