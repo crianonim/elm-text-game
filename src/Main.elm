@@ -5,7 +5,7 @@ import DialogGame exposing (..)
 import DialogGameEditor
 import Dict
 import Html exposing (..)
-import Html.Attributes exposing (class, value)
+import Html.Attributes exposing (class, style, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Json
@@ -79,7 +79,7 @@ init _ =
         --, Http.get { url = "games/ts2.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/testsandbox.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
         --, Http.get { url = "games/fabled.json", expect = Http.expectJson GotGameDefinition decodeGameDefinition }
-        --, askforGame ()
+        , askforGame ()
         ]
     )
 
@@ -365,7 +365,7 @@ model_gameModel =
 
 view : Model -> Html Msg
 view model =
-    div [ class "my-container" ]
+    div [ class "container", style "margin" "auto" ]
         [ DialogGame.view model.mainMenuDialog |> Html.map MainMenuDialog
         , case model.page of
             MainMenuPage ->
