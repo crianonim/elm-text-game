@@ -391,7 +391,7 @@ viewUrlLoader model =
                 ]
 
         Nothing ->
-            text ""
+            text "EMPTY"
 
 
 port saveGame : String -> Cmd msg

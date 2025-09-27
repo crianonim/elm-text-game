@@ -1,0 +1,53 @@
+.status, .dialog, .messages {
+  border: 1px solid #000;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  padding: 5px;
+  box-shadow: 3px 3px;
+}
+
+.intro {
+  padding: 5px;
+  font-style: italic;
+}
+
+.option {
+  cursor: pointer;
+  border: 1px solid #000;
+  margin: 5px 0;
+  padding: 5px;
+  transition: all .5s;
+}
+
+.option:hover {
+  color: #fff;
+  background-color: #000;
+}
+
+.messages {
+  max-height: 10em;
+  overflow-y: scroll;
+}
+
+.screept_condition {
+  padding-left: 1em;
+}
+
+.screept-statement-block {
+  border: 1px solid gray;
+  padding: 1em;
+}
+
+.screept-editor-intvalue, .screept-editor-statement {
+  font-family: monospace;
+}
+
+.screept-editor-variable {
+  font-weight: bold;
+}
+
+.screept-editor-text-string {
+  font-style: italic;
+}
+
+/*# sourceMappingURL=index.e5980c4e.css.map */

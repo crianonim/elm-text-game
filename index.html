@@ -1,31 +1,17 @@
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Elm game</title>
-  <link rel="stylesheet"  href="main.css">
-  <link rel="stylesheet"  href="dialogeditor.css">
-  <style>
-
-  </style>
-
+    <title>Empty Elm App</title>
+    <script type="module" src="./index.js"></script>
+    <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-<div id="elm-app"></div>
-<script  type="module" src="./index.js"></script>
-<!--<script src="main.js"></script>-->
-<script>
-      var app = Elm.Main.init({
-        node: document.getElementById("elm-app")
-      });
-      app.ports.saveGame.subscribe(s=>localStorage.setItem("game",s))
-      app.ports.askforGame.subscribe(()=>
-               app.ports.loadGame.send(localStorage.getItem("game"))
-
-         )
-
-</script>
-<script src="tailwind.js"></script>
+<div id="root"></div>
 </body>
+
 </html>

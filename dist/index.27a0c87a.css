@@ -1,0 +1,22 @@
+.de-dialog {
+  border: 1px solid #000;
+  margin-bottom: 5px;
+  padding: 1em;
+}
+
+.de-dialog-id {
+  font-family: monospace;
+}
+
+.de-dialog-option {
+  border: 1px solid gray;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  padding: 5px;
+}
+
+.de-dialog-condition {
+  font-family: monospace;
+}
+
+/*# sourceMappingURL=index.27a0c87a.css.map */
